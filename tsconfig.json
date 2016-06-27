@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "removeComments": true,
+    "noResolve": false,
+    "noImplicitAny": false
+  },
+  "exclude": "dist",
+  "files": ["typings/index.d.ts", "src/boot/main.ts"],
+  "bundles": {
+    "main": {
+      "files": [
+        "src/boot/main.ts"
+      ]
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "screeps-starter",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./dist/boot/main.js",
+  "scripts": {
+    "gulp": "gulp",
+    "gulp:w": "gulp watch",
+    "gulp:b": "gulp build",
+    "postinstall": "typings install",
+    "deploy": "npm run gulp:b",
+    "start": "npm run gulp:w",
+    "typings": "typings"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "~3.9.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-util": "^3.0.7",
+    "tsproject": "^1.2.1",
+    "typings": "^1.3.0"
+  }
+}
