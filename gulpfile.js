@@ -26,7 +26,7 @@ gulp.task('upload-sim', ['compile'], function () {
     email: config.email,
     password: config.password,
     data: {
-      branch: 'default',
+      branch: config.branch,
       modules: {
         main: fs.readFileSync('./dist/main.js', { encoding: "utf8" }),
       }
