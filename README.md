@@ -20,7 +20,7 @@ $ npm install --save screeps-typescript-declarations
 
 Once installed include it by going to `tsconfig.json` and adding `node_modules/screeps-typescript-declarations/dist/screeps.d.ts` just after `typings/index.d.ts` within the `files` property.
 
-**Heads up!** Be sure to add the type definitions **before** other files within the `files` property of the `tsconfig.json` file, else VS Code will shit the bed and show a lot of errors regarding missing types.
+> **Heads up!** Be sure to add the type definitions **before** other files within the `files` property of the `tsconfig.json` file, else VS Code will (sometimes) shit the bed and show a lot of errors regarding missing types.
 
 ### Requirements
 
@@ -38,6 +38,8 @@ $ cp config.example.json config.json
 ```
 
 Then change the `username` and `password` properties with your Screeps credentials.
+
+If you want to push your code to another branch, for example, if you have some sort of a staging branch where you test around in Simulation mode, we have left a `branch` option for you to easily change the target branch of the upload process. The `default` branch is set as the default.
 
 **WARNING: DO NOT** commit this file into your repository!
 
