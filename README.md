@@ -10,7 +10,7 @@ After you create a spawn, this bot will create 4 creeps which will start to harv
 
 ### Important note about Typings definitions
 
-The Screeps type definitions included might not be the latest version available! Until it's available from within the Typings repository, don't forget to update the **commit hash** of the Screeps type definitions from within `typings.json` into the latest hash. View their repository [here](https://github.com/MarkoSulamagi/Screeps-Typescript-Declarations) for latest updates.
+The Screeps type definitions included might not be the latest version available! Until it's available from within the Typings repository, don't forget to update the **commit hash** of the Screeps type definitions from within `typings.json` into the latest hash. View their repository [here](https://github.com/screepers/Screeps-Typescript-Declarations) for latest updates.
 
 Another option is to install it directly via npm.
 
