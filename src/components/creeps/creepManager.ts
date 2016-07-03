@@ -21,7 +21,7 @@ export namespace CreepManager {
     }
   }
 
-  export function createHarvester(): number {
+  export function createHarvester(): number | string {
     let bodyParts: string[] = [MOVE, MOVE, CARRY, WORK];
     let name: string = null;
     let properties: any = {
@@ -31,7 +31,7 @@ export namespace CreepManager {
       renew_station_id: SpawnManager.getFirstSpawn().id
     };
 
-    var status: number = SpawnManager.getFirstSpawn().canCreateCreep(bodyParts, name);
+    var status: number | string = SpawnManager.getFirstSpawn().canCreateCreep(bodyParts, name);
     if (status == OK) {
       status = SpawnManager.getFirstSpawn().createCreep(bodyParts, name, properties);
 
