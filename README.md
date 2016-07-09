@@ -8,20 +8,6 @@ This starter kit is a modified version of the original [Screeps/TypeScript sampl
 
 After you create a spawn, this bot will create 4 creeps which will start to harvest the closest source. The bots harvest, then transfer energy back to Spawn. If a creep's lifespan has depleted enough, it will refill in Spawn.
 
-### Important note about Typings definitions
-
-The Screeps type definitions included might not be the latest version available! Until it's available from within the Typings repository, don't forget to update the **commit hash** of the Screeps type definitions from within `typings.json` into the latest hash. View their repository [here](https://github.com/screepers/Screeps-Typescript-Declarations) for latest updates.
-
-Another option is to install it directly via npm.
-
-```bash
-$ npm install --save screeps-typescript-declarations
-```
-
-Once installed include it by going to `tsconfig.json` and adding `node_modules/screeps-typescript-declarations/dist/screeps.d.ts` just after `typings/index.d.ts` within the `files` property.
-
-> **Heads up!** Be sure to add the type definitions **before** other files within the `files` property of the `tsconfig.json` file, else VS Code will (sometimes) shit the bed and show a lot of errors regarding missing types.
-
 ### Requirements
 
 * [Node.js](https://nodejs.org/en/) (v4.0.0+)
@@ -58,6 +44,14 @@ $ npm start
 # To deploy the code to Screeps
 $ npm run deploy
 ```
+
+## Contributing
+
+1. [Fork it](https://github.com/resir014/screeps-typescript-starter/fork)
+2. Create your feature branch: `git checkout -b my-new-feature`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin my-new-feature`
+5. Create a new Pull Request
 
 ## Special thanks
 

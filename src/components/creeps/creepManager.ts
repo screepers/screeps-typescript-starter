@@ -6,22 +6,22 @@ import { Harvester } from './harvester';
 
 export namespace CreepManager {
 
-  export var creeps: {Creep} = null;
-  export var creepNames: string[] = [];
-  export var creepCount: number = 0;
+  export let creeps: { [creepName: string]: Creep };
+  export let creepNames: string[] = [];
+  export let creepCount: number;
 
   export function loadCreeps(): void {
-    this.creeps = Game.creeps;
-    this.creepCount = _.size(this.creeps);
+    creeps = Game.creeps;
+    creepCount = _.size(creeps);
 
     _loadCreepNames();
 
     if (Config.VERBOSE) {
-      console.log(this.creepCount + ' creeps found in the playground.');
+      console.log(creepCount + ' creeps found in the playground.');
     }
   }
 
-  export function createHarvester(): number {
+  export function createHarvester(): number | string {
     let bodyParts: string[] = [MOVE, MOVE, CARRY, WORK];
     let name: string = null;
     let properties: any = {
@@ -31,7 +31,7 @@ export namespace CreepManager {
       renew_station_id: SpawnManager.getFirstSpawn().id
     };
 
-    var status: number = SpawnManager.getFirstSpawn().canCreateCreep(bodyParts, name);
+    let status: number | string = SpawnManager.getFirstSpawn().canCreateCreep(bodyParts, name);
     if (status == OK) {
       status = SpawnManager.getFirstSpawn().createCreep(bodyParts, name, properties);
 
