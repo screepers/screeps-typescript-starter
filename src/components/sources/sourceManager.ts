@@ -3,8 +3,8 @@ import { RoomManager } from './../rooms/roomManager';
 
 export namespace SourceManager {
 
-  export var sources: Source[] = [];
-  export var sourceCount: number = 0;
+  export var sources: Source[];
+  export var sourceCount: number;
 
   export function loadSources() {
     sources = RoomManager.getFirstRoom().find<Source>(FIND_SOURCES_ACTIVE);

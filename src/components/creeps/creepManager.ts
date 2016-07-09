@@ -6,8 +6,8 @@ import { Harvester } from './harvester';
 
 export namespace CreepManager {
 
-  export var creeps: { [creepName: string]: Creep } = null;
-  export var creepCount: number = 0;
+  export var creeps: { [creepName: string]: Creep };
+  export var creepCount: number;
 
   export function loadCreeps(): void {
     creeps = Game.creeps;

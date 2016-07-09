@@ -2,9 +2,9 @@ import { Config } from './../../config/config';
 
 export namespace SpawnManager {
 
-  export var spawns: { [spawnName: string]: Spawn } = null;
-  export var spawnNames: string[] = [];
-  export var spawnCount: number = 0;
+  export var spawns: { [spawnName: string]: Spawn };
+  export var spawnNames: string[];
+  export var spawnCount: number;
 
   export function loadSpawns() {
     spawns = Game.spawns;

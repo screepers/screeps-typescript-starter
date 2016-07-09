@@ -20,8 +20,8 @@ export interface ICreepAction {
 }
 
 export class CreepAction implements ICreepAction {
-  public creep: Creep = null;
-  public renewStation: Spawn = null;
+  public creep: Creep;
+  public renewStation: Spawn;
 
   public _minLifeBeforeNeedsRenew: number = Config.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL;
 
