@@ -27,7 +27,7 @@ export class CreepAction implements ICreepAction {
 
   public setCreep(creep: Creep) {
     this.creep = creep;
-    this.renewStation = <Spawn>Game.getObjectById(this.creep.memory.renew_station_id);
+    this.renewStation = Game.getObjectById<Spawn>(this.creep.memory.renew_station_id);
   }
 
   public moveTo(target: RoomPosition | { pos: RoomPosition }) {
