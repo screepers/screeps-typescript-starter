@@ -1,10 +1,10 @@
 # Ignore basic folders
-dist
-node_modules
-typings
+/dist
+/node_modules
+/typings
 
 # Screeps config file
-config.json
+/config.json
 
 # Numerous always-ignore extensions
 *.diff
