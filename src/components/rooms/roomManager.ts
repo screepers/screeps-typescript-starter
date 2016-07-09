@@ -3,7 +3,7 @@ import { Config } from './../../config/config';
 export namespace RoomManager {
 
   export var rooms: { [roomName: string]: Room };
-  export var roomNames: string[];
+  export var roomNames: string[] = [];
 
   export function loadRooms() {
     rooms = Game.rooms;

@@ -7,11 +7,14 @@ import { Harvester } from './harvester';
 export namespace CreepManager {
 
   export var creeps: { [creepName: string]: Creep };
+  export var creepNames: string[] = [];
   export var creepCount: number;
 
   export function loadCreeps(): void {
     creeps = Game.creeps;
     creepCount = _.size(creeps);
+
+    _loadCreepNames();
 
     if (Config.VERBOSE) {
       console.log(creepCount + ' creeps found in the playground.');
@@ -67,6 +70,14 @@ export namespace CreepManager {
    */
   export function isHarvesterLimitFull(): boolean {
     return (Config.MAX_HARVESTERS_PER_SOURCE == this.creepCount);
+  }
+
+  function _loadCreepNames(): void {
+    for (let creepName in creeps) {
+      if (creeps.hasOwnProperty(creepName)) {
+        creepNames.push(creepName);
+      }
+    }
   }
 
 }
