@@ -3,15 +3,15 @@ import { RoomManager } from './../rooms/roomManager';
 
 export namespace SourceManager {
 
-  export var sources: Source[];
+  export var sources: {}[] = [];
   export var sourceCount: number = 0;
 
   export function loadSources() {
-    this.sources = RoomManager.getFirstRoom().find(FIND_SOURCES_ACTIVE);
-    this.sourceCount = _.size(this.sources);
+    sources = RoomManager.getFirstRoom().find(FIND_SOURCES_ACTIVE);
+    sourceCount = _.size(sources);
 
     if (Config.VERBOSE) {
-      console.log(this.sourceCount + ' sources in room.');
+      console.log(sourceCount + ' sources in room.');
     }
   }
 
