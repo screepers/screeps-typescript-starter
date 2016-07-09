@@ -45,6 +45,20 @@ $ npm start
 $ npm run deploy
 ```
 
+## Notes
+
+### The `noImplicitAny` compiler flag
+
+TypeScript developers disagree about whether the `noImplicitAny` flag should be `true` or `false`. There is no correct answer and you can change the flag later. But your choice now can make a difference in larger projects so it merits discussion.
+
+When the `noImplicitAny` flag is `false` (the default), the compiler silently defaults the type of a variable to `any` if it cannot infer the type based on how the variable is used.
+
+When the `noImplicitAny` flag is `true` and the TypeScript compiler cannot infer the type, it still generates the JavaScript files. But it also reports an error. Many seasoned developers prefer this stricter setting because type checking catches more unintentional errors at compile time.
+
+In this starter kit, the `noImplicitAny` compiler flag is set to `false` to make it easier for beginners. If you want a more stricter environmet, you can change the `noImplicitAny` flag to `true` on the `tsconfig.json` file.
+
+**Source:** https://angular.io/docs/ts/latest/guide/typescript-configuration.html
+
 ## Contributing
 
 1. [Fork it](https://github.com/resir014/screeps-typescript-starter/fork)
