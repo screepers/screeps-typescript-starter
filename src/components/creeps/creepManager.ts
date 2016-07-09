@@ -6,9 +6,9 @@ import { Harvester } from './harvester';
 
 export namespace CreepManager {
 
-  export var creeps: { [creepName: string]: Creep };
-  export var creepNames: string[] = [];
-  export var creepCount: number;
+  export let creeps: { [creepName: string]: Creep };
+  export let creepNames: string[] = [];
+  export let creepCount: number;
 
   export function loadCreeps(): void {
     creeps = Game.creeps;
@@ -31,7 +31,7 @@ export namespace CreepManager {
       renew_station_id: SpawnManager.getFirstSpawn().id
     };
 
-    var status: number | string = SpawnManager.getFirstSpawn().canCreateCreep(bodyParts, name);
+    let status: number | string = SpawnManager.getFirstSpawn().canCreateCreep(bodyParts, name);
     if (status == OK) {
       status = SpawnManager.getFirstSpawn().createCreep(bodyParts, name, properties);
 
