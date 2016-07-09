@@ -24,7 +24,7 @@ export namespace CreepManager {
   export function createHarvester(): number | string {
     let bodyParts: string[] = [MOVE, MOVE, CARRY, WORK];
     let name: string = null;
-    let properties: any = {
+    let properties: { [key: string]: any } = {
       role: 'harvester',
       target_source_id: SourceManager.getFirstSource().id,
       target_energy_dropoff_id: SpawnManager.getFirstSpawn().id,

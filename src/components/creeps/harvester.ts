@@ -23,8 +23,8 @@ export class Harvester extends CreepAction implements IHarvester, ICreepAction {
   public setCreep(creep: Creep) {
     super.setCreep(creep);
 
-    this.targetSource = <Source>Game.getObjectById(this.creep.memory.target_source_id);
-    this.targetEnergyDropOff = <Spawn | Structure>Game.getObjectById(this.creep.memory.target_energy_dropoff_id);
+    this.targetSource = Game.getObjectById<Source>(this.creep.memory.target_source_id);
+    this.targetEnergyDropOff = Game.getObjectById<Spawn | Structure>(this.creep.memory.target_energy_dropoff_id);
   }
 
   public isBagFull(): boolean {
