@@ -45,6 +45,14 @@ $ npm start
 $ npm run deploy
 ```
 
+## Contributing
+
+1. [Fork it](https://github.com/resir014/screeps-typescript-starter/fork)
+2. Create your feature branch: `git checkout -b my-new-feature`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin my-new-feature`
+5. Create a new Pull Request
+
 ## Special thanks
 
 [Marko Sulamägi](https://github.com/MarkoSulamagi), for the original [Screeps/TypeScript sample project](https://github.com/MarkoSulamagi/Screeps-typescript-sample-project).
