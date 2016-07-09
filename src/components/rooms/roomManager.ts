@@ -2,22 +2,22 @@ import { Config } from './../../config/config';
 
 export namespace RoomManager {
 
-  export var rooms: Room[] = null;
+  export var rooms: { [roomName: string]: Room };
   export var roomNames: string[] = [];
 
   export function loadRooms() {
-    this.rooms = Game.rooms;
+    rooms = Game.rooms;
 
     _loadRoomNames();
 
     if (Config.VERBOSE) {
-      let count = _.size(this.rooms);
+      let count = _.size(rooms);
       console.log(count + ' rooms found.');
     }
   }
 
   export function getFirstRoom(): Room {
-    return this.rooms[this.roomNames[0]];
+    return rooms[roomNames[0]];
   }
 
   function _loadRoomNames() {

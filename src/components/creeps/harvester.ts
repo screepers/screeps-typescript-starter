@@ -17,8 +17,8 @@ export interface IHarvester {
 
 export class Harvester extends CreepAction implements IHarvester, ICreepAction {
 
-  public targetSource: Source = null;
-  public targetEnergyDropOff: Spawn | Structure = null;
+  public targetSource: Source;
+  public targetEnergyDropOff: Spawn | Structure;
 
   public setCreep(creep: Creep) {
     super.setCreep(creep);

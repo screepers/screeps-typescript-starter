@@ -6,18 +6,18 @@ import { Harvester } from './harvester';
 
 export namespace CreepManager {
 
-  export var creeps: {Creep} = null;
+  export var creeps: { [creepName: string]: Creep };
   export var creepNames: string[] = [];
-  export var creepCount: number = 0;
+  export var creepCount: number;
 
   export function loadCreeps(): void {
-    this.creeps = Game.creeps;
-    this.creepCount = _.size(this.creeps);
+    creeps = Game.creeps;
+    creepCount = _.size(creeps);
 
     _loadCreepNames();
 
     if (Config.VERBOSE) {
-      console.log(this.creepCount + ' creeps found in the playground.');
+      console.log(creepCount + ' creeps found in the playground.');
     }
   }
 
