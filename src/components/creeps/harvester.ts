@@ -28,7 +28,7 @@ export class Harvester extends CreepAction implements IHarvester, ICreepAction {
   }
 
   public isBagFull(): boolean {
-    return (this.creep.carry.energy == this.creep.carryCapacity);
+    return (this.creep.carry.energy === this.creep.carryCapacity);
   }
 
   public tryHarvest(): number {
@@ -36,7 +36,7 @@ export class Harvester extends CreepAction implements IHarvester, ICreepAction {
   }
 
   public moveToHarvest(): void {
-    if (this.tryHarvest() == ERR_NOT_IN_RANGE) {
+    if (this.tryHarvest() === ERR_NOT_IN_RANGE) {
       this.moveTo(this.targetSource);
     }
   }
@@ -46,7 +46,7 @@ export class Harvester extends CreepAction implements IHarvester, ICreepAction {
   }
 
   public moveToDropEnergy(): void {
-    if (this.tryEnergyDropOff() == ERR_NOT_IN_RANGE) {
+    if (this.tryEnergyDropOff() === ERR_NOT_IN_RANGE) {
       this.moveTo(this.targetEnergyDropOff);
     }
   }

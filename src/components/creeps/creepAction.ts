@@ -43,7 +43,7 @@ export class CreepAction implements ICreepAction {
   }
 
   public moveToRenew(): void {
-    if (this.tryRenew() == ERR_NOT_IN_RANGE) {
+    if (this.tryRenew() === ERR_NOT_IN_RANGE) {
       this.moveTo(this.renewStation);
     }
   }
