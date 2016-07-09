@@ -17,7 +17,7 @@ export namespace RoomManager {
   }
 
   export function getFirstRoom(): Room {
-    return this.rooms[this.roomNames[0]];
+    return rooms[roomNames[0]];
   }
 
   function _loadRoomNames() {
