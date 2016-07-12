@@ -12,13 +12,6 @@
     "src/**/*.ts",
     "typings/**/*.d.ts"
   ],
-  "bundles": {
-    "main": {
-      "files": [
-        "src/boot/main.ts"
-      ]
-    }
-  },
   "files": [
     "src/boot/main.ts",
     "src/components/creeps/creepAction.ts",
@@ -33,5 +26,12 @@
     "typings/globals/lodash/index.d.ts",
     "typings/globals/screeps/index.d.ts",
     "typings/index.d.ts"
-  ]
+  ],
+  "bundles": {
+    "main": {
+      "files": [
+        "src/boot/main.ts"
+      ]
+    }
+  }
 }
