@@ -8,12 +8,30 @@
   },
   "compileOnSave": false,
   "exclude": "dist",
-  "files": ["typings/index.d.ts", "src/boot/main.ts", "typings/globals/lodash/index.d.ts", "typings/globals/screeps/index.d.ts"],
+  "filesGlob": [
+    "src/**/*.ts",
+    "typings/**/*.d.ts"
+  ],
   "bundles": {
     "main": {
       "files": [
         "src/boot/main.ts"
       ]
     }
-  }
+  },
+  "files": [
+    "src/boot/main.ts",
+    "src/components/creeps/creepAction.ts",
+    "src/components/creeps/creepManager.ts",
+    "src/components/creeps/harvester.ts",
+    "src/components/rooms/roomManager.ts",
+    "src/components/sources/sourceManager.ts",
+    "src/components/spawns/spawnManager.ts",
+    "src/config/config.ts",
+    "src/gameManager.ts",
+    "src/shared/memoryManager.ts",
+    "typings/globals/lodash/index.d.ts",
+    "typings/globals/screeps/index.d.ts",
+    "typings/index.d.ts"
+  ]
 }
