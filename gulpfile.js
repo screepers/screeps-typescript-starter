@@ -3,18 +3,26 @@
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var tsproject = require('tsproject');
+var tsconfig = require('gulp-tsconfig-files');
 var clean = require('gulp-clean');
 var https = require('https');
 var fs = require('fs');
 
 var config = require('./config.json');
 
+gulp.task('update-tsconfig-files', function () {
+  gulp.src(['src/**/*.ts', 'typings/**/*.ts'])
+    .pipe(tsconfig({
+      posix: true
+    }));
+});
+
 gulp.task('clean', function () {
   return gulp.src('dist', { read: false })
     .pipe(clean());
 });
 
-gulp.task('compile', ['clean'], function () {
+gulp.task('compile', ['clean', 'update-tsconfig-files'], function () {
   return tsproject.src('./tsconfig.json')
     .pipe(gulp.dest('dist'));
 });
