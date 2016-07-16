@@ -1,26 +1,35 @@
 {
   "rules": {
-    "align": [true,
-              "parameters",
-              "statements"
-             ],
+    "align": [
+      true,
+      "parameters",
+      "statements"
+    ],
     "class-name": true,
-    "comment-format": [true,
-                       "check-space"
-                      ],
+    "comment-format": [
+      true,
+      "check-space"
+    ],
     "curly": true,
     "eofline": true,
-    "indent": [true, "spaces"],
+    "indent": [
+      true,
+      "spaces"
+    ],
     "jsdoc-format": true,
     "label-position": true,
     "label-undefined": true,
-    "max-line-length": [true, 120],
+    "max-line-length": [
+      true,
+      120
+    ],
     "member-access": true,
-    "member-ordering": [true,
-                        "public-before-private",
-                        "static-before-instance",
-                        "variables-before-functions"
-                       ],
+    "member-ordering": [
+      true,
+      "public-before-private",
+      "static-before-instance",
+      "variables-before-functions"
+    ],
     "new-parens": true,
     "no-any": false,
     "no-arg": true,
@@ -45,63 +54,83 @@
     "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-new": true,
-    "no-unused-variable": [true, "react"],
+    "no-unused-variable": [
+      true,
+      "react"
+    ],
     // disable this rule as it is very heavy performance-wise and not that useful
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-var-requires": true,
     "object-literal-sort-keys": true,
-    "one-line": [true,
-                 "check-catch",
-                 "check-else",
-                 "check-finally",
-                 "check-open-brace",
-                 "check-whitespace"
-                ],
-    "one-variable-per-declaration": [true,
-                                     "ignore-for-loop"
-                                    ],
-    "quotemark": [true, "double", "avoid-escape"],
+    "one-line": [
+      true,
+      "check-catch",
+      "check-else",
+      "check-finally",
+      "check-open-brace",
+      "check-whitespace"
+    ],
+    "one-variable-per-declaration": [
+      true,
+      "ignore-for-loop"
+    ],
+    "quotemark": [
+      true,
+      "double",
+      "avoid-escape"
+    ],
     "radix": true,
-    "semicolon": [true, "always"],
+    "semicolon": [
+      true,
+      "always"
+    ],
     "switch-default": true,
-    "trailing-comma": [true,
-                       {
-                         "singleline": "never",
-                         "multiline": "always"
-                       }
-                      ],
-    "triple-equals": [true, "allow-null-check"],
+    "trailing-comma": [
+      true,
+      {
+        "singleline": "never",
+        "multiline": "always"
+      }
+    ],
+    "triple-equals": [
+      true,
+      "allow-null-check"
+    ],
     "typedef": false,
-    "typedef-whitespace": [true,
-                           {
-                             "call-signature": "nospace",
-                             "index-signature": "nospace",
-                             "parameter": "nospace",
-                             "property-declaration": "nospace",
-                             "variable-declaration": "nospace"
-                           }, {
-                             "call-signature": "onespace",
-                             "index-signature": "onespace",
-                             "parameter": "onespace",
-                             "property-declaration": "onespace",
-                             "variable-declaration": "onespace"
-                           }
-                          ],
+    "typedef-whitespace": [
+      true,
+      {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      },
+      {
+        "call-signature": "onespace",
+        "index-signature": "onespace",
+        "parameter": "onespace",
+        "property-declaration": "onespace",
+        "variable-declaration": "onespace"
+      }
+    ],
     "use-isnan": true,
-    "variable-name": [true,
-                      "ban-keywords",
-                      "check-format",
-                      "allow-pascal-case",
-                      "allow-leading-underscore"
-                     ],
-    "whitespace": [true,
-                   "check-branch",
-                   "check-decl",
-                   "check-operator",
-                   "check-separator",
-                   "check-type",
-                   "check-typecast"
-                  ]
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-pascal-case",
+      "allow-leading-underscore"
+    ],
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-separator",
+      "check-type",
+      "check-typecast"
+    ]
   }
 }
