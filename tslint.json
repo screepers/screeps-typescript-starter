@@ -26,6 +26,9 @@
     "member-access": true,
     "member-ordering": [
       true,
+      {
+        "order": "statics-first"
+      },
       "public-before-private",
       "static-before-instance",
       "variables-before-functions"
