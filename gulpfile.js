@@ -1,20 +1,24 @@
 'use strict';
 
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var tsproject = require('tsproject');
-var tsconfig = require('gulp-tsconfig-files');
-var clean = require('gulp-clean');
-var https = require('https');
-var fs = require('fs');
+let clean = require('gulp-clean');
+let gulp = require('gulp');
+let gulpDotFlatten = require('./libs/gulp-dot-flatten.js');
+let gulpRename = require("gulp-rename");
+let gulpScreepsUpload = require('./libs/gulp-screeps-upload.js');
+let path = require('path');
+let ts = require('gulp-typescript');
+let tsconfigGlob = require('tsconfig-glob');
+let tslint = require("gulp-tslint");
+let ts_project = ts.createProject('tsconfig.json');
+let tsproject = require('tsproject');
 
-var config = require('./config.json');
+let config = require('./config.json');
 
 gulp.task('update-tsconfig-files', function () {
-  gulp.src(['src/**/*.ts', 'typings/**/*.ts'])
-    .pipe(tsconfig({
-      posix: true
-    }));
+  return tsconfigGlob({
+    configPath: '.',
+    indent: 2
+  });
 });
 
 gulp.task('clean', function () {
@@ -23,45 +27,41 @@ gulp.task('clean', function () {
 });
 
 gulp.task('compile', ['clean', 'update-tsconfig-files'], function () {
-  return tsproject.src('./tsconfig.json')
-    .pipe(gulp.dest('dist'));
+  return ts_project.src()
+    .pipe(ts(ts_project))
+    .on('error', function(error) { process.exit(1); })
+    .js.pipe(gulp.dest('dist'))
+  
+  // Alternate compiler: more verbose but does not stop on errors
+  //
+  //  return tsproject.src('./tsconfig.json')
+  //     .pipe(gulp.dest('dist'));
+  //
 });
 
-gulp.task('upload-sim', ['compile'], function () {
-  gutil.log('Starting upload...');
-
-  var screeps = {
-    email: config.email,
-    password: config.password,
-    data: {
-      branch: config.branch,
-      modules: {
-        main: fs.readFileSync('./dist/main.js', { encoding: "utf8" })
-      }
-    }
-  };
-
-  var req = https.request({
-    hostname: 'screeps.com',
-    port: 443,
-    path: '/api/user/code',
-    method: 'POST',
-    auth: screeps.email + ':' + screeps.password,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8'
-    }
-  }, function (res) {
-    gutil.log('Build ' + gutil.colors.cyan('completed') + ' with HTTPS Response ' + gutil.colors.magenta(res.statusCode));
-  });
-
-  req.write(JSON.stringify(screeps.data));
-  req.end();
+gulp.task("lint", ['compile'], () => {
+  return gulp.src(["./src/**/*.ts", "!./src/**/*.d.ts"])
+    .pipe(tslint({ formatter: "prose" }))
+    .pipe(tslint.report({ summarizeFailureOutput: true }))
+    .on('error', function(error) { this.emit('end') });
 });
 
-gulp.task('watch', function () {
-  gulp.watch('./src/**/*.ts', ['compile']);
+gulp.task('flatten', ['lint'], function () {
+  return gulp.src('./dist/src/**/*.js')
+    .pipe(gulpDotFlatten(0))
+    .pipe(gulp.dest('./dist/flat'))
 });
 
-gulp.task('build', ['upload-sim']);
+gulp.task('upload', ['flatten'], function () {
+  return gulp.src('./dist/flat/*.js')
+    .pipe(gulpRename(path => { path.extname = ""; }))
+    .pipe(gulpScreepsUpload(config.email, config.password, config.branch))
+});
+
+gulp.task('watch', ['build'], function () {
+  gulp.watch('./src/**/*.ts', ['build']);
+});
+
+gulp.task('build', ['upload']);
 
 gulp.task('default', ['watch']);

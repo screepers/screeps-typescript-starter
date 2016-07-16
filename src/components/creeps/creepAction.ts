@@ -1,4 +1,4 @@
-import { Config } from './../../config/config';
+import * as Config from "./../../config/config";
 
 export interface ICreepAction {
   creep: Creep;
@@ -19,7 +19,7 @@ export interface ICreepAction {
   action(): boolean;
 }
 
-export class CreepAction implements ICreepAction {
+export default class CreepAction implements ICreepAction {
   public creep: Creep;
   public renewStation: Spawn;
 

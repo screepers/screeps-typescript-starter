@@ -1,5 +1,4 @@
-import { Config } from './../../config/config';
-import { ICreepAction, CreepAction } from './creepAction';
+import CreepAction, { ICreepAction } from "./creepAction";
 
 export interface IHarvester {
 
@@ -15,7 +14,7 @@ export interface IHarvester {
   action(): boolean;
 }
 
-export class Harvester extends CreepAction implements IHarvester, ICreepAction {
+export default class Harvester extends CreepAction implements IHarvester, ICreepAction {
 
   public targetSource: Source;
   public targetEnergyDropOff: Spawn | Structure;
@@ -60,7 +59,7 @@ export class Harvester extends CreepAction implements IHarvester, ICreepAction {
       this.moveToHarvest();
     }
 
-    return true
+    return true;
   }
 
 }
