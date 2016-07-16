@@ -1,37 +1,37 @@
 'use strict';
 
-let clean = require('gulp-clean');
-let gulp = require('gulp');
-let gulpDotFlatten = require('./libs/gulp-dot-flatten.js');
-let gulpRename = require("gulp-rename");
-let gulpScreepsUpload = require('./libs/gulp-screeps-upload.js');
-let path = require('path');
-let ts = require('gulp-typescript');
-let tsconfigGlob = require('tsconfig-glob');
-let tslint = require("gulp-tslint");
-let ts_project = ts.createProject('tsconfig.json');
-let tsproject = require('tsproject');
+const clean = require('gulp-clean');
+const gulp = require('gulp');
+const gulpDotFlatten = require('./libs/gulp-dot-flatten.js');
+const gulpRename = require('gulp-rename');
+const gulpScreepsUpload = require('./libs/gulp-screeps-upload.js');
+const path = require('path');
+const ts = require('gulp-typescript');
+const tsconfigGlob = require('tsconfig-glob');
+const tslint = require('gulp-tslint');
+const tsconfig = ts.createProject('tsconfig.json');
+const tsproject = require('tsproject');
 
-let config = require('./config.json');
+const config = require('./config.json');
 
-gulp.task('update-tsconfig-files', function () {
+gulp.task('update-tsconfig-files', () => {
   return tsconfigGlob({
     configPath: '.',
     indent: 2
   });
 });
 
-gulp.task('clean', function () {
+gulp.task('clean', () => {
   return gulp.src('dist', { read: false })
     .pipe(clean());
 });
 
-gulp.task('compile', ['clean', 'update-tsconfig-files'], function () {
-  return ts_project.src()
-    .pipe(ts(ts_project))
-    .on('error', function(error) { process.exit(1); })
+gulp.task('compile', ['clean', 'update-tsconfig-files'], () => {
+  return tsconfig.src()
+    .pipe(ts(tsconfig))
+    .on('error', (error) => { process.exit(1); })
     .js.pipe(gulp.dest('dist'))
-  
+
   // Alternate compiler: more verbose but does not stop on errors
   //
   //  return tsproject.src('./tsconfig.json')
@@ -39,26 +39,26 @@ gulp.task('compile', ['clean', 'update-tsconfig-files'], function () {
   //
 });
 
-gulp.task("lint", ['compile'], () => {
-  return gulp.src(["./src/**/*.ts", "!./src/**/*.d.ts"])
-    .pipe(tslint({ formatter: "prose" }))
+gulp.task('lint', ['compile'], () => {
+  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts'])
+    .pipe(tslint({ formatter: 'prose' }))
     .pipe(tslint.report({ summarizeFailureOutput: true }))
-    .on('error', function(error) { this.emit('end') });
+    .on('error', (error) => { this.emit('end') });
 });
 
-gulp.task('flatten', ['lint'], function () {
+gulp.task('flatten', ['lint'], () => {
   return gulp.src('./dist/src/**/*.js')
     .pipe(gulpDotFlatten(0))
     .pipe(gulp.dest('./dist/flat'))
 });
 
-gulp.task('upload', ['flatten'], function () {
+gulp.task('upload', ['flatten'], () => {
   return gulp.src('./dist/flat/*.js')
-    .pipe(gulpRename(path => { path.extname = ""; }))
-    .pipe(gulpScreepsUpload(config.email, config.password, config.branch))
+    .pipe(gulpRename(path => { path.extname = ''; }))
+    .pipe(gulpScreepsUpload(config.email, config.password, config.branch, 0))
 });
 
-gulp.task('watch', ['build'], function () {
+gulp.task('watch', ['build'], () => {
   gulp.watch('./src/**/*.ts', ['build']);
 });
 
