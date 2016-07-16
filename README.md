@@ -59,6 +59,25 @@ In this starter kit, the `noImplicitAny` compiler flag is set to `false` to make
 
 **Source:** https://angular.io/docs/ts/latest/guide/typescript-configuration.html
 
+
+### TSLint
+
+TSLint checks your TypeScript code for readability, maintainability, and functionality errors, and can also enforce coding style standards.
+
+After each successful compiling of the project, TSLint will parse the TypeScript source files and display a warning for any issues it will find.
+
+This project provides TSLint rules through a `tslint.json` file, which is based on the recommended set of rules from TSLint github repository: https://github.com/palantir/tslint/blob/next/src/configs/recommended.ts
+
+We made some changes to those rules, which we considered necessary and/or relevant to a proper Screeps project:
+
+ - removed the [forin](http://palantir.github.io/tslint/rules/forin/) rule which was forcing `for ( ... in ...)` loops to check if object members were not coming from the class prototype.
+ - removed the [interface-name](http://palantir.github.io/tslint/rules/interface-name/) rule that was set to enforce prefixing interfaces with `I`.
+ - set the [no-console](http://palantir.github.io/tslint/rules/no-console/) rule to `false`, in order to allow using `console`.
+ - in the [variable-name](http://palantir.github.io/tslint/rules/variable-name/) rule, added `allow-leading-underscore`.
+
+**More info about TSLint:** https://palantir.github.io/tslint/
+
+
 ## Contributing
 
 1. [Fork it](https://github.com/resir014/screeps-typescript-starter/fork)
