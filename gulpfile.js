@@ -21,12 +21,19 @@ gulp.task('update-tsconfig-files', () => {
   });
 });
 
+gulp.task('lint', () => {
+  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts'])
+    .pipe(tslint({ formatter: 'prose' }))
+    .pipe(tslint.report({ summarizeFailureOutput: true }))
+    .on('error', (error) => { this.emit('end') });
+});
+
 gulp.task('clean', () => {
   return gulp.src('dist', { read: false })
     .pipe(clean());
 });
 
-gulp.task('compile', ['clean', 'update-tsconfig-files'], () => {
+gulp.task('compile', ['lint', 'clean', 'update-tsconfig-files'], () => {
   return tsconfig.src()
     .pipe(ts(tsconfig))
     .on('error', (error) => { process.exit(1); })
@@ -39,14 +46,7 @@ gulp.task('compile', ['clean', 'update-tsconfig-files'], () => {
   //
 });
 
-gulp.task('lint', ['compile'], () => {
-  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts'])
-    .pipe(tslint({ formatter: 'prose' }))
-    .pipe(tslint.report({ summarizeFailureOutput: true }))
-    .on('error', (error) => { this.emit('end') });
-});
-
-gulp.task('flatten', ['lint'], () => {
+gulp.task('flatten', ['compile'], () => {
   return gulp.src('./dist/src/**/*.js')
     .pipe(gulpDotFlatten(0))
     .pipe(gulp.dest('./dist/flat'))
@@ -63,5 +63,5 @@ gulp.task('watch', ['build'], () => {
 });
 
 gulp.task('build', ['upload']);
-
+gulp.task('test', ['lint']);
 gulp.task('default', ['watch']);

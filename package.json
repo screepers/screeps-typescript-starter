@@ -5,11 +5,10 @@
   "main": "./dist/main.js",
   "scripts": {
     "gulp": "gulp",
-    "gulp:w": "gulp watch",
-    "gulp:b": "gulp build",
     "postinstall": "typings install",
-    "deploy": "npm run gulp:b",
-    "start": "npm run gulp:w",
+    "deploy": "gulp build",
+    "start": "gulp watch",
+    "test": "gulp lint",
     "typings": "typings"
   },
   "author": "",
