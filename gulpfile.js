@@ -6,11 +6,11 @@ const gulpDotFlatten = require('./libs/gulp-dot-flatten.js');
 const gulpRename = require('gulp-rename');
 const gulpScreepsUpload = require('./libs/gulp-screeps-upload.js');
 const path = require('path');
+const PluginError = require('gulp-util').PluginError;
 const ts = require('gulp-typescript');
 const tsconfigGlob = require('tsconfig-glob');
 const tslint = require('gulp-tslint');
 const tsconfig = ts.createProject('tsconfig.json');
-const tsproject = require('tsproject');
 
 const config = require('./config.json');
 
@@ -22,10 +22,12 @@ gulp.task('update-tsconfig-files', () => {
 });
 
 gulp.task('lint', () => {
-  return gulp.src(['./src/**/*.ts', '!./src/**/*.d.ts'])
+  return gulp.src('./src/**/*.ts')
     .pipe(tslint({ formatter: 'prose' }))
-    .pipe(tslint.report({ summarizeFailureOutput: true }))
-    .on('error', (error) => { this.emit('end') });
+    .pipe(tslint.report({
+      summarizeFailureOutput: true,
+      emitError: false
+    }))
 });
 
 gulp.task('clean', () => {
@@ -33,20 +35,23 @@ gulp.task('clean', () => {
     .pipe(clean());
 });
 
+let compileFailed = false;
+
 gulp.task('compile', ['lint', 'clean', 'update-tsconfig-files'], () => {
+  compileFailed = false;
   return tsconfig.src()
     .pipe(ts(tsconfig))
-    .on('error', (error) => { process.exit(1); })
-    .js.pipe(gulp.dest('dist'))
-
-  // Alternate compiler: more verbose but does not stop on errors
-  //
-  //  return tsproject.src('./tsconfig.json')
-  //     .pipe(gulp.dest('dist'));
-  //
+    .on('error', (err) => { compileFailed = true; })
+    .js.pipe(gulp.dest('dist'));
 });
 
-gulp.task('flatten', ['compile'], () => {
+gulp.task('checked-compile', ['compile'], () => {
+  if (!compileFailed)
+    return true;
+  throw new PluginError("gulp-typescript", "failed to compile: not executing further tasks");
+})
+
+gulp.task('flatten', ['checked-compile'], () => {
   return gulp.src('./dist/src/**/*.js')
     .pipe(gulpDotFlatten(0))
     .pipe(gulp.dest('./dist/flat'))
@@ -58,7 +63,7 @@ gulp.task('upload', ['flatten'], () => {
     .pipe(gulpScreepsUpload(config.email, config.password, config.branch, 0))
 });
 
-gulp.task('watch', ['build'], () => {
+gulp.task('watch', () => {
   gulp.watch('./src/**/*.ts', ['build']);
 });
 
