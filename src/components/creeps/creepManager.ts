@@ -20,7 +20,7 @@ export function loadCreeps(): void {
 
 export function createHarvester(): number | string {
   let bodyParts: string[] = [MOVE, MOVE, CARRY, WORK];
-  let name: string = null;
+  let name: string | undefined = undefined;
   let properties: { [key: string]: any } = {
     renew_station_id: SpawnManager.getFirstSpawn().id,
     role: "harvester",
@@ -43,7 +43,7 @@ export function createHarvester(): number | string {
 export function harvestersGoToWork(): void {
 
   let harvesters: Harvester[] = [];
-  _.forEach(this.creeps, function (creep: Creep, creepName: string) {
+  _.forEach(this.creeps, function (creep: Creep) {
     if (creep.memory.role === "harvester") {
       let harvester = new Harvester();
       harvester.setCreep(creep);
