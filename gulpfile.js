@@ -27,7 +27,7 @@ gulp.task('lint', () => {
     .pipe(tslint.report({
       summarizeFailureOutput: true,
       emitError: false
-    }))
+    }));
 });
 
 gulp.task('clean', () => {
@@ -49,7 +49,7 @@ gulp.task('checked-compile', ['compile'], () => {
   if (!compileFailed)
     return true;
   throw new PluginError("gulp-typescript", "failed to compile: not executing further tasks");
-})
+});
 
 gulp.task('flatten', ['checked-compile'], () => {
   return gulp.src('./dist/src/**/*.js')
