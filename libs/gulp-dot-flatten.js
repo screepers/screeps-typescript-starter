@@ -4,7 +4,7 @@ const path = require('path');
 const gutil = require('gulp-util');
 const through2 = require('through2');
 const PluginError = require('gulp-util').PluginError;
-const recast = require('recast')
+const recast = require('recast');
 
 module.exports = function (logAmount, stringFilter) {
   return through2.obj(function (file, enc, next) {
@@ -42,7 +42,7 @@ module.exports = function (logAmount, stringFilter) {
             } else {
               return false;
             }
-          }
+          },
         })).code);
 
         let relPath = path.dirname(file.relative).split(path.sep);
@@ -63,6 +63,7 @@ module.exports = function (logAmount, stringFilter) {
         this.emit('error', new PluginError('flatten', e));
       }
     }
+
     next();
   });
 };
