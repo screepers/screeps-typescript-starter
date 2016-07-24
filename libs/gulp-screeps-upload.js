@@ -1,3 +1,4 @@
+/*jshint esversion: 6, node: true */
 'use strict';
 
 const _ = require('lodash');
@@ -14,12 +15,12 @@ module.exports = (email, password, branch, logAmount) => {
     _gulpUploadVinylsAsModules(fileVinyls, cbd.makeNodeResolver(), email, password, branch, logAmount);
     return cbd.promise;
   });
-}
+};
 
 var __lastUploaded = null;
 
 function _gulpUploadVinylsAsModules(fileVinyls, cb, email, password, branch, logAmount) {
-  let modules = {}
+  let modules = {};
   for (let fileVinyl of fileVinyls) {
     let moduleName = path.basename(fileVinyl.path);
     modules[moduleName] = fileVinyl.contents.toString('utf-8');
@@ -27,7 +28,7 @@ function _gulpUploadVinylsAsModules(fileVinyls, cb, email, password, branch, log
   if (logAmount && logAmount > 0) {
     gutil.log('Modules: ');
     for (let key in modules) {
-      gutil.log(`- ${gutil.colors.cyan(key)}`)
+      gutil.log(`- ${gutil.colors.cyan(key)}`);
     }
   }
   let data = { branch: branch, modules: modules };

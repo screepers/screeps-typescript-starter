@@ -11,9 +11,7 @@ After you create a spawn, this bot will create 4 creeps which will start to harv
 ### Requirements
 
 * [Node.js](https://nodejs.org/en/) (v4.0.0+)
-* Gulp - `npm install -g gulp`
-* TypeScript - `npm install -g typescript`
-* Typings - `npm install -g typings`
+* Gulp 4.0+ - `sudo npm install -g gulpjs/gulp.git#4.0`
 
 ### Quick setup
 

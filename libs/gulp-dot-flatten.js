@@ -1,10 +1,11 @@
+/*jshint esversion: 6, node: true */
 'use strict';
 
 const path = require('path');
 const gutil = require('gulp-util');
 const through2 = require('through2');
 const PluginError = require('gulp-util').PluginError;
-const recast = require('recast')
+const recast = require('recast');
 
 module.exports = function (logAmount, stringFilter) {
   return through2.obj(function (file, enc, next) {
@@ -51,7 +52,7 @@ module.exports = function (logAmount, stringFilter) {
         let newName = relPath.join('.');
 
         while (newName[0] == '.') newName = newName.slice(1);
-        if (stringFilter) newName = stringFilter(result);
+        if (stringFilter) newName = stringFilter(newName);
 
         if (logAmount && logAmount > 0) {
           gutil.log(`>> flattened file '${gutil.colors.cyan(path.dirname(file.relative) + path.sep + path.basename(file.path))}' into '${gutil.colors.cyan(newName)}'`);
