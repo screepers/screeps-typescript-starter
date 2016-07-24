@@ -43,7 +43,7 @@ module.exports = function (logAmount, stringFilter) {
             } else {
               return false;
             }
-          }
+          },
         })).code);
 
         let relPath = path.dirname(file.relative).split(path.sep);
@@ -64,6 +64,7 @@ module.exports = function (logAmount, stringFilter) {
         this.emit('error', new PluginError('flatten', e));
       }
     }
+
     next();
   });
 };
