@@ -1,7 +1,7 @@
 {
   "user": {
     "email": "YOUR_USERNAME",
-    "password": "YOUR_PASSWORD",
+    "password": "YOUR_PASSWORD"
   },
   "defaultTarget": "dev",
   "targets": {
