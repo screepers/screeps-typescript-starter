@@ -66,13 +66,19 @@ const buildConfig = config.targets[buildTarget];
 /* TASKS */
 /*********/
 
-gulp.task('lint', function() {
-  return gulp.src('src/**/*.ts')
-    .pipe(tslint({ formatter: 'prose' }))
-    .pipe(tslint.report({
-      summarizeFailureOutput: true,
-      emitError: false
-    }));
+gulp.task('lint', function(done) {
+  if (buildConfig.lint) {
+    gutil.log('linting ...');
+    return gulp.src('src/**/*.ts')
+      .pipe(tslint({ formatter: 'prose' }))
+      .pipe(tslint.report({
+        summarizeFailureOutput: true,
+        emitError: buildConfig.lintRequired === true
+      }));
+  } else {
+    gutil.log('skipped lint, according to config');
+    return done();
+  }
 });
 
 gulp.task('clean', function() {
