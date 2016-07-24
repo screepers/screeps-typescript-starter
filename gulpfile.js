@@ -18,8 +18,8 @@ gulp.task('lint', () => {
     .pipe(tslint({ formatter: 'prose' }))
     .pipe(tslint.report({
       summarizeFailureOutput: true,
-      emitError: false
-    }))
+      emitError: false,
+    }));
 });
 
 gulp.task('clean', () => {
@@ -40,19 +40,19 @@ gulp.task('compile', ['lint', 'clean'], () => {
 gulp.task('checked-compile', ['compile'], () => {
   if (!compileFailed)
     return true;
-  throw new PluginError("gulp-typescript", "failed to compile: not executing further tasks");
-})
+  throw new PluginError('gulp-typescript', 'failed to compile: not executing further tasks');
+});
 
 gulp.task('flatten', ['checked-compile'], () => {
   return gulp.src('./dist/js/**/*.js')
     .pipe(gulpDotFlatten(0))
-    .pipe(gulp.dest('./dist/flat'))
+    .pipe(gulp.dest('./dist/flat'));
 });
 
 gulp.task('upload', ['flatten'], () => {
   return gulp.src('./dist/flat/*.js')
     .pipe(gulpRename(path => { path.extname = ''; }))
-    .pipe(gulpScreepsUpload(config.email, config.password, config.branch, 0))
+    .pipe(gulpScreepsUpload(config.email, config.password, config.branch, 0));
 });
 
 gulp.task('watch', () => {
