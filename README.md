@@ -4,9 +4,13 @@
 
 This starter kit is a modified version of the original [Screeps/TypeScript sample project](https://github.com/MarkoSulamagi/Screeps-typescript-sample-project) by [Marko Sulamägi](https://github.com/MarkoSulamagi).
 
-## Getting Started
+## Notice
 
-After you create a spawn, this bot will create 4 creeps which will start to harvest the closest source. The bots harvest, then transfer energy back to Spawn. If a creep's lifespan has depleted enough, it will refill in Spawn.
+This repository recently transitioned to TypeScript 2, complete with all sorts of new features including the ability to flatten your code with Webpack. Those who still wish to use TS1 should checkout the [`ts1-legacy`](https://github.com/screepers/screeps-typescript-starter/tree/ts1-legacy) branch. Any notable changes in `master` may be backported into the legacy branch.
+
+To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/typescript/2016/07/11/announcing-typescript-2-0-beta/).
+
+## Getting Started
 
 ### Requirements
 
