@@ -1,3 +1,4 @@
+/*jshint esversion: 6, node: true */
 'use strict';
 
 const _ = require('lodash');
@@ -14,27 +15,30 @@ module.exports = (email, password, branch, logAmount) => {
     _gulpUploadVinylsAsModules(fileVinyls, cbd.makeNodeResolver(), email, password, branch, logAmount);
     return cbd.promise;
   });
-}
+};
 
 var __lastUploaded = null;
 
 function _gulpUploadVinylsAsModules(fileVinyls, cb, email, password, branch, logAmount) {
-  let modules = {}
+  let modules = {};
   for (let fileVinyl of fileVinyls) {
     let moduleName = path.basename(fileVinyl.path);
     modules[moduleName] = fileVinyl.contents.toString('utf-8');
   }
+
   if (logAmount && logAmount > 0) {
     gutil.log('Modules: ');
     for (let key in modules) {
-      gutil.log(`- ${gutil.colors.cyan(key)}`)
+      gutil.log(`- ${gutil.colors.cyan(key)}`);
     }
   }
+
   let data = { branch: branch, modules: modules };
   if (deepEqual(__lastUploaded, data)) {
     // gutil.log('Skipping upload due to equal outputs.');
     return cb(null, {});
   }
+
   __lastUploaded = data;
 
   gutil.log(`Uploading to branch ${gutil.colors.cyan(branch)}...`);
@@ -46,8 +50,8 @@ function _gulpUploadVinylsAsModules(fileVinyls, cb, email, password, branch, log
     method: 'POST',
     auth: `${email}:${password}`,
     headers: {
-      'Content-Type': 'application/json; charset=utf-8'
-    }
+      'Content-Type': 'application/json; charset=utf-8',
+    },
   }, res => {
     gutil.log(`Build ${gutil.colors.cyan('completed')} with HTTP response ${gutil.colors.magenta(res.statusCode)}`);
     cb(null, {});

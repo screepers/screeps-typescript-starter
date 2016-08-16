@@ -5,30 +5,19 @@
     "removeComments": true,
     "noResolve": false,
     "noImplicitAny": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true
   },
   "compileOnSave": false,
+  "include": [
+    "typings/**/*.d.ts",
+    "src/**/*.ts"
+  ],
   "exclude": [
     "dist",
     "node_modules",
     "libs"
-  ],
-  "filesGlob": [
-    "typings/**/*.d.ts",
-    "src/**/*.ts"
-  ],
-  "files": [
-    "typings/globals/lodash/index.d.ts",
-    "typings/globals/screeps/index.d.ts",
-    "typings/index.d.ts",
-    "src/components/creeps/creepAction.ts",
-    "src/components/creeps/creepManager.ts",
-    "src/components/creeps/harvester.ts",
-    "src/components/rooms/roomManager.ts",
-    "src/components/sources/sourceManager.ts",
-    "src/components/spawns/spawnManager.ts",
-    "src/config/config.ts",
-    "src/main.ts",
-    "src/shared/memoryManager.ts"
   ]
 }

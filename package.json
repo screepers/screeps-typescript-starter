@@ -3,31 +3,40 @@
   "version": "0.0.0",
   "description": "",
   "main": "./dist/main.js",
+  "repository": "screepers/screeps-typescript-starter",
   "scripts": {
     "gulp": "gulp",
     "postinstall": "typings install",
     "deploy": "gulp build",
+    "deploy-prod": "gulp build --target prod",
     "start": "gulp watch",
-    "test": "gulp lint",
-    "typings": "typings"
+    "prod": "gulp watch --target prod",
+    "test": "gulp test",
+    "tslint": "tslint 'src/**/*.ts'; echo",
+    "typings": "typings",
+    "jshint-gulp": "jshint gulpfile.js libs/gulp*.js; echo"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "deep-equal": "^1.0.1",
-    "gulp": "~3.9.0",
+    "gulp": "github:gulpjs/gulp#4.0",
     "gulp-clean": "^0.3.2",
     "gulp-collect": "^0.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-tslint": "^6.0.1",
     "gulp-typescript": "^2.13.6",
     "gulp-util": "^3.0.7",
-    "lodash": "^4.13.1",
+    "jshint": "^2.9.2",
+    "lodash": "^4.14.0",
     "q": "^1.4.1",
     "recast": "^0.11.10",
     "through2": "^2.0.1",
-    "tsconfig-glob": "^0.4.3",
+    "ts-loader": "^0.8.2",
     "tslint": "^3.13.0",
-    "typings": "^1.3.0"
+    "typescript": "^2.0.0",
+    "typings": "^1.3.0",
+    "webpack": "^1.13.1",
+    "webpack-stream": "^3.2.0"
   }
 }
