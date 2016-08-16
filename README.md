@@ -4,6 +4,10 @@
 
 This starter kit is a modified version of the original [Screeps/TypeScript sample project](https://github.com/MarkoSulamagi/Screeps-typescript-sample-project) by [Marko Sulamägi](https://github.com/MarkoSulamagi).
 
+## Before You Start
+
+<b>DO NOT</b> run the Steam client directly out of the same location as the gulp file watcher.  The steam client will attempt to sync new files on the server back down to your local workspace.
+
 ## Getting Started
 
 After you create a spawn, this bot will create 4 creeps which will start to harvest the closest source. The bots harvest, then transfer energy back to Spawn. If a creep's lifespan has depleted enough, it will refill in Spawn.
