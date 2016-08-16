@@ -19,17 +19,30 @@ To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/
 
 ### Quick setup
 
-First, create a copy of `config.example.json` and rename it to `config.json`.
+First, you will have to set up your config files. Create a copy of `config.example.json` and rename it to `config.json`. Then navigate into the `src/config` directory, reate a copy of `config.example.ts` and rename it to `config.ts`.
 
 ```bash
+# config.json
 $ cp config.example.json config.json
+
+# config.ts
+$ cd src/config
+$ cp config.example.ts config.ts
 ```
 
-Then change the `username` and `password` properties with your Screeps credentials.
+Then, on the `config.json` file, change the `username` and `password` properties with your Screeps credentials.
 
-If you want to push your code to another branch, for example, if you have some sort of a staging branch where you test around in Simulation mode, we have left a `branch` option for you to easily change the target branch of the upload process. The `default` branch is set as the default.
+The `config.json` file is where you set up your development environment. If you want to push your code to another branch, for example, if you have some sort of a staging branch where you test around in Simulation mode, we have left a `branch` option for you to easily change the target branch of the upload process. The `default` branch is set as the default.
 
-**WARNING: DO NOT** commit this file into your repository!
+The `src/config/config.ts` file is where you store your code-specific config variables. For example, if you want to easily turn on `PathFinder` when needed, you can set your own variable here. Once you've set up your configs, import the `config.ts` file on the file you want to call these configs at:
+
+```js
+import * as Config from "../path/to/config";
+```
+
+Then simply call the config variables with `Config.CONFIG_VARIABLE`.
+
+**WARNING: DO NOT** commit these files into your repository!
 
 Then run the following the command to install the required npm packages and TypeScript type definitions.
 
