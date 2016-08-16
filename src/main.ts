@@ -19,6 +19,7 @@ RoomManager.loadRooms();
 SpawnManager.loadSpawns();
 SourceManager.loadSources();
 
+// This is an example for using a config variable from `config.ts`.
 if (Config.USE_PATHFINDER) {
   PathFinder.use(true);
 }
