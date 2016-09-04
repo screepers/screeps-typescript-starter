@@ -34,7 +34,7 @@ module.exports = function (logAmount, stringFilter) {
                   if (logAmount && logAmount > 1) {
                     gutil.log(`> in file '${gutil.colors.cyan(path.dirname(file.relative) + path.sep + path.basename(file.path))}', flattened path '${gutil.colors.cyan(expr.arguments[0].value)}' into '${gutil.colors.cyan(result)}'`);
                   }
-                  result = result.replace(/.(ts|js)/g, '')
+                  result = result.replace(/[.](ts|js)/g, '')
                   expr.arguments[0] = arg.raw.charAt(0) + result + arg.raw.charAt(0);
                 } else {
                   gutil.log(`> Non Literal argument for 'require' in '${gutil.colors.cyan(path.dirname(file.relative) + path.sep + path.basename(file.path))}' location: ${arg.loc.start.line}:${arg.loc.start.column}`)
