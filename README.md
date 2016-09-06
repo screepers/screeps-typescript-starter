@@ -44,6 +44,8 @@ Then simply call the config variables with `Config.CONFIG_VARIABLE`.
 
 **WARNING: DO NOT** commit these files into your repository!
 
+### Installing npm modules
+
 Then run the following the command to install the required npm packages and TypeScript type definitions.
 
 ```bash
@@ -59,6 +61,8 @@ $ npm start
 # To deploy the code to Screeps
 $ npm run deploy
 ```
+
+You can also use `deploy-prod` instead of `deploy` for a bundled version of the project, which has better performance but is harder to debug.
 
 ## Notes
 
@@ -97,7 +101,7 @@ If you believe that some rules should not apply to a part of your code, you can 
 
 ## Contributing
 
-1. [Fork it](https://github.com/resir014/screeps-typescript-starter/fork)
+1. [Fork it](https://github.com/screepers/screeps-typescript-starter/fork)
 2. Create your feature branch: `git checkout -b my-new-feature`
 3. Commit your changes: `git commit -am 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
