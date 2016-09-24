@@ -11,7 +11,7 @@ const path = require('path');
 const PluginError = require('gulp-util').PluginError;
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
-const tsconfig = ts.createProject('tsconfig.json', { typescript: require('typescript') });
+const tsProject = ts.createProject('tsconfig.json', { typescript: require('typescript') });
 const webpack = require('webpack-stream');
 
 /********/
@@ -81,7 +81,7 @@ gulp.task('lint', function(done) {
   }
 });
 
-gulp.task('clean', function() {
+gulp.task('clean', function () {
   return gulp.src(['dist/tmp/', 'dist/' + buildTarget], { read: false, allowEmpty: true })
     .pipe(clean());
 });
@@ -97,8 +97,8 @@ gulp.task('compile-flattened', gulp.series(
   gulp.parallel('lint', 'clean'),
   function tsc() {
     global.compileFailed = false;
-    return tsconfig.src()
-      .pipe(ts(tsconfig))
+    return tsProject.src()
+      .pipe(tsProject())
       .on('error', (err) => global.compileFailed = true)
       .js.pipe(gulp.dest('dist/tmp'));
   },
@@ -129,7 +129,7 @@ gulp.task('watch', function () {
       console.log('');
       gutil.log(gutil.colors.green('File ' + path + ' was ' + event + 'ed, running tasks...'));
     })
-    .on('error', function() {
+    .on('error', function () {
       gutil.log(gutil.colors.green('Error during build tasks: aborting'));
     });
 });
