@@ -6,7 +6,7 @@ This starter kit is a modified version of the original [Screeps/TypeScript sampl
 
 ## Notice
 
-This repository recently transitioned to TypeScript 2, complete with all sorts of new features including the ability to flatten your code with Webpack. Those who still wish to use TS1 should checkout the [`ts1-legacy`](https://github.com/screepers/screeps-typescript-starter/tree/ts1-legacy) branch. Any notable changes in `master` may be backported into the legacy branch.
+This repository recently transitioned to TypeScript 2, complete with all sorts of new features, including strict `null` checks, as well as the ability to flatten your code with Webpack. Those who still wish to use TS1 should checkout the [`ts1-legacy`](https://github.com/screepers/screeps-typescript-starter/tree/ts1-legacy) branch. Any notable changes in `master` may be backported into the legacy branch.
 
 To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/typescript/2016/07/11/announcing-typescript-2-0-beta/).
 
@@ -65,6 +65,14 @@ $ npm run deploy
 You can also use `deploy-prod` instead of `deploy` for a bundled version of the project, which has better performance but is harder to debug.
 
 ## Notes
+
+### Sample code
+
+This starter kit includes a bit of sample code, which uses some of the new TS2 features mentioned earlier. Feel free to build upon this as you please, but if you don't want to use them, you can remove everything from within the `src/` directory and start from scratch.
+
+When starting from scratch, make sure a `main.ts` file exists with a `loop()` function. This is necessary in order to run the game loop.
+
+**Source:** http://support.screeps.com/hc/en-us/articles/204825672-New-main-loop-architecture
 
 ### The `noImplicitAny` compiler flag
 
