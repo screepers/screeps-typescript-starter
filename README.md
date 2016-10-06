@@ -68,7 +68,7 @@ When the `noImplicitAny` flag is `false` (the default), the compiler silently de
 
 When the `noImplicitAny` flag is `true` and the TypeScript compiler cannot infer the type, it still generates the JavaScript files. But it also reports an error. Many seasoned developers prefer this stricter setting because type checking catches more unintentional errors at compile time.
 
-In this starter kit, the `noImplicitAny` compiler flag is set to `false` to make it easier for beginners. If you want a more stricter environment, you can change the `noImplicitAny` flag to `true` on the `tsconfig.json` file.
+In this starter kit, the `noImplicitAny` is set to `true` for a more stricter environment. If you don't like this, you can change the `noImplicitAny` flag to `false` on the `tsconfig.json` file.
 
 **Source:** https://angular.io/docs/ts/latest/guide/typescript-configuration.html
 
