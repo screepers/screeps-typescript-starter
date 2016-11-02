@@ -1,4 +1,5 @@
 import * as Config from "../../config/config";
+import { log } from "../support/log";
 
 /**
  * The base class for Rooms.
@@ -66,7 +67,7 @@ export class BaseRoom {
    */
   protected setBodyParts(role: string): string[] | undefined {
     if (this.debug) {
-      console.log("[BaseRoom.setBodyParts] Current role:", role);
+      log.debug("[BaseRoom.setBodyParts] Current role:", role);
     }
 
     if (role === "harvester") {

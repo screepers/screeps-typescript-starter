@@ -1,10 +1,23 @@
 import * as Config from "./config/config";
 import { ControlledRoom } from "./components/rooms/controlledRoom";
 
+import { log, Log } from "./components/support/log";
+
+log.showSource = Config.LOG_PRINT_LINES;
+if (Config.LOG_LOAD_SOURCE_MAP) {
+  Log.loadSourceMap();
+}
+
+if (Config.LOG_LEVEL) {
+  log.level = Config.LOG_LEVEL;
+}
+
 // This is an example for using a config variable from `config.ts`.
 if (Config.USE_PATHFINDER) {
   PathFinder.use(true);
 }
+
+log.info("load");
 
 /**
  * This function is executed *every tick*.
@@ -35,7 +48,7 @@ export function loop() {
 
       if (creep.room === room.name) {
         if (!Game.creeps[name]) {
-          console.log("Clearing non-existing creep memory:", name);
+          log.info("Clearing non-existing creep memory:", name);
           delete Memory.creeps[name];
         }
       }

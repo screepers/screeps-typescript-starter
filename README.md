@@ -106,6 +106,13 @@ If you believe that some rules should not apply to a part of your code, you can 
 
 **More info about TSLint:** https://palantir.github.io/tslint/
 
+### Source maps
+
+Works out of the box with "npm run deploy-prod" and default values from src/config/config.example.ts.
+
+Currently maps are generated, but "source-maps" module doesn't get uploaded for non-webpack builds.
+
+![Console output example](/console.png "Console output example")
 
 ## Contributing
 

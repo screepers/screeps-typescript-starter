@@ -1,5 +1,6 @@
 import { BaseRoom } from "./baseRoom";
 import { Harvester } from "../creeps/roles/harvester";
+import { log } from "../support/log";
 
 /**
  * Rooms that the player controls. Includes scripts necessary to run all tasks
@@ -43,7 +44,7 @@ export class ControlledRoom extends BaseRoom {
     });
 
     if (this.debug) {
-      console.log("[ControlledRoom.loadCreeps] " + this.creepCount + " creeps found in the playground.");
+      log.debug("[ControlledRoom.loadCreeps] " + this.creepCount + " creeps found in the playground.");
     }
   }
 
@@ -56,7 +57,7 @@ export class ControlledRoom extends BaseRoom {
 
     if (this.debug) {
       if (spawns[0]) {
-        console.log("[ControlledRoom.buildMissingCreeps] Spawn: " + spawns[0].name);
+        log.debug("[ControlledRoom.buildMissingCreeps] Spawn: " + spawns[0].name);
       }
     }
 
@@ -93,13 +94,13 @@ export class ControlledRoom extends BaseRoom {
     if (body) {
       let status: number | string = spawn.createCreep(body, name, properties);
       if (typeof status === "string") {
-        console.log("Started creating new Creep in room " + spawn.room.name);
+        log.debug("Started creating new Creep in room " + spawn.room.name);
         Memory.uuid++;
       } else if (status !== -6)  {
-        console.log("Failed to spawn creep in room " + spawn.room.name + ":", status, "[" + role + "]");
+        log.error("Failed to spawn creep in room " + spawn.room.name + ":", status, "[" + role + "]");
       }
     } else {
-      console.log("Failed to spawn creep in room " + spawn.room.name + ":", "unknown body part", "[" + role + "]");
+      log.error("Failed to spawn creep in room " + spawn.room.name + ":", "unknown body part", "[" + role + "]");
     }
   }
 

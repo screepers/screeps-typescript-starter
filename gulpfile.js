@@ -13,6 +13,8 @@ const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
 const tsProject = ts.createProject('tsconfig.json', { typescript: require('typescript') });
 const webpack = require('webpack-stream');
+const sourcemaps = require('gulp-sourcemaps');
+const through = require('through2');
 
 /********/
 /* INIT */
@@ -90,6 +92,19 @@ gulp.task('compile-bundled', gulp.series(gulp.parallel('lint', 'clean'), functio
   const webpackConfig = require('./webpack.config.js');
   return gulp.src('src/main.ts')
     .pipe(webpack(webpackConfig))
+    .pipe(through.obj(function (file, enc, cb)
+    {
+        // Source maps are JSON files with a single object.
+        // Screeps server takes only *.js files, require() expects .js files to be modules and export something, so turning it into module with one export: "d".
+        // If we could name it *.json, this wouldn't be needed.
+        var isSourceMap = /\.map.js$/.test(file.path);
+        if (isSourceMap)
+        {
+          file._contents = Buffer.concat([Buffer.from("module.exports.d=", 'utf-8'), file._contents]);
+        }
+        this.push(file);
+        cb();
+    }))
     .pipe(gulp.dest('dist/' + buildTarget));
 }));
 
@@ -98,9 +113,12 @@ gulp.task('compile-flattened', gulp.series(
   function tsc() {
     global.compileFailed = false;
     return tsProject.src()
+      .pipe(sourcemaps.init())
       .pipe(tsProject())
-      .on('error', (err) => global.compileFailed = true)
-      .js.pipe(gulp.dest('dist/tmp'));
+      .on('error', (err) => global.compileFailed = true).js
+      .pipe(sourcemaps.write("."))
+      .pipe(gulp.dest('dist/tmp'))
+      ;
   },
   function checkTsc(done) {
     if (!global.compileFailed) {
@@ -110,7 +128,13 @@ gulp.task('compile-flattened', gulp.series(
   },
   function flatten() {
     return gulp.src('dist/tmp/**/*.js')
+      .pipe(sourcemaps.init( { loadMaps: true } ))
       .pipe(gulpDotFlatten(0))
+      .pipe(sourcemaps.write(".",
+        {
+          includeContent: false,
+          mapFile: f => { return f.replace('.js.map', '.map.js'); },
+        }))
       .pipe(gulp.dest('dist/' + buildTarget));
   }
 ));
