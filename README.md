@@ -110,6 +110,8 @@ If you believe that some rules should not apply to a part of your code, you can 
 
 Works out of the box with "npm run deploy-prod" and default values from src/config/config.example.ts.
 
+Doesn't work in sim, because they do lots of evals with scripts in sim.
+
 Currently maps are generated, but "source-maps" module doesn't get uploaded for non-webpack builds.
 
 ![Console output example](/console.png "Console output example")
