@@ -1,24 +1,43 @@
-import { WorkerCreep } from "../workerCreep";
+import * as creepActions from "../creepActions";
 
-export class Harvester extends WorkerCreep {
-  private room: Room;
-  private spawn: Spawn;
-  private energySource: Source;
+/**
+ * Runs all creep actions.
+ *
+ * @export
+ * @param {Creep} creep
+ */
+export function run(creep: Creep): void {
+  let spawn = creep.room.find<Spawn>(FIND_MY_SPAWNS)[0];
+  let energySource = creep.room.find<Source>(FIND_SOURCES_ACTIVE)[0];
 
-  constructor(creep: Creep, room: Room) {
-    super(creep);
-    this.room = room;
-    this.spawn = this.creep.room.find<Spawn>(FIND_MY_SPAWNS)[0];
-    this.energySource = this.creep.room.find<Source>(FIND_SOURCES_ACTIVE)[0];
+  if (creepActions.needsRenew(creep)) {
+    console.log("moveToRenew");
+    creepActions.moveToRenew(creep, spawn);
+  } else if (_.sum(creep.carry) === creep.carryCapacity) {
+    _moveToDropEnergy(creep, spawn);
+    console.log("moveToDropEnergy");
+  } else {
+    console.log("moveToHarvest");
+    _moveToHarvest(creep, energySource);
   }
+}
 
-  public run(): void {
-    if (this.needsRenew()) {
-      this.moveToRenew(this.spawn);
-    } else if (_.sum(this.creep.carry) === this.creep.carryCapacity) {
-      this.moveToDropEnergy(this.spawn);
-    } else {
-      this.moveToHarvest(this.energySource);
-    }
+function _tryHarvest(creep: Creep, target: Source): number {
+  return creep.harvest(target);
+}
+
+function _moveToHarvest(creep: Creep, target: Source): void {
+  if (_tryHarvest(creep, target) === ERR_NOT_IN_RANGE) {
+    creepActions.moveTo(creep, target.pos);
+  }
+}
+
+function _tryEnergyDropOff(creep: Creep, target: Spawn | Structure): number {
+  return creep.transfer(target, RESOURCE_ENERGY);
+}
+
+function _moveToDropEnergy(creep: Creep, target: Spawn | Structure): void {
+  if (_tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
+    creepActions.moveTo(creep, target.pos);
   }
 }
