@@ -11,13 +11,10 @@ export function run(creep: Creep): void {
   let energySource = creep.room.find<Source>(FIND_SOURCES_ACTIVE)[0];
 
   if (creepActions.needsRenew(creep)) {
-    console.log("moveToRenew");
     creepActions.moveToRenew(creep, spawn);
   } else if (_.sum(creep.carry) === creep.carryCapacity) {
     _moveToDropEnergy(creep, spawn);
-    console.log("moveToDropEnergy");
   } else {
-    console.log("moveToHarvest");
     _moveToHarvest(creep, energySource);
   }
 }

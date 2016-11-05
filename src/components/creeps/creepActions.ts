@@ -73,6 +73,14 @@ export function getEnergy(creep: Creep, roomObject: RoomObject): void {
   }
 }
 
+/**
+ * Returns true if a creep's `working` memory entry is set to true, and false
+ * otherwise.
+ *
+ * @export
+ * @param {Creep} creep
+ * @returns {boolean}
+ */
 export function canWork(creep: Creep): boolean {
   let working = creep.memory.working;
 
