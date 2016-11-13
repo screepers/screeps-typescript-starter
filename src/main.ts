@@ -1,21 +1,11 @@
 import * as Config from "./config/config";
 import * as CreepManager from "./components/creeps/creepManager";
+import { log } from "./components/support/log";
 
 // Any code written outside the `loop()` method is executed only when the
 // Screeps system reloads your script.
 // Use this bootstrap wisely. You can cache some of your stuff to save CPU.
 // You should extend prototypes before the game loop executes here.
-
-import { log, Log } from "./components/support/log";
-
-log.showSource = Config.LOG_PRINT_LINES;
-if (Config.LOG_LOAD_SOURCE_MAP) {
-  Log.loadSourceMap();
-}
-
-if (Config.LOG_LEVEL) {
-  log.level = Config.LOG_LEVEL;
-}
 
 // This is an example for using a config variable from `config.ts`.
 if (Config.USE_PATHFINDER) {

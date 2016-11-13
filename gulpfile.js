@@ -15,6 +15,8 @@ const tsProject = ts.createProject('tsconfig.json', { typescript: require('types
 const webpack = require('webpack-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const through = require('through2');
+const git = require("simple-git");
+const _ = require("lodash");
 
 /********/
 /* INIT */
@@ -88,7 +90,28 @@ gulp.task('clean', function () {
     .pipe(clean());
 });
 
-gulp.task('compile-bundled', gulp.series(gulp.parallel('lint', 'clean'), function bundle() {
+var revisionInfo = { valid: false };
+gulp.task('gitRevisions', function(cb) {
+  return git().listRemote(['--get-url'], (err, data) =>
+  {
+    if (!err)
+    {
+      revisionInfo.repo = _.trim(data).replace(/\.git$/, "");
+    }
+  }).revparse(["HEAD"], (err, data) =>
+  {
+    if (!err)
+    {
+      revisionInfo.revision = _.trim(data);
+    }
+    if(revisionInfo.repo && revisionInfo.revision)
+      revisionInfo.valid = true;
+    cb();
+  });
+});
+
+gulp.task('compile-bundled', gulp.series(gulp.parallel('gitRevisions', 'lint', 'clean'), function bundle() {
+
   const webpackConfig = require('./webpack.config.js');
   return gulp.src('src/main.ts')
     .pipe(webpack(webpackConfig))
@@ -97,11 +120,25 @@ gulp.task('compile-bundled', gulp.series(gulp.parallel('lint', 'clean'), functio
         // Source maps are JSON files with a single object.
         // Screeps server takes only *.js files, require() expects .js files to be modules and export something, so turning it into module with one export: "d".
         // If we could name it *.json, this wouldn't be needed.
-        var isSourceMap = /\.map.js$/.test(file.path);
-        if (isSourceMap)
+        if (/main\.js\.map\.js$/.test(file.path))
         {
           file._contents = Buffer.concat([Buffer.from("module.exports.d=", 'utf-8'), file._contents]);
         }
+
+        // Updating repo/revision for source links.
+        if (/main\.js$/.test(file.path))
+        {
+          if(revisionInfo.valid)
+          {
+            let contents = file._contents.toString('utf-8');
+            contents = contents
+              .replace(/repo: "@@_repo_@@"/, `repo: "${revisionInfo.repo}"`)
+              .replace(/revision: "@@_revision_@@", valid: false/, `revision: "${revisionInfo.revision}", valid: true`)
+            ;
+            file._contents = Buffer.from(contents, 'utf-8');
+          }
+        }
+
         this.push(file);
         cb();
     }))
