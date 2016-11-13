@@ -2,6 +2,8 @@ import * as Config from "../../config/config";
 
 import * as harvester from "./roles/harvester";
 
+import { log } from "../../components/support/log";
+
 export let creeps: Creep[];
 export let creepCount: number = 0;
 
@@ -37,7 +39,7 @@ function _loadCreeps(room: Room) {
   harvesters = _.filter(creeps, (creep) => creep.memory.role === "harvester");
 
   if (Config.ENABLE_DEBUG_MODE) {
-    console.log("[CreepManager._loadCreeps] " + creepCount + " creeps found in the playground.");
+    log.info(creepCount + " creeps found in the playground.");
   }
 }
 
@@ -57,7 +59,7 @@ function _buildMissingCreeps(room: Room) {
 
   if (Config.ENABLE_DEBUG_MODE) {
     if (spawns[0]) {
-      console.log("[CreepManager._buildMissingCreeps] Spawn: " + spawns[0].name);
+      log.info("Spawn: " + spawns[0].name);
     }
   }
 
@@ -96,9 +98,9 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
     Memory.uuid = uuid + 1;
     let creepName: string = spawn.room.name + " - " + role + uuid;
 
-    console.log("[CreepManager._spawnCreep] Started creating new creep: " + creepName);
+    log.info("Started creating new creep: " + creepName);
     if (Config.ENABLE_DEBUG_MODE) {
-      console.log("[CreepManager._spawnCreep] Body: " + bodyParts);
+      log.info("Body: " + bodyParts);
     }
 
     status = spawn.createCreep(bodyParts, creepName, properties);
@@ -106,7 +108,7 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
     return _.isString(status) ? OK : status;
   } else {
     if (Config.ENABLE_DEBUG_MODE) {
-      console.log("[CreepManager._spawnCreep] Failed creating new creep: " + status);
+      log.info("Failed creating new creep: " + status);
     }
 
     return status;
