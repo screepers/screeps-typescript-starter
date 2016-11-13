@@ -114,6 +114,15 @@ Doesn't work in sim, because they do lots of evals with scripts in sim.
 
 Currently maps are generated, but "source-maps" module doesn't get uploaded for non-webpack builds.
 
+Log level and output can be controlled from console by setting level, showSource and showTick properties on log object.
+
+```js
+// print errors only, hide ticks and source locations
+log.level = 1;
+log.showSource = false;
+log.showTick = false;
+```
+
 ![Console output example](/console.png "Console output example")
 
 ## Contributing
