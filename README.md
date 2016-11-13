@@ -108,7 +108,7 @@ If you believe that some rules should not apply to a part of your code, you can 
 
 ### Source maps
 
-Works out of the box with "npm run deploy-prod" and default values from src/config/config.example.ts. Links back to source control when possible (currently understands only github and gitlab). Code has to be committed at build time ad pushed to remote at run time for this to work correctly.
+Works out of the box with "npm run deploy-prod" and default values from src/config/config.example.ts. Links back to source control when possible (currently understands only github and gitlab). Code has to be committed at build time and pushed to remote at run time for this to work correctly.
 
 Doesn't work in sim, because they do lots of evals with scripts in sim.
 
