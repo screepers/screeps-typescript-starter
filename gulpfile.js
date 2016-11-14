@@ -15,8 +15,8 @@ const tsProject = ts.createProject('tsconfig.json', { typescript: require('types
 const webpack = require('webpack-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const through = require('through2');
-const git = require("simple-git");
-const _ = require("lodash");
+const git = require('simple-git');
+const _ = require('lodash');
 
 /********/
 /* INIT */
@@ -27,7 +27,7 @@ let config;
 try {
   config = require('./config.json');
 } catch (error) {
-  if (error.code == "MODULE_NOT_FOUND") {
+  if (error.code === "MODULE_NOT_FOUND") {
     gutil.log(gutil.colors.red('ERROR'), 'Could not find file "config.json"');
   } else {
     gutil.log(error);
@@ -92,20 +92,17 @@ gulp.task('clean', function () {
 
 var revisionInfo = { valid: false };
 gulp.task('gitRevisions', function(cb) {
-  return git().listRemote(['--get-url'], (err, data) =>
-  {
-    if (!err)
-    {
+  return git().listRemote(['--get-url'], (err, data) => {
+    if (!err) {
       revisionInfo.repo = _.trim(data).replace(/\.git$/, "");
     }
-  }).revparse(["HEAD"], (err, data) =>
-  {
-    if (!err)
-    {
+  }).revparse(["HEAD"], (err, data) => {
+    if (!err) {
       revisionInfo.revision = _.trim(data);
     }
-    if(revisionInfo.repo && revisionInfo.revision)
+    if(revisionInfo.repo && revisionInfo.revision) {
       revisionInfo.valid = true;
+    }
     cb();
   });
 });
@@ -115,21 +112,17 @@ gulp.task('compile-bundled', gulp.series(gulp.parallel('gitRevisions', 'lint', '
   const webpackConfig = require('./webpack.config.js');
   return gulp.src('src/main.ts')
     .pipe(webpack(webpackConfig))
-    .pipe(through.obj(function (file, enc, cb)
-    {
+    .pipe(through.obj(function (file, enc, cb) {
         // Source maps are JSON files with a single object.
         // Screeps server takes only *.js files, require() expects .js files to be modules and export something, so turning it into module with one export: "d".
         // If we could name it *.json, this wouldn't be needed.
-        if (/main\.js\.map\.js$/.test(file.path))
-        {
+        if (/main\.js\.map\.js$/.test(file.path)) {
           file._contents = Buffer.concat([Buffer.from("module.exports.d=", 'utf-8'), file._contents]);
         }
 
         // Updating repo/revision for source links.
-        if (/main\.js$/.test(file.path))
-        {
-          if(revisionInfo.valid)
-          {
+        if (/main\.js$/.test(file.path)) {
+          if(revisionInfo.valid) {
             let contents = file._contents.toString('utf-8');
             contents = contents
               .replace(/repo: "@@_repo_@@"/, `repo: "${revisionInfo.repo}"`)
@@ -167,11 +160,10 @@ gulp.task('compile-flattened', gulp.series(
     return gulp.src('dist/tmp/**/*.js')
       .pipe(sourcemaps.init( { loadMaps: true } ))
       .pipe(gulpDotFlatten(0))
-      .pipe(sourcemaps.write(".",
-        {
-          includeContent: false,
-          mapFile: f => { return f.replace('.js.map', '.map.js'); },
-        }))
+      .pipe(sourcemaps.write(".", {
+        includeContent: false,
+        mapFile: f => { return f.replace('.js.map', '.map.js'); },
+      }))
       .pipe(gulp.dest('dist/' + buildTarget));
   }
 ));

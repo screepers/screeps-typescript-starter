@@ -7,7 +7,7 @@ const through2 = require('through2');
 const PluginError = require('gulp-util').PluginError;
 const recast = require('recast');
 
-module.exports = function (logAmount, stringFilter) {
+module.exports = (logAmount, stringFilter) => {
   return through2.obj(function (file, enc, next) {
     if (logAmount && logAmount > 2) {
       gutil.log(`>>> flattener starting file '${gutil.colors.cyan(path.dirname(file.relative) + path.sep + path.basename(file.path))}'`);
@@ -19,13 +19,13 @@ module.exports = function (logAmount, stringFilter) {
           visitCallExpression: function (filePath) {
             var expr = filePath.node;
 
-            if (expr.callee.name != 'require') {
+            if (expr.callee.name !== 'require') {
               this.traverse(filePath);
-            } else if (expr.callee.name == 'require') {
+            } else if (expr.callee.name === 'require') {
               this.traverse(filePath);
               if (expr.arguments.length) {
                 let arg = expr.arguments[0]
-                if (arg.type == 'Literal' && arg.value[0] == '.') {
+                if (arg.type === 'Literal' && arg.value[0] === '.') {
                   let value = path.posix.normalize(path.dirname(file.relative).split(path.sep).join(path.posix.sep) + '/./' + arg.value);
                   let result = './' + value.split('/').join('.');
 
@@ -55,7 +55,7 @@ module.exports = function (logAmount, stringFilter) {
 
         let newName = relPath.join('.');
 
-        while (newName[0] == '.') newName = newName.slice(1);
+        while (newName[0] === '.') newName = newName.slice(1);
         if (stringFilter) newName = stringFilter(newName);
 
         if (logAmount && logAmount > 0) {
