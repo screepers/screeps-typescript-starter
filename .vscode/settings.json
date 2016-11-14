@@ -1,7 +1,7 @@
 {
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
-  "editor.renderWhitespace": true,
+  "editor.renderWhitespace": "boundary",
   "files.encoding": "utf8",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
@@ -10,5 +10,6 @@
     "node_modules/**": true,
     "typings/**": true
   },
-  "typescript.tsdk": "./node_modules/typescript/lib"
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "standard.enable": false
 }
