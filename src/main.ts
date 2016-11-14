@@ -1,5 +1,6 @@
 import * as Config from "./config/config";
 import * as CreepManager from "./components/creeps/creepManager";
+import { log } from "./components/support/log";
 
 // Any code written outside the `loop()` method is executed only when the
 // Screeps system reloads your script.
@@ -10,6 +11,8 @@ import * as CreepManager from "./components/creeps/creepManager";
 if (Config.USE_PATHFINDER) {
   PathFinder.use(true);
 }
+
+log.info("load");
 
 /**
  * Screeps system expects this "loop" method in main.js to run the
@@ -36,7 +39,7 @@ export function loop() {
 
       if (creep.room === room.name) {
         if (!Game.creeps[name]) {
-          console.log("Clearing non-existing creep memory:", name);
+          log.info("Clearing non-existing creep memory:", name);
           delete Memory.creeps[name];
         }
       }
