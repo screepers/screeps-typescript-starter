@@ -179,9 +179,14 @@ gulp.task('compile-flattened', gulp.series(
 gulp.task('compile', gulp.series(buildConfig.bundle ? 'compile-bundled' : 'compile-flattened'));
 
 gulp.task('upload', gulp.series('compile', function uploading() {
-  return gulp.src('dist/' + buildTarget + '/*.js')
-    .pipe(gulpRename((path) => path.extname = ''))
-    .pipe(gulpScreepsUpload(config.user.email, config.user.password, buildConfig.branch, 0));
+  if(buildConfig.branch) {
+    return gulp.src('dist/' + buildTarget + '/*.js')
+      .pipe(gulpRename((path) => path.extname = ''))
+      .pipe(gulpScreepsUpload(config.user.email, config.user.password, buildConfig.branch, 0));
+  } else {
+    return gulp.src('dist/' + buildTarget + '/*.js')
+      .pipe(gulp.dest(buildConfig.localPath));
+  }
 }));
 
 gulp.task('watch', function () {

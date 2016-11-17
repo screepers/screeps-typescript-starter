@@ -64,6 +64,8 @@ $ npm run deploy
 
 You can also use `deploy-prod` instead of `deploy` for a bundled version of the project, which has better performance but is harder to debug.
 
+`deploy-local` will copy files into a local folder to be picked up by steam client and used with the official or a private server.
+
 ## Notes
 
 ### Sample code
