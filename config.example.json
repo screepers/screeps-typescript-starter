@@ -16,6 +16,12 @@
       "bundle": true,
       "lint": true,
       "lintRequired": true
+    },
+    "local": {
+      "bundle": true,
+      "lint": true,
+      "lintRequired": false,
+      "localPath": "PATH_TO_LOCAL_FOLDER"
     }
   }
 }

@@ -9,6 +9,7 @@
     "postinstall": "typings install",
     "deploy": "gulp build",
     "deploy-prod": "gulp build --target prod",
+    "deploy-local": "gulp build --target local",
     "start": "gulp watch",
     "prod": "gulp watch --target prod",
     "test": "gulp test",
