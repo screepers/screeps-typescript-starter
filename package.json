@@ -13,9 +13,9 @@
     "start": "gulp watch",
     "prod": "gulp watch --target prod",
     "test": "gulp test",
-    "tslint": "tslint 'src/**/*.ts'; echo",
+    "tslint": "tslint \"src/**/*.ts\"",
     "typings": "typings",
-    "jshint-gulp": "jshint gulpfile.js libs/gulp*.js; echo"
+    "jshint-gulp": "jshint gulpfile.js libs/gulp-dot-flatten.js libs/gulp-screeps-upload.js"
   },
   "author": "",
   "license": "MIT",
