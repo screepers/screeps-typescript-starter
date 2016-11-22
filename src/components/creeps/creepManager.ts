@@ -19,7 +19,7 @@ export function run(room: Room): void {
   _loadCreeps(room);
   _buildMissingCreeps(room);
 
-  _.each(creeps, function (creep: Creep) {
+  _.each(creeps, (creep: Creep) => {
     if (creep.memory.role === "harvester") {
       harvester.run(creep);
     }
@@ -52,7 +52,7 @@ function _buildMissingCreeps(room: Room) {
   let bodyParts: string[];
 
   let spawns: Spawn[] = room.find<Spawn>(FIND_MY_SPAWNS, {
-    filter: function (spawn: Spawn) {
+    filter: (spawn: Spawn) => {
       return spawn.spawning === null;
     },
   });
@@ -89,7 +89,7 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
   let status: number | string = spawn.canCreateCreep(bodyParts, undefined);
 
   let properties: { [key: string]: any } = {
-    role: role,
+    role,
     room: spawn.room.name,
   };
 

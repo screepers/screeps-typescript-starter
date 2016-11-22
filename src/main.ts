@@ -1,5 +1,6 @@
-import * as Config from "./config/config";
 import * as CreepManager from "./components/creeps/creepManager";
+import * as Config from "./config/config";
+
 import { log } from "./components/support/log";
 
 // Any code written outside the `loop()` method is executed only when the
