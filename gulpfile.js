@@ -107,7 +107,7 @@ gulp.task('gitRevisions', function(cb) {
       revisionInfo.valid = true;
     }
     cb();
-  })
+  });
 });
 
 gulp.task('compile-bundled', gulp.series(gulp.parallel('gitRevisions', 'lint', 'clean'), function bundle() {
