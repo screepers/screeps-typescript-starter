@@ -96,6 +96,9 @@ gulp.task('gitRevisions', function(cb) {
     if (!err) {
       revisionInfo.repo = _.trim(data).replace(/\.git$/, "");
     }
+    else {
+     cb();
+    }
   }).revparse(["HEAD"], (err, data) => {
     if (!err) {
       revisionInfo.revision = _.trim(data);
@@ -104,7 +107,7 @@ gulp.task('gitRevisions', function(cb) {
       revisionInfo.valid = true;
     }
     cb();
-  });
+  })
 });
 
 gulp.task('compile-bundled', gulp.series(gulp.parallel('gitRevisions', 'lint', 'clean'), function bundle() {
