@@ -12,7 +12,8 @@ const PluginError = require('gulp-util').PluginError;
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
 const tsProject = ts.createProject('tsconfig.json', { typescript: require('typescript') });
-const webpack = require('webpack-stream');
+const webpack = require('webpack');
+const webpackStream = require('webpack-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const through = require('through2');
 const git = require('simple-git');
@@ -114,7 +115,7 @@ gulp.task('compile-bundled', gulp.series(gulp.parallel('gitRevisions', 'lint', '
 
   const webpackConfig = require('./webpack.config.js');
   return gulp.src('src/main.ts')
-    .pipe(webpack(webpackConfig))
+    .pipe(webpackStream(webpackConfig, webpack))
     .pipe(through.obj(function (file, enc, cb) {
         // Source maps are JSON files with a single object.
         // Screeps server takes only *.js files, require() expects .js files to be modules and export something, so turning it into module with one export: "d".
