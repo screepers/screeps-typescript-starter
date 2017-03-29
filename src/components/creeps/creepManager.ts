@@ -2,7 +2,7 @@ import * as Config from "../../config/config";
 
 import * as harvester from "./roles/harvester";
 
-import { log } from "../../components/support/log";
+import { log } from "../../lib/logger/log";
 
 export let creeps: Creep[];
 export let creepCount: number = 0;
