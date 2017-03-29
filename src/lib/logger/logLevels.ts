@@ -1,6 +1,6 @@
-export class LogLevels {
-  public static ERROR = 0;
-  public static WARNING = 1;
-  public static INFO = 2;
-  public static DEBUG = 3;
+export enum LogLevels {
+  ERROR,
+  WARNING,
+  INFO,
+  DEBUG,
 };

@@ -63,7 +63,7 @@ function time(): string {
   return color(Game.time.toString(), "gray");
 }
 
-export class Log extends LogLevels {
+export class Log {
   public static sourceMap: any;
 
   public static loadSourceMap() {
@@ -89,7 +89,6 @@ export class Log extends LogLevels {
   private _maxFileString: number = 0;
 
   constructor() {
-    super();
     _.defaultsDeep(Memory, { log: {
       level: Config.LOG_LEVEL,
       showSource: Config.LOG_PRINT_LINES,
@@ -98,7 +97,7 @@ export class Log extends LogLevels {
   }
 
   public trace(error: Error): Log {
-    if (this.level >= Log.ERROR && error.stack) {
+    if (this.level >= LogLevels.ERROR && error.stack) {
       console.log(this.resolveStack(error.stack));
     }
 
@@ -106,26 +105,26 @@ export class Log extends LogLevels {
   }
 
   public error(...args: any[]) {
-    if (this.level >= Log.ERROR) {
-      console.log.apply(this, this.buildArguments(Log.ERROR).concat([].slice.call(args)));
+    if (this.level >= LogLevels.ERROR) {
+      console.log.apply(this, this.buildArguments(LogLevels.ERROR).concat([].slice.call(args)));
     }
   }
 
   public warning(...args: any[]) {
-    if (this.level >= Log.WARNING) {
-      console.log.apply(this, this.buildArguments(Log.WARNING).concat([].slice.call(args)));
+    if (this.level >= LogLevels.WARNING) {
+      console.log.apply(this, this.buildArguments(LogLevels.WARNING).concat([].slice.call(args)));
     }
   }
 
   public info(...args: any[]) {
-    if (this.level >= Log.INFO) {
-      console.log.apply(this, this.buildArguments(Log.INFO).concat([].slice.call(args)));
+    if (this.level >= LogLevels.INFO) {
+      console.log.apply(this, this.buildArguments(LogLevels.INFO).concat([].slice.call(args)));
     }
   }
 
   public debug(...args: any[]) {
-    if (this.level >= Log.DEBUG) {
-      console.log.apply(this, this.buildArguments(Log.DEBUG).concat([].slice.call(args)));
+    if (this.level >= LogLevels.DEBUG) {
+      console.log.apply(this, this.buildArguments(LogLevels.DEBUG).concat([].slice.call(args)));
     }
   }
 
@@ -149,17 +148,17 @@ export class Log extends LogLevels {
   private buildArguments(level: number): Array<string> {
     let out: Array<string> = [];
     switch (level) {
-      case Log.ERROR:
+      case LogLevels.ERROR:
         out.push(color("ERROR  ", "red"));
         break;
-      case Log.WARNING:
+      case LogLevels.WARNING:
         out.push(color("WARNING", "yellow"));
         break;
-      case Log.INFO:
+      case LogLevels.INFO:
         out.push(color("INFO   ", "green"));
         break;
-      case Log.DEBUG:
-        out.push(color("DEBUG   ", "gray"));
+      case LogLevels.DEBUG:
+        out.push(color("DEBUG  ", "gray"));
         break;
       default:
         break;
