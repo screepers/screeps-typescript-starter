@@ -1,4 +1,4 @@
-import { LogLevels } from "../components/support/log.levels";
+import { LogLevels } from "../lib/logger/logLevels";
 
 /**
  * Enable this if you want a lot of text to be logged to console.

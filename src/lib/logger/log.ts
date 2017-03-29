@@ -1,5 +1,5 @@
 import * as Config from "../../config/config";
-import { LogLevels } from "./log.levels";
+import { LogLevels } from "./logLevels";
 
 // <caller> (<source>:<line>:<column>)
 const stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
