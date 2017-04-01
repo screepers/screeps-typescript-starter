@@ -33,7 +33,7 @@ module.exports = {
   ],
 
   module: {
-    rules: [
+    loaders: [
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
       { test: /\.js$/, loader: 'source-map-loader', enforce: 'pre' },
       // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
