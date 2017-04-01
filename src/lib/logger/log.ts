@@ -75,7 +75,7 @@ export class Log {
         Log.sourceMap = new SourceMapConsumer(map);
       }
     } catch (err) {
-      console.log("failed lo load source map", err);
+      console.log("failed to load source map", err);
     }
   }
 
