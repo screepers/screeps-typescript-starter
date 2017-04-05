@@ -72,20 +72,35 @@ const buildConfig = config.targets[buildTarget];
 /* TASKS */
 /*********/
 
-gulp.task('lint', function(done) {
+// runs tslint on the path
+function lintPath(path) {
+  return gulp.src(path)
+             .pipe(tslint({ formatter: 'prose' }))
+             .pipe(tslint.report({
+               summarizeFailureOutput: true,
+               emitError: buildConfig.lintRequired === true
+             }));
+}
+
+gulp.task('lint-src', function(done) {
   if (buildConfig.lint) {
-    gutil.log('linting ...');
-    return gulp.src('src/**/*.ts')
-      .pipe(tslint({ formatter: 'prose' }))
-      .pipe(tslint.report({
-        summarizeFailureOutput: true,
-        emitError: buildConfig.lintRequired === true
-      }));
+    return lintPath('src/**/*.ts');
   } else {
-    gutil.log('skipped lint, according to config');
+    gutil.log('skipped src lint, according to config');
     return done();
   }
 });
+
+gulp.task('lint-test', function(done) {
+  if (buildConfig.lint && buildConfig.test) {
+    return lintPath('test/**/*.ts');
+  } else {
+    gutil.log('skipped test lint, according to config');
+    return done();
+  }
+});
+
+gulp.task('lint', gulp.series('lint-src', 'lint-test'));
 
 gulp.task('clean', function () {
   return gulp.src(['dist/tmp/', 'dist/' + buildTarget, 'coverage/', '.nyc_output'], {

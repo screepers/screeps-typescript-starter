@@ -1,4 +1,6 @@
-
+/* tslint:disable:object-literal-sort-keys object-literal-key-quotes*/
+// we disable those linting rules to make updating this file from the official API reference
+// as easy as possible.
 const gameConsts = {
   OK: 0,
   ERR_NOT_OWNER: -1,
@@ -666,7 +668,9 @@ const gameConsts = {
 
   SYSTEM_USERNAME: "Screeps",
 
+  /* tslint:disable max-line-length */
   SIGN_NOVICE_AREA: "A new Novice Area is being planned somewhere in this sector. Please make sure all important rooms are reserved.",
+  /* tslint:disable max-line-length */
   SIGN_RESPAWN_AREA: "A new Respawn Area is being planned somewhere in this sector. Please make sure all important rooms are reserved.",
 
   BODYPARTS_ALL: [
@@ -742,7 +746,7 @@ const gameConsts = {
 function deepFreeze(o: any) {
   Object.freeze(o);
 
-  Object.getOwnPropertyNames(o).forEach(function (prop) {
+  Object.getOwnPropertyNames(o).forEach((prop) => {
     if (o.hasOwnProperty(prop)
       && o[prop] !== null
       && (typeof o[prop] === "object" || typeof o[prop] === "function")
@@ -752,6 +756,6 @@ function deepFreeze(o: any) {
   });
 
   return o;
-};
+}
 
 export default deepFreeze(gameConsts);

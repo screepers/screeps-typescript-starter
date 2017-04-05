@@ -1,3 +1,4 @@
+/* tslint:disable:no-reference */
 /// <reference path="../../typings/globals/screeps/index.d.ts"/>
 import * as _ from "lodash";
 
@@ -24,7 +25,7 @@ export class CreepFactory {
     if (!capacity && _.isArray(this._body)) {
       capacity = _.filter(this._body, (p: any) => p === CARRY).length * CARRY_CAPACITY;
     }
-    return <Creep> {
+    return {
       body: this._body,
       carry: this._carry,
       carryCapacity: capacity,
@@ -40,7 +41,7 @@ export class CreepFactory {
       saying: this._saying,
       spawning: this._spawning,
       ticksToLive: this._ticksToLive,
-    };
+    } as Creep;
   }
 
   public body(body: any): CreepFactory {
@@ -50,11 +51,11 @@ export class CreepFactory {
 
   public carrying(type: StoreDefinition | string, amount?: number): CreepFactory {
     if (!amount) {
-      this._carry = <StoreDefinition> type;
+      this._carry = type as StoreDefinition;
     } else if (typeof type === "string") {
       const c: any = {};
       c[type] = amount;
-      this._carry = <StoreDefinition> c;
+      this._carry = c as StoreDefinition;
     }
     return this;
   }
@@ -124,4 +125,3 @@ export class CreepFactory {
     return this;
   }
 }
-

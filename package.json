@@ -14,7 +14,7 @@
     "prod": "gulp watch --target prod",
     "test": "mocha",
     "test:coverage": "nyc mocha",
-    "tslint": "tslint \"src/**/*.ts\"",
+    "tslint": "tslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "typings": "typings",
     "jshint-gulp": "jshint gulpfile.js libs/gulp-screeps-upload.js"
   },

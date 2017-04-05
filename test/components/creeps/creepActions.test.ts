@@ -1,6 +1,4 @@
-/// <reference path="../../../typings/globals/screeps/index.d.ts"/>
-import {assert, expect} from "chai";
-// import * as sinon from "sinon";
+import {assert} from "chai";
 import {canWork} from "../../../src/components/creeps/creepActions";
 import {CreepFactory} from "../../mock/factory.creep";
 
@@ -23,7 +21,7 @@ describe("creep actions", () => {
     const creep = creepFactory.build();
 
     assert.isTrue(canWork(creep));
-    expect(creep.memory.working).to.be.true;
+    assert.isTrue(creep.memory.working);
   });
 
   it("cannot work when working and at capacity", () => {
@@ -31,6 +29,6 @@ describe("creep actions", () => {
     const creep = creepFactory.carrying({}).memory({working: true}).build();
 
     assert.isFalse(canWork(creep));
-    expect(creep.memory.working).to.be.false;
+    assert.isFalse(creep.memory.working);
   });
 });

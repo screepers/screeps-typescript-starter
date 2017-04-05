@@ -100,6 +100,12 @@ an example on how to write a test, including the latest game object mocking supp
 For writing assertions we provide [chai](http://chaijs.com). Check out their
 [documentation](http://chaijs.com/guide/styles/) to learn how to write assertions in your tests.
 
+**Important:** In your tests, if you want to use lodash you must import it explicitly to avoid errors:
+
+```js
+import * as _  from "lodash"
+```
+
 ## Notes
 
 ### Sample code

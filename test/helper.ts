@@ -7,11 +7,12 @@
  + Screeps game constants
 
  */
-//
+declare const global: any;
+declare const _: any;
 
-const _ = require("lodash");
-(<any> global)._ = _;
+import * as lodash from "lodash";
 import consts from "./mock/game";
 
-_.merge((<any> global), consts);
+global._ = lodash;
 
+_.merge(global, consts);
