@@ -181,13 +181,13 @@ gulp.task('mocha', shell.task('npm -s run test'));
 gulp.task('mocha:coverage', shell.task('npm -s run test:coverage'));
 
 var testTask = function() {
-      if(buildConfig.test) {
-        return 'mocha';
-      }
-      return function tests(done) {
-        gutil.log("Skipping tests. Edit your config.json to enable testing.");
-        done();
-      }
+  if(buildConfig.test) {
+    return 'mocha';
+  }
+  return function tests(done) {
+    gutil.log("Skipping tests. Edit your config.json to enable testing.");
+    done();
+  }
 };
 
 gulp.task('upload', gulp.series('compile',
