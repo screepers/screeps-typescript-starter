@@ -17,6 +17,10 @@ To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/
 * [Node.js](https://nodejs.org/en/) (v4.0.0+)
 * Gulp 4.0+ - `sudo npm install -g gulpjs/gulp.git#4.0`
 
+For testing:
+* [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage  
+    `sudo npm install -g nyc mocha`
+
 ### Quick setup
 
 First, you will have to set up your config files. Create a copy of `config.example.json` and rename it to `config.json`. Then navigate into the `src/config` directory, reate a copy of `config.example.ts` and rename it to `config.ts`.
@@ -65,6 +69,36 @@ $ npm run deploy
 You can also use `deploy-prod` instead of `deploy` for a bundled version of the project, which has better performance but is harder to debug.
 
 `deploy-local` will copy files into a local folder to be picked up by steam client and used with the official or a private server.
+
+## Testing
+
+### Running Tests
+
+To enable tests as part of the build and deploy process, flip the `test` flag in your `config.json` to `true`.
+
+You can always run tests by running `npm test`. You can get a code coverage report by running
+`npm test:coverage`. Then opening `coverage/index.html` in your browser.
+
+### Writing Tests
+
+All tests should go in the `test/` directory and end in the extension `.test.ts`.
+
+All constants are available globally as normal.
+
+The game state is no simulated, so you must mock all game objects and state that your code requires.
+As part of this project, we hope to provide some helpers for generating game objects.
+
+It is recommended to test the smallest pieces of your code at a time. That is, write tests that
+assert the behavior of single, small functions. The advantages of this are:
+
+1. less mocking to setup and maintain
+2. allows you to test behavior, not implementation
+
+See [test/components/creeps/creepActions.test.ts](test/components/creeps/creepActions.test.ts) as
+an example on how to write a test, including the latest game object mocking support.
+
+For writing assertions we provide [chai](http://chaijs.com). Check out their
+[documentation](http://chaijs.com/guide/styles/) to learn how to write assertions in your tests.
 
 ## Notes
 

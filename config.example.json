@@ -9,19 +9,22 @@
       "branch": "default",
       "bundle": false,
       "lint": true,
-      "lintRequired": false
+      "lintRequired": false,
+      "test": false
     },
     "prod": {
       "branch": "default",
       "bundle": true,
       "lint": true,
-      "lintRequired": true
+      "lintRequired": true,
+      "test": false
     },
     "local": {
       "bundle": true,
       "lint": true,
       "lintRequired": false,
-      "localPath": "PATH_TO_LOCAL_FOLDER"
+      "localPath": "PATH_TO_LOCAL_FOLDER",
+      "test": false
     }
   }
 }
