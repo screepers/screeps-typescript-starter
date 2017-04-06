@@ -4,6 +4,7 @@
 const gutil = require('gulp-util');
 const clean = require('gulp-clean');
 const gulp = require('gulp');
+const shell = require('gulp-shell');
 const gulpDotFlatten = require('gulp-dot-flatten');
 const gulpRename = require('gulp-rename');
 const gulpScreepsUpload = require('./libs/gulp-screeps-upload.js');
@@ -71,24 +72,41 @@ const buildConfig = config.targets[buildTarget];
 /* TASKS */
 /*********/
 
-gulp.task('lint', function(done) {
+// runs tslint on the path
+function lintPath(path) {
+  return gulp.src(path)
+             .pipe(tslint({ formatter: 'prose' }))
+             .pipe(tslint.report({
+               summarizeFailureOutput: true,
+               emitError: buildConfig.lintRequired === true
+             }));
+}
+
+gulp.task('lint-src', function(done) {
   if (buildConfig.lint) {
-    gutil.log('linting ...');
-    return gulp.src('src/**/*.ts')
-      .pipe(tslint({ formatter: 'prose' }))
-      .pipe(tslint.report({
-        summarizeFailureOutput: true,
-        emitError: buildConfig.lintRequired === true
-      }));
+    return lintPath('src/**/*.ts');
   } else {
-    gutil.log('skipped lint, according to config');
+    gutil.log('skipped src lint, according to config');
     return done();
   }
 });
 
+gulp.task('lint-test', function(done) {
+  if (buildConfig.lint && buildConfig.test) {
+    return lintPath('test/**/*.ts');
+  } else {
+    gutil.log('skipped test lint, according to config');
+    return done();
+  }
+});
+
+gulp.task('lint', gulp.series('lint-src', 'lint-test'));
+
 gulp.task('clean', function () {
-  return gulp.src(['dist/tmp/', 'dist/' + buildTarget], { read: false, allowEmpty: true })
-    .pipe(clean());
+  return gulp.src(['dist/tmp/', 'dist/' + buildTarget, 'coverage/', '.nyc_output'], {
+    read: false,
+    allowEmpty: true
+  }).pipe(clean());
 });
 
 var revisionInfo = { valid: false };
@@ -174,16 +192,32 @@ gulp.task('compile-flattened', gulp.series(
 
 gulp.task('compile', gulp.series(buildConfig.bundle ? 'compile-bundled' : 'compile-flattened'));
 
-gulp.task('upload', gulp.series('compile', function uploading() {
-  if(buildConfig.branch) {
-    return gulp.src('dist/' + buildTarget + '/*.js')
-      .pipe(gulpRename((path) => path.extname = ''))
-      .pipe(gulpScreepsUpload(config.user.email, config.user.password, buildConfig.branch, 0));
-  } else {
-    return gulp.src('dist/' + buildTarget + '/*.js')
-      .pipe(gulp.dest(buildConfig.localPath));
+gulp.task('mocha', shell.task('npm -s run test'));
+gulp.task('mocha:coverage', shell.task('npm -s run test:coverage'));
+
+var testTask = function() {
+  if(buildConfig.test) {
+    return 'mocha';
   }
-}));
+  return function tests(done) {
+    gutil.log("Skipping tests. Edit your config.json to enable testing.");
+    done();
+  }
+};
+
+gulp.task('upload', gulp.series('compile',
+  testTask(),
+  function uploading() {
+    if (buildConfig.branch) {
+      return gulp.src('dist/' + buildTarget + '/*.js')
+                 .pipe(gulpRename((path) => path.extname = ''))
+                 .pipe(gulpScreepsUpload(config.user.email, config.user.password, buildConfig.branch, 0));
+    } else {
+      return gulp.src('dist/' + buildTarget + '/*.js')
+                 .pipe(gulp.dest(buildConfig.localPath));
+    }
+  }
+));
 
 gulp.task('watch', function () {
   gulp.watch('src/**/*.ts', gulp.series('build'))
@@ -200,5 +234,5 @@ gulp.task('build', gulp.series('upload', function buildDone(done) {
   gutil.log(gutil.colors.green('Build done'));
   return done();
 }));
-gulp.task('test', gulp.series('lint'));
+gulp.task('test', gulp.series('lint', 'mocha'));
 gulp.task('default', gulp.series('watch'));

@@ -6,6 +6,10 @@
 # Screeps config file
 /config.json
 
+# code coverage directory
+/coverage
+.nyc_output/
+
 # Numerous always-ignore extensions
 *.diff
 *.err
