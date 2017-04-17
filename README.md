@@ -18,7 +18,7 @@ To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/
 * Gulp 4.0+ - `sudo npm install -g gulpjs/gulp.git#4.0`
 
 For testing:
-* [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage  
+* [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage
     `sudo npm install -g nyc mocha`
 
 ### Quick setup
@@ -37,6 +37,8 @@ $ cp config.example.ts config.ts
 Then, on the `config.json` file, change the `username` and `password` properties with your Screeps credentials.
 
 The `config.json` file is where you set up your development environment. If you want to push your code to another branch, for example, if you have some sort of a staging branch where you test around in Simulation mode, we have left a `branch` option for you to easily change the target branch of the upload process. The `default` branch is set as the default.
+
+Set `"autobranch": true` instead of explicit `branch` name to use your current git branch name when uploading. You still have to create matching branch in screeps client by cloning an existing branch (API limitation). This is useful when setting up deployment pipelines that upload on commit after successful build (so a commit to `major_refactoring` branch doesn't overwrite your default branch in the middle of epic alliance action just because you forgot to update a pipeline configuration).
 
 The `src/config/config.ts` file is where you store your code-specific config variables. For example, if you want to easily turn on `PathFinder` when needed, you can set your own variable here. Once you've set up your configs, import the `config.ts` file on the file you want to call these configs at:
 
