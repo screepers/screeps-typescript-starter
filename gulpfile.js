@@ -125,8 +125,7 @@ gulp.task('gitRevisions', function(cb) {
     else {
       cb();
     }
-  }).raw(["branch"], (err, data) =>
-  {
+  }).raw(["branch"], (err, data) => {
     const re = /\* (.*)/;
     const match = re.exec(_.trim(data));
     revisionInfo.branch = match[1];
