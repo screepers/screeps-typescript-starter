@@ -15,15 +15,12 @@ To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/
 ### Requirements
 
 * [Node.js](https://nodejs.org/en/) (latest LTS is recommended)
-* [Yarn](https://yarnpkg.com/en/)
-  * Optional. You can use `npm` if you don't want to, but this is for your own sanity.
-* Gulp 4.0+
-  * `yarn global add gulpjs/gulp.git#4.0`
+* [Yarn](https://yarnpkg.com/en/) - Optional. You can use `npm` if you don't want to, but this is for your own sanity.
+* Gulp 4.0+ - `yarn global add gulpjs/gulp.git#4.0`
 
 For testing:
 
-* [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage
-  * `yarn global add nyc mocha`
+* [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage - `yarn global add nyc mocha`
 
 ### Quick setup
 
