@@ -14,16 +14,20 @@ To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/
 
 ### Requirements
 
-* [Node.js](https://nodejs.org/en/) (v4.0.0+)
-* Gulp 4.0+ - `sudo npm install -g gulpjs/gulp.git#4.0`
+* [Node.js](https://nodejs.org/en/)
+  * Latest LTS is recommended.
+* [Yarn](https://yarnpkg.com/en/)
+  * Optional. You can use `npm` if you don't want to, but this is for your own sanity.
+* Gulp 4.0+
+  * `yarn global add gulpjs/gulp.git#4.0`
 
-For testing:
+  For testing:
 * [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage
-    `sudo npm install -g nyc mocha`
+  * `yarn global add nyc mocha`
 
 ### Quick setup
 
-First, you will have to set up your config files. Create a copy of `config.example.json` and rename it to `config.json`. Then navigate into the `src/config` directory, reate a copy of `config.example.ts` and rename it to `config.ts`.
+First, you will have to set up your config files. Create a copy of `config.example.json` and rename it to `config.json`. Then navigate into the `src/config` directory, create a copy of `config.example.ts` and rename it to `config.ts`.
 
 ```bash
 # config.json
@@ -50,12 +54,12 @@ Then simply call the config variables with `Config.CONFIG_VARIABLE`.
 
 **WARNING: DO NOT** commit these files into your repository!
 
-### Installing npm modules
+### Installing modules
 
-Then run the following the command to install the required npm packages and TypeScript type definitions.
+Then run the following the command to install the required packages and TypeScript declaration files.
 
 ```bash
-$ npm install
+$ yarn
 ```
 
 ### Running the compiler
