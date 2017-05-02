@@ -73,6 +73,14 @@ You can also use `deploy-prod` instead of `deploy` for a bundled version of the 
 
 `deploy-local` will copy files into a local folder to be picked up by steam client and used with the official or a private server.
 
+You can override the branch to upload to by supplying an addition `--branch` argument.
+
+```bash
+# upload to branch "tempbranch" instead of configured branch
+# note: npm requires additional arguments to be separated with a double dash: --
+$ npm run deploy -- --branch tempbranch
+```
+
 ## Testing
 
 ### Running Tests

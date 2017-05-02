@@ -220,10 +220,12 @@ var testTask = function() {
 gulp.task('upload', gulp.series('compile',
   testTask(),
   function uploading() {
-    if (buildConfig.branch || buildConfig.autobranch) {
+    const targetBranch = gutil.env.branch ||
+            (buildConfig.autobranch ? revisionInfo.branch: buildConfig.branch);
+    if (targetBranch) {
       return gulp.src('dist/' + buildTarget + '/*.js')
                  .pipe(gulpRename((path) => path.extname = ''))
-                 .pipe(gulpScreepsUpload(config.user.email, config.user.password, buildConfig.autobranch ? revisionInfo.branch : buildConfig.branch, 0));
+                 .pipe(gulpScreepsUpload(config.user.email, config.user.password, targetBranch, 0));
     } else {
       return gulp.src('dist/' + buildTarget + '/*.js')
                  .pipe(gulp.dest(buildConfig.localPath));
