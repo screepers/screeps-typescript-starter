@@ -26,5 +26,12 @@
       "localPath": "PATH_TO_LOCAL_FOLDER",
       "test": false
     }
+  },
+  "tslint": {
+    "formatter": "prose",
+    "paths": [
+        "src/**/*.ts",
+        "!src/lib/**"
+    ]
   }
 }

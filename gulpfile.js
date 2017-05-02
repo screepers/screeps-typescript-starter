@@ -74,8 +74,9 @@ const buildConfig = config.targets[buildTarget];
 
 // runs tslint on the path
 function lintPath(path) {
+  const formatter = config.tslint.formatter || "prose";
   return gulp.src(path)
-             .pipe(tslint({ formatter: 'prose' }))
+             .pipe(tslint({ formatter: formatter }))
              .pipe(tslint.report({
                summarizeFailureOutput: true,
                emitError: buildConfig.lintRequired === true
@@ -84,7 +85,11 @@ function lintPath(path) {
 
 gulp.task('lint-src', function(done) {
   if (buildConfig.lint) {
-    return lintPath('src/**/*.ts');
+    if (config.tslint) {
+      return lintPath(config.tslint.paths);
+    } else {
+      return lintPath('src/**/*.ts');
+    }
   } else {
     gutil.log('skipped src lint, according to config');
     return done();
@@ -215,10 +220,12 @@ var testTask = function() {
 gulp.task('upload', gulp.series('compile',
   testTask(),
   function uploading() {
-    if (buildConfig.branch || buildConfig.autobranch) {
+    const targetBranch = gutil.env.branch ||
+            (buildConfig.autobranch ? revisionInfo.branch: buildConfig.branch);
+    if (targetBranch) {
       return gulp.src('dist/' + buildTarget + '/*.js')
                  .pipe(gulpRename((path) => path.extname = ''))
-                 .pipe(gulpScreepsUpload(config.user.email, config.user.password, buildConfig.autobranch ? revisionInfo.branch : buildConfig.branch, 0));
+                 .pipe(gulpScreepsUpload(config.user.email, config.user.password, targetBranch, 0));
     } else {
       return gulp.src('dist/' + buildTarget + '/*.js')
                  .pipe(gulp.dest(buildConfig.localPath));

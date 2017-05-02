@@ -73,6 +73,14 @@ You can also use `deploy-prod` instead of `deploy` for a bundled version of the 
 
 `deploy-local` will copy files into a local folder to be picked up by steam client and used with the official or a private server.
 
+You can override the branch to upload to by supplying an addition `--branch` argument.
+
+```bash
+# upload to branch "tempbranch" instead of configured branch
+# note: npm requires additional arguments to be separated with a double dash: --
+$ npm run deploy -- --branch tempbranch
+```
+
 ## Testing
 
 ### Running Tests
@@ -137,6 +145,8 @@ In this starter kit, the `noImplicitAny` is set to `true` for a more stricter en
 TSLint checks your TypeScript code for readability, maintainability, and functionality errors, and can also enforce coding style standards.
 
 After each successful compiling of the project, TSLint will parse the TypeScript source files and display a warning for any issues it will find.
+
+You can change the file paths checked automatically by editing the paths in the `tslint` section of `config.json`.
 
 This project provides TSLint rules through a `tslint.json` file, which extends the recommended set of rules from TSLint github repository: https://github.com/palantir/tslint/blob/next/src/configs/recommended.ts
 
