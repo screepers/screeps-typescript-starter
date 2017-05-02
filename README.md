@@ -138,6 +138,8 @@ TSLint checks your TypeScript code for readability, maintainability, and functio
 
 After each successful compiling of the project, TSLint will parse the TypeScript source files and display a warning for any issues it will find.
 
+You can change the file paths checked automatically by editing the paths in the `tslint` section of `config.json`.
+
 This project provides TSLint rules through a `tslint.json` file, which extends the recommended set of rules from TSLint github repository: https://github.com/palantir/tslint/blob/next/src/configs/recommended.ts
 
 We made some changes to those rules, which we considered necessary and/or relevant to a proper Screeps project:

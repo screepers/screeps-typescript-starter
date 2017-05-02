@@ -74,8 +74,9 @@ const buildConfig = config.targets[buildTarget];
 
 // runs tslint on the path
 function lintPath(path) {
+  const formatter = config.tslint.formatter || "prose";
   return gulp.src(path)
-             .pipe(tslint({ formatter: 'prose' }))
+             .pipe(tslint({ formatter: formatter }))
              .pipe(tslint.report({
                summarizeFailureOutput: true,
                emitError: buildConfig.lintRequired === true
@@ -84,7 +85,11 @@ function lintPath(path) {
 
 gulp.task('lint-src', function(done) {
   if (buildConfig.lint) {
-    return lintPath('src/**/*.ts');
+    if (config.tslint) {
+      return lintPath(config.tslint.paths);
+    } else {
+      return lintPath('src/**/*.ts');
+    }
   } else {
     gutil.log('skipped src lint, according to config');
     return done();
