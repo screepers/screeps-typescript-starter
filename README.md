@@ -180,6 +180,18 @@ log.showTick = false;
 
 ![Console output example](/console.png "Console output example")
 
+**Note:** The built-in URL template only works on GitHub and GitLab. If you use Bitbucket, replace `LOG_VSC_URL_TEMPLATE` on your `config.ts` with this:
+
+```ts
+export const LOG_VSC_URL_TEMPLATE = (path: string, line: string) => {
+  const parts = path.split('/');
+  const filename: string = parts[parts.length - 1];
+  return `${LOG_VSC.repo}/src/${LOG_VSC.revision}/${path}?fileviewer=file-view-default#${filename}-${line}`;
+};
+```
+
+(Thanks to crzytrane on Slack for this code sample!)
+
 ## Contributing
 
 1. [Fork it](https://github.com/screepers/screeps-typescript-starter/fork)
