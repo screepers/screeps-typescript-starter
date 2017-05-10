@@ -2,15 +2,9 @@
 
 > Starter kit for [TypeScript](http://www.typescriptlang.org/)-based [Screeps](https://screeps.com/) AI codes.
 
-This starter kit is a modified version of the original [Screeps/TypeScript sample project](https://github.com/MarkoSulamagi/Screeps-typescript-sample-project) by [Marko Sulamägi](https://github.com/MarkoSulamagi).
+`screeps-typescript-starter` is a starter kit for building [Screeps](https://screeps.com/) AIs in [TypeScript](http://www.typescriptlang.org/). It is based on [the original starter kit](https://github.com/MarkoSulamagi/Screeps-typescript-sample-project) by [Marko Sulamägi](https://github.com/MarkoSulamagi), but with extra tools for easy compiling/deploying of scripts to the Screeps server, as well as a base framework for running tests.
 
-[Download the latest zipped copy](https://github.com/screepers/screeps-typescript-starter/archive/master.zip)
-
-## Notice
-
-This repository recently transitioned to TypeScript 2, complete with all sorts of new features, including strict `null` checks, as well as the ability to flatten your code with Webpack. Those who still wish to use TS1 should checkout the [`ts1-legacy`](https://github.com/screepers/screeps-typescript-starter/tree/ts1-legacy) branch. Any notable changes in `master` may be backported into the legacy branch.
-
-To learn more about TypeScript 2, [click here](https://blogs.msdn.microsoft.com/typescript/2016/07/11/announcing-typescript-2-0-beta/).
+[Download the latest zipped copy here.](https://github.com/screepers/screeps-typescript-starter/archive/master.zip)
 
 ## Getting Started
 
