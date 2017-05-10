@@ -1,8 +1,10 @@
-# screeps-starter
+# screeps-typescript-starter
 
 > Starter kit for [TypeScript](http://www.typescriptlang.org/)-based [Screeps](https://screeps.com/) AI codes.
 
 This starter kit is a modified version of the original [Screeps/TypeScript sample project](https://github.com/MarkoSulamagi/Screeps-typescript-sample-project) by [Marko Sulamägi](https://github.com/MarkoSulamagi).
+
+[Download](https://github.com/screepers/screeps-typescript-starter/archive/master.zip)
 
 ## Notice
 
@@ -23,6 +25,8 @@ For testing:
 * [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage - `yarn global add nyc mocha`
 
 ### Quick setup
+
+To get started, [download a zipped copy](https://github.com/screepers/screeps-typescript-starter/archive/master.zip) of the starter kit and extract it somewhere.
 
 First, you will have to set up your config files. Create a copy of `config.example.json` and rename it to `config.json`. Then navigate into the `src/config` directory, create a copy of `config.example.ts` and rename it to `config.ts`.
 
