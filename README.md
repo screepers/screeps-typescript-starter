@@ -4,7 +4,7 @@
 
 This starter kit is a modified version of the original [Screeps/TypeScript sample project](https://github.com/MarkoSulamagi/Screeps-typescript-sample-project) by [Marko Sulamägi](https://github.com/MarkoSulamagi).
 
-[Download](https://github.com/screepers/screeps-typescript-starter/archive/master.zip)
+[Download the latest zipped copy](https://github.com/screepers/screeps-typescript-starter/archive/master.zip)
 
 ## Notice
 
