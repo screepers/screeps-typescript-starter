@@ -12,6 +12,8 @@
   "license": "MIT",
   "devDependencies": {
     "awesome-typescript-loader": "^3.1.3",
+    "tslint": "^5.2.0",
+    "tslint-loader": "^3.5.3",
     "typescript": "^2.4.0-dev.20170511",
     "typings": "^2.1.1",
     "webpack": "^2.5.1"

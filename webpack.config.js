@@ -44,6 +44,7 @@ module.exports = {
     rules: [
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
       { test: /\.js$/, loader: 'source-map-loader', enforce: 'pre' },
+      ////
       // typescript rules
       {
         // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
@@ -51,6 +52,23 @@ module.exports = {
         exclude: [ path.resolve(__dirname, "src/snippets") ],
         loader: 'awesome-typescript-loader',
         options: { configFileName: "tsconfig.json" },
+      },
+      ////
+      // tslint rules
+      {
+        test: /\.tsx?$/,
+        exclude: [ path.resolve(__dirname, "src/snippets") ],
+        enforce: 'pre',
+        loader: 'tslint-loader',
+        options: {
+          // enables type checked rules like 'for-in-array'
+          // uses tsconfig.json from current working directory
+          typeCheck: false,
+          // automaticall fix linting errors
+          fix: false,
+          // you can search NPM and install custom formatters
+          formatter: 'stylish',
+        },
       },
     ],
   },
