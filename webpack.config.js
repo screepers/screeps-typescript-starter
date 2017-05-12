@@ -71,7 +71,10 @@ module.exports = {
       // tslint rules
       {
         test: /\.tsx?$/,
-        exclude: [ path.resolve(__dirname, "src/snippets") ],
+        exclude: [
+          path.resolve(__dirname, "src/snippets"),
+          path.resolve(__dirname, "src/lib")
+        ],
         enforce: 'pre',
         loader: 'tslint-loader',
         options: {
