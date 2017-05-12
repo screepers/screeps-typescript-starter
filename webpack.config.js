@@ -1,6 +1,9 @@
 const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader');
 const ScreepsWebpackPlugin = require('screeps-webpack-plugin');
 const path = require('path');
+const credentials = require('./credentials.json');
+
+credentials.branch = "somebranch";
 
 module.exports = {
   devtool: 'source-map',
