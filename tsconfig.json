@@ -10,12 +10,7 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "*": [
-        "src/*"
-      ]
-    }
+    "baseUrl": "./src/"
   },
   "compileOnSave": false,
   "include": [
