@@ -4,7 +4,6 @@
 /typings
 
 # Screeps config file
-/credentials.json
 /config.json
 
 # code coverage directory
