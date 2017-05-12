@@ -5,6 +5,7 @@
   "main": "./dist/main.js",
   "repository": "screepers/screeps-typescript-starter",
   "scripts": {
+    "build": "webpack --colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
