@@ -5,9 +5,11 @@
   "main": "./dist/main.js",
   "repository": "screepers/screeps-typescript-starter",
   "scripts": {
+    "postinstall": "typings install",
     "build": "webpack --colors",
     "start": "webpack --colors --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "typings": "typings"
   },
   "author": "",
   "license": "MIT",

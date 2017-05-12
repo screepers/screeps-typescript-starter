@@ -1,5 +1,5 @@
-const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader')
-const { path } = require('path')
+const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader');
+const path = require('path');
 
 module.exports = {
   devtool: 'source-map',
@@ -9,7 +9,7 @@ module.exports = {
     pathinfo: true,
     libraryTarget: 'commonjs2',
     sourceMapFilename: '[file].map.js', // normally this is [file].map, but we need a js file, or it will be rejected by screeps server.
-    devtoolModuleFilenameTemplate: '[resource-path]',
+    devtoolModuleFilenameTemplate: '[resource-path]'
   },
 
   target: 'node',
@@ -20,25 +20,31 @@ module.exports = {
     process: false,
     Buffer: false,
     __filename: false,
-    __dirname: false,
+    __dirname: false
   },
 
   watchOptions: {
     ignored: [
       /node_modules/,
-    ],
+    ]
   },
 
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
     extensions: ['.js', '.ts', '.d.ts', '.tsx'],
-    plugins: [ new TsConfigPathsPlugin(/* { tsconfig, compiler } */) ]
+    // see for more info about TsConfigPathsPlugin
+    // https://github.com/s-panferov/awesome-typescript-loader/issues/402
+    plugins: [
+      new TsConfigPathsPlugin()
+    ]
+    // alternative method
+    // modules: [path.resolve(__dirname, "src"), "node_modules"]
   },
 
   externals: [
     {
         // webpack will not try to rewrite require("main.js.map")
-        'main.js.map': './main.js.map',
+        'main.js.map': './main.js.map'
     },
   ],
 
@@ -58,7 +64,7 @@ module.exports = {
         test: /\.tsx?$/,
         exclude: [ path.resolve(__dirname, "src/snippets") ],
         loader: 'awesome-typescript-loader',
-        options: { configFileName: "tsconfig.json" },
+        options: { configFileName: "tsconfig.json" }
       },
       ////
       // tslint rules
@@ -74,9 +80,9 @@ module.exports = {
           // automaticall fix linting errors
           fix: false,
           // you can search NPM and install custom formatters
-          formatter: 'stylish',
-        },
-      },
-    ],
-  },
+          formatter: 'stylish'
+        }
+      }
+    ]
+  }
 };

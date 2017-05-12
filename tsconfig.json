@@ -13,8 +13,7 @@
     "baseUrl": ".",
     "paths": {
       "*": [
-        "*",
-        "some-other-dir/*"
+        "src/*"
       ]
     }
   },
@@ -27,6 +26,6 @@
     "dist",
     "node_modules",
     "libs",
-    "src/snippets",
+    "src/snippets"
   ]
 }
