@@ -5,7 +5,7 @@ module.exports = {
   devtool: 'source-map',
   entry: './src/main.ts',
   output: {
-    filename: './main.js',
+    filename: './dist/[name].js',
     pathinfo: true,
     libraryTarget: 'commonjs2',
     sourceMapFilename: '[file].map.js', // normally this is [file].map, but we need a js file, or it will be rejected by screeps server.
@@ -31,7 +31,8 @@ module.exports = {
 
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
-    extensions: ['.js', '.ts', '.d.ts', '.tsx'],
+    // https://basarat.gitbooks.io/typescript/docs/quick/browser.html
+    extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
     // see for more info about TsConfigPathsPlugin
     // https://github.com/s-panferov/awesome-typescript-loader/issues/402
     plugins: [
