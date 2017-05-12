@@ -23,6 +23,12 @@ module.exports = {
     __dirname: false,
   },
 
+  watchOptions: {
+    ignored: [
+      /node_modules/,
+    ],
+  }
+
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
     extensions: ['.js', '.ts', '.d.ts', '.tsx'],

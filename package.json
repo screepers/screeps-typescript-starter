@@ -6,6 +6,7 @@
   "repository": "screepers/screeps-typescript-starter",
   "scripts": {
     "build": "webpack --colors",
+    "start": "webpack --colors --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
