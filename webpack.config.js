@@ -1,4 +1,5 @@
 const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader');
+const ScreepsWebpackPlugin = require('screeps-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -51,6 +52,15 @@ module.exports = {
 
   plugins: [
     new CheckerPlugin(),
+    new ScreepsWebpackPlugin({
+      branch: '$activeWorld',
+      email: 'EMAIL',
+      password: 'PASSWORD',
+      token: 'TOKEN',
+      serverUrl: 'https://screeps.com',
+      serverPassword: 'SERVER_PASS',
+      gzip: false
+    })
   ],
 
   module: {
