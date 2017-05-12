@@ -9,7 +9,14 @@
     "strictNullChecks": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "*",
+        "some-other-dir/*"
+      ]
+    }
   },
   "compileOnSave": false,
   "include": [

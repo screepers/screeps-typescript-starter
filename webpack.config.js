@@ -1,4 +1,4 @@
-const { CheckerPlugin } = require('awesome-typescript-loader')
+const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader')
 const { path } = require('path')
 
 module.exports = {
@@ -25,7 +25,8 @@ module.exports = {
 
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
-    extensions: ['.js', '.ts', '.d.ts', '.tsx']
+    extensions: ['.js', '.ts', '.d.ts', '.tsx'],
+    plugins: [ new TsConfigPathsPlugin(/* { tsconfig, compiler } */) ]
   },
 
   externals: [
@@ -48,7 +49,9 @@ module.exports = {
         // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
         test: /\.tsx?$/,
         exclude: [ path.resolve(__dirname, "src/snippets") ],
-        loader: 'awesome-typescript-loader' }
+        loader: 'awesome-typescript-loader',
+        options: { configFileName: "tsconfig.json" },
+      },
     ],
   },
 };
