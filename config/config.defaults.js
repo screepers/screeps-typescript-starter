@@ -62,7 +62,9 @@ module.exports = new Config().merge({
   ],
 
   plugins: [
+    // this plugin is for typescript's typeschecker to run in async mode
     new CheckerPlugin(),
+    // this plugin wipes the `dist` directory clean before each new deploy
     new CleanWebpackPlugin(
       [ 'dist/[env]/*' ],  // array of paths to clean
       { root: '[root]' }
