@@ -1,6 +1,8 @@
 const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const { Config } = require('webpack-config');
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
+const webpack = require('webpack');
 const path = require('path');
 
 
@@ -62,7 +64,18 @@ module.exports = new Config().merge({
     new CleanWebpackPlugin(
       [ 'dist/[env]/*.*' ],  // array of paths to clean
       { root: '[root]' }
-    )
+    ),
+    // This plugin provides acces to git info throughout this script
+    new GitRevisionPlugin({ branch: true }),
+    // you can use this to define build toggles
+    //  keys defined here will be replaced in the
+    //  output code with their values
+    // Note that because the plugin does a direct text replacement, the value given to it must include actual quotes inside of the string itself. Typically, this is done either with either alternate quotes, such as '"production"', or by using JSON.stringify('production'). 
+    new webpack.DefinePlugin({
+      '@@_repo_@@': JSON.stringify('UNEMPLEMENTED'),
+      '@@_revision_@@': JSON.stringify('[git-revision-version]'),
+      PRODUCTION: JSON.stringify(true)
+    })
   ],
 
   module: {
