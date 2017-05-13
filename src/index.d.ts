@@ -11,4 +11,4 @@ interface Global {
 
 declare var global: Global;
 
-declare var REVISION: string;
+declare var __REVISION__: string;

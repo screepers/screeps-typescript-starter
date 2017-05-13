@@ -46,7 +46,8 @@ export const LOG_MAX_PAD: number = 100;
  * VSC location, used to create links back to source.
  * Repo and revision are filled in at build time for git repositories.
  */
-export const LOG_VSC = { repo: "@@_repo_@@", revision: "@@_revision_@@", valid: false };
+// export const LOG_VSC = { repo: "@@_repo_@@", revision: "@@_revision_@@", valid: false };
+export const LOG_VSC = { repo: "@@_repo_@@", revision: __REVISION__, valid: false };
 
 /**
  * URL template for VSC links, this one works for github and gitlab.

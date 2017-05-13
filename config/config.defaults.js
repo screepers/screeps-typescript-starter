@@ -6,8 +6,6 @@ const git = require('git-rev-sync');
 const webpack = require('webpack');
 const path = require('path');
 
-
-
 // WARNING: don't use `__dirname` in these files unless you are sure of
 // what you want, since it will resolve to the `config/` dir, instead of
 // the project root
@@ -79,8 +77,8 @@ module.exports = new Config().merge({
     // Make sure to let typescript know about these via `define` !
     // See https://github.com/kurttheviking/git-rev-sync-js for more git options
     new webpack.DefinePlugin({
-      BUILD_TIME: JSON.stringify(Date.now()),  // useful for debuging
-      REVISION: JSON.stringify(git.short()),
+      __BUILD_TIME__: JSON.stringify(Date.now()),  // example defination
+      __REVISION__: JSON.stringify(git.short()),
       PRODUCTION: JSON.stringify(true)
     }),
     new ScreepsSourceMapToJson()
@@ -124,17 +122,3 @@ module.exports = new Config().merge({
     ]
   }
 });
-
-// class ScreepsSourceMapToJson {
-//   constructor(options) {
-//     return;
-//   }
-
-//   apply(compiler) {
-//     compiler.plugin("emit", (compilation) => {
-//       for (var filename in compilation.assets) {
-//         console.log("File: ", filename);
-//       }
-//     });
-//   }
-// }
