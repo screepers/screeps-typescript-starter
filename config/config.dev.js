@@ -11,10 +11,7 @@ module.exports = new Config().extend('./config/config.defaults').merge({
 });
 
 function getCredentials() {
-  console.log("!!!!!!!!!");
   const cred = require('./credentials.json');
-  console.log(JSON.stringify(cred));
   Object.assign(cred, { branch: 'dev' });
-  console.log(JSON.stringify(cred));
   return cred;
 }
