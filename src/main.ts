@@ -13,7 +13,7 @@ if (Config.USE_PATHFINDER) {
   PathFinder.use(true);
 }
 
-log.info("load");
+log.info(`loading revision: ${ REVISION }`);
 
 /**
  * Screeps system expects this "loop" method in main.js to run the

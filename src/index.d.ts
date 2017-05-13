@@ -10,3 +10,5 @@ interface Global {
 }
 
 declare var global: Global;
+
+declare var REVISION: string;
