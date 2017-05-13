@@ -1,13 +1,19 @@
 const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const { Config } = require('webpack-config');
 const path = require('path');
 
+
+// WARNING: don't use `__dirname` in these files unless you are sure of
+// what you want, since it will resolve to the `config/` dir, instead of
+// the project root
+
 module.exports = new Config().merge({
   devtool: 'source-map',
-  entry: './src/main.ts',
+  entry: { main: './src/main.ts' },
   output: {
     filename: '[name].js',
-    path: path.join('[root]', 'dist'),
+    path: path.join('[root]', 'dist', '[env]'),
     pathinfo: false,
     libraryTarget: 'commonjs2',
     sourceMapFilename: '[file].map.js', // normally this is [file].map, but we need a js file, or it will be rejected by screeps server.
@@ -53,6 +59,10 @@ module.exports = new Config().merge({
 
   plugins: [
     new CheckerPlugin(),
+    new CleanWebpackPlugin(
+      [ 'dist/[env]/*.*' ],  // array of paths to clean
+      { root: '[root]' }
+    )
   ],
 
   module: {
