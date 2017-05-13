@@ -11,15 +11,16 @@ const path = require('path');
 // the project root
 
 module.exports = new Config().merge({
-  devtool: 'source-map',
+  // devtool: 'source-map',
+  devtool: 'source-map-inline', // https://webpack.js.org/configuration/devtool/
   entry: { main: './src/main.ts' },
   output: {
-    filename: '[name].js',
+    filename: 'main', // screeps webpack requires the output is named 'main'
     path: path.join('[root]', 'dist', '[env]'),
-    pathinfo: false,
+    pathinfo: false,  // the docs strongly recommend `false` in production
     libraryTarget: 'commonjs2',
-    sourceMapFilename: '[file].map.js', // normally this is [file].map, but we need a js file, or it will be rejected by screeps server.
-    devtoolModuleFilenameTemplate: '[resource-path]'
+    sourceMapFilename: '[file].map.js' // normally this is [file].map, but we need a js file, or it will be rejected by screeps server.
+    // devtoolModuleFilenameTemplate: '[resource-path]'
   },
 
   target: 'node',
@@ -62,7 +63,7 @@ module.exports = new Config().merge({
   plugins: [
     new CheckerPlugin(),
     new CleanWebpackPlugin(
-      [ 'dist/[env]/*.*' ],  // array of paths to clean
+      [ 'dist/[env]/*' ],  // array of paths to clean
       { root: '[root]' }
     ),
     // you can use this to define build toggles; keys defined here
@@ -83,6 +84,7 @@ module.exports = new Config().merge({
   module: {
     rules: [
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+      // consider excluding 'node_modules/'
       { test: /\.js$/, loader: 'source-map-loader', enforce: 'pre' },
       { test: /\.tsx?$/, loader: 'source-map-loader', enforce: 'pre' },
       ////
