@@ -1,3 +1,6 @@
+# yarn lock file
+/yarn.lock
+
 # Ignore basic folders
 /dist
 /node_modules
