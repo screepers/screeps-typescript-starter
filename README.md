@@ -10,8 +10,8 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 [Download the latest zipped copy here.](https://github.com/screepers/screeps-typescript-starter/archive/master.zip)
 
 ## Table of Contents
-* [Quick Start](#quick-start)
 * [Features](#features)
+* [Quick Start](#quick-start)
 * [Configuration](#configuration)
 * [Testing](#testing)
 * [Notes](#notes)
@@ -62,7 +62,7 @@ $ npm install
 
 Create a copy of `config/credentials.example.json` and rename it to `config/credentials.json`.
 
-**WARNING: DO NOT** commit this files into your repository!
+**WARNING: DO NOT** commit this file into your repository!
 
 ```bash
 # config/credentials.json
@@ -99,7 +99,7 @@ import * as Config from "../path/to/config";
 
 ... and simply calling the config variables with `Config.CONFIG_VARIABLE` in your code.  This file mostly servers as an example for making configurable code.
 
-NOTE: You may want to consider adding this file to `.gitignore` if you end up storing confidential information there.
+_**NOTE**: You may want to consider adding this file to `.gitignore` if you end up storing confidential information there._
 
 ### Deployment / Compiling configuration
 
@@ -109,7 +109,7 @@ The files under `config/`, as well as `webpack.config.js` are where deployment c
 
 `webpack.config.js` is for setting environment variables throughout the rest of the config.
 Any variables set inside of `environment.setAll` will be replaced by their value by the webpack compiler.
-(NOTE: these values are only for config files; they have no effect on your actualy typescript code).
+(*NOTE: these values are only for config files; they have no effect on your actualy typescript code*).
 
 For, example, with the default configuration:
 
@@ -124,23 +124,23 @@ Anywhere else in the config with `"[env]"` or `"[root]"` will be replaced with t
 
 #### Build toggles / deployment-dependent variables
 
-Variables set under `plugins:` `new webpack.DefinePlugin` will be replaced in actual output JS code.
-These are essentially the opposite of the above environment variables.
+Variables set under `plugins:` `new webpack.DefinePlugin` will be replaced in actual output JS code (located in `config.defaults.js`).
+These are essentially the opposite of the environment variables above.
 When compiling your code, webpack will perform a search and replace, replacing the variable names with the output of the supplied expression or value.
 
 Because these values are evaluated once a string (for the find-and-replace), and once as an expression, they either need to be wrapped in `JSON.stringify` or double quoted (ex. `VARIABLE: '"value-in-double-quotes"'`).
 
 Webpack can do a lot with these variables and dead code elimination.
 
-**Caveats**: you need to let typescript know about these variables by declaring them in a type definitions (`.d.ts`) file.
+*__Caveats__: you need to let typescript know about these variables by declaring them in a type definitions (`.d.ts`) file.
 Also be careful not to use too common of a name, because it will replace it throughout your code without warning.
-A good standard is to make the variables all caps, and surrounded by double underscores, so they stand out.
+A good standard is to make the variables all caps, and surrounded by double underscores, so they stand out (ex: `__REVISION__`).*
 
 #### Additional Options
 
 `config.defaults.js` is for config options common to all environments.  Other environments inherit from this file, and add to, or override options.
 
-`config.dev.js` is a specific environment configuration.  You can potentially have as many environments as your make files for (only a `dev` environment is provided to start with).  To specify which environment to use, prepend `NODE_ENV=` and the environment name to any commands.  An example is provided in `package.json`.
+`config.dev.js` is a specific environment configuration.  You can potentially have as many environments as you make files for (only a `dev` environment is provided to start with).  To specify which environment to use, prepend `NODE_ENV=` and the environment name to any commands.  An example is provided in `package.json`.
 
 Common options you may wish to configure:
 
@@ -160,18 +160,19 @@ You code is uploaded to the branch configured by the `branch` setting inside `ne
 
 ```js
 // webpack.config.js
-const git = require('git-rev-sync'); // make sure you require `git`
+const git = require('git-rev-sync'); // make sure you require `git-rev-sync`
 environment.setAll({
   "branch": git.branch() || "dev",
 });
 
 // config.dev.js
-    new ScreepsWebpackPlugin(Object.assign(require('./credentials.json'), {
-      branch: '[branch]'
-    }))
+new ScreepsWebpackPlugin(Object.assign(require('./credentials.json'), {
+  branch: '[branch]' // '[branch]' will be replaced with the output of git.branch()
+}))
 ```
 
 The above example will automatically set your upload branch to be the same as your active git branch.  This is functionally equivalent to the option `"autobranch": true` in older versions.
+
 You still have to create matching branch in screeps client by cloning an existing branch (API limitation). This is useful when setting up deployment pipelines that upload on commit after successful build (so a commit to `major_refactoring` branch doesn't overwrite your default branch in the middle of epic alliance action just because you forgot to update a pipeline configuration).
 
 
