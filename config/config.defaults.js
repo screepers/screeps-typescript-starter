@@ -1,30 +1,12 @@
 const { CheckerPlugin, TsConfigPathsPlugin } = require('awesome-typescript-loader');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const ScreepsSourceMapToJson = require('../libs/screeps-webpack-sources');
 const { Config } = require('webpack-config');
 const git = require('git-rev-sync');
 const webpack = require('webpack');
 const path = require('path');
 
 
-const ConcatSource = require('webpack-sources').ConcatSource;
-class ScreepsSourceMapToJson {
-  constructor(options) {
-    return;
-  }
-
-  apply(compiler) {
-    compiler.plugin("emit", (compilation, cb) => {
-      for (var filename in compilation.assets) {
-        console.log("File: ", filename);
-        if (path.extname(filename) === ".map") {
-          console.log("Match!");
-          compilation.assets[filename] = new ConcatSource("module.exports = ", compilation.assets[filename]);
-        }
-      }
-      cb();
-    });
-  }
-}
 
 // WARNING: don't use `__dirname` in these files unless you are sure of
 // what you want, since it will resolve to the `config/` dir, instead of
