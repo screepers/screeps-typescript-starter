@@ -6,21 +6,42 @@ const webpack = require('webpack');
 const path = require('path');
 
 
+const ConcatSource = require('webpack-sources').ConcatSource;
+class ScreepsSourceMapToJson {
+  constructor(options) {
+    return;
+  }
+
+  apply(compiler) {
+    compiler.plugin("emit", (compilation, cb) => {
+      for (var filename in compilation.assets) {
+        console.log("File: ", filename);
+        if (path.extname(filename) === ".map") {
+          console.log("Match!");
+          compilation.assets[filename] = new ConcatSource("module.exports = ", compilation.assets[filename]);
+        }
+      }
+      cb();
+    });
+  }
+}
+
 // WARNING: don't use `__dirname` in these files unless you are sure of
 // what you want, since it will resolve to the `config/` dir, instead of
 // the project root
 
 module.exports = new Config().merge({
-  // devtool: 'source-map',
-  devtool: 'source-map-inline', // https://webpack.js.org/configuration/devtool/
+  // devtool: 'source-map-inline', // https://webpack.js.org/configuration/devtool/
+  devtool: 'source-map',
   entry: { main: './src/main.ts' },
   output: {
-    filename: 'main', // screeps webpack requires the output is named 'main'
+    // filename: 'main.js',
+    filename: 'main.js',
     path: path.join('[root]', 'dist', '[env]'),
     pathinfo: false,  // the docs strongly recommend `false` in production
     libraryTarget: 'commonjs2',
-    sourceMapFilename: '[file].map.js' // normally this is [file].map, but we need a js file, or it will be rejected by screeps server.
-    // devtoolModuleFilenameTemplate: '[resource-path]'
+    sourceMapFilename: '[file].map', // normally this is [file].map, but we need a js file, or it will be rejected by screeps server.
+    devtoolModuleFilenameTemplate: '[resource-path]'
   },
 
   target: 'node',
@@ -56,7 +77,7 @@ module.exports = new Config().merge({
   externals: [
     {
         // webpack will not try to rewrite require("main.js.map")
-        'main.js.map': './main.js.map'
+        'main.js.map': 'main.js.map'
     },
   ],
 
@@ -76,17 +97,19 @@ module.exports = new Config().merge({
     // Make sure to let typescript know about these via `define` !
     // See https://github.com/kurttheviking/git-rev-sync-js for more git options
     new webpack.DefinePlugin({
+      BUILD_TIME: JSON.stringify(Date.now()),  // useful for debuging
       REVISION: JSON.stringify(git.short()),
       PRODUCTION: JSON.stringify(true)
-    })
+    }),
+    new ScreepsSourceMapToJson()
   ],
 
   module: {
     rules: [
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-      // consider excluding 'node_modules/'
       { test: /\.js$/, loader: 'source-map-loader', enforce: 'pre' },
       { test: /\.tsx?$/, loader: 'source-map-loader', enforce: 'pre' },
+
       ////
       // typescript rules
       {
@@ -120,3 +143,16 @@ module.exports = new Config().merge({
   }
 });
 
+// class ScreepsSourceMapToJson {
+//   constructor(options) {
+//     return;
+//   }
+
+//   apply(compiler) {
+//     compiler.plugin("emit", (compilation) => {
+//       for (var filename in compilation.assets) {
+//         console.log("File: ", filename);
+//       }
+//     });
+//   }
+// }
