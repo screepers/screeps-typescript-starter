@@ -7,9 +7,9 @@ import { LogLevels } from "../lib/logger/logLevels";
 export const ENABLE_DEBUG_MODE: boolean = true;
 
 /**
- * Enable this to use the experimental PathFinder class.
+ * Enable this to enable screeps profiler
  */
-export const USE_PATHFINDER: boolean = true;
+export const USE_PROFILER: boolean = true;
 
 /**
  * Minimum number of ticksToLive for a Creep before they go to renew.
