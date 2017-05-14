@@ -21,6 +21,8 @@ import { EnvOptions } from "./types";
 export function init(options: EnvOptions): Config {
   const ENV = options.ENV || "dev";
   const ROOT = options.ROOT || __dirname;
+  // const TEST = options.TEST || false;
+
   const config = new Config();
 
   // set all common configurations here
