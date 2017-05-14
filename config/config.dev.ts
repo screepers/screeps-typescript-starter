@@ -1,4 +1,4 @@
-// import * as webpack from "webpack";
+/* tslint:disable:no-var-requires */
 import * as Config from "webpack-chain";
 
 import * as CommonConfig from "./config.common";
@@ -8,7 +8,6 @@ const ScreepsWebpackPlugin = require("screeps-webpack-plugin");
 
 function webpackConfig(options: EnvOptions = {}): Config {
   // get the common configuration to start with
-  console.log("DEV!");
   const config = CommonConfig.init(options);
 
   // make "dev" specific changes here

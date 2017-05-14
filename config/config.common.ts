@@ -27,7 +27,6 @@ export function init(options: EnvOptions): Config {
   config
     .entry("main")
       .add("./src/main.ts");
-      // .end() // `.end` moves the chain up one level
 
   config
     .output
