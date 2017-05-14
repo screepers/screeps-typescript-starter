@@ -115,8 +115,8 @@ You can use these variables to pass options to the rest of the config through th
 For example:
 
 ```bash
-> # (npm requires arguments be seperated by a double dash)
-> npm run build -- -env.TEST=true
+# (npm requires arguments be seperated by a double dash)
+$ npm run build -- --env.TEST=true
 ```
 Will set the member `TEST` to `true` on the options object.
 
