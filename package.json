@@ -6,8 +6,8 @@
   "repository": "screepers/screeps-typescript-starter",
   "scripts": {
     "postinstall": "typings install",
-    "deploy": "webpack --colors",
-    "start": "NODE_ENV=dev webpack --colors --watch",
+    "deploy": "webpack --colors --env.ENV=dev",
+    "start": "webpack --colors --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "typings": "typings"
   },
