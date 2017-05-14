@@ -17,7 +17,8 @@
     "webpack.config.ts",
     "config/*.ts",
     "typings/**/*.d.ts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts"
   ],
   "exclude": [
     "dist",

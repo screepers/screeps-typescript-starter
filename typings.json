@@ -1,6 +1,7 @@
 {
   "name": "resir014-screeps",
   "dependencies": {
+    "tapable": "registry:dt/tapable#0.2.5+20161220195540",
     "webpack": "registry:dt/webpack#2.2.0+20170320160659",
     "webpack-chain": "registry:dt/webpack-chain#3.0.0+20170322005926"
   },

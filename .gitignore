@@ -4,7 +4,6 @@
 # Ignore basic folders
 /dist
 /node_modules
-/typings
 
 # Screeps config file
 /config.json
