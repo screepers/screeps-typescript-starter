@@ -9,16 +9,21 @@
     "strictNullChecks": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "./src/"
   },
   "compileOnSave": false,
   "include": [
+    "webpack.config.ts",
+    "config/*.ts",
     "typings/**/*.d.ts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts"
   ],
   "exclude": [
     "dist",
     "node_modules",
-    "libs"
+    "libs",
+    "src/snippets"
   ]
 }
