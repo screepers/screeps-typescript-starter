@@ -14,6 +14,8 @@
   },
   "compileOnSave": false,
   "include": [
+    "webpack.config.ts",
+    "config/*.ts",
     "typings/**/*.d.ts",
     "src/**/*.ts"
   ],
