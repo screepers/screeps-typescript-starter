@@ -17,6 +17,12 @@ function webpackConfig(options: EnvOptions = {}): Config {
   config.plugin("screeps")
     .use(ScreepsWebpackPlugin, [credentials]);
 
+  // modify the args of "define" plugin
+  config.plugin("define").tap((args: any[]) => {
+    args[0].PRODUCTION = JSON.stringify(false);
+    return args;
+  });
+
   return config;
 }
 
