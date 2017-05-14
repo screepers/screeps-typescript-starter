@@ -24,7 +24,7 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 - Highly configurable environment with sane defaults
 - Pre-configured linting rules customized for screeps
 - Typescript Screeps typings
-- Logger which links with source code and git repo
+- Logger which links with source code and git repo (TODO: pending documentation)
 - Screeps profiler
 - "Snippets" directory for code you want to save, but don't want compiled or linted
 - Modest starter code to get you started, but not hold your hand
@@ -37,7 +37,7 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 * [Node.js](https://nodejs.org/en/) (latest LTS is recommended)
 * [Yarn](https://yarnpkg.com/en/) - Optional. You can use `npm` if you don't want to, but this is for your own sanity.
 
-For testing:
+For testing **NOTE** _Testing is currently a work-in-progress_:
 
 * [Mocha](https://mochajs.org/) test runner and [NYC](https://istanbul.js.org/) for code coverage - `yarn global add nyc mocha`
 
@@ -103,32 +103,35 @@ _**NOTE**: You may want to consider adding this file to `.gitignore` if you end 
 
 ### Deployment / Compiling configuration
 
-The files under `config/`, as well as `webpack.config.js` are where deployment configuration options are set.
+The files under `config/`, as well as `webpack.config.ts` are where deployment configuration options are set.
+
+It's helpful to remember that the config is just a javascript object, and can be passed around and modifide using [webpack-chain](https://github.com/mozilla-neutrino/webpack-chain).
+
 
 #### Environment:
 
-`webpack.config.js` is for setting environment variables throughout the rest of the config.
-Any variables set inside of `environment.setAll` will be replaced by their value by the webpack compiler.
-(*NOTE: these values are only for config files; they have no effect on your actualy typescript code*).
+`webpack.config.ts` is for setting environment variables defaults throughout the rest of the config.
+You can use these variables to pass options to the rest of the config through the command line.
+For example:
 
-For, example, with the default configuration:
-
-```js
-environment.setAll({
-  "env": process.env.NODE_ENV || "dev",
-  "root": __dirname
-});
+```bash
+> # (npm requires arguments be seperated by a double dash)
+> npm run build -- -env.TEST=true
 ```
+Will set the member `TEST` to `true` on the options object.
 
-Anywhere else in the config with `"[env]"` or `"[root]"` will be replaced with the supplied value.  Pay attention that when you use the variables, that they are quoted as a string.
+Remember, the config code is just a typescript function that return a config object, so you can hypothetically configure it wherever and however is most convenient.
 
 #### Build toggles / deployment-dependent variables
 
-Variables set under `plugins:` `new webpack.DefinePlugin` will be replaced in actual output JS code (located in `config.defaults.js`).
-These are essentially the opposite of the environment variables above.
+Inside `config.common.ts` is where the majority of the webpack configuration happens.
+
+Of particular interest is the Plugins section where `DefinePlugin` is configured (look for the line about half-way down statring with `config.plugin("define")`).
+
+Variables set in the object here will be replaced in the actual output JS code.
 When compiling your code, webpack will perform a search and replace, replacing the variable names with the output of the supplied expression or value.
 
-Because these values are evaluated once a string (for the find-and-replace), and once as an expression, they either need to be wrapped in `JSON.stringify` or double quoted (ex. `VARIABLE: '"value-in-double-quotes"'`).
+Because these values are evaluated once as a string (for the find-and-replace), and once as an expression, they either need to be wrapped in `JSON.stringify` or double quoted (ex. `VARIABLE: '"value-in-double-quotes"'`).
 
 Webpack can do a lot with these variables and dead code elimination.
 
@@ -138,9 +141,9 @@ A good standard is to make the variables all caps, and surrounded by double unde
 
 #### Additional Options
 
-`config.defaults.js` is for config options common to all environments.  Other environments inherit from this file, and add to, or override options.
+`config.common.js` is for config options common to all environments.  Other environments can inherit from this file, and add to, or override options on the config object.
 
-`config.dev.js` is a specific environment configuration.  You can potentially have as many environments as you make files for (only a `dev` environment is provided to start with).  To specify which environment to use, prepend `NODE_ENV=` and the environment name to any commands.  An example is provided in `package.json`.
+`config.dev.js` is a specific environment configuration.  You can potentially have as many environments as you make files for (only a `dev` environment is provided to start with).  To specify which environment to use, append `--env.ENV=` and the environment name to any commands.  An example is provided in `package.json`.
 
 Common options you may wish to configure:
 
@@ -148,27 +151,26 @@ Common options you may wish to configure:
 
 `watchOptions.ignored`:  This option is only to save computer resources, since watch-mode (`npm start`) can be CPU intensive.  You can exclude directories you know don't need to be watched.
 
-`module.rules`:  These are the individual rules webpack uses to process your code.  The defaults are generally all you will need.  The most useful change you may want to make here is to explicity `exclude` files or directories from being compiled or linted (in case of 3rd party code, for example).
+`module.rules`:  These are the individual rules webpack uses to process your code.  The defaults are generally all you will need.  The most useful change you may want to make here is to explicity `exclude` files or directories from being compiled or linted (in case of 3rd party code, for example).  These values, like all others can be passed around and modified before webpack acts on them.
 
 #### Change the upload branch
 
-You code is uploaded to the branch configured by the `branch` setting inside `new ScreepsWebpackPlugin` (see `config/config.dev.js`).  You have three ways to customize this:
+You code is uploaded to the branch configured by the `branch` property on the object sent to `new ScreepsWebpackPlugin` (see `config/config.dev.ts`).  You have three ways to customize this:
 
 1.  Multiple config environment files, each with a seperate branch
 2.  Use the special variables `'$activeWorld'` to upload to whatever brach is active in the Screeps world
-3.  Configure a new environment variable in `webpack.config.js` and use that in your code.  For example:
+3.  Configure a new environment variable in `webpack.config.ts` and use that in your code.  For example:
 
-```js
-// webpack.config.js
+```typescript
+// webpack.custom-env.ts
+const ScreepsWebpackPlugin = require("screeps-webpack-plugin");
 const git = require('git-rev-sync'); // make sure you require `git-rev-sync`
-environment.setAll({
-  "branch": git.branch() || "dev",
-});
 
-// config.dev.js
-new ScreepsWebpackPlugin(Object.assign(require('./credentials.json'), {
-  branch: '[branch]' // '[branch]' will be replaced with the output of git.branch()
-}))
+const credentials: Credentials = require("./credentials.json");
+credentials.branch = git.branch();
+
+config.plugin("screeps").use(ScreepsWebpackPlugin, [credentials]);
+
 ```
 
 The above example will automatically set your upload branch to be the same as your active git branch.  This is functionally equivalent to the option `"autobranch": true` in older versions.
@@ -179,6 +181,7 @@ You still have to create matching branch in screeps client by cloning an existin
 ## Testing
 
 ### Running Tests
+**WARNING** _Testing functionality is currently not finished in the 2.0 build of the Starter.
 
 To enable tests as part of the build and deploy process, flip the `test` flag in your `config.json` to `true`.
 
