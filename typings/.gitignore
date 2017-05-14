@@ -1,0 +1,4 @@
+*
+!/.gitignore
+!/index.d.ts
+!/vendor.d.ts
