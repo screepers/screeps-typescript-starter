@@ -16,6 +16,7 @@ function webpackConfig(options: EnvOptions = {}): webpack.Configuration {
 
   const config: Config = require(`./config/config.${options.ENV}`)(options);
 
+  // call `toConfig` to convert to webpack object, and return it
   return config.toConfig();
 }
 

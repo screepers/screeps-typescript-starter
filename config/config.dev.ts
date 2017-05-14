@@ -1,17 +1,24 @@
-import * as webpack from "webpack";
-// import * as Config from "webpack-chain";
+// import * as webpack from "webpack";
+import * as Config from "webpack-chain";
 
 import * as CommonConfig from "./config.common";
-import { EnvOptions } from "./options";
+import { Credentials, EnvOptions } from "./types";
 
-function webpackConfig(options: EnvOptions = {}): webpack.Configuration {
+const ScreepsWebpackPlugin = require("screeps-webpack-plugin");
+
+function webpackConfig(options: EnvOptions = {}): Config {
   // get the common configuration to start with
+  console.log("DEV!");
   const config = CommonConfig.init(options);
 
   // make "dev" specific changes here
+  const credentials: Credentials = require("./credentials.json");
+  credentials.branch = "dev";
 
-  // call `toConfig` to convert to webpack object, and return it
-  return config.toConfig();
+  config.plugin("screeps")
+    .use(ScreepsWebpackPlugin, [credentials]);
+
+  return config;
 }
 
 module.exports = webpackConfig;
