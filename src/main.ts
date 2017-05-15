@@ -26,14 +26,14 @@ function mloop() {
     Memory.uuid = 0;
   }
 
-  for (let i in Game.rooms) {
-    let room: Room = Game.rooms[i];
+  for (const i in Game.rooms) {
+    const room: Room = Game.rooms[i];
 
     CreepManager.run(room);
 
     // Clears any non-existing creep memory.
-    for (let name in Memory.creeps) {
-      let creep: any = Memory.creeps[name];
+    for (const name in Memory.creeps) {
+      const creep: any = Memory.creeps[name];
 
       if (creep.room === room.name) {
         if (!Game.creeps[name]) {

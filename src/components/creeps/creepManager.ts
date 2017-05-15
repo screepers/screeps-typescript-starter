@@ -51,7 +51,7 @@ function _loadCreeps(room: Room) {
 function _buildMissingCreeps(room: Room) {
   let bodyParts: string[];
 
-  let spawns: Spawn[] = room.find<Spawn>(FIND_MY_SPAWNS, {
+  const spawns: Spawn[] = room.find<Spawn>(FIND_MY_SPAWNS, {
     filter: (spawn: Spawn) => {
       return spawn.spawning === null;
     },
@@ -85,10 +85,10 @@ function _buildMissingCreeps(room: Room) {
  * @returns
  */
 function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
-  let uuid: number = Memory.uuid;
+  const uuid: number = Memory.uuid;
   let status: number | string = spawn.canCreateCreep(bodyParts, undefined);
 
-  let properties: { [key: string]: any } = {
+  const properties: { [key: string]: any } = {
     role,
     room: spawn.room.name,
   };
@@ -96,7 +96,7 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
   status = _.isString(status) ? OK : status;
   if (status === OK) {
     Memory.uuid = uuid + 1;
-    let creepName: string = spawn.room.name + " - " + role + uuid;
+    const creepName: string = spawn.room.name + " - " + role + uuid;
 
     log.info("Started creating new creep: " + creepName);
     if (Config.ENABLE_DEBUG_MODE) {

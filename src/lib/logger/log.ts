@@ -14,16 +14,16 @@ interface SourcePos {
 }
 
 export function resolve(fileLine: string): SourcePos {
-  let split = _.trim(fileLine).match(stackLineRe);
+  const split = _.trim(fileLine).match(stackLineRe);
   if (!split || !Log.sourceMap) {
-    return <SourcePos> { compiled: fileLine, final: fileLine };
+    return { compiled: fileLine, final: fileLine } as SourcePos;
   }
 
-  let pos = { column: parseInt(split[4], 10), line: parseInt(split[3], 10) };
+  const pos = { column: parseInt(split[4], 10), line: parseInt(split[3], 10) };
 
-  let original = Log.sourceMap.originalPositionFor(pos);
-  let line = `${split[1]} (${original.source}:${original.line})`;
-  let out = {
+  const original = Log.sourceMap.originalPositionFor(pos);
+  const line = `${split[1]} (${original.source}:${original.line})`;
+  const out = {
       caller: split[1],
       compiled: fileLine,
       final: line,
@@ -129,24 +129,25 @@ export class Log {
   }
 
   public getFileLine(upStack = 4): string {
-    let stack = new Error("").stack;
+    const stack = new Error("").stack;
+
     if (stack) {
-      let lines = stack.split("\n");
+      const lines = stack.split("\n");
+
       if (lines.length > upStack) {
-        let originalLines = _.drop(lines, upStack).map(resolve);
-        let hoverText = _.map(originalLines, "final").join("&#10;");
-        return this.adjustFileLine
-          (
+        const originalLines = _.drop(lines, upStack).map(resolve);
+        const hoverText = _.map(originalLines, "final").join("&#10;");
+        return this.adjustFileLine(
           originalLines[0].final,
           tooltip(makeVSCLink(originalLines[0]), hoverText)
-          );
+        );
       }
     }
     return "";
   }
 
-  private buildArguments(level: number): Array<string> {
-    let out: Array<string> = [];
+  private buildArguments(level: number): string[] {
+    const out: string[] = [];
     switch (level) {
       case LogLevels.ERROR:
         out.push(color("ERROR  ", "red"));
@@ -181,7 +182,7 @@ export class Log {
   }
 
   private adjustFileLine(visibleText: string, line: string): string {
-    let newPad = Math.max(visibleText.length, this._maxFileString);
+    const newPad = Math.max(visibleText.length, this._maxFileString);
     this._maxFileString = Math.min(newPad, Config.LOG_MAX_PAD);
 
     return `|${_.padRight(line, line.length + this._maxFileString - visibleText.length, " ")}|`;
@@ -192,6 +193,6 @@ if (Config.LOG_LOAD_SOURCE_MAP) {
   Log.loadSourceMap();
 }
 
-export var log = new Log();
+export const log = new Log();
 
 global.log = log;

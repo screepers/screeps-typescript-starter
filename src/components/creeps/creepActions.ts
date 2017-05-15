@@ -62,7 +62,7 @@ export function moveToRenew(creep: Creep, spawn: Spawn): void {
  * @param {RoomObject} roomObject
  */
 export function getEnergy(creep: Creep, roomObject: RoomObject): void {
-  let energy: Resource = <Resource> roomObject;
+  const energy: Resource = roomObject as Resource;
 
   if (energy) {
     if (creep.pos.isNearTo(energy)) {
@@ -82,7 +82,7 @@ export function getEnergy(creep: Creep, roomObject: RoomObject): void {
  * @returns {boolean}
  */
 export function canWork(creep: Creep): boolean {
-  let working = creep.memory.working;
+  const working = creep.memory.working;
 
   if (working && _.sum(creep.carry) === 0) {
     creep.memory.working = false;
