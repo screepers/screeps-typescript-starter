@@ -181,7 +181,8 @@ You still have to create matching branch in screeps client by cloning an existin
 ## Testing
 
 ### Running Tests
-**WARNING** _Testing functionality is currently not finished in the 2.0 build of the Starter.
+
+**WARNING** _Testing functionality is currently not finished in the 2.0 build of the Starter._
 
 To enable tests as part of the build and deploy process, flip the `test` flag in your `config.json` to `true`.
 
@@ -226,6 +227,8 @@ When starting from scratch, make sure a `main.ts` file exists with a `loop()` fu
 **Source:** http://support.screeps.com/hc/en-us/articles/204825672-New-main-loop-architecture
 
 ### The `noImplicitAny` compiler flag
+
+**TODO: Replace this with information about `strict` mode.**
 
 TypeScript developers disagree about whether the `noImplicitAny` flag should be `true` or `false`. There is no correct answer and you can change the flag later. But your choice now can make a difference in larger projects so it merits discussion.
 
