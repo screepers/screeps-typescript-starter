@@ -36,6 +36,7 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 ### Requirements
 
 * [Node.js](https://nodejs.org/en/) (latest LTS is recommended)
+* [Typings](https://github.com/typings/typings)
 * [Yarn](https://yarnpkg.com/en/) - Optional. You can use `npm` if you don't want to, but this is for your own sanity.
 
 For testing **NOTE** _Testing is currently a work-in-progress_:
@@ -142,9 +143,11 @@ A good standard is to make the variables all caps, and surrounded by double unde
 
 #### Additional Options
 
-`config.common.js` is for config options common to all environments.  Other environments can inherit from this file, and add to, or override options on the config object.
+`config.common.ts` is for config options common to all environments.  Other environments can inherit from this file, and add to, or override options on the config object.
 
-`config.dev.js` is a specific environment configuration.  You can potentially have as many environments as you make files for (only a `dev` environment is provided to start with).  To specify which environment to use, append `--env.ENV=` and the environment name to any commands.  An example is provided in `package.json`.
+`config.dev.ts` is a specific environment configuration.  You can potentially have as many environments as you make files for.  To specify which environment to use, append `--env.ENV=` and the environment name to any commands.  An example is provided in `package.json`.
+
+`config.local.ts` is an example configuration for local deploys.  If you want to deploy to a local server for testing, just edit the path in the file and run with `npm run local` or `npm run watch-local`.
 
 Common options you may wish to configure:
 
