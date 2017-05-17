@@ -10,6 +10,7 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 [Download the latest zipped copy here.](https://github.com/screepers/screeps-typescript-starter/archive/master.zip)
 
 ## Table of Contents
+
 * [Features](#features)
 * [Quick Start](#quick-start)
 * [Configuration](#configuration)
@@ -226,19 +227,18 @@ When starting from scratch, make sure a `main.ts` file exists with a `loop()` fu
 
 **Source:** http://support.screeps.com/hc/en-us/articles/204825672-New-main-loop-architecture
 
-### The `noImplicitAny` compiler flag
+### `--strict` mode
 
-**TODO: Replace this with information about `strict` mode.**
+The `--strict` mode was introduced in TypeScript 2.3 which sets all strict type-checking options to `true` by default. The options affected under the `--strict` mode are as follows (and may in the future include more options):
 
-TypeScript developers disagree about whether the `noImplicitAny` flag should be `true` or `false`. There is no correct answer and you can change the flag later. But your choice now can make a difference in larger projects so it merits discussion.
+* `--strictNullChecks`
+* `--noImplicitAny`
+* `--noImplicitThis`
+* `--alwaysStrict`
 
-When the `noImplicitAny` flag is `false` (the default), the compiler silently defaults the type of a variable to `any` if it cannot infer the type based on how the variable is used.
+Starting from version 2.0 of the starter kit, the `tsconfig.json` file will include a `"strict": true` setting in the `"compilerOptions"` section, to conform with the TS 2.3 defaults. If this gives you compile errors, you can try setting `"strict"` to `false`, or by overriding one or more of the options listed above.
 
-When the `noImplicitAny` flag is `true` and the TypeScript compiler cannot infer the type, it still generates the JavaScript files. But it also reports an error. Many seasoned developers prefer this stricter setting because type checking catches more unintentional errors at compile time.
-
-In this starter kit, the `noImplicitAny` is set to `true` for a more stricter environment. If you don't like this, you can change the `noImplicitAny` flag to `false` on the `tsconfig.json` file.
-
-**Source:** https://angular.io/docs/ts/latest/guide/typescript-configuration.html
+**For more info:** https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html#new---strict-master-option
 
 
 ### TSLint
