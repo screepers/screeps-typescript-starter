@@ -15,6 +15,7 @@
   "include": [
     "webpack.config.ts",
     "config/*.ts",
+    "libs/*.ts",
     "typings/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.d.ts"
@@ -22,7 +23,6 @@
   "exclude": [
     "dist",
     "node_modules",
-    "libs",
     "src/snippets"
   ]
 }

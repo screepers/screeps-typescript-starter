@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as webpack from "webpack";
 import * as Config from "webpack-chain";
+import { ScreepsSourceMapToJson } from "../libs/screeps-webpack-sources";
 
 // Plugins:
 // disable tslint rule, because we don't have types for these files
@@ -8,7 +9,6 @@ import * as Config from "webpack-chain";
 const { CheckerPlugin, TsConfigPathsPlugin } = require("awesome-typescript-loader");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const git = require("git-rev-sync");
-const ScreepsSourceMapToJson = require("../libs/screeps-webpack-sources");
 
 import { EnvOptions } from "./types";
 
@@ -135,6 +135,7 @@ export function init(options: EnvOptions): Config {
     .use("tslint")
       .loader("tslint-loader")
       .options({
+        configFile: path.join(ROOT, "tslint.json"),
         // automaticall fix linting errors
         fix: false,
         // you can search NPM and install custom formatters

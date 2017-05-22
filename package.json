@@ -8,6 +8,8 @@
     "postinstall": "typings install",
     "deploy": "webpack --colors --env.ENV=dev",
     "start": "webpack --colors --watch",
+    "local": "webpack --colors --env.ENV=local",
+    "watch-local": "webpack --colors --watch --env.ENV=local",
     "test": "echo \"Error: no test specified\" && exit 1",
     "typings": "typings"
   },
