@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "es6",
     "removeComments": true,
+    "noEmitOnError": true,
     "noResolve": false,
     "experimentalDecorators": true,
     "strict": true,
