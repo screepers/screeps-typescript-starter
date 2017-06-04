@@ -24,7 +24,7 @@
     "git-rev-sync": "^1.9.1",
     "lodash": "^3.10.1",
     "mocha": "^3.3.0",
-    "screeps-webpack-plugin": "git://github.com/bryanbecker/screeps-webpack-plugin.git",
+    "screeps-webpack-plugin": "^1.3.0",
     "source-map-loader": "^0.2.1",
     "ts-node": "^3.0.4",
     "tslint": "^5.2.0",
