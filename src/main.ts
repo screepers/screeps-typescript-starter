@@ -1,7 +1,8 @@
 import * as CreepManager from "./components/creeps/creepManager";
-import * as Config from "./config/config";
 
-import * as Profiler from "screeps-profiler";
+// uncomment the following line if you want to use the profiler
+// import * as Profiler from "lib/Profiler";
+
 import { log } from "./lib/logger/log";
 
 // Any code written outside the `loop()` method is executed only when the
@@ -9,18 +10,13 @@ import { log } from "./lib/logger/log";
 // Use this bootstrap wisely. You can cache some of your stuff to save CPU.
 // You should extend prototypes before the game loop executes here.
 
-// This is an example for using a config variable from `config.ts`.
-// NOTE: this is used as an example, you may have better performance
-// by setting USE_PROFILER through webpack, if you want to permanently
-// remove it on deploy
-// Start the profiler
-if (Config.USE_PROFILER) {
-  Profiler.enable();
-}
+// uncomment the following line if you want to use the profiler
+// see the documentation https://github.com/screepers/screeps-typescript-profiler
+// global.P = Profiler.init();
 
 log.info(`loading revision: ${ __REVISION__ }`);
 
-function mloop() {
+function mainLoop() {
   // Check memory for null or out of bounds custom objects
   if (!Memory.uuid || Memory.uuid > 100) {
     Memory.uuid = 0;
@@ -53,4 +49,4 @@ function mloop() {
  *
  * @export
  */
-export const loop = !Config.USE_PROFILER ? mloop : Profiler.wrap(mloop);
+export const loop = mainLoop;

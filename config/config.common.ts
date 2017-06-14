@@ -96,6 +96,7 @@ export function init(options: EnvOptions): Config {
     .use(webpack.DefinePlugin, [{
       PRODUCTION: JSON.stringify(true),
       __BUILD_TIME__: JSON.stringify(Date.now()),  // example defination
+      __PROFILER_ENABLED__: JSON.stringify(true),
       __REVISION__: JSON.stringify(git.short()),
     }]);
 

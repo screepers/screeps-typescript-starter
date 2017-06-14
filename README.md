@@ -26,7 +26,7 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 - Pre-configured linting rules customized for screeps
 - Typescript Screeps typings
 - Logger which links with source code and git repo (TODO: pending documentation)
-- Screeps profiler
+- [Screeps profiler](https://github.com/screepers/screeps-typescript-profiler) disabled by default -- see linked documentation for usage
 - "Snippets" directory for code you want to save, but don't want compiled or linted
 - Modest starter code to get you started, but not hold your hand
 
@@ -46,6 +46,10 @@ For testing **NOTE** _Testing is currently a work-in-progress_:
 ### Download
 
 To get started, [download a zipped copy](https://github.com/screepers/screeps-typescript-starter/archive/master.zip) of the starter kit and extract it somewhere, or clone this repo.
+
+```bash
+$ git clone --recursive git@github.com:screepers/screeps-typescript-profiler.git
+```
 
 ### Install all required modules!
 
