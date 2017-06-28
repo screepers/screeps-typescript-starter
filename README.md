@@ -99,7 +99,18 @@ You can use the configuration variables in `src/config` by importing the file:
 import * as Config from "../path/to/config";
 ```
 
-... and simply calling the config variables with `Config.CONFIG_VARIABLE` in your code.  This file mostly servers as an example for making configurable code.
+... and simply calling the config variables with `Config.CONFIG_VARIABLE` in your code.
+
+This file mostly serves as an example for making configurable code. We've included some built-in config variables that you might want to take a look at:
+
+```js
+// You can enable/disable the Screeps Profiler here. This will reduce your CPU usage.
+export const USE_PROFILER: boolean = true;
+
+// Set these to false to remove sourcemaps from the output logs, which will also reduce CPU usage.
+export const LOG_PRINT_LINES: boolean = true;
+export const LOG_LOAD_SOURCE_MAP: boolean = true;
+```
 
 _**NOTE**: You may want to consider adding this file to `.gitignore` if you end up storing confidential information there._
 
