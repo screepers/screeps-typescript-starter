@@ -33,6 +33,8 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 
 ## Quick Start
 
+**NEW!** Check out [this awesome guide](https://screepsworld.com/2017/07/typescreeps-installing-everything-you-need/) by @bonzaiferroni on Screeps World to easily get started with writing TypeScript code on Screeps.
+
 ### Requirements
 
 * [Node.js](https://nodejs.org/en/) (latest LTS is recommended)
