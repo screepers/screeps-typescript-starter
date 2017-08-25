@@ -5,13 +5,16 @@
   "main": "./dist/main.js",
   "repository": "screepers/screeps-typescript-starter",
   "scripts": {
-    "postinstall": "typings install",
     "deploy": "webpack --colors --env.ENV=dev",
-    "start": "webpack --colors --watch",
+    "lint": "tslint \"src/**/*.ts\" -e \"**/src/lib/**/*.ts\"",
+    "lint-webpack": "tslint \"config/**/*.ts\" \"webpack.config.ts\" \"libs/**/*.ts\"",
     "local": "webpack --colors --env.ENV=local",
-    "watch-local": "webpack --colors --watch --env.ENV=local",
+    "postinstall": "typings install",
+    "start": "npm run watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "typings": "typings"
+    "typings": "typings",
+    "watch": "webpack --colors --watch",
+    "watch-local": "webpack --colors --watch --env.ENV=local"
   },
   "author": "",
   "license": "MIT",
