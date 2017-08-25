@@ -25,7 +25,7 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 - Highly configurable environment with sane defaults
 - Pre-configured linting rules customized for screeps
 - Typescript Screeps typings
-- Logger which links with source code and git repo (TODO: pending documentation)
+- Logger which links with source code and git repo
 - Screeps profiler
 - "Snippets" directory for code you want to save, but don't want compiled or linted
 - Modest starter code to get you started, but not hold your hand
@@ -278,16 +278,13 @@ If you believe that some rules should not apply to a part of your code, you can 
 
 **More info about TSLint:** https://palantir.github.io/tslint/
 
-### Source maps
+### Sample library: logger
 
-**TODO: Fix this readme info**
-Works out of the box with "npm run deploy-prod" and default values from src/config/config.example.ts. Links back to source control when configured. Code has to be committed at build time and pushed to remote at run time for this to work correctly.
+We've also included a sample library for detailed logging, with support for log levels and sourcemaps. If your code is committed to a source control (like GitHub or GitLab) it can also generate a link back to your repository with the appropriate line marked. Code has to be committed at build time and pushed to remote at run time for this to work correctly.
 
-Doesn't work in sim, because they do lots of evals with scripts in sim.
+![Console output example](/console.png "Console output example")
 
-Currently maps are generated, but "source-maps" module doesn't get uploaded for non-webpack builds.
-
-Log level and output can be controlled from console by setting level, showSource and showTick properties on log object.
+The logger works out of the box, uses default values from your runtime config (`src/config/config.ts`) and stores it to your memory. You can also change these configs directly from the Screeps console, for example:
 
 ```js
 // print errors only, hide ticks and source locations
@@ -296,10 +293,10 @@ log.showSource = false;
 log.showTick = false;
 ```
 
-![Console output example](/console.png "Console output example")
 
-**TODO: Fix this readme info**
-**Note:** As a side effect of changing the project to webpack, the built-in URL template is no longer automatically configured. GitHub and GitLab. If you use Bitbucket, replace `LOG_VSC_URL_TEMPLATE` on your `config.ts` with this:
+**Note:** At the moment, the source maps feature doesn't work in Simulation mode, since Simulation mode does a lot of evals with scripts.
+
+**Note:** As a side effect of changing the project to webpack, the built-in URL template is no longer automatically configured. Currently it is hardcoded to work with GitHub and GitLab. If you use Bitbucket, replace `LOG_VSC_URL_TEMPLATE` on your `config.ts` with this:
 
 ```ts
 export const LOG_VSC_URL_TEMPLATE = (path: string, line: string) => {
