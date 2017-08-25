@@ -1,3 +1,4 @@
+import { SourceMapConsumer } from "source-map";
 import * as Config from "../../config/config";
 import { LogLevels } from "./logLevels";
 
@@ -69,7 +70,6 @@ export class Log {
   public static loadSourceMap() {
     try {
       // tslint:disable-next-line
-      var SourceMapConsumer = require("source-map").SourceMapConsumer;
       const map = require("main.js.map");
       if (map) {
         Log.sourceMap = new SourceMapConsumer(map);
