@@ -9,12 +9,7 @@ import * as Config from "../../config/config";
  * @returns {number}
  */
 export function moveTo(creep: Creep, target: Structure | RoomPosition): number {
-  let result: number = 0;
-
-  // Execute moves by cached paths at first
-  result = creep.moveTo(target);
-
-  return result;
+  return creep.moveTo(target);
 }
 
 /**

@@ -4,11 +4,6 @@ import * as harvester from "./roles/harvester";
 
 import { log } from "../../lib/logger/log";
 
-export let creeps: Creep[];
-export let creepCount: number = 0;
-
-export let harvesters: Creep[] = [];
-
 /**
  * Initialization scripts for CreepManager module.
  *
@@ -16,8 +11,14 @@ export let harvesters: Creep[] = [];
  * @param {Room} room
  */
 export function run(room: Room): void {
-  _loadCreeps(room);
-  _buildMissingCreeps(room);
+  const creeps = room.find<Creep>(FIND_MY_CREEPS);
+  const creepCount = _.size(creeps);
+
+  if (Config.ENABLE_DEBUG_MODE) {
+    log.info(creepCount + " creeps found in the playground.");
+  }
+
+  _buildMissingCreeps(room, creeps);
 
   _.each(creeps, (creep: Creep) => {
     if (creep.memory.role === "harvester") {
@@ -27,29 +28,15 @@ export function run(room: Room): void {
 }
 
 /**
- * Loads and counts all available creeps.
- *
- * @param {Room} room
- */
-function _loadCreeps(room: Room) {
-  creeps = room.find<Creep>(FIND_MY_CREEPS);
-  creepCount = _.size(creeps);
-
-  // Iterate through each creep and push them into the role array.
-  harvesters = _.filter(creeps, (creep) => creep.memory.role === "harvester");
-
-  if (Config.ENABLE_DEBUG_MODE) {
-    log.info(creepCount + " creeps found in the playground.");
-  }
-}
-
-/**
  * Creates a new creep if we still have enough space.
  *
  * @param {Room} room
  */
-function _buildMissingCreeps(room: Room) {
+function _buildMissingCreeps(room: Room, creeps: Creep[]) {
   let bodyParts: string[];
+
+  // Iterate through each creep and push them into the role array.
+  const harvesters = _.filter(creeps, (creep) => creep.memory.role === "harvester");
 
   const spawns: Spawn[] = room.find<Spawn>(FIND_MY_SPAWNS, {
     filter: (spawn: Spawn) => {
