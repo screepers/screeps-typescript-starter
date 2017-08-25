@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as path from "path";
 import * as webpack from "webpack";
 import * as Config from "webpack-chain";
@@ -24,6 +25,8 @@ export function init(options: EnvOptions): Config {
   // const TEST = options.TEST || false;
 
   const config = new Config();
+  // Check if git repo exists
+  const gitRepoExists = fs.existsSync("../.git");
 
   // set all common configurations here
   config
@@ -96,7 +99,7 @@ export function init(options: EnvOptions): Config {
     .use(webpack.DefinePlugin, [{
       PRODUCTION: JSON.stringify(true),
       __BUILD_TIME__: JSON.stringify(Date.now()),  // example defination
-      __REVISION__: JSON.stringify(git.short()),
+      __REVISION__: JSON.stringify(gitRepoExists ? git.short() : undefined),
     }]);
 
   config.plugin("screeps-source-map")
