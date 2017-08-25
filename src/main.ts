@@ -18,7 +18,10 @@ if (Config.USE_PROFILER) {
   Profiler.enable();
 }
 
-log.info(`loading revision: ${ __REVISION__ }`);
+log.info(`Scripts bootstrapped`);
+if (__REVISION__) {
+  log.info(`Revision ID: ${__REVISION__}`);
+}
 
 function mloop() {
   // Check memory for null or out of bounds custom objects
