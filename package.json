@@ -21,7 +21,7 @@
     "@types/chai": "^3.5.2",
     "@types/lodash": "^3.10.0",
     "@types/mocha": "^2.2.41",
-    "@types/node": "^7.0.0",
+    "@types/node": "^8.0.25",
     "@types/source-map": "^0.5.1",
     "@types/webpack": "^2.2.0",
     "@types/webpack-chain": "^3.0.4",
