@@ -103,7 +103,7 @@ export function init(options: EnvOptions): Config {
     }]);
 
   config.plugin("screeps-source-map")
-    .use(ScreepsSourceMapToJson);
+    .use((ScreepsSourceMapToJson as Config.PluginClass));
 
   config.plugin("no-emit-on-errors")
     .use((webpack.NoEmitOnErrorsPlugin as Config.PluginClass));
