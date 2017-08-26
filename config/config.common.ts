@@ -6,7 +6,7 @@ import { ScreepsSourceMapToJson } from "../libs/screeps-webpack-sources";
 
 // Webpack + plugins:
 // disable tslint rule, because we don't have types for these files
-/* tslint:disable:no-var-requires */
+/* tslint:disable:no-var-requires no-require-imports */
 const { CheckerPlugin, TsConfigPathsPlugin } = require("awesome-typescript-loader");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const git = require("git-rev-sync");

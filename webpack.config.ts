@@ -1,3 +1,4 @@
+/* tslint:disable:no-var-requires no-require-imports */
 import * as _ from "lodash";
 import * as webpack from "webpack";
 import * as Config from "webpack-chain";

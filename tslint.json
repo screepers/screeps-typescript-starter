@@ -6,6 +6,7 @@
     "forin": false,
     "interface-name": [false],
     "no-console": [false],
+    "no-namespace": [true, "allow-declarations"],
     "trailing-comma": [
       true,
       "never"
