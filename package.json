@@ -10,10 +10,9 @@
     "lint-webpack": "tslint \"config/**/*.ts\" \"webpack.config.ts\" \"libs/**/*.ts\"",
     "local": "webpack --colors --env.ENV=local",
     "postinstall": "typings install",
-    "start": "npm run watch",
+    "start": "webpack --colors --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "typings": "typings",
-    "watch": "webpack --colors --watch",
     "watch-local": "webpack --colors --watch --env.ENV=local"
   },
   "author": "",
