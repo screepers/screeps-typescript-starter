@@ -11,7 +11,7 @@ It is based on [the original starter kit](https://github.com/MarkoSulamagi/Scree
 
 ## What's new
 
-* [@bonzaiferroni](https://github.com/bonzaiferroni) has put out some really useful guides to get started with TypeScript development on Screeps Go read them!([Guide #1](https://screepsworld.com/2017/07/typescreeps-getting-started-with-ts-in-screeps/), [Guide #2](https://screepsworld.com/2017/07/typescreeps-installing-everything-you-need/))
+* [@bonzaiferroni](https://github.com/bonzaiferroni) has put out some really useful guides to get started with TypeScript development on Screeps Go read them! ([Guide #1](https://screepsworld.com/2017/07/typescreeps-getting-started-with-ts-in-screeps/), [Guide #2](https://screepsworld.com/2017/07/typescreeps-installing-everything-you-need/))
 * We've consolidated all of our guides into the [wiki page](https://github.com/screepers/screeps-typescript-starter/wiki). This README will be simplified to include the essentials to get you up and running. Feel free to contribute to the wiki as well!
 
 ---
