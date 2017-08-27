@@ -99,7 +99,7 @@ export function init(options: EnvOptions): Config {
     .use((webpack.DefinePlugin as Config.PluginClass), [{
       PRODUCTION: JSON.stringify(true),
       __BUILD_TIME__: JSON.stringify(Date.now()),  // example defination
-      __REVISION__: JSON.stringify(gitRepoExists ? git.short() : undefined),
+      __REVISION__: gitRepoExists ? JSON.stringify(git.short()) : JSON.stringify(""),
     }]);
 
   config.plugin("screeps-source-map")
