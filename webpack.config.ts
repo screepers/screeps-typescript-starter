@@ -1,3 +1,4 @@
+/* tslint:disable:no-var-requires no-require-imports */
 import * as _ from "lodash";
 import * as webpack from "webpack";
 import * as Config from "webpack-chain";
@@ -18,7 +19,7 @@ function webpackConfig(options: EnvOptions = {}): webpack.Configuration {
   const config: Config = require(`./config/config.${options.ENV}`)(options);
 
   // call `toConfig` to convert to webpack object, and return it
-  return config.toConfig();
+  return config.toConfig() as webpack.Configuration;
 }
 
 module.exports = webpackConfig;

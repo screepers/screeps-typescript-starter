@@ -4,9 +4,9 @@ import * as webpack from "webpack";
 import * as Config from "webpack-chain";
 import { ScreepsSourceMapToJson } from "../libs/screeps-webpack-sources";
 
-// Plugins:
+// Webpack + plugins:
 // disable tslint rule, because we don't have types for these files
-/* tslint:disable:no-var-requires */
+/* tslint:disable:no-var-requires no-require-imports */
 const { CheckerPlugin, TsConfigPathsPlugin } = require("awesome-typescript-loader");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const git = require("git-rev-sync");
@@ -96,17 +96,17 @@ export function init(options: EnvOptions): Config {
   // Make sure to let typescript know about these via `define` !
   // See https://github.com/kurttheviking/git-rev-sync-js for more git options
   config.plugin("define")
-    .use(webpack.DefinePlugin, [{
+    .use((webpack.DefinePlugin as Config.PluginClass), [{
       PRODUCTION: JSON.stringify(true),
       __BUILD_TIME__: JSON.stringify(Date.now()),  // example defination
       __REVISION__: JSON.stringify(gitRepoExists ? git.short() : undefined),
     }]);
 
   config.plugin("screeps-source-map")
-    .use(ScreepsSourceMapToJson);
+    .use((ScreepsSourceMapToJson as Config.PluginClass));
 
   config.plugin("no-emit-on-errors")
-    .use(webpack.NoEmitOnErrorsPlugin);
+    .use((webpack.NoEmitOnErrorsPlugin as Config.PluginClass));
 
   /////////
   /// Modules
