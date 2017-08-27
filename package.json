@@ -2,7 +2,7 @@
   "name": "screeps-typescript-starter",
   "version": "2.0.0",
   "description": "",
-  "main": "./dist/main.js",
+  "private": true,
   "repository": "screepers/screeps-typescript-starter",
   "scripts": {
     "deploy": "webpack --colors --env.ENV=dev",
