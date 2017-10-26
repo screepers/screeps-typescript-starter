@@ -35,7 +35,7 @@
     "screeps-webpack-plugin": "git://github.com/langri-sha/screeps-webpack-plugin.git",
     "source-map-loader": "^0.2.1",
     "ts-node": "^3.0.4",
-    "tslint": "^5.2.0",
+    "tslint": "^5.8.0",
     "tslint-loader": "^3.5.3",
     "typescript": "^2.3.2",
     "typings": "^2.1.1",
