@@ -7,7 +7,8 @@ import { ScreepsSourceMapToJson } from "../libs/screeps-webpack-sources";
 // Webpack + plugins:
 // disable tslint rule, because we don't have types for these files
 /* tslint:disable:no-var-requires no-require-imports */
-const { CheckerPlugin, TsConfigPathsPlugin } = require("awesome-typescript-loader");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+// const { CheckerPlugin, TsConfigPathsPlugin } = require("awesome-typescript-loader");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const git = require("git-rev-sync");
 
@@ -61,11 +62,6 @@ export function init(options: EnvOptions): Config {
     .extensions
       .merge([".webpack.js", ".web.js", ".ts", ".tsx", ".js"]);
 
-  // see for more info about TsConfigPathsPlugin
-  // https://github.com/s-panferov/awesome-typescript-loader/issues/402
-  config.resolve.plugin("tsConfigPaths") // name here is just an identifier
-    .use(TsConfigPathsPlugin);
-
   config.externals({
     // webpack will not try to rewrite require("main.js.map")
     "main.js.map": "main.js.map",
@@ -73,15 +69,17 @@ export function init(options: EnvOptions): Config {
 
   /////////
   /// Plugins
+  ///
+  /// NOTE: do not use 'new' on these, it will be called automatically
 
-  //   NOTE: do not use 'new' on these, it will be called automatically
-  // this plugin is for typescript's typeschecker to run in async mode
+  // use ForkTsCheckerWebpackPlugin for faster typechecking
   config.plugin("tsChecker")
-    .use(CheckerPlugin);
+    .use(ForkTsCheckerWebpackPlugin);
 
   // this plugin wipes the `dist` directory clean before each new deploy
   config.plugin("clean")
-    .use(CleanWebpackPlugin, [    // arguments passed to CleanWebpackPlugin ctor
+    .use(CleanWebpackPlugin, [
+      // arguments passed to CleanWebpackPlugin ctor
       [ `dist/${options.ENV}/*` ],
       { root: options.ROOT },
     ]);
@@ -129,26 +127,10 @@ export function init(options: EnvOptions): Config {
       .add(path.join(ROOT, "src/snippets"))
       .end()
     .use("typescript")
-      .loader("awesome-typescript-loader")
-      .options({ configFileName: "tsconfig.json" });
-
-  config.module.rule("lint")
-    .test(/\.tsx?$/)
-    .exclude
-      .add(path.join(ROOT, "src/snippets"))
-      .add(path.join(ROOT, "src/lib"))
-      .end()
-    .use("tslint")
-      .loader("tslint-loader")
+      .loader("ts-loader")
       .options({
-        configFile: path.join(ROOT, "tslint.json"),
-        // automaticall fix linting errors
-        fix: false,
-        // you can search NPM and install custom formatters
-        formatter: "stylish",
-        // enables type checked rules like 'for-in-array'
-        // uses tsconfig.json from current working directory
-        typeCheck: false,
+        // disable type checker - we will use it in fork plugin
+        transpileOnly: true
       });
 
   // return the config object
