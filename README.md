@@ -53,6 +53,8 @@ We'll assume you have already downloaded/cloned the starter kit.
 * [Typings](https://github.com/typings/typings)
 * [Yarn](https://yarnpkg.com/en/) - Optional. You can use `npm` if you don't want to, but this is for your own sanity.
 
+> **Why Yarn?** Yarn has a stronger dependency tree, supports lockfiles, and fixes most of the issues pre-`npm@5`. It also has a host of unique features as described on [their website](https://yarnpkg.com/en/), and is entirely compatible with `npm`.
+
 ### Installing the modules
 
 Run the following the command to install the required packages and TypeScript declaration files if you are using yarn:
