@@ -10,7 +10,8 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "sourceMap": true,
-    "baseUrl": "./src/"
+    "baseUrl": "./src/",
+    "types": ["lodash", "typed-screeps", "screeps-profiler"]
   },
   "compileOnSave": false,
   "include": [

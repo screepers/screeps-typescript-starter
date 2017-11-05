@@ -1,7 +1,0 @@
-{
-  "name": "screeps-typescript-starter",
-  "dependencies": {},
-  "globalDependencies": {
-    "screeps": "github:screepers/Screeps-Typescript-Declarations/dist/screeps.d.ts"
-  }
-}

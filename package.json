@@ -9,10 +9,8 @@
     "lint": "tslint \"src/**/*.ts\" -e \"**/src/lib/**/*.ts\"",
     "lint-webpack": "tslint \"config/**/*.ts\" \"webpack.config.ts\" \"libs/**/*.ts\"",
     "local": "webpack --colors --env.ENV=local",
-    "postinstall": "typings install",
     "start": "webpack --colors --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "typings": "typings",
     "watch-local": "webpack --colors --watch --env.ENV=local"
   },
   "author": "",
@@ -37,6 +35,7 @@
     "ts-loader": "^3.1.0",
     "ts-node": "^3.0.4",
     "tslint": "^5.8.0",
+    "typed-screeps": "^1.0.3",
     "typescript": "^2.3.2",
     "typings": "^2.1.1",
     "webpack": "^2.5.1",
