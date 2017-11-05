@@ -1,3 +1,10 @@
+// memory extension samples
+interface CreepMemory {
+  role: string;
+  room: string;
+  working: boolean;
+}
+
 // add objects to `global` here
 declare namespace NodeJS {
   interface Global {

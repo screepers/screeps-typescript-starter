@@ -33,7 +33,7 @@ export function run(room: Room): void {
  * @param {Room} room
  */
 function _buildMissingCreeps(room: Room, creeps: Creep[]) {
-  let bodyParts: string[];
+  let bodyParts: BodyPartConstant[];
 
   // Iterate through each creep and push them into the role array.
   const harvesters = _.filter(creeps, (creep) => creep.memory.role === "harvester");
@@ -67,17 +67,18 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
  * Spawns a new creep.
  *
  * @param {Spawn} spawn
- * @param {string[]} bodyParts
+ * @param {BodyPartConstant[]} bodyParts
  * @param {string} role
  * @returns
  */
-function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
+function _spawnCreep(spawn: Spawn, bodyParts: BodyPartConstant[], role: string) {
   const uuid: number = Memory.uuid;
   let status: number | string = spawn.canCreateCreep(bodyParts, undefined);
 
-  const properties: { [key: string]: any } = {
+  const properties: CreepMemory = {
     role,
     room: spawn.room.name,
+    working: false
   };
 
   status = _.isString(status) ? OK : status;
