@@ -6,6 +6,7 @@
 
 # Ignore basic folders
 /dist
+/tsc-out
 /node_modules
 
 # TypeScript definitions installed by Typings
