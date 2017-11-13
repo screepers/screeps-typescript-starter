@@ -50,7 +50,6 @@ By far, the easiest and quickest way to get started with TypeScript development 
 We'll assume you have already downloaded/cloned the starter kit.
 
 * [Node.js](https://nodejs.org/en/) (latest LTS is recommended)
-* [Typings](https://github.com/typings/typings)
 * [Yarn](https://yarnpkg.com/en/) - Optional. You can use `npm` if you don't want to, but this is for your own sanity.
 
 > **Why Yarn?** Yarn has a stronger dependency tree, supports lockfiles, and fixes most of the issues pre-`npm@5`. It also has a host of unique features as described on [their website](https://yarnpkg.com/en/), and is entirely compatible with `npm`.
