@@ -94,6 +94,8 @@ credentials.branch = "dev";
 
 Change the `credentials.branch` property you want to initially build and upload to, e.g. `"default"`. Note that due to the Screeps API limitations, you still have to create a branch with a matching name in the Screeps client by cloning an existing branch. The compiler will yell at you when you forgot to do so.
 
+You can also set it to `$activeWorld` to upload to whatever branch is active in the Screeps world.
+
 ### Advanced configuration
 
 See [Configuration page](https://github.com/screepers/screeps-typescript-starter/wiki/Configuration) on the screeps-typescript-starter wiki for more in-depth info on configuration options.
