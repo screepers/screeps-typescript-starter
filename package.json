@@ -1,0 +1,29 @@
+{
+  "name": "screeps-typescript-starter",
+  "version": "3.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/screepers/screeps-typescript-starter.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/screepers/screeps-typescript-starter/issues"
+  },
+  "homepage": "https://github.com/screepers/screeps-typescript-starter#readme",
+  "devDependencies": {
+    "@types/lodash": "^4.14.85",
+    "rollup": "^0.51.8",
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-typescript2": "^0.8.1",
+    "tslint": "^5.8.0",
+    "typed-screeps": "^1.0.4",
+    "typescript": "^2.6.1"
+  }
+}

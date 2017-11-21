@@ -1,0 +1,12 @@
+{
+  "editor.renderWhitespace": "boundary",
+  "files.encoding": "utf8",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "search.exclude": {
+    "dist/**": true,
+    "node_modules/**": true,
+    "typings/**": true
+  },
+  "typescript.tsdk": "./node_modules/typescript/lib"
+}

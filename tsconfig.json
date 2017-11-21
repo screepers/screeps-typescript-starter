@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es5",
+		"outDir": "dist",
+		"baseUrl": "src/",
+		"sourceMap": true,
+		"alwaysStrict": true,
+		"experimentalDecorators": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"structNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+		"allowUnreachableCode": false,
+		"types": [
+			"lodash",
+			"typed-screeps"
+		]
+	},
+	"exclude": [
+		"node_modules"
+	]
+}
