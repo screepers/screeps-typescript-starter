@@ -15,6 +15,14 @@ Open the folder in your terminal and run `npm install` (or `yarn`) to install th
 
 Fire up your preferred editor with typescript installed and you are good to go!
 
+### Rollup
+
+Screeps Typescript Starter uses rollup to compile your typescript and upload it to a screeps server.
+
+Change `creeps.sample.json` to `screeps.json` and update the settings.
+
+Running `rollup -c` will compile and upload your code.
+
 ## Typings
 
 The typings for Screeps comes from [typed-screeps](https://github.com/screepers/typed-screeps), if you have an issue with incorrect typings open an issue there.

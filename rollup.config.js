@@ -2,6 +2,7 @@
 
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
+import screepsUpload from "rollup-plugin-screeps-upload";
 import typescript from "rollup-plugin-typescript2";
 
 // In Screeps, require only works for exported content
@@ -34,6 +35,7 @@ export default {
     resolve(),
     commonjs(),
     typescript({tsconfig: "./tsconfig.json"}),
+    screepsUpload('./screeps.json'),
     exportSourceMaps()
   ]
 }

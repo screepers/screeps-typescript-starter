@@ -13,6 +13,9 @@
 # TypeScript definitions installed by Typings
 /typings
 
+# Screeps Config
+screeps.json
+
 # Numerous always-ignore extensions
 *.diff
 *.err

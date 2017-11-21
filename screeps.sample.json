@@ -1,0 +1,8 @@
+{
+  "email": "you@provider.tld",
+  "password": "Password",
+  "protocol": "https",
+  "hostname": "screeps.com",
+  "port": 443,
+  "path": "/"
+}
