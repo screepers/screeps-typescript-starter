@@ -19,7 +19,7 @@ Fire up your preferred editor with typescript installed and you are good to go!
 
 Screeps Typescript Starter uses rollup to compile your typescript and upload it to a screeps server.
 
-Change `creeps.sample.json` to `screeps.json` and update the settings.
+Change `screeps.sample.json` to `screeps.json` and update the settings.
 
 Running `rollup -c` will compile and upload your code.
 
