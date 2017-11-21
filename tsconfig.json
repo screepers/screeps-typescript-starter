@@ -10,7 +10,7 @@
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
-		"structNullChecks": true,
+		"strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
 		"allowUnreachableCode": false,
 		"types": [
