@@ -35,7 +35,7 @@ export default {
     resolve(),
     commonjs(),
     typescript({tsconfig: "./tsconfig.json"}),
-    screepsUpload('./screeps.json'),
-    exportSourceMaps()
+    exportSourceMaps(),
+    screepsUpload('./screeps.json')
   ]
 }
