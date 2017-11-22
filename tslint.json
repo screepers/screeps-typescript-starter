@@ -4,7 +4,7 @@
   ],
   "rules": {
     "forin": false,
-    "interface-name": ["never-prefix"],
+    "interface-name": [true, "never-prefix"],
     "no-console": [false],
     "no-namespace": [true, "allow-declarations"],
     "trailing-comma": [true, {"multiline": "never", "singleline": "never"}],
