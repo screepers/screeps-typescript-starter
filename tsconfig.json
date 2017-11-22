@@ -1,24 +1,21 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es5",
-		"outDir": "dist",
-		"baseUrl": "src/",
-		"sourceMap": true,
-		"alwaysStrict": true,
-		"experimentalDecorators": true,
-		"noImplicitAny": true,
-		"noImplicitReturns": true,
-		"noImplicitThis": true,
-		"strictNullChecks": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "outDir": "dist",
+    "baseUrl": "src/",
+    "sourceMap": true,
+    "strict": true,
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
-		"allowUnreachableCode": false,
-		"types": [
-			"lodash",
-			"typed-screeps"
-		]
-	},
-	"exclude": [
-		"node_modules"
-	]
+    "allowUnreachableCode": false,
+    "types": [
+      "lodash",
+      "typed-screeps"
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }
