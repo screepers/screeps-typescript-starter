@@ -7,7 +7,7 @@ import commonjs from "rollup-plugin-commonjs";
 import screepsUpload from "rollup-plugin-screeps-upload";
 import typescript from "rollup-plugin-typescript2";
 
-const getSourcemapFilename = () => 'main.js.map.js'
+const getSourcemapFilename = () => "main.js.map.js";
 
 // In Screeps, require only works for exported content
 // This "plugin" prepends an export to source maps so that it can be loaded in screeps via require`
@@ -27,7 +27,7 @@ function exportSourceMaps(options) {
       const map = bundle.map
       fs.writeFileSync(path.resolve(__dirname, `./dist/${options || getSourcemapFilename()}`), map);
       // Delete the old file
-      fs.unlinkSync(path.resolve(__dirname, `./dist/main.js.map`));
+      fs.unlinkSync(path.resolve(__dirname, "./dist/main.js.map"));
     }
   }
 }
