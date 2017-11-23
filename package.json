@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/lodash": "^4.14.85",
     "rollup": "^0.51.8",
+    "rollup-plugin-clean": "^1.0.0",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-screeps-upload": "git+https://github.com/ezolenko/rollup-plugin-screeps-upload.git#master",

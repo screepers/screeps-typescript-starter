@@ -2,12 +2,11 @@
 
 import fs from "fs";
 import path from "path";
+import clean from "rollup-plugin-clean";
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
 import screepsUpload from "rollup-plugin-screeps-upload";
 import typescript from "rollup-plugin-typescript2";
-
-const getSourcemapFilename = () => "main.js.map.js";
 
 // In Screeps, require only works for exported content
 // This "plugin" prepends an export to source maps so that it can be loaded in screeps via require`
@@ -23,11 +22,12 @@ function exportSourceMaps(options) {
         return "module.exports = " + tmp.apply(this, arguments) + ";";
       }
     },
-    onwrite: function ({ bundle }) {
-      const map = bundle.map
-      fs.writeFileSync(path.resolve(__dirname, `./dist/${options || getSourcemapFilename()}`), map);
-      // Delete the old file
-      fs.unlinkSync(path.resolve(__dirname, "./dist/main.js.map"));
+    onwrite: function () {
+      // Rename generated source file
+      fs.renameSync(
+        path.resolve(__dirname, "./dist", "main.js.map"),
+        path.resolve(__dirname, "./dist", options.filename || "main.js.map.js")
+      );
     }
   }
 }
@@ -42,10 +42,11 @@ export default {
   sourcemap: true,
 
   plugins: [
+    clean(),
     resolve(),
     commonjs(),
     typescript({tsconfig: "./tsconfig.json"}),
-    exportSourceMaps("main.js.map.js"),
+    exportSourceMaps({filename: "./main.js.map.js"}),
     screepsUpload("./screeps.json")
   ]
 }
