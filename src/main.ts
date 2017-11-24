@@ -1,4 +1,4 @@
-import { ErrorMapper } from "./utils/ErrorMapper";
+import { ErrorMapper } from "utils/ErrorMapper";
 
 export function loop() {
   try {
@@ -11,6 +11,6 @@ export function loop() {
 
     console.log(`Current tick is ${Game.time}`);
   } catch (e) {
-    console.error(ErrorMapper.sourceMappedStackTrace(e));
+    console.log(ErrorMapper.sourceMappedStackTrace(e));
   }
 }
