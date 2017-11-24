@@ -22,7 +22,7 @@
     "rollup-plugin-clean": "^1.0.0",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-screeps-upload": "git+https://github.com/ezolenko/rollup-plugin-screeps-upload.git#master",
+    "rollup-plugin-screeps": "0.0.0",
     "rollup-plugin-typescript2": "^0.8.1",
     "tslint": "^5.8.0",
     "typed-screeps": "^1.0.4",

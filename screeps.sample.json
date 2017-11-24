@@ -4,5 +4,6 @@
   "protocol": "https",
   "hostname": "screeps.com",
   "port": 443,
-  "path": "/"
+  "path": "/",
+  "branch": "auto"
 }
