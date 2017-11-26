@@ -6,13 +6,11 @@ import commonjs from "rollup-plugin-commonjs";
 import screeps from "rollup-plugin-screeps";
 import typescript from "rollup-plugin-typescript2";
 
-const config = require("./screeps");
-
 let cfg;
 const i = process.argv.indexOf("--dest") + 1;
 if (i == 0) {
   console.log("No destination specified - code will be compiled but not uploaded");
-} else if (i >= process.argv.length || (cfg = config[process.argv[i]]) == null) {
+} else if (i >= process.argv.length || (cfg = require("./screeps")[process.argv[i]]) == null) {
   throw new Error("Invalid upload destination");
 }
 
