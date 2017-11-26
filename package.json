@@ -3,8 +3,11 @@
   "version": "3.0.0",
   "description": "",
   "main": "index.js",
+  "//": "If you add or change the names of destinations in screeps.json, make sure you update these scripts to reflect the changes",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "push-main": "rollup -c --dest main",
+    "push-sim": "rollup -c --dest sim",
+    "push-pserver": "rollup -c --dest pserver"
   },
   "repository": {
     "type": "git",
