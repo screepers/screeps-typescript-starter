@@ -3,8 +3,8 @@
 import clean from "rollup-plugin-clean";
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
-import screeps from "rollup-plugin-screeps";
 import typescript from "rollup-plugin-typescript2";
+import screeps from "rollup-plugin-screeps";
 
 let cfg;
 const i = process.argv.indexOf("--dest") + 1;
