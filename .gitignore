@@ -9,6 +9,7 @@
 /.rpt2_cache
 /tsc-out
 /node_modules
+/_book
 
 # TypeScript definitions installed by Typings
 /typings

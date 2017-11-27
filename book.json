@@ -1,0 +1,5 @@
+{
+  "title": "Screeps Typescript Starter",
+  "description": "Starter kit for TypeScript-based Screeps AI codes.",
+  "root": "./docs"
+}
