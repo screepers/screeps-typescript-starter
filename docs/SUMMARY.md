@@ -7,11 +7,17 @@
 ### Getting Started
 
 * [Installation](./getting-started/installation.md)
-* [Usage](./getting-started/usage.md)
+* [Deploying](./getting-started/deploying.md)
+
+### In-Depth
+
+* Configuration variables
+* TypeScript
+  * Strict mode
+  * TSLint
+* Cookbook
+  * [TODO]
 
 ---
 
-### Stuff You Might Want to Know
-
-* Cookbook
 * FAQ & Troubleshooting
