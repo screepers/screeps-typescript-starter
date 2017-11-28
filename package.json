@@ -5,9 +5,14 @@
   "main": "index.js",
   "//": "If you add or change the names of destinations in screeps.json, make sure you update these scripts to reflect the changes",
   "scripts": {
+    "lint": "tslint \"src/**/*.ts\"",
     "push-main": "rollup -c --dest main",
+    "push-pserver": "rollup -c --dest pserver",
     "push-sim": "rollup -c --dest sim",
-    "push-pserver": "rollup -c --dest pserver"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch-main": "rollup -cw --dest main",
+    "watch-pserver": "rollup -cw --dest pserver",
+    "watch-sim": "rollup -cw --dest sim"
   },
   "repository": {
     "type": "git",
