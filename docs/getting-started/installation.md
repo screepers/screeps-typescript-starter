@@ -8,7 +8,7 @@ You will need:
  - A Package Manager (Yarn or NPM)
  - Rollup (install with `npm intall -g rollup`)
 
-## Installing `npm` Modules
+## Installing `npm` modules
 
 Run the following the command to install the required packages and TypeScript declaration files:
 

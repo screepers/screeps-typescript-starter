@@ -11,13 +11,12 @@
 
 ### In-Depth
 
-* Configuration variables
-* TypeScript
-  * Strict mode
-  * TSLint
-* Cookbook
+* [Module bundling](./in-depth/module-bundling.md)
+* [Configuration variables](./in-depth/configuration-variables.md)
+* [TypeScript](./in-depth/typescript.md)
+* [Cookbook](./in-depth/cookbook.md)
   * [TODO]
 
 ---
 
-* FAQ & Troubleshooting
+* [FAQ & Troubleshooting](./faq-troubleshooting.md)
