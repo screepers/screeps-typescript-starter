@@ -5,7 +5,8 @@
 You will need:
 
  - Node.JS (Latest LTS is recommended)
- - A Package Manager (Yarn or NPM)
+ - A Package Manager (`yarn` or `npm`)
+ - Rollup CLI (Optional, install via `npm install -g rollup`)
 
 ## Installing `npm` modules
 

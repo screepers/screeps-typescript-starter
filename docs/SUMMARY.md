@@ -12,7 +12,7 @@
 ### In-Depth
 
 * [Module bundling](./in-depth/module-bundling.md)
-* [Configuration variables](./in-depth/configuration-variables.md)
+* [Deploy destinations](./in-depth/deploy-destinations.md)
 * [TypeScript](./in-depth/typescript.md)
 * [Cookbook](./in-depth/cookbook.md)
   * [TODO]

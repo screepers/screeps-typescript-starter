@@ -1,6 +1,6 @@
-# Configuration variables
+# Deploy destination
 
-The `screeps.json` file is a JSON configuration file separated into multiple environments. We've given you three primary environments by default.
+The `screeps.json` file is a JSON configuration file separated into multiple deploy destinations. We've given you three primary destinations by default.
 
 ```json
 {
@@ -37,4 +37,10 @@ The `screeps.json` file is a JSON configuration file separated into multiple env
 }
 ```
 
-[TODO: running environments]
+You can make as many separate destinations as you want. Just make a copy of any config object and perform the necessary changes. Once you're done, use the `--dest` argument on the `rollup` command to specify which environment to upload to.
+
+```bash
+rollup -c --dest main
+```
+
+Omitting the `--dest` argument will perform a dry run, which can be used for local directories via symlinks.
