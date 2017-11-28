@@ -6,7 +6,6 @@ You will need:
 
  - Node.JS (Latest LTS is recommended)
  - A Package Manager (Yarn or NPM)
- - Rollup (install with `npm intall -g rollup`)
 
 ## Installing `npm` modules
 
