@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/screepers/screeps-typescript-starter#readme",
   "devDependencies": {
-    "@types/lodash": "^4.14.85",
+    "@types/lodash": "^3.10.1",
     "@types/source-map": "^0.5.2",
     "rollup": "^0.51.8",
     "rollup-plugin-clean": "^1.0.0",

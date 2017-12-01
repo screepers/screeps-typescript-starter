@@ -67,4 +67,23 @@ export class ErrorMapper {
     this.cache[stack] = outStack;
     return outStack;
   }
+
+  public static wrapLoop(loop: () => void): () => void {
+    return () => {
+      try {
+        loop();
+      } catch (e) {
+        if (e instanceof Error) {
+          if ("sim" in Game.rooms) {
+            console.log(`<span style='color:red'>Source maps don't work in the simulator - displaying original error<br>${_.escape(e.stack)}</span>`)
+          } else {
+            console.log(`<span style='color:red'>${_.escape(this.sourceMappedStackTrace(e))}</span>`);
+          }
+        } else {
+          // can't handle it
+          throw e;
+        }
+      }
+    }
+  }
 }
