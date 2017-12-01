@@ -15,8 +15,8 @@
 * [Deploy destinations](./in-depth/deploy-destinations.md)
 * [TypeScript](./in-depth/typescript.md)
 * [Cookbook](./in-depth/cookbook.md)
-  * [TODO]
 
 ---
 
-* [FAQ & Troubleshooting](./faq-troubleshooting.md)
+* [Troubleshooting](./troubleshooting.md)
+* [Contributing guidelines](./contributing.md)

@@ -12,8 +12,6 @@ Then you can import these libraries just like you would any other `npm` module. 
 
 Some module bundlers even support performing further optimisations like eliminating unused module functions from your final bundled code (aka. _tree-shaking_), reducing the size of your final bundled JS even further.
 
-[TODO: more advantages of bundling code, if any]
-
 ## Rollup
 
 From version 3.0 onwards, the starter kit uses Rollup as its main module bundler. Some useful features of Rollup include:

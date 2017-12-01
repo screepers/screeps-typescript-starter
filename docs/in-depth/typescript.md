@@ -22,7 +22,14 @@ Starting from version 2.0 of the starter kit, we've enabled the `--strict` flag 
 
 TSLint checks your TypeScript code for readability, maintainability, and functionality errors, and can also enforce coding style standards.
 
-[TODO: describe TSlint rules used in brief]
+This project provides TSLint rules through a `tslint.json` file, which extends the recommended rules from TSLint defined [here](https://github.com/palantir/tslint/blob/next/src/configs/recommended.ts).
+
+We've made some changes to these rules, which we considered necessary and/or relevant to a proper Screeps project:
+
+ - set the [forin](http://palantir.github.io/tslint/rules/forin/) rule to `false`, it was forcing `for ( ... in ...)` loops to check if object members were not coming from the class prototype.
+ - set the [interface-name](http://palantir.github.io/tslint/rules/interface-name/) rule to `false`, in order to allow interfaces that are not prefixed with `I`.
+ - set the [no-console](http://palantir.github.io/tslint/rules/no-console/) rule to `false`, in order to allow using `console`.
+ - in the [variable-name](http://palantir.github.io/tslint/rules/variable-name/) rule, added `allow-leading-underscore`.
 
 ### Customising TSLint
 
