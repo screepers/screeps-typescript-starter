@@ -4,6 +4,8 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "search.exclude": {
+    "_book/**": true,
+    ".rpt2_cache/**": true,
     "dist/**": true,
     "node_modules/**": true,
     "typings/**": true
