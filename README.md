@@ -32,3 +32,11 @@ Finally, there are also NPM scripts that serve as aliases for these commands in 
 ## Typings
 
 The type definitions for Screeps come from [typed-screeps](https://github.com/screepers/typed-screeps). If you find a problem or have a suggestion, please open an issue there.
+
+## Documentation
+
+We also have a community-maintained [documentation page](https://screepers.gitbooks.io/screeps-typescript-starter/), which includes all the essentials to get you up and running with Screeps AI development in TypeScript, as well as various other tips and tricks to further improve your development workflow.
+
+## Contributing
+
+Issues, Pull Requests, and contribution to the docs are welcome! See our [Contributing Guidelines](CONTRIBUTING.md) for more details.
