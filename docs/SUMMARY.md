@@ -15,6 +15,7 @@
 * [Deploy destinations](./in-depth/deploy-destinations.md)
 * [TypeScript](./in-depth/typescript.md)
 * [Cookbook](./in-depth/cookbook.md)
+  * [Environment variables](./in-depth/cookbook/environment-variables.md)
 
 ---
 
