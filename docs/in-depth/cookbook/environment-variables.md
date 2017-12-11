@@ -4,7 +4,7 @@ Environment variables provide a more streamlined way to manage your build proces
 
 ## Setting it up
 
-Let's say that we want to set `NODE_ENV` to `production` for uploading to our main branch, and `development` for uploading to our Simulation branch. First we'll catch the environment variable and assign the compile target.
+Let's say that we want to set `NODE_ENV` to `production` for uploading to our main branch, and `development` for uploading to our Simulation branch. First we'll catch the environment variable and assign the compile target based on it.
 
 ```js
 // rollup.config.js
@@ -45,6 +45,7 @@ Then we'll change the build tasks on `package.json` to pass the environment vari
 ```bash
 npm install --save-dev cross-env
 ```
+
 ```json
 {
   "tasks": {
@@ -58,4 +59,65 @@ Now let's give it a try! Run `npm run deploy-dev` or `npm run deploy-prod` and s
 
 ## Setting up build toggles
 
-[TODO]
+You can also setup deployment-dependent variables (aka. "build toggles") that are injected to your code during build time to allow for more advanced optimisations like dead code elimination.
+
+To do this, install `rollup-plugin-replace`.
+
+```bash
+# npm
+$ npm install --save-dev rollup-plugin-replace
+
+# yarn
+$ yarn add --dev rollup-plugin-replace
+```
+
+Then configure your `rollup.config.js` to include your desired variables.
+
+```js
+// rollup.config.js
+import replace from 'rollup-plugin-replace';
+
+export default {
+  // ...
+  plugins: [
+    replace({
+      PRODUCTION: JSON.stringify(isProduction),
+      __BUILD_TIME__: JSON.stringify(Date.now()),
+      __REVISION__: JSON.stringify(require('git-rev-sync').short()),
+    })
+  ]
+};
+```
+
+> **Note:** Generally, you need to ensure that `rollup-plugin-replace` goes *before* other plugins, so that those plugins can apply any optimisations like dead code elimination.
+
+Variables set by this plugin will be replaced in the actual output JS code. When compiling your code, Rollup will replace the variable names with the output of the supplied expression or value.
+
+Once it's set up, you use it in your code.
+
+```ts
+// log the latest commit ID from git
+if (__REVISION__) {
+  console.log(`Revision ID: ${__REVISION__}`)
+}
+
+export function loop() {
+  if (!PRODUCTION) {
+    // will only be included in development mode
+    devLogger.log('loop started')
+  }
+}
+```
+
+### Notes
+
+Since TypeScript won't recognise these variables if you pass it blindly into your code, you will still need to declare them in a type definition (.d.ts) file.
+
+```ts
+// file.d.ts
+
+declare const __REVISION__: string;
+declare const __BUILD_TIME__: string;
+```
+
+Also, be careful not to use too common of a name, because it will replace it throughout your code without warning. A good standard is to make the variables all caps, and surrounded by double underscores, so they stand out (e.g. `__REVISION__`).
