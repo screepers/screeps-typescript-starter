@@ -34,7 +34,7 @@
     "rollup-plugin-screeps": "0.0.1",
     "rollup-plugin-typescript2": "^0.8.1",
     "tslint": "^5.8.0",
-    "typed-screeps": "^1.0.4",
+    "typed-screeps": "^2.0.0",
     "typescript": "^2.6.1"
   },
   "dependencies": {
