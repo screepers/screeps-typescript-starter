@@ -21,3 +21,24 @@ From version 3.0 onwards, the starter kit uses Rollup as its main module bundler
 * Simpler configuration (compared to Webpack)
 
 If you're still comfortable with using Webpack, the old version of the starter kit is available here (**TODO:** legacy branch link), but moving forward, no new features will be added to the Webpack version.
+
+### Note: Rollup and named exports
+
+By default, Rollup recognises ES6 modules. This means that some adjustments are necessary in order for Rollup to work well with CommonJS modules, particularly those with named exports like `screeps-profiler`. (See [#77](https://github.com/screepers/screeps-typescript-starter/issues/77))
+
+In this case, you will have to manually specify the named exports you use, which is where the `rollup-plugin-commonjs` plugin comes into play. This plugin resolves any CommonJS modules and converts them to ES6 modules, which can be bundled.
+
+Simply include the modules you want to bundle complete with its named exports, like so:
+
+```js
+commonjs({
+  namedExports: {
+    // left-hand side can be an absolute path, a path
+    // relative to the current directory, or the name
+    // of a module in node_modules
+    'node_modules/my-lib/index.js': ['named']
+  }
+})
+```
+
+**For more info:** [`rollup-plugin-commonjs` docs](https://github.com/rollup/rollup-plugin-commonjs)
