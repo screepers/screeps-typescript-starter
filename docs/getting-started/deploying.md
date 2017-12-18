@@ -16,7 +16,7 @@ The `screeps.json` file is a JSON configuration file separated into multiple env
 
 > **Note:** You don't have to manually create the target branch in your Screeps client if it doesn't exist yet. `rollup-plugin-screeps` will do it for you.
 
-## Running Your First Deploy
+## Running your first deploy
 
 Once you're done, run the following command:
 
@@ -28,4 +28,4 @@ You're done! Now go to your Screeps client and make sure your code is deployed p
 
 ![deploying-2](img/deploying-2.png)
 
-Ready for something extra? Read on.
+Ready for something extra? [Read on.](../in-depth/module-bundling.md)

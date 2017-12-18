@@ -16,6 +16,7 @@
 * [TypeScript](./in-depth/typescript.md)
 * [Cookbook](./in-depth/cookbook.md)
   * [Environment variables](./in-depth/cookbook/environment-variables.md)
+  * [One-line PowerShell setup](./in-depth/cookbook/one-line-powershell.md)
 
 ---
 

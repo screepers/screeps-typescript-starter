@@ -78,10 +78,12 @@ Then configure your `rollup.config.js` to include your desired variables.
 import replace from 'rollup-plugin-replace';
 
 export default {
-  // ...
   plugins: [
     replace({
+      // returns 'true' if code is bundled in prod mode
       PRODUCTION: JSON.stringify(isProduction),
+      // you can also use this to include deploy-related data, such as
+      // date + time of build, as well as latest commit ID from git
       __BUILD_TIME__: JSON.stringify(Date.now()),
       __REVISION__: JSON.stringify(require('git-rev-sync').short()),
     })
@@ -89,7 +91,9 @@ export default {
 };
 ```
 
-> **Note:** Generally, you need to ensure that `rollup-plugin-replace` goes *before* other plugins, so that those plugins can apply any optimisations like dead code elimination.
+> **Note:** Generally, you need to ensure that `rollup-plugin-replace` goes *before* other plugins, so we can be sure Rollup replaces these variables correctly and the remaining plugins can apply any optimisations (e.g. dead code elimination) correctly.
+
+> **Note:** Because these values are evaluated once as a string (for the find-and-replace), and once as an expression, they need to be wrapped in `JSON.stringify`.
 
 Variables set by this plugin will be replaced in the actual output JS code. When compiling your code, Rollup will replace the variable names with the output of the supplied expression or value.
 

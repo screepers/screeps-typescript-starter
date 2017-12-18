@@ -22,4 +22,4 @@ Or if you're running `yarn`:
 yarn
 ```
 
-Next up, we'll configure our environment and run our first code deploy.
+Next up, we'll configure our environment and [run our first code deploy](./deploying.md).
