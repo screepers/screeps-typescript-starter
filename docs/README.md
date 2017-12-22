@@ -28,4 +28,4 @@ Download the latest source [here](https://github.com/screepers/screeps-typescrip
 git clone https://github.com/screepers/screeps-typescript-starter.git
 ```
 
-Extract it to a folder, and let's get started!
+Extract it to a folder, and [let's get started](./getting-started/installation.md)!
