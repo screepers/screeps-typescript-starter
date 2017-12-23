@@ -2,7 +2,7 @@
 
 TypeScript is, in our opinion, the best language to write your Screeps codebase in. It combines the familiarity of JavaScript with the power of static typing.
 
-Static typing reduces the amount of bugs in your code by detecting type errors during compile time. In general, static type checkers like TypeScript and Flow [can prevent about 15%](https://blog.acolyer.org/2017/09/19/to-type-or-not-to-type-quantifying-detectable-bugs-in-javascript/) of the bugs that end up in committed code. Not only static typing, TypeScript also provides various productivity enhancements like advanced statement completion, as well as smart code refactoring.
+Static typing helps reduce the amount of bugs in your code by detecting type errors during compile time. In general, static type checkers like TypeScript and Flow [can prevent about 15%](https://blog.acolyer.org/2017/09/19/to-type-or-not-to-type-quantifying-detectable-bugs-in-javascript/) of the bugs that end up in committed code. Not only static typing, TypeScript also provides various productivity enhancements like advanced statement completion, as well as smart code refactoring.
 
 To read more about how TypeScript can help you in Screeps, read [this Screeps World article](https://screepsworld.com/2017/07/typescreeps-getting-started-with-ts-in-screeps/) by [@bonzaiferroni](https://github.com/bonzaiferroni).
 
