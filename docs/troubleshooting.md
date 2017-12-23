@@ -11,3 +11,12 @@ If you're getting the following error:
 ```
 
 Make sure you have [screepsmod-auth](https://github.com/ScreepsMods/screepsmod-auth) installed on your private server, and you've set a password on the account in your private server as well.
+
+## Unable to extend type interfaces (e.g. `Game`, `Memory`)
+
+Make sure you declare any extensions to the type interfaces as an [*ambient declaration*](https://stackoverflow.com/a/40916055). You can either:
+
+* put them inside a `*.d.ts` file, or
+* in an existing `.ts` file (with at least one `import` or `export`), you can use `declare global { interface CreepMemory { ... } }` to accomplish the same effect.
+
+**For more info:** https://github.com/screepers/typed-screeps/issues/27
