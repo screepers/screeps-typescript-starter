@@ -21,4 +21,4 @@
 ---
 
 * [Troubleshooting](./troubleshooting.md)
-* [Contributing guidelines](./contributing.md)
+* [Contributing to the docs](./contributing.md)

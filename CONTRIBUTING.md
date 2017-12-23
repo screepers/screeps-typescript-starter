@@ -4,19 +4,7 @@ This document outlines guides to get started on developing the starter kit.
 
 ## Contributing to the docs
 
-We welcome contributions to the docs! We're looking for ways to make the starter kit documentation better, as well as many other tips and tricks about Screeps AI development in TypeScript.
-
-You can start working on the docs locally as well. First, you'll need to install the [Gitbook](https://www.gitbook.com/) CLI.
-
-```bash
-npm install -g gitbook-cli
-```
-
-To run a local Gitbook server, run the following command on the project's root directory.
-
-```bash
-gitbook serve
-```
+Contributions to the docs are also welcome! We've documented the steps to do so [here](./docs/contributing.md).
 
 ## The Five Golden Rules
 
@@ -30,7 +18,7 @@ The simple steps of contributing to any GitHub project are as follows:
 
 To keep your fork of in sync with this repository, [follow this guide](https://help.github.com/articles/syncing-a-fork/).
 
-## Submitting a Pull Request
+## Submitting a pull request
 
 We accept almost all pull requests, as long as the following criterias are met:
 
