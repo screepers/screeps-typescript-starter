@@ -9,11 +9,7 @@
     "experimentalDecorators": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
-    "allowUnreachableCode": false,
-    "types": [
-      "lodash",
-      "typed-screeps"
-    ]
+    "allowUnreachableCode": false
   },
   "exclude": [
     "node_modules"
