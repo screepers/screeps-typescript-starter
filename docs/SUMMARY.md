@@ -7,6 +7,7 @@
 ### Getting Started
 
 * [Installation](./getting-started/installation.md)
+* [Authenticating with Screeps](./getting-started/authenticating.md)
 * [Deploying](./getting-started/deploying.md)
 
 ### In-Depth

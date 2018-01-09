@@ -2,17 +2,11 @@
 
 ## Building your configuration file
 
-The starter kit builds your code using `rollup`, which uses a `screeps.json` file as its configuration file. A sample config file is provided within the project, to use it, simply make a copy and rename it to `screeps.json`.
+The starter kit builds your code using `rollup`, which uses a `screeps.json` file we built on the previous section as its configuration file.
 
-```bash
-cp screeps.sample.json screeps.json
-```
+The `screeps.json` file is a JSON configuration file separated into multiple environments. We're going to focus on the `main` environment to get you started. If you'd like to deploy to a different branch, be sure to change the `branch` key to the branch you'd like to deploy to.
 
-> **IMPORTANT:** The `screeps.json` file contains your Screeps credentials. If you use any source control, **DO NOT** check in this file into your repository.
-
-The `screeps.json` file is a JSON configuration file separated into multiple environments. We're going to focus on the `main` environment to get you starter. Fill in your Screeps credentials accordingly, along with your target branch.
-
-![deploying-1](img/deploying-1.png)
+![authenticating-4](img/authenticating-4.png)
 
 > **Note:** You don't have to manually create the target branch in your Screeps client if it doesn't exist yet. `rollup-plugin-screeps` will do it for you.
 
