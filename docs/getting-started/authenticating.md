@@ -40,4 +40,16 @@ Now, paste it to your `screeps.json` file.
 
 ![authenticating-4](img/authenticating-4.png)
 
-Congratulations, you've successfully authenticated! Next up, we'll configure our environment and [run our first code deploy](./deploying.md).
+## Sanity check
+
+Now we'll do a quick check if things are running properly. Let's perform a quick deploy.
+
+```bash
+npm run push-main
+```
+
+Now go to your Screeps client and check if the `main` branch is created, or if said branch already exists, the code is overwriten to it.
+
+It works? Good, you've successfully authenticated!
+
+Next up, we'll configure our environment and [run our first code deploy](./deploying.md).
