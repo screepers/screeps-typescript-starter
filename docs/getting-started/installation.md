@@ -22,4 +22,4 @@ Or if you're running `yarn`:
 yarn
 ```
 
-Next up, we'll configure our environment and [run our first code deploy](./deploying.md).
+Once that's all done, let's [authenticate with the Screeps server](./authenticating.md).
