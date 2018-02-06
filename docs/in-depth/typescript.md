@@ -2,7 +2,7 @@
 
 TypeScript is, in our opinion, the best language to write your Screeps codebase in. It combines the familiarity of JavaScript with the power of static typing.
 
-Static typing helps reduce the amount of bugs in your code by detecting type errors during compile time. In general, static type checkers like TypeScript and Flow [can prevent about 15%](https://blog.acolyer.org/2017/09/19/to-type-or-not-to-type-quantifying-detectable-bugs-in-javascript/) of the bugs that end up in committed code. Not only static typing, TypeScript also provides various productivity enhancements like advanced statement completion, as well as smart code refactoring.
+Static type checkers like TypeScript and [Flow](https://flow.org/) help reduce the amount of bugs in your code by detecting type errors during compile time. In general, using static typing in your JavaScript code [can help prevent about 15%](https://blog.acolyer.org/2017/09/19/to-type-or-not-to-type-quantifying-detectable-bugs-in-javascript/) of the bugs that end up in committed code. Not only static typing, TypeScript also provides various productivity enhancements like advanced statement completion, as well as smart code refactoring.
 
 To read more about how TypeScript can help you in Screeps, read [this Screeps World article](https://screepsworld.com/2017/07/typescreeps-getting-started-with-ts-in-screeps/) by [@bonzaiferroni](https://github.com/bonzaiferroni).
 
@@ -12,13 +12,14 @@ This section provides TypeScript-specific tips &amp; tricks for you to make the 
 
 The `--strict` compiler flag was introduced in TypeScript 2.3 which activates TypeScript's "strict mode". The strict mode sets all strict typechecking options to `true` by default.
 
-As of TypeScript 2.6, the affected options are:
+As of TypeScript 2.7, the affected options are:
 
 * `--noImplicitAny`
 * `--noImplicitThis`
 * `--alwaysStrict`
 * `--strictNullChecks`
 * `--strictFunctionTypes`
+* `--strictPropertyInitialization`
 
 Starting from version 2.0 of the starter kit, we've enabled the `--strict` flag in `tsconfig.json`. If this gives you compile time errors, you can try setting `"strict"` to `false`, or by overriding one or more of the options listed above.
 

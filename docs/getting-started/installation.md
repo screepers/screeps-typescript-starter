@@ -4,21 +4,19 @@
 
 You will need:
 
- - Node.JS (Latest LTS is recommended)
- - A Package Manager (`yarn` or `npm`)
+ - [Node.JS](https://nodejs.org/en/download) (>= 8.0.0)
+ - A Package Manager ([Yarn](https://yarnpkg.com/en/docs/getting-started) or [npm](https://docs.npmjs.com/getting-started/installing-node))
  - Rollup CLI (Optional, install via `npm install -g rollup`)
 
 ## Installing `npm` modules
 
-Run the following the command to install the required packages and TypeScript declaration files:
+Open the folder in your terminal and run your package manager to install install the required packages and TypeScript declaration files:
 
 ```bash
+# npm
 npm install
-```
 
-Or if you're running `yarn`:
-
-```bash
+# yarn
 yarn
 ```
 
