@@ -27,17 +27,16 @@
   "devDependencies": {
     "@types/lodash": "^3.10.1",
     "@types/screeps": "^2.1.0",
-    "@types/source-map": "^0.5.2",
-    "rollup": "^0.53.2",
+    "rollup": "^0.55.3",
     "rollup-plugin-clean": "^1.0.0",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-screeps": "^0.1.1",
-    "rollup-plugin-typescript2": "^0.9.0",
+    "rollup-plugin-screeps": "^0.1.2",
+    "rollup-plugin-typescript2": "^0.11.0",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.1"
+    "typescript": "^2.7.1"
   },
   "dependencies": {
-    "source-map": "^0.6.1"
+    "source-map": "^0.7.0"
   }
 }
