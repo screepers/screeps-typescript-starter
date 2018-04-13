@@ -6,13 +6,13 @@
   "//": "If you add or change the names of destinations in screeps.json, make sure you update these scripts to reflect the changes",
   "scripts": {
     "lint": "tslint \"src/**/*.ts\"",
-    "push-main": "rollup -c --dest main",
-    "push-pserver": "rollup -c --dest pserver",
-    "push-sim": "rollup -c --dest sim",
+    "push-main": "rollup -c --environment DEST:main",
+    "push-pserver": "rollup -c --environment DEST:pserver",
+    "push-sim": "rollup -c --environment DEST:sim",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch-main": "rollup -cw --dest main",
-    "watch-pserver": "rollup -cw --dest pserver",
-    "watch-sim": "rollup -cw --dest sim"
+    "watch-main": "rollup -cw --environment DEST:main",
+    "watch-pserver": "rollup -cw --environment DEST:pserver",
+    "watch-sim": "rollup -cw --environment DEST:sim"
   },
   "repository": {
     "type": "git",
@@ -26,15 +26,15 @@
   "homepage": "https://github.com/screepers/screeps-typescript-starter#readme",
   "devDependencies": {
     "@types/lodash": "^3.10.1",
-    "@types/screeps": "^2.1.0",
-    "rollup": "^0.55.3",
+    "@types/screeps": "^2.2.1",
+    "rollup": "^0.57.1",
     "rollup-plugin-clean": "^1.0.0",
-    "rollup-plugin-commonjs": "^8.2.6",
-    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-commonjs": "^9.1.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-screeps": "^0.1.2",
-    "rollup-plugin-typescript2": "^0.11.0",
-    "tslint": "^5.8.0",
-    "typescript": "^2.7.1"
+    "rollup-plugin-typescript2": "^0.12.0",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.1"
   },
   "dependencies": {
     "source-map": "~0.6.1"

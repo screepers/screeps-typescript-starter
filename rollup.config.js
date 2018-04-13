@@ -7,10 +7,10 @@ import typescript from "rollup-plugin-typescript2";
 import screeps from "rollup-plugin-screeps";
 
 let cfg;
-const i = process.argv.indexOf("--dest") + 1;
-if (i == 0) {
+const dest = process.env.DEST;
+if (!dest) {
   console.log("No destination specified - code will be compiled but not uploaded");
-} else if (i >= process.argv.length || (cfg = require("./screeps")[process.argv[i]]) == null) {
+} else if ((cfg = require("./screeps")[dest]) == null) {
   throw new Error("Invalid upload destination");
 }
 
