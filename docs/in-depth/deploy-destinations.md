@@ -37,10 +37,10 @@ The `screeps.json` file is a JSON configuration file separated into multiple dep
 }
 ```
 
-You can make as many separate destinations as you want. Just make a copy of any config object and perform the necessary changes. Once you're done, use the `--dest` argument on the `rollup` command to specify which environment to upload to.
+You can make as many separate destinations as you want. Just make a copy of any config object and perform the necessary changes. Once you're done, use the `--environment DEST:<dest>` argument on the `rollup` command to specify which environment to upload to.
 
 ```bash
-rollup -c --dest main
+rollup -c --environment DEST:main
 ```
 
-Omitting the `--dest` argument will perform a dry run, which can be used for local directories via symlinks.
+Omitting the destination will perform a dry run, which will compile and bundle the code without uploading it.
