@@ -1,5 +1,6 @@
 import * as Config from "../../config/config";
 
+import { State } from "./roles/creepBase";
 import * as harvester from "./roles/harvester";
 import * as wrk from "./roles/worker";
 import * as job from "./jobs";
@@ -153,14 +154,10 @@ function _buildJobs(room: Room) {
   _.each(constSites, (s) => jobs.push(new job.Job(s, job.JobAction.Build)));
 
   // things that need energy
-  // let drained = room.find(FIND_MY_STRUCTURES, {filter: (s: Structure) => {
-  //   let es = s as any as {energy: number, energyCapacity: number};
-  //   return es.energyCapacity && es.energy < es.energyCapacity;
-  // }});
-  let drained = room.find(FIND_MY_STRUCTURES, (s: Structure) => {
+  let drained = room.find(FIND_MY_STRUCTURES, {filter: (s) => {
     let es = s as any as {energy: number, energyCapacity: number};
     return es.energyCapacity > 0 && es.energy < es.energyCapacity;
-  });
+  }});
   _.each(drained, (s) => jobs.push(new job.Job(s, job.JobAction.Transfer)));
 
   return jobs;
@@ -171,7 +168,7 @@ function _assignJobs(jobs: job.Job[]) {
 
     // first check to see if we've already assigned this job by checking each worker's jobs
     let workersOnJob = _.filter(workers, (w) => w.job != null && j.equals(w.job));
-    const workersNeeded = 3 - workersOnJob.length;
+    let workersNeeded = 3 - workersOnJob.length;
 
     // if the job isn't assigned, pick someone to do it
     if (workersNeeded > 0) {
@@ -181,16 +178,17 @@ function _assignJobs(jobs: job.Job[]) {
         // log.info(`{${job.JobAction[j.action]} ${j.target.id}} unassigned - no workers available`);
         return;
       } else if (idleWorkers.length < workersNeeded) {
-        // log.info(`{${job.JobAction[j.action]} ${j.target.id}} will be under assigned - not enough workers available to meet quota`);
+        log.info(`{${job.JobAction[j.action]} ${j.target.id}} will be under assigned - not enough workers available to meet quota`);
+        workersNeeded = idleWorkers.length;
       }
 
       // now we know idleWorkers.length >= workersNeeded
       for (let i=0; i<workersNeeded; i++) {
         idleWorkers[i].assignJob(j);
-        // log.info(`assigning job {${j.action} ${j.target.id}} to ${idleWorkers[i].name}`);
+        log.info(`assigning job {${j.action} ${j.target.id}} to ${idleWorkers[i].name}`);
       }
     } else {
-      // log.info(`{${job.JobAction[j.action]} ${j.target.id}} is already assigned to ${JSON.stringify(_.map(workersOnJob, (w) => w.name))}`);
+      log.info(`{${job.JobAction[j.action]} ${j.target.id}} is already assigned to ${JSON.stringify(_.map(workersOnJob, (w) => w.name))}`);
     }
 
     // now our job has a worker, either from previous or just now

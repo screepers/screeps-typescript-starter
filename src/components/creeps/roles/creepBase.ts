@@ -1,5 +1,17 @@
 import {log} from '../../../lib/logger/log'
 
+export enum State {
+  Idle,
+  Working,
+  Collecting
+}
+
+declare global {
+  interface CreepMemory {
+    state: State
+  }
+}
+
 export class Base {
   protected readonly _creep: Creep;
 

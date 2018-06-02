@@ -8,15 +8,8 @@ declare enum CreepRole {
     Harvester
 }
 
-declare enum State {
-    Idle,
-    Working,
-    Collecting
-}
-
 declare interface CreepMemory {
     role: string
-    state: State
     job: string
     silo: string
     energySource: string

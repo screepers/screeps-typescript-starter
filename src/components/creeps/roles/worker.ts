@@ -13,7 +13,7 @@ export class Worker extends creep.Base {
         this.backToIdle();
       }
     } else {
-      this.state = State.Idle;
+      this.state = creep.State.Idle;
       this._job = null;
     }
   }
@@ -24,7 +24,7 @@ export class Worker extends creep.Base {
 
   public assignJob(job: job.Job) {
     this._job = job;
-    this.state = State.Working;
+    this.state = creep.State.Working;
     this._creep.memory.job = job.toMemory();
   }
 
@@ -32,7 +32,7 @@ export class Worker extends creep.Base {
       this._job = null;
       delete this._creep.memory.job;
       // log.info(`${this._creep.name}: reset to idle`);
-      this.state = State.Idle;
+      this.state = creep.State.Idle;
   }
 
   public run() {
@@ -40,24 +40,24 @@ export class Worker extends creep.Base {
     // log.debug(`state: ${creep.State[this.state]}, carry: ${this._creep.carry.energy}, capacity: ${this._creep.carryCapacity}, job: ${jobStr}`);
 
     // first maintain the state machine
-    if (this.state === State.Collecting && _.sum(this._creep.carry) == this._creep.carryCapacity) {
+    if (this.state === creep.State.Collecting && _.sum(this._creep.carry) == this._creep.carryCapacity) {
       // we're collecting our energy and we're full, time to go do work
-      this.state = this._job ? State.Working : State.Idle;  // if we don't have a job then we're ready for one
-    } else if ((this.state == State.Idle || this.state === State.Working) && this._creep.carry.energy === 0) {
+      this.state = this._job ? creep.State.Working : creep.State.Idle;  // if we don't have a job then we're ready for one
+    } else if ((this.state == creep.State.Idle || this.state === creep.State.Working) && this._creep.carry.energy === 0) {
       // we were doing work and we ran out of energy, time to get some more
-      this.state = State.Collecting;
+      this.state = creep.State.Collecting;
     }
 
     // now do the actual work
-    if (this.state === State.Collecting) {
+    if (this.state === creep.State.Collecting) {
       // need to go get some energy from a container, find the closest non-empty one
       // log.debug("collecting energy");
       this.collectEnergy();
-    } else if (this.state === State.Working) {
+    } else if (this.state === creep.State.Working) {
       // time to get to work
       // log.debug("working");
       this.doWork();
-    } else if (this.state === State.Idle) {
+    } else if (this.state === creep.State.Idle) {
       // idle workers should upgrade the room controller
       // log.debug("upgrading controller");
       this.upgradeController();
