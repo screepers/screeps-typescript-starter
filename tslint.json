@@ -1,6 +1,8 @@
 {
+  "rulesDirectory": "tslint-plugin-prettier",
   "extends" : [
-    "tslint:recommended"
+    "tslint:recommended",
+    "tslint-config-prettier"
   ],
   "rules": {
     "forin": false,
