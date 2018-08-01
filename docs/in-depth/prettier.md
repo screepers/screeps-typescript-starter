@@ -56,3 +56,4 @@ yarn add --dev tslint-plugin-prettier
     "prettier": true
   }
 }
+```
