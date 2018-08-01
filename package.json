@@ -27,9 +27,10 @@
   "homepage": "https://github.com/screepers/screeps-typescript-starter#readme",
   "devDependencies": {
     "@types/lodash": "^3.10.1",
+    "@types/node": "^10.5.5",
     "@types/screeps": "^2.4.0",
     "prettier": "^1.14.0",
-    "rollup": "^0.57.1",
+    "rollup": "^0.63.4",
     "rollup-plugin-clear": "^2.0.7",
     "rollup-plugin-commonjs": "^9.1.4",
     "rollup-plugin-node-resolve": "^3.3.0",
