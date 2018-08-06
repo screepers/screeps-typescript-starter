@@ -12,7 +12,7 @@ If you have an existing copy of your starter kit, follow these steps:
 
 ## Seting up Screeps authentication
 
-The authentication token is pulled by the starter kit from a file named `screeps.json`. A sample config file (`screeps.sample.json`) is provided within the project, to use it, simply make a copy and rename it to `screeps.json`.
+The authentication token is pulled by the starter kit from a file named `screeps.json`. A sample config file \(`screeps.sample.json`\) is provided within the project, to use it, simply make a copy and rename it to `screeps.json`.
 
 ```bash
 cp screeps.sample.json screeps.json
@@ -22,23 +22,23 @@ cp screeps.sample.json screeps.json
 
 ## Generating an auth token
 
-To generate an authentication token, click **[your username] > Manage account**. You should see the **Auth tokens** in the options now, click it.
+To generate an authentication token, click **\[your username\] &gt; Manage account**. You should see the **Auth tokens** in the options now, click it.
 
-![authenticating-1](img/authenticating-1.png)
+![authenticating-1](../.gitbook/assets/authenticating-1.png)
 
 On the next screen, we'll create a full access token. We pick the **Full access** option, then click the **Generate Token** button.
 
-![authenticating-2](img/authenticating-2.png)
+![authenticating-2](../.gitbook/assets/authenticating-2.png)
 
 Your generated token should now be shown on your screen. Copy it to your clipboard.
 
-![authenticating-3](img/authenticating-3.png)
+![authenticating-3](../.gitbook/assets/authenticating-3.png)
 
 > **Note:** This token will be displayed **only once**! Make sure to never lose it. However, if you did lose it, simply remove said token from your account, and create a new one.
 
 Now, paste it to your `screeps.json` file.
 
-![authenticating-4](img/authenticating-4.png)
+![authenticating-4](../.gitbook/assets/authenticating-4.png)
 
 ## Sanity check
 
@@ -52,4 +52,5 @@ Now go to your Screeps client and check if the `main` branch is created, or if s
 
 It works? Good, you've successfully authenticated!
 
-Next up, we'll configure our environment and [run our first code deploy](./deploying.md).
+Next up, we'll configure our environment and [run our first code deploy](deploying.md).
+

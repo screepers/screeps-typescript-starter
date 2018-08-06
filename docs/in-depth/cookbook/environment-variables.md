@@ -1,4 +1,4 @@
-# Managing deploys with environment variables
+# Environment variables
 
 Environment variables provide a more streamlined way to manage your build process. We can also use it to define "build toggles", or environment-based variables that will be injected into your scripts to be used during runtime.
 
@@ -6,7 +6,7 @@ Environment variables provide a more streamlined way to manage your build proces
 
 Let's say that we want to set `NODE_ENV` to `production` for uploading to our main branch, and `development` for uploading to our Simulation branch. First we'll catch the environment variable and assign the compile target based on it.
 
-```js
+```javascript
 // rollup.config.js
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -31,7 +31,7 @@ export default {
 
 Then we'll change the build tasks on `package.json` to pass the environment variable before running the rollup command.
 
-```json
+```javascript
 {
   "tasks": {
     "deploy-prod": "NODE_ENV=production rollup -c",
@@ -46,7 +46,7 @@ Then we'll change the build tasks on `package.json` to pass the environment vari
 npm install --save-dev cross-env
 ```
 
-```json
+```javascript
 {
   "tasks": {
     "deploy-prod": "cross-env NODE_ENV=production rollup -c",
@@ -59,7 +59,7 @@ Now let's give it a try! Run `npm run deploy-dev` or `npm run deploy-prod` and s
 
 ## Setting up build toggles
 
-You can also setup deployment-dependent variables (aka. "build toggles") that are injected to your code during build time to allow for more advanced optimisations like dead code elimination.
+You can also setup deployment-dependent variables \(aka. "build toggles"\) that are injected to your code during build time to allow for more advanced optimisations like dead code elimination.
 
 To do this, install `rollup-plugin-replace`.
 
@@ -73,7 +73,7 @@ $ yarn add --dev rollup-plugin-replace
 
 Then configure your `rollup.config.js` to include your desired variables.
 
-```js
+```javascript
 // rollup.config.js
 import replace from 'rollup-plugin-replace';
 
@@ -91,15 +91,15 @@ export default {
 };
 ```
 
-> **Note:** Generally, you need to ensure that `rollup-plugin-replace` goes *before* other plugins, so we can be sure Rollup replaces these variables correctly and the remaining plugins can apply any optimisations (e.g. dead code elimination) correctly.
-
-> **Note:** Because these values are evaluated once as a string (for the find-and-replace), and once as an expression, they need to be wrapped in `JSON.stringify`.
+> **Note:** Generally, you need to ensure that `rollup-plugin-replace` goes _before_ other plugins, so we can be sure Rollup replaces these variables correctly and the remaining plugins can apply any optimisations \(e.g. dead code elimination\) correctly.
+>
+> **Note:** Because these values are evaluated once as a string \(for the find-and-replace\), and once as an expression, they need to be wrapped in `JSON.stringify`.
 
 Variables set by this plugin will be replaced in the actual output JS code. When compiling your code, Rollup will replace the variable names with the output of the supplied expression or value.
 
 Once it's set up, you use it in your code.
 
-```ts
+```typescript
 // log the latest commit ID from git
 if (__REVISION__) {
   console.log(`Revision ID: ${__REVISION__}`)
@@ -115,13 +115,14 @@ export function loop() {
 
 ### Notes
 
-Since TypeScript won't recognise these variables if you pass it blindly into your code, you will still need to declare them in a type definition (.d.ts) file.
+Since TypeScript won't recognise these variables if you pass it blindly into your code, you will still need to declare them in a type definition \(.d.ts\) file.
 
-```ts
+```typescript
 // file.d.ts
 
 declare const __REVISION__: string;
 declare const __BUILD_TIME__: string;
 ```
 
-Also, be careful not to use too common of a name, because it will replace it throughout your code without warning. A good standard is to make the variables all caps, and surrounded by double underscores, so they stand out (e.g. `__REVISION__`).
+Also, be careful not to use too common of a name, because it will replace it throughout your code without warning. A good standard is to make the variables all caps, and surrounded by double underscores, so they stand out \(e.g. `__REVISION__`\).
+

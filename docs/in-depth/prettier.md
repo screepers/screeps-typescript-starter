@@ -1,10 +1,10 @@
-# Code formatting with Prettier
+# Prettier
 
 [Prettier](https://prettier.io/) is an automatic code formatter which supports various languages, including TypeScript. It also has extensions for various text editors like [VSCode](https://github.com/prettier/prettier-vscode), [Atom](https://github.com/prettier/prettier-atom), and even [Vim](https://github.com/prettier/vim-prettier). If you have installed these extensions, it will use Prettier's service to automatically format your code after saving.
 
 If you would rather not use Prettier instead, you can easily disable it too. In VSCode, open `.vscode/settings.json`, then change the `"editor.formatOnSave"` option to `false`:
 
-```json
+```javascript
 {
   "[json]": {
     "editor.formatOnSave": false
@@ -22,7 +22,7 @@ If you would rather not use Prettier instead, you can easily disable it too. In 
 
 The `.prettierrc` file configures how Prettier formats your code. By default we use the following options.
 
-```json
+```javascript
 {
   "semi": true,
   "tabWidth": 2,
@@ -34,7 +34,7 @@ The `.prettierrc` file configures how Prettier formats your code. By default we 
 
 We can use `tslint-config-prettier` to override some TSLint rules with its Prettier counterparts. In your `tslint.json` file, extend `tslint-config-prettier`.
 
-```json
+```javascript
 {
   "extends" : [
     "tslint:recommended",
@@ -49,7 +49,7 @@ To make Prettier error out on formatting errors, we can also use `tslint-plugin-
 yarn add --dev tslint-plugin-prettier
 ```
 
-```json
+```javascript
 {
   "rulesDirectory": ["tslint-plugin-prettier"],
   "rules": {
@@ -57,3 +57,4 @@ yarn add --dev tslint-plugin-prettier
   }
 }
 ```
+

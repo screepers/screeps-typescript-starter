@@ -1,26 +1,22 @@
-# Summary
+# Table of contents
 
 * [Introduction](README.md)
 
----
+## Getting Started
 
-### Getting Started
+* [Installation](getting-started/installation.md)
+* [Authenticating with Screeps](getting-started/authenticating.md)
+* [Deploying](getting-started/deploying.md)
 
-* [Installation](./getting-started/installation.md)
-* [Authenticating with Screeps](./getting-started/authenticating.md)
-* [Deploying](./getting-started/deploying.md)
+## In-Depth
 
-### In-Depth
+* [Module bundling](in-depth/module-bundling.md)
+* [Deploy destinations](in-depth/deploy-destinations.md)
+* [TypeScript](in-depth/typescript.md)
+* [Prettier](in-depth/prettier.md)
+* [Cookbook](in-depth/cookbook/README.md)
+  * [Environment variables](in-depth/cookbook/environment-variables.md)
+  * [One-line PowerShell setup](in-depth/cookbook/one-line-powershell.md)
+* [Troubleshooting](in-depth/troubleshooting.md)
+* [Contributing to the docs](in-depth/contributing.md)
 
-* [Module bundling](./in-depth/module-bundling.md)
-* [Deploy destinations](./in-depth/deploy-destinations.md)
-* [TypeScript](./in-depth/typescript.md)
-* [Prettier](./in-depth/prettier.md)
-* [Cookbook](./in-depth/cookbook.md)
-  * [Environment variables](./in-depth/cookbook/environment-variables.md)
-  * [One-line PowerShell setup](./in-depth/cookbook/one-line-powershell.md)
-
----
-
-* [Troubleshooting](./troubleshooting.md)
-* [Contributing to the docs](./contributing.md)
