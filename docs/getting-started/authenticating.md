@@ -18,7 +18,9 @@ The authentication token is pulled by the starter kit from a file named `screeps
 cp screeps.sample.json screeps.json
 ```
 
-> **IMPORTANT:** The `screeps.json` file contains your Screeps credentials. If you use any source control, **DO NOT** check in this file into your repository.
+{% hint style="danger" %}
+**IMPORTANT:** The `screeps.json` file contains your Screeps credentials! If you use any source control to store your codebase, **DO NOT** check in this file into your repository.
+{% endhint %}
 
 ## Generating an auth token
 

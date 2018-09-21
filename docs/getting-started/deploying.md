@@ -6,9 +6,9 @@ The starter kit builds your code using `rollup`, which uses a `screeps.json` fil
 
 The `screeps.json` file is a JSON configuration file separated into multiple environments. We're going to focus on the `main` environment to get you started. If you'd like to deploy to a different branch, be sure to change the `branch` key to the branch you'd like to deploy to.
 
-![authenticating-4](../.gitbook/assets/authenticating-4.png)
-
-> **Note:** You don't have to manually create the target branch in your Screeps client if it doesn't exist yet. `rollup-plugin-screeps` will do it for you.
+{% hint style="info" %}
+You don't have to manually create the target branch in your Screeps client if it doesn't exist yet. `rollup-plugin-screeps` will do it for you.
+{% endhint %}
 
 ## Running your first deploy
 

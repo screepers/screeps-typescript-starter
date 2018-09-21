@@ -40,7 +40,9 @@ Then we'll change the build tasks on `package.json` to pass the environment vari
 }
 ```
 
-**Note:** On Windows, setting the environment variables as defined above will not work. For a cross-platform solution to define environment variables, use `cross-env`.
+{% hint style="warning" %}
+On Windows, setting the environment variables as defined above will not work. For a cross-platform solution to define environment variables, use `cross-env`.
+{% endhint %}
 
 ```bash
 npm install --save-dev cross-env
@@ -91,9 +93,13 @@ export default {
 };
 ```
 
-> **Note:** Generally, you need to ensure that `rollup-plugin-replace` goes _before_ other plugins, so we can be sure Rollup replaces these variables correctly and the remaining plugins can apply any optimisations \(e.g. dead code elimination\) correctly.
->
-> **Note:** Because these values are evaluated once as a string \(for the find-and-replace\), and once as an expression, they need to be wrapped in `JSON.stringify`.
+{% hint style="info" %}
+Generally, you need to ensure that `rollup-plugin-replace` goes _before_ other plugins, so we can be sure Rollup replaces these variables correctly and the remaining plugins can apply any optimisations \(e.g. dead code elimination\) correctly.
+{% endhint %}
+
+{% hint style="warning" %}
+Because these values are evaluated once as a string \(for the find-and-replace\), and once as an expression, they need to be wrapped in `JSON.stringify`.
+{% endhint %}
 
 Variables set by this plugin will be replaced in the actual output JS code. When compiling your code, Rollup will replace the variable names with the output of the supplied expression or value.
 
