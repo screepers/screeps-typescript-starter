@@ -44,9 +44,14 @@ Now, paste it to your `screeps.json` file.
 
 ## Sanity check
 
-Now we'll do a quick check if things are running properly. Let's perform a quick deploy.
+Now we'll do a quick check if things are running properly. 
 
 ```bash
+# needed only once to
+# download the packages
+npm install
+
+# Perform a quick deploy.
 npm run push-main
 ```
 
