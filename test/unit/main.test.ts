@@ -1,5 +1,5 @@
 import {assert} from "chai";
-import {loop} from "../src/main";
+import {loop} from "../../src/main";
 import {Game, Memory} from "./mock"
 
 describe("main", () => {
