@@ -14,6 +14,7 @@
 * [Deploy destinations](in-depth/deploy-destinations.md)
 * [TypeScript](in-depth/typescript.md)
 * [Prettier](in-depth/prettier.md)
+* [Testing](in-depth/testing.md)
 * [Cookbook](in-depth/cookbook/README.md)
   * [Environment variables](in-depth/cookbook/environment-variables.md)
   * [One-line PowerShell setup](in-depth/cookbook/one-line-powershell.md)
