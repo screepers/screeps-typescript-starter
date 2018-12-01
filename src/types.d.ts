@@ -2,6 +2,10 @@
 
 // memory extension samples
 interface CreepMemory {
+  job: string | null;
+  source_id: string;
+  spawn_id: string;
+  controller_id: string;
   role: string;
   room: string;
   working: boolean;
