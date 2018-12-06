@@ -1,15 +1,20 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Jobs } from "jobs";
+import Traffic from "traffic"
 import Names from "names";
 
 console.log("Booting up...");
 
+// console.log("Clean up all construction sites...")
+// _.each(Game.constructionSites, c => c.remove())
+
 let prioritizedJobList: any[] = []
+
+if (!Memory.traffic) Memory.traffic = {}
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
-  console.log(`Current game tick is ${Game.time}`)
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
@@ -18,17 +23,26 @@ export const loop = ErrorMapper.wrapLoop(() => {
     }
   }
 
+  // TODO try to flip on its head -- generate list of jobs, THEN looks for screeps who can do it.
+
+  // Pick priorities...
+  // Only build one thing at a time for now
+  if (!_.keys(Game.constructionSites).length)
+    Traffic.buildRoads()
+
   // Mess with the Prioritized Jobs List
   if (prioritizedJobList.length == 0) {
     console.log("Adding jobs to the list")
-    prioritizedJobList = prioritizedJobList.concat(Jobs)
+    prioritizedJobList = _.shuffle(Jobs)
   }
 
   // For each creep, go down the list from high to low priority trying to assign a job
   const idle_creeps = _.reject(Game.creeps, c => c.memory.job)
   _.each(idle_creeps, creep => {
-    let jobList = _.shuffle(prioritizedJobList) // someday you should use priorities here
-    let job = jobList[0]
+    let job = prioritizedJobList.shift()
+    if (!job) {
+      return;
+    }
     if (job.validate(creep)) {
       console.log(creep.name, "assigned", job.name)
     } else {
@@ -45,10 +59,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
 
   _.each(Game.spawns, function (spawn) {
-    console.log(spawn.name)
+    //console.log(spawn.name)
     if (spawn.canCreateCreep) {
       spawn.spawnCreep([CARRY, CARRY, WORK, WORK, MOVE, MOVE], _.shuffle(Names)[0])
-      spawn.spawnCreep([CARRY, WORK, MOVE], _.shuffle(Names)[0])
+      //spawn.spawnCreep([CARRY, WORK, MOVE], _.shuffle(Names)[0])
     }
   })
 

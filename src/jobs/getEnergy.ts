@@ -1,5 +1,3 @@
-import { getDefaultSettings } from "http2";
-
 export default {
   name: 'getEnergy',
   validate: function (creep: Creep) {
@@ -14,7 +12,7 @@ export default {
     return true;
   },
   perform: function (creep: Creep) {
-    creep.say("ë")
+    // creep.say("ë")
 
     if (!creep.memory.source_id) throw "Missing source"
 
@@ -24,6 +22,11 @@ export default {
 
     creep.moveTo(source)
     creep.harvest(source)
+
+    const structures = creep.pos.lookFor("structure")
+    if (!structures.length) {
+      Memory.traffic[`${creep.pos.roomName},${creep.pos.x},${creep.pos.y}`] = (Memory.traffic[`${creep.pos.roomName},${creep.pos.x},${creep.pos.y}`] + 1) || 1
+    }
 
     if (_.sum(creep.carry) >= creep.carryCapacity)
       creep.memory.job = null;

@@ -1,13 +1,15 @@
-import { getDefaultSettings } from "http2";
-
 export default {
-    name: 'returnEnergy',
+    name: 'transferToSpawn',
     validate: function (creep: Creep) {
 
-        const spawn = creep.pos.findClosestByRange(FIND_MY_SPAWNS);
+        if (!creep.carry.energy) return false
+
+        const spawn = creep.pos.findClosestByRange(FIND_MY_SPAWNS, {
+            filter: s => (s.structureType == STRUCTURE_SPAWN) && (s.energy < s.energyCapacity)
+        });
         if (!spawn) return false;
 
-        creep.memory.job = 'returnEnergy'
+        creep.memory.job = 'transferToSpawn'
         creep.memory.spawn_id = spawn.id
         return true;
     },
@@ -19,6 +21,12 @@ export default {
         // move toward it, or...
         let spawn: StructureSpawn | null = Game.getObjectById(creep.memory.spawn_id)
         if (!spawn) throw "Missing spawn"
+
+        if (spawn.energy == spawn.energyCapacity) {
+            console.log("Spawn filled up while en-route.")
+            creep.memory.job = null;
+            return
+        }
 
         creep.moveTo(spawn)
         creep.transfer(spawn, RESOURCE_ENERGY)

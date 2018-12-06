@@ -4,6 +4,8 @@ export default {
     name: 'upgradeController',
     validate: function (creep: Creep) {
 
+        if (!creep.carry.energy) return false
+
         let controllers = _.filter(Game.structures, s => s.structureType == STRUCTURE_CONTROLLER)
         if (controllers.length == 0) return false;
         let controller = controllers[0];
