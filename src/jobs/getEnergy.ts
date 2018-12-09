@@ -4,11 +4,14 @@ export default {
     // Have room?
     if (_.sum(creep.carry) >= creep.carryCapacity) return false;
 
-    const source = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
-    if (!source) return false;
+    const sources = creep.room.find(FIND_SOURCES_ACTIVE)
+    if (!sources || sources.length == 0) return false;
+
+    // TODO make sure you have work body part lol...
 
     creep.memory.job = 'getEnergy'
-    creep.memory.source_id = source.id
+    if (!creep.memory.source_id)
+      creep.memory.source_id = _.shuffle(sources)[0].id
     return true;
   },
   perform: function (creep: Creep) {
@@ -18,7 +21,12 @@ export default {
 
     // move toward it, or...
     let source: Source | null = Game.getObjectById(creep.memory.source_id)
-    if (!source) throw "Missing source"
+    if (!source) {
+      console.log("[!] can't find source for some reason")
+      delete creep.memory.source_id;
+      creep.memory.job = null;
+      return
+    }
 
     creep.moveTo(source)
     creep.harvest(source)
@@ -30,5 +38,6 @@ export default {
 
     if (_.sum(creep.carry) >= creep.carryCapacity)
       creep.memory.job = null;
+
   }
 }

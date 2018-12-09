@@ -4,6 +4,8 @@ export default {
     name: 'upgradeController',
     validate: function (creep: Creep) {
 
+        if (_.random(1)) return false; // dumb trick to de-prioritize controller upgrades if there is other work to do.
+
         if (!creep.carry.energy) return false
 
         let controllers = _.filter(Game.structures, s => s.structureType == STRUCTURE_CONTROLLER)

@@ -3,10 +3,8 @@ export default {
   validate: function (creep: Creep) {
     if (!creep.carry.energy) return false
 
-    //let roads = _.filter(Game.constructionSites, s => s.structureType == STRUCTURE_ROAD)
-    let roads = _.filter(Game.constructionSites, s => true) // temp hack
-    if (roads.length == 0) return false;
-    let construction = roads[0]
+    let construction = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES)
+    if (!construction) return false;
 
     creep.memory.job = this.name
     creep.memory.construction_id = construction.id
