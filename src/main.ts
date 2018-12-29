@@ -11,4 +11,6 @@ export const loop = ErrorMapper.wrapLoop(() => {
       delete Memory.creeps[name];
     }
   }
+
+  console.log("this is a test");
 });
