@@ -8,7 +8,7 @@
 */
 
 // @ts-ignore
-import { MemoryManager } from "Memory/MemoryManagement";
+import { MemoryManager } from "Managers/MemoryManagement";
 // @ts-ignore
 import { ErrorMapper } from "utils/ErrorMapper";
 // ------ end imports
