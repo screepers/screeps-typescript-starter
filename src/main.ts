@@ -20,5 +20,5 @@ export const loop = ErrorMapper.wrapLoop(() => {
   MemoryManager.garbageCollector();
 
   // start running the empire
-  console.log(`Current game tick is ${Game.time}`);
+  console.log(`Current game tick is ${Game.time}!`);
 });
