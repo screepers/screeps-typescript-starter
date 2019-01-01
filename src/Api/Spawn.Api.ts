@@ -1,7 +1,7 @@
 import { RoomHelper } from "../Helpers/RoomHelper"
 
 // the api used by the spawn manager
-export class SpawnApi{
+export class SpawnApi {
 
     // get count for the specified creep
     public static getCreepCount(room: Room, creepConst: RoleConstant): number {
@@ -9,7 +9,7 @@ export class SpawnApi{
     }
 
     // get the limit for the specified creep
-    public static getCreepLimits(room: Room, creepConst, RoleConstant): StringMap {
+    public static getCreepLimits(room: Room, creepConst: RoleConstant): StringMap {
         return room.memory.creepLimit[creepConst];
     }
 
