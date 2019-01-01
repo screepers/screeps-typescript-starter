@@ -23,17 +23,17 @@ export class RoomHelper {
         return false;
     }
 
-    // is source keeper -- progress
+    // is source keeper -- in progress
     public static isSourceKeeperRoom(room: any): boolean {
         return false;
     }
 
-    // is highway -- progress
+    // is highway -- in progress
     public static isHighwayRoom(room: any): boolean {
         return false;
     }
 
-    // is in walking range -- progress
+    // is in walking range -- in progress
     public static inTravelRange(room: Room): boolean {
         return false;
     }
@@ -77,8 +77,36 @@ export class RoomHelper {
     // get creeps in room by filter
     public static getCreepsInRoomBy(room: Room, creepConst: RoleConstant, filterFunction: (c) => boolean): StringMap{
 
-        const allCreeps: StringMap = room.memory.creeps[creepConst];
+        const allCreeps: StringMap = this.getCreepsInRoom(room, creepConst);
 
         return _.filter(allCreeps, filterFunction);
     }
+
+    // get number of creeps in a role, can also pass a filter function to narrow down selection
+    public static getNumCreepsInRoomBy(room: Room, creepConst: RoleConstant, filterFunction?: (c) => boolean): number {
+
+        // get all creeps of this role
+        const allCreeps: StringMap = this.getCreepsInRoom(room, creepConst);
+
+        // if no filter function provdied
+        if(filterFunction == null){
+            return allCreeps.length;
+        }
+
+        // if filter function is provided, apply it
+        return _.filter(allCreeps, filterFunction).length;
+    }
+
+    // check if the object exists within the room
+    public static isExistInRoom(room: any, objectConst: StructureConstant): boolean{
+
+        // return true if any of this object exists
+        if(this.getObjectsInRoom(room, objectConst).length > 0){
+            return true;
+        }
+
+        return false;
+    }
+
+    
 }   

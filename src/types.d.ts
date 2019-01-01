@@ -76,6 +76,7 @@ interface RoomMemory {
   sources: Source[];          // all sources in the room
   upgradeLink: StructureLink; // the link the power upgrader pulls from
   creeps: Creep[];            // all creeps assigned to this room
+  creepLimit: StringMap       // the limit of each role for the room
   hostiles: Creep[];          // all hostile creeps in this room
   attackRooms: Room[];        // all rooms flagged to attack
   remoteRooms: Room[];        // all rooms flagged to remote harvest
