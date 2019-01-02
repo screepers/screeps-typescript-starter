@@ -1,3 +1,4 @@
+import { StringMap } from "../types";
 
 // helper functions for rooms
 export class RoomHelper {
@@ -42,7 +43,9 @@ export class RoomHelper {
     public static getObjectsInRoom(room: Room, objectConst: StructureConstant): StringMap {
 
         // check if the objects are in memory
-        const allObjects: StringMap = room.memory.structures[objectConst];
+        const allObjectsID: StringMap = room.memory.structures[objectConst];
+
+        const allObjects: StringMap = _.map(allObjectsID, (o) => Game.getObjectById(o));
 
         if(allObjects !== undefined){
             return allObjects;
@@ -107,6 +110,4 @@ export class RoomHelper {
 
         return false;
     }
-
-    
 }   

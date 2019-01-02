@@ -9,9 +9,9 @@ export class SpawnApi{
     }
 
     // get the limit for the specified creep
-    public static getCreepLimits(room: Room, creepConst, RoleConstant): StringMap {
+    public static getCreepLimits(room: Room, creepConst: RoleConstant): CreepLimits {
         return room.memory.creepLimit[creepConst];
     }
 
-    // set a new limit for the specified creep
+    
 }
