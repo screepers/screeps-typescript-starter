@@ -1,3 +1,4 @@
+// @ts-ignore
 import { RoomHelper } from "Helpers/RoomHelper";
 
 // add various commands to the console for empire management

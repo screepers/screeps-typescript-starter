@@ -1,3 +1,4 @@
+// @ts-ignore
 import {MemoryApi} from "Api/Memory.Api"
 
 // manager for the memory of the empire

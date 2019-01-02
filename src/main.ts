@@ -7,11 +7,17 @@
   Starting Jan 2019
 */
 
+// @ts-ignore
 import { ConsoleCommands } from "Helpers/ConsoleCommands";
+// @ts-ignore
 import { EmpireManager } from "Managers/EmpireManager";
+// @ts-ignore
 import { MemoryManager } from "Managers/MemoryManagement";
+// @ts-ignore
 import { RoomManager} from "Managers/RoomManager";
+// @ts-ignore
 import { SpawnManager } from "Managers/SpawnManager"
+// @ts-ignore
 import { ErrorMapper } from "utils/ErrorMapper";
 // ------ end imports
 
@@ -29,6 +35,6 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
   // run spawning
   try { SpawnManager.runSpawnManager(); } catch(e) { console.log("Error running SPAWN manager:\n ", e.stack)}
-  
+              
   // -------- end managers --------
 });
