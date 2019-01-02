@@ -8,7 +8,7 @@ export class SpawnApi {
     /**
      * get count for the specified creep
      */
-    public static getCreepCount(room: Room, creepConst: RoleConstant): number {
+    public static getCreepCount(room: Room, creepConst: number): number {
         return RoomHelper.getNumCreepsInRoomBy(room, creepConst);
     }
 

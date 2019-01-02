@@ -68,7 +68,7 @@ export class RoomHelper {
     /**
      * return all the objects of a specified type in the room by a filter function
      */
-    public static getObjectsInRoomBy(room: Room, objectConst?: StructureConstant, filterFunction: (o) => boolean): StringMap {
+    public static getObjectsInRoomBy(room: Room, filterFunction: (o: any) => boolean, objectConst?: StructureConstant): StringMap {
 
         let allObjects: StringMap;
 
@@ -86,7 +86,7 @@ export class RoomHelper {
     /**
      * get all the creeps in the room 
      */
-    public static getCreepsInRoom(room: Room, creepConst?: RoleConstant): StringMap {
+    public static getCreepsInRoom(room: Room, creepConst?: number): StringMap {
 
         let allCreeps: StringMap;
 
@@ -109,7 +109,7 @@ export class RoomHelper {
     /**
      * get creeps in room by a filter function
      */
-    public static getCreepsInRoomBy(room: Room, filterFunction: (c: any) => boolean, creepConst?: RoleConstant): StringMap{
+    public static getCreepsInRoomBy(room: Room, filterFunction: (c: any) => boolean, creepConst?: number): StringMap{
 
         let allCreeps: StringMap;
 
@@ -127,7 +127,7 @@ export class RoomHelper {
     /**
      * get number of creeps in room (can pass a filter function)
      */ 
-    public static getNumCreepsInRoomBy(room: Room, creepConst?: RoleConstant, filterFunction?: (c: any) => boolean): number {
+    public static getNumCreepsInRoomBy(room: Room, creepConst?: number, filterFunction?: (c: any) => boolean): number {
 
         let allCreeps: StringMap;
 
@@ -161,7 +161,7 @@ export class RoomHelper {
   /*
    * get the stored amount from the target
    */
-    public static getStoredAmount(target: any, resourceType: string): number{
+    public static getStoredAmount(target: any, resourceType: ResourceConstant): number | undefined{
       
         if (target instanceof Creep) {
             return target.carry[resourceType];
