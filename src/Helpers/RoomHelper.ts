@@ -156,7 +156,7 @@ export class RoomHelper {
             allCreeps = this.getCreepsInRoom(room);
         }
         else{ // if role specified, get by that
-            allCreeps = this.getCreepsInRoom(room);
+            allCreeps = this.getCreepsInRoom(room, creepConst);
         }
       
         // if no filter function provdied
