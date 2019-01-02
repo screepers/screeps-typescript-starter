@@ -108,4 +108,54 @@ export class RoomHelper {
 
         return false;
     }
+  
+  /*
+   * get the stored amount from the target
+   */
+    public static getStoredAmount(target: StructureStorage | StructureTerminal | StructureContainer | Creep | Resource, 
+                                   resourceType: string): number{
+      
+        if (target instanceof Creep) {
+            return target.carry[resourceType];
+        }
+        else if (target.hasOwnProperty("store")) {
+            return target.store[resourceType];
+        }
+        else if (resourceType === RESOURCE_ENERGY && target.hasOwnProperty("energy")) {
+            return target.energy;
+        }  
+    }
+  
+  /*
+   * get the capacity amount from the target
+   */
+    public static getStoredAmount(target: StructureStorage | StructureTerminal | StructureContainer | Creep | Resource, 
+                                   resourceType: string): number{
+      
+  /*
+   * get the stored amount from the target
+   */
+    public static getStoredAmount(target: StructureStorage | StructureTerminal | StructureContainer | Creep | Resource, 
+                                   resourceType: string): number{
+      
+        if (target instanceof Creep) {
+            return target.carryCapacity;
+        }
+        else if (target.hasOwnProperty("store")) {
+            return target.storeCapacity;
+        }
+        else if (target.hasOwnProperty("energyCapacity")) {
+            return target.energyCapacity;
+        }
+    }
+      
+  /*
+   * get the amount of damage a tower will do at this distance
+   */
+    public static getTowerDamageAtRange(range: number) {
+        if (range <= TOWER_OPTIMAL_RANGE) { return TOWER_POWER_ATTACK; }
+        if (range >= TOWER_FALLOFF_RANGE) { range = TOWER_FALLOFF_RANGE; }
+        return TOWER_POWER_ATTACK - (TOWER_POWER_ATTACK * TOWER_FALLOFF *
+            (range - TOWER_OPTIMAL_RANGE) / (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE));
+    }
 }   
