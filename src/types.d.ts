@@ -1,7 +1,16 @@
 // constants -----
-/**
- * Roomstate Constants
- */
+
+// room state constants
+
+declare const ROOM_STATE_INTRO = 0;
+declare const ROOM_STATE_BEGINNER = 1;
+declare const ROOM_STATE_INTER = 2;
+declare const ROOM_STATE_ADVANCED = 3;
+declare const ROOM_STATE_UPGRADER = 4;
+declare const ROOM_STATE_SEIGE = 5;
+declare const ROOM_STATE_STIMULATE = 6;
+declare const ROOM_STATE_NUKE_INBOUND = 7;
+
 type RoomStateConstant =
     | ROOM_STATE_INTRO
     | ROOM_STATE_BEGINNER
@@ -9,7 +18,7 @@ type RoomStateConstant =
     | ROOM_STATE_ADVANCED
     | ROOM_STATE_UPGRADER
     | ROOM_STATE_SEIGE
-    | ROOM_STATE_STIMULI
+    | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
 /**
@@ -39,11 +48,27 @@ type ROOM_STATE_SEIGE = 5;
 /**
  * if the room has been flagged and is receiving heavy external assistance to upgrade quickly
  */
-type ROOM_STATE_STIMULI = 6;
+type ROOM_STATE_STIMULATE = 6;
 /**
  * if a nuke is inbound to the room and we have to prepare for the strike x ticks before (low priority but good to keep in mind)
  */
 type ROOM_STATE_NUKE_INBOUND = 7;
+// --------------------------------------------------------------------
+
+// role constants 
+declare const ROLE_MINER = "miner";
+declare const ROLE_HARVESTER = "harvester";
+declare const ROLE_WORKER = "worker"; 
+declare const ROLE_POWER_UPGRADER = "power_upgrader";
+declare const ROLE_LORRY = "lorry"; 
+declare const ROLE_REMOTE_MINER = "remote_miner"; 
+declare const ROLE_REMOTE_HARVESTER = "remote_harvester"; 
+declare const ROLE_REMOTE_RESERVER = "remote_reserver"; 
+declare const ROLE_REMOTE_DEFENDER = "remote_defender"; 
+declare const ROLE_COLONIZER = "remote_colonizer"; 
+declare const ROLE_ZEALOT = "zealot";
+declare const ROLE_STALKER = "stalker";
+declare const ROLE_MEDIC = "medic";
 
 /**
  * role constants
@@ -82,7 +107,7 @@ type ROLE_POWER_UPGRADER = "power_upgrader"; //
 /**
  * moves energy around the room to where it needs to be
  */
-type ROLE_LORRY = "lorry"; //
+type ROLE_LORRY = "lorry"; 
 /**
  * goes into remote room and sits on source to mine full-time
  */
@@ -115,7 +140,8 @@ type ROLE_STALKER = "stalker";
  * Military Creep - To be described
  */
 type ROLE_MEDIC = "medic";
-// ---------------
+// --------------------------------------------------------------------
+
 
 /**
  * global map function with string key
