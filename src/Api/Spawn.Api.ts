@@ -1,7 +1,7 @@
 import { RoomHelper } from "../Helpers/RoomHelper"
 
 // the api used by the spawn manager
-export class SpawnApi{
+export class SpawnApi {
 
     // get count for the specified creep
     public static getCreepCount(room: Room, creepConst: RoleConstant): number {
