@@ -1,5 +1,3 @@
-import { StringMap } from "../types";
-
 // helper functions for rooms
 export class RoomHelper {
 
@@ -78,7 +76,7 @@ export class RoomHelper {
     }
 
     // get creeps in room by filter
-    public static getCreepsInRoomBy(room: Room, creepConst: RoleConstant, filterFunction: (c) => boolean): StringMap{
+    public static getCreepsInRoomBy(room: Room, creepConst: RoleConstant, filterFunction: (c: any) => boolean): StringMap{
 
         const allCreeps: StringMap = this.getCreepsInRoom(room, creepConst);
 
@@ -86,7 +84,7 @@ export class RoomHelper {
     }
 
     // get number of creeps in a role, can also pass a filter function to narrow down selection
-    public static getNumCreepsInRoomBy(room: Room, creepConst: RoleConstant, filterFunction?: (c) => boolean): number {
+    public static getNumCreepsInRoomBy(room: Room, creepConst: RoleConstant, filterFunction?: (c: any) => boolean): number {
 
         // get all creeps of this role
         const allCreeps: StringMap = this.getCreepsInRoom(room, creepConst);
