@@ -308,7 +308,7 @@ interface CreepOptionsMili {
 /**
  * creep limits for room
  */
-interface CreepLimits {
+interface CreepLimits extends StringMap{
     /**
      * creep limits for remote creeps
      */
