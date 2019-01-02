@@ -44,7 +44,6 @@
    */
   type ROOM_STATE_NUKE_INBOUND = 7; 
 
-
   /**
    * role constants
    */
