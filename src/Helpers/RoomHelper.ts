@@ -79,7 +79,7 @@ export class RoomHelper {
     public static getCreepsInRoomBy(room: Room, creepConst: RoleConstant, filterFunction: (c: any) => boolean): StringMap{
 
         const allCreeps: StringMap = this.getCreepsInRoom(room, creepConst);
-
+        
         return _.filter(allCreeps, filterFunction);
     }
 
