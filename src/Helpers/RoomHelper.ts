@@ -237,10 +237,6 @@ export class RoomHelper {
      * @param ticks the number of ticks you want between executions
      */
     public static excecuteEveryTicks(ticks: number): boolean{
-        if(Game.time % ticks === 0){
-            return true;
-        }
-
-        return false;
+        return Game.time % ticks === 0
     }
 }   
