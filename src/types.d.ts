@@ -213,6 +213,10 @@ interface RoomMemory {
      */
     hostiles: Creep[];
     /**
+     * the defcon level for the room
+     */
+    defcon: number;
+    /**
      * all rooms flagged to attack
      */
     attackRooms?: Room[];

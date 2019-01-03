@@ -1,4 +1,6 @@
+// @ts-ignore
 import { MemoryApi } from "Api/Memory.Api";
+// @ts-ignore
 import { MemoryHelper } from "./MemoryHelper";
 
 // helper functions for rooms
@@ -29,7 +31,7 @@ export class RoomHelper {
      * @param room the room we want to check
      */
     public static isSourceKeeperRoom(room: any): boolean {
-        //Just do that regex thing to check, we have it in our old code
+        // Just do that regex thing to check, we have it in our old code
         return false;
     }
 
@@ -119,10 +121,6 @@ export class RoomHelper {
      * @param ticks the number of ticks you want between executions
      */
     public static excecuteEveryTicks(ticks: number): boolean{
-        if(Game.time % ticks === 0){
-            return true;
-        }
-
-        return false;
+        return Game.time % ticks === 0
     }
 }   

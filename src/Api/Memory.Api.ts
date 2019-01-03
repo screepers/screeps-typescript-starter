@@ -16,10 +16,10 @@ export class MemoryApi {
             if (!(roomName in Game.rooms)) {
                 delete Memory.rooms[roomName];
             } else {
-                //re-initialize stale memory in that room
-                //Used to do:
-                //Memory.rooms[roomName].jobQueues = {};
-                //Memory.rooms[roomName].creepCounts = {};
+                // re-initialize stale memory in that room
+                // Used to do:
+                // Memory.rooms[roomName].jobQueues = {};
+                // Memory.rooms[roomName].creepCounts = {};
             }
         }
 
@@ -35,18 +35,19 @@ export class MemoryApi {
         
         _.forEach(Game.rooms, (room: Room) => {
             console.log("Working on room", JSON.stringify(room.memory));
-            //Abort if Memory already exists
+            // Abort if Memory already exists
             if (Memory.rooms[room.name]) delete room.memory;
     
-            //Initialize Memory - Typescript requires it be done this way
+            // Initialize Memory - Typescript requires it be done this way
             //                    unless we define a constructor for RoomMemory.
             Memory.rooms[room.name] = {
-                roomState: ROOM_STATE_INTRO,
-                structures: {},
-                sources: room.find(FIND_SOURCES),
-                creeps: [],
                 creepLimit: {},
-                hostiles: []
+                creeps: [],
+                defcon: 0,
+                hostiles: [],
+                roomState: ROOM_STATE_INTRO,
+                sources: room.find(FIND_SOURCES),
+                structures: {},
             };    
         });
 
