@@ -50,6 +50,7 @@ export class MemoryApi {
                 roomState: ROOM_STATE_INTRO,
                 sources: room.find(FIND_SOURCES),
                 structures: {},
+                constructionSites: []
             };
         });
 
@@ -60,10 +61,10 @@ export class MemoryApi {
      * @param room The room to update the memory of
      */
     public static updateRoomMemory(room: Room): void {
+
     }
 
     /**
-     * init the memory structure for a creep with given values and defaults
      * @param creep the creep we want to initialize memory for
      */
     public static initCreepMemory(creep: Creep, creepRole: RoleConstant, creepHomeRoom: string,

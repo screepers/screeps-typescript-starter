@@ -91,7 +91,7 @@ type RoleConstant =
 /**
  * sits on the source and mines energy full-time
  */
-type ROLE_MINER = "miner"; 
+type ROLE_MINER = "miner";
 /**
  * brings energy from the miners to fill spawn/extensions
  */
@@ -193,6 +193,10 @@ interface RoomMemory {
      */
     structures: StringMap;
     /**
+     * construction sites in the room
+     */
+    constructionSites: ConstructionSite[];
+    /**
      * all sources in the room
      */
     sources: Source[];
@@ -230,7 +234,7 @@ interface RoomMemory {
     claimRooms?: Room[];
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
@@ -438,7 +442,7 @@ interface Cache {
      */
     id: string;
     /**
-     * Cache Object 
+     * Cache Object
      */
     object: StructureCache | CreepCache;
 }
@@ -469,7 +473,7 @@ interface StructureCache {
  */
 interface CreepCache {
     /**
-     * The ID of the creep 
+     * The ID of the creep
      */
     id: string;
     /**
