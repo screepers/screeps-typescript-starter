@@ -1,17 +1,17 @@
-import { RoomHelper } from "../Helpers/RoomHelper"
+import { RoomHelper } from "../Helpers/RoomHelper";
+import { MemoryHelper } from "../Helpers/MemoryHelper";
 
 /**
  * the api used by the spawn manager
  */
 export class SpawnApi {
-
     /**
      * get count for the specified creep
      * @param room the room we are getting the count for
      * @param creepConst the role of the creep we want
      */
     public static getCreepCount(room: Room, creepConst: any): number {
-        return RoomHelper.getNumCreepsInRoomBy(room, creepConst);
+        return MemoryHelper.getNumCreepsInRoomBy(room, creepConst);
     }
 
     /**
@@ -21,18 +21,17 @@ export class SpawnApi {
      */
     public static getCreepLimits(room: Room, creepConst: RoleConstant): CreepLimits {
         return room.memory.creepLimit[creepConst];
-    } 
+    }
 
     /**
      * get the first available open spawn for a room
      * @param room the room we are checking the spawn for
      */
-    public static getOpenSpawn(room: Room): StructureSpawn | undefined{
-        
+    public static getOpenSpawn(room: Room): StructureSpawn | undefined {
         const allOpenSpawns = _.filter(room.memory.structures[STRUCTURE_SPAWN], (s: StructureSpawn) => !s.spawning);
 
         // if there exists an open spawn, return it, or return undefined
-        if(allOpenSpawns.length > 0){
+        if (allOpenSpawns.length > 0) {
             return allOpenSpawns[0];
         }
 
@@ -43,7 +42,7 @@ export class SpawnApi {
      * check if theres an open spawn in the room
      * @param room the room we are checking the spawn for
      */
-    public static isOpenSpawn(room: Room): boolean{
+    public static isOpenSpawn(room: Room): boolean {
         return _.some(room.memory.structures[STRUCTURE_SPAWN], (s: StructureSpawn) => !s.spawning);
     }
 
@@ -70,6 +69,4 @@ export class SpawnApi {
     /**
      * get the memory options for this creep
      */
-
-    
 }

@@ -16,8 +16,6 @@ export class MemoryApi {
             if (!(roomName in Game.rooms)) {
                 delete Memory.rooms[roomName];
             } else {
-                this.initialize_room_memory(Game.rooms[roomName]);
-
                 //re-initialize stale memory in that room
                 //Used to do:
                 //Memory.rooms[roomName].jobQueues = {};
@@ -30,24 +28,35 @@ export class MemoryApi {
     }
 
     /**
-     * Initialize the Memory object for a new room
+     * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    public static initialize_room_memory(room: Room): void {
+    public static initialize_room_memories(): void {
         
-        //Abort if Memory already exists
-        if (room.memory) return;
+        _.forEach(Game.rooms, (room: Room) => {
+            console.log("Working on room", JSON.stringify(room.memory));
+            //Abort if Memory already exists
+            if (Memory.rooms[room.name]) delete room.memory;
+    
+            //Initialize Memory - Typescript requires it be done this way
+            //                    unless we define a constructor for RoomMemory.
+            Memory.rooms[room.name] = {
+                roomState: ROOM_STATE_INTRO,
+                structures: {},
+                sources: room.find(FIND_SOURCES),
+                creeps: [],
+                creepLimit: {},
+                hostiles: []
+            };    
+        });
 
-        //Initialize Memory - Typescript requires it be done this way
-        //                    unless we define a constructor for RoomMemory.
-        room.memory = {
-            roomState: ROOM_STATE_INTRO,
-            structures: {},
-            sources: [],
-            creeps: [],
-            creepLimit: {},
-            hostiles: []
-        };
+    }
 
+    /**
+     * Calls all the helper functions to update room.memory
+     * @param room The room to update the memory of
+     */
+    public static update_room_memory(room: Room): void {
+        
     }
 }

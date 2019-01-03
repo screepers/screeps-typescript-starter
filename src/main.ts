@@ -21,7 +21,6 @@ import { SpawnManager } from "Managers/SpawnManager"
 import { ErrorMapper } from "utils/ErrorMapper";
 // ------ end imports
 
-
 export const loop = ErrorMapper.wrapLoop(() => {
 
   // clean up memory first

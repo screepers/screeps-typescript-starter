@@ -91,7 +91,7 @@ type RoleConstant =
 /**
  * sits on the source and mines energy full-time
  */
-type ROLE_MINER = "miner"; //
+type ROLE_MINER = "miner"; 
 /**
  * brings energy from the miners to fill spawn/extensions
  */
@@ -423,4 +423,61 @@ interface MilitaryCreepLimits {
      * limit for military medics
      */
     medic: number;
+}
+
+/**
+ * A container object for Cache memory - Stores a StructureCache or CreepCache
+ */
+interface Cache {
+    /**
+     * The unique identifier string for the cache object
+     */
+    id: string;
+    /**
+     * Cache Object 
+     */
+    object: StructureCache | CreepCache;
+}
+
+/**
+ * An object stored in a cache object that contains the data of a structure query
+ */
+interface StructureCache {
+    /**
+     * The ID of the structure
+     */
+    id: string;
+    /**
+     * [optional] The type of structure
+     */
+    structureType?: StructureConstant;
+    /**
+     * [optional] The structure's ( hits / hitsMax )
+     */
+    hit_percent?: number;
+    /**
+     * [optional] Any extra data - In Object Form
+     */
+}
+
+/**
+ * The data of a creep query - Stored in a Cache object
+ */
+interface CreepCache {
+    /**
+     * The ID of the creep 
+     */
+    id: string;
+    /**
+     * [optional] The role of the creep
+     */
+    role?: string;
+    /**
+     * [optional] The creep's ( hits / hitsMax )
+     */
+    hit_percent?: number;
+    /**
+     * [optional] Any extra data - In Object form
+     */
+    data?: object;
 }
