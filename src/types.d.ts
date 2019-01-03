@@ -55,17 +55,17 @@ type ROOM_STATE_STIMULATE = 6;
 type ROOM_STATE_NUKE_INBOUND = 7;
 // --------------------------------------------------------------------
 
-// role constants 
+// role constants
 declare const ROLE_MINER = "miner";
 declare const ROLE_HARVESTER = "harvester";
-declare const ROLE_WORKER = "worker"; 
+declare const ROLE_WORKER = "worker";
 declare const ROLE_POWER_UPGRADER = "power_upgrader";
-declare const ROLE_LORRY = "lorry"; 
-declare const ROLE_REMOTE_MINER = "remote_miner"; 
-declare const ROLE_REMOTE_HARVESTER = "remote_harvester"; 
-declare const ROLE_REMOTE_RESERVER = "remote_reserver"; 
-declare const ROLE_REMOTE_DEFENDER = "remote_defender"; 
-declare const ROLE_COLONIZER = "remote_colonizer"; 
+declare const ROLE_LORRY = "lorry";
+declare const ROLE_REMOTE_MINER = "remote_miner";
+declare const ROLE_REMOTE_HARVESTER = "remote_harvester";
+declare const ROLE_REMOTE_RESERVER = "remote_reserver";
+declare const ROLE_REMOTE_DEFENDER = "remote_defender";
+declare const ROLE_COLONIZER = "remote_colonizer";
 declare const ROLE_ZEALOT = "zealot";
 declare const ROLE_STALKER = "stalker";
 declare const ROLE_MEDIC = "medic";
@@ -107,7 +107,7 @@ type ROLE_POWER_UPGRADER = "power_upgrader"; //
 /**
  * moves energy around the room to where it needs to be
  */
-type ROLE_LORRY = "lorry"; 
+type ROLE_LORRY = "lorry";
 /**
  * goes into remote room and sits on source to mine full-time
  */
@@ -142,6 +142,12 @@ type ROLE_STALKER = "stalker";
 type ROLE_MEDIC = "medic";
 // --------------------------------------------------------------------
 
+/**
+ * Ally Names
+ */
+type AllyConstant = JAKESBOY2 | UHMBROCK;
+type JAKESBOY2 = "jakesboy2";
+type UHMBROCK = "uhmbrock";
 
 /**
  * global map function with string key
@@ -193,7 +199,7 @@ interface RoomMemory {
     /**
      * the link the power upgrader pulls from
      */
-    upgradeLink: StructureLink;
+    upgradeLink?: StructureLink | undefined;
     /**
      * all creeps assigned to this room
      */
@@ -201,7 +207,7 @@ interface RoomMemory {
     /**
      * the limit of each role for the room
      */
-    creepLimit: CreepLimits;
+    creepLimit: StringMap | CreepLimits;
     /**
      * all hostile creeps in this room
      */
@@ -209,15 +215,15 @@ interface RoomMemory {
     /**
      * all rooms flagged to attack
      */
-    attackRooms: Room[];
+    attackRooms?: Room[];
     /**
      * all rooms flagged to remote harvest
      */
-    remoteRooms: Room[];
+    remoteRooms?: Room[];
     /**
      * all rooms flagged to colonize
      */
-    claimRooms: Room[];
+    claimRooms?: Room[];
 }
 
 interface EmpireMemory {}
@@ -334,7 +340,7 @@ interface CreepOptionsMili {
 /**
  * creep limits for room
  */
-interface CreepLimits extends StringMap{
+interface CreepLimits extends StringMap {
     /**
      * creep limits for remote creeps
      */
