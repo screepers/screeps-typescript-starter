@@ -18,10 +18,10 @@ export class MemoryApi {
             } else {
                 this.initialize_room_memory(Game.rooms[roomName]);
 
-                //re-initialize stale memory in that room
-                //Used to do:
-                //Memory.rooms[roomName].jobQueues = {};
-                //Memory.rooms[roomName].creepCounts = {};
+                // re-initialize stale memory in that room
+                // Used to do:
+                // Memory.rooms[roomName].jobQueues = {};
+                // Memory.rooms[roomName].creepCounts = {};
             }
         }
 
@@ -34,19 +34,22 @@ export class MemoryApi {
      * @param room The room to initialize the memory of.
      */
     public static initialize_room_memory(room: Room): void {
-        
-        //Abort if Memory already exists
-        if (room.memory) return;
 
-        //Initialize Memory - Typescript requires it be done this way
+        // Abort if Memory already exists
+        if (room.memory) {
+            return;
+        }
+
+        // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
         room.memory = {
-            roomState: ROOM_STATE_INTRO,
-            structures: {},
-            sources: [],
-            creeps: [],
             creepLimit: {},
-            hostiles: []
+            creeps: [],
+            defcon: 0,
+            hostiles: [],
+            roomState: ROOM_STATE_INTRO,
+            sources: [],
+            structures: {}
         };
 
     }
