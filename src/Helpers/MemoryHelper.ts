@@ -1,4 +1,4 @@
-//Accessing Memory Helpers
+// Accessing Memory Helpers
 export class MemoryHelper{
 
     /**
@@ -49,7 +49,6 @@ export class MemoryHelper{
         return _.filter(allObjects, filterFunction);
     }
 
-    // note : it wouldn't let be put RoleConstant for the creepConst type on some of these, so i chagned all to make it consistant
     /**
      * get all the creeps in the room 
      * @param room the room we want to get creeps from
