@@ -1,3 +1,5 @@
+import { stringify } from "querystring";
+
 // the api for the memory class
 export class MemoryApi {
     /**
@@ -31,13 +33,13 @@ export class MemoryApi {
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    public static initialize_room_memories(): void {
-        
+    public static initRoomMemory(): void {
+
         _.forEach(Game.rooms, (room: Room) => {
             console.log("Working on room", JSON.stringify(room.memory));
             // Abort if Memory already exists
             if (Memory.rooms[room.name]) delete room.memory;
-    
+
             // Initialize Memory - Typescript requires it be done this way
             //                    unless we define a constructor for RoomMemory.
             Memory.rooms[room.name] = {
@@ -48,7 +50,7 @@ export class MemoryApi {
                 roomState: ROOM_STATE_INTRO,
                 sources: room.find(FIND_SOURCES),
                 structures: {},
-            };    
+            };
         });
 
     }
@@ -57,7 +59,27 @@ export class MemoryApi {
      * Calls all the helper functions to update room.memory
      * @param room The room to update the memory of
      */
-    public static update_room_memory(room: Room): void {
-        
+    public static updateRoomMemory(room: Room): void {
+    }
+
+    /**
+     * init the memory structure for a creep with given values and defaults
+     * @param creep the creep we want to initialize memory for
+     */
+    public static initCreepMemory(creep: Creep, creepRole: RoleConstant, creepHomeRoom: string,
+        creepOptions: CreepOptionsCiv | CreepOptionsMili, creepTargetRoom?: string): void {
+
+        // abort if memory already exists
+        if (Memory.creeps[creep.name]) delete creep.memory;
+
+        // Initialize Memory
+        Memory.creeps[creep.name] = {
+            role: creepRole,
+            homeRoom: creepHomeRoom,
+            targetRoom: creepTargetRoom || "",
+            workTarget: "",
+            working: false,
+            options: creepOptions
+        };
     }
 }
