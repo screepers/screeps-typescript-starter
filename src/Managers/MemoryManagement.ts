@@ -8,7 +8,12 @@ export class MemoryManager{
      * run the memory for the AI
      */
     public static runMemoryManager(): void{
+        
         MemoryApi.garbageCollection();
-        console.log("collecting garbage");
+        
+        for(const room in Game.rooms)
+        {
+            MemoryApi.initialize_room_memory(Game.rooms[room]);
+        }
     }
 }
