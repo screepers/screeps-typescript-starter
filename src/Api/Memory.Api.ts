@@ -1,8 +1,8 @@
 import { stringify } from "querystring";
-import { Constants } from "utils/Constants"
+import { ROLE_COLONIZER, ROOM_STATE_INTRO } from "utils/Constants";
+
 // the api for the memory class
 export class MemoryApi {
-
     /**
      * clear out all dead memory
      */
@@ -37,11 +37,11 @@ export class MemoryApi {
     public static initRoomMemory(): void {
         _.forEach(Game.rooms, (room: Room) => {
             // Abort if Memory already exists
+            console.log("in MEMORY.API: ", ROLE_COLONIZER);
             if (Memory.rooms[room.name]) {
                 // delete Memory.rooms[room.name];
                 return;
             }
-            console.log("in MEMORY.API: ", Constants.TEST_CONSTANT);
 
             console.log("Working on: ", JSON.stringify(Memory.rooms[room.name]));
             // Initialize Memory - Typescript requires it be done this way
@@ -89,7 +89,7 @@ export class MemoryApi {
             role: creepRole,
             targetRoom: creepTargetRoom || "",
             workTarget: "",
-            working: false,
+            working: false
         };
     }
 }

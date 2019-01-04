@@ -2,14 +2,14 @@
 
 // room state constants
 
-declare const ROOM_STATE_INTRO: 0;
-declare const ROOM_STATE_BEGINNER: 1;
-declare const ROOM_STATE_INTER: 2;
-declare const ROOM_STATE_ADVANCED: 3;
-declare const ROOM_STATE_UPGRADER: 4;
-declare const ROOM_STATE_SEIGE: 5;
-declare const ROOM_STATE_STIMULATE: 6;
-declare const ROOM_STATE_NUKE_INBOUND: 7;
+// declare const ROOM_STATE_INTRO: 0;
+// declare const ROOM_STATE_BEGINNER: 1;
+// declare const ROOM_STATE_INTER: 2;
+// declare const ROOM_STATE_ADVANCED: 3;
+// declare const ROOM_STATE_UPGRADER: 4;
+// declare const ROOM_STATE_SEIGE: 5;
+// declare const ROOM_STATE_STIMULATE: 6;
+// declare const ROOM_STATE_NUKE_INBOUND: 7;
 
 type RoomStateConstant =
     | ROOM_STATE_INTRO
@@ -21,7 +21,7 @@ type RoomStateConstant =
     | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
-/**     
+/**
  * right when a room is starting and nothing is built/no creeps exist
  */
 type ROOM_STATE_INTRO = 0;
@@ -56,19 +56,19 @@ type ROOM_STATE_NUKE_INBOUND = 7;
 // --------------------------------------------------------------------
 
 // role constants
-declare const ROLE_MINER = "miner";
-declare const ROLE_HARVESTER = "harvester";
-declare const ROLE_WORKER = "worker";
-declare const ROLE_POWER_UPGRADER = "power_upgrader";
-declare const ROLE_LORRY = "lorry";
-declare const ROLE_REMOTE_MINER = "remote_miner";
-declare const ROLE_REMOTE_HARVESTER = "remote_harvester";
-declare const ROLE_REMOTE_RESERVER = "remote_reserver";
-declare const ROLE_REMOTE_DEFENDER = "remote_defender";
-declare const ROLE_COLONIZER = "remote_colonizer";
-declare const ROLE_ZEALOT = "zealot";
-declare const ROLE_STALKER = "stalker";
-declare const ROLE_MEDIC = "medic";
+// declare const ROLE_MINER = "miner";
+// declare const ROLE_HARVESTER = "harvester";
+// declare const ROLE_WORKER = "worker";
+// declare const ROLE_POWER_UPGRADER = "power_upgrader";
+// declare const ROLE_LORRY = "lorry";
+// declare const ROLE_REMOTE_MINER = "remote_miner";
+// declare const ROLE_REMOTE_HARVESTER = "remote_harvester";
+// declare const ROLE_REMOTE_RESERVER = "remote_reserver";
+// declare const ROLE_REMOTE_DEFENDER = "remote_defender";
+// declare const ROLE_COLONIZER = "remote_colonizer";
+// declare const ROLE_ZEALOT = "zealot";
+// declare const ROLE_STALKER = "stalker";
+// declare const ROLE_MEDIC = "medic";
 
 /**
  * role constants
@@ -234,7 +234,7 @@ interface RoomMemory {
     claimRooms?: Room[];
 }
 
-interface EmpireMemory { }
+interface EmpireMemory {}
 // ----------------------------------
 
 /**
