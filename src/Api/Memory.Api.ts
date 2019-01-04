@@ -2,6 +2,7 @@ import { stringify } from "querystring";
 
 // the api for the memory class
 export class MemoryApi {
+
     /**
      * clear out all dead memory
      */
@@ -43,14 +44,14 @@ export class MemoryApi {
             // Initialize Memory - Typescript requires it be done this way
             //                    unless we define a constructor for RoomMemory.
             Memory.rooms[room.name] = {
+                constructionSites: [],
                 creepLimit: {},
                 creeps: [],
                 defcon: 0,
                 hostiles: [],
                 roomState: ROOM_STATE_INTRO,
                 sources: room.find(FIND_SOURCES),
-                structures: {},
-                constructionSites: []
+                structures: {}
             };
         });
 

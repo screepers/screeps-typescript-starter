@@ -195,15 +195,15 @@ interface RoomMemory {
     /**
      * construction sites in the room
      */
-    constructionSites: ConstructionSite[];
+    constructionSites: StringMap;
     /**
      * all sources in the room
      */
-    sources: Source[];
+    sources: StringMap;
     /**
      * the link the power upgrader pulls from
      */
-    upgradeLink?: StructureLink | undefined;
+    upgradeLink?: string;
     /**
      * all creeps assigned to this room
      */

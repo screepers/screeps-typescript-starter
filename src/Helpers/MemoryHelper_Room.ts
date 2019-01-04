@@ -1,3 +1,5 @@
+import { spawn } from "child_process";
+
 /**
  * Contains all functions for initializing and updating room memory
  */
@@ -34,15 +36,27 @@ export class MemoryHelper_Room {
         // save each one of these into their spot in the memory
         let structureMemory: StringMap = Memory.rooms[room.name].structures;
 
-        structureMemory[STRUCTURE_EXTENSION] = allStructures[STRUCTURE_EXTENSION];
-        structureMemory[STRUCTURE_EXTRACTOR] = allStructures[STRUCTURE_EXTRACTOR];
-        structureMemory[STRUCTURE_LAB] = allStructures[STRUCTURE_LAB];
-        structureMemory[STRUCTURE_LINK] = allStructures[STRUCTURE_LINK];
-        structureMemory[STRUCTURE_NUKER] = allStructures[STRUCTURE_NUKER];
-        structureMemory[STRUCTURE_OBSERVER] = allStructures[STRUCTURE_OBSERVER];
-        structureMemory[STRUCTURE_RAMPART] = allStructures[STRUCTURE_RAMPART];
-        structureMemory[STRUCTURE_SPAWN] = allStructures[STRUCTURE_SPAWN];
-        structureMemory[STRUCTURE_TOWER] = allStructures[STRUCTURE_TOWER];
+        // get a string map of the id's of each structure
+        const extensions: StringMap = _.map(allStructures[STRUCTURE_EXTENSION], (extension: StructureExtension) => extension.id);
+        const extractors: StringMap = _.map(allStructures[STRUCTURE_EXTRACTOR], (extractor: StructureExtractor) => extractor.id);
+        const labs: StringMap = _.map(allStructures[STRUCTURE_LAB], (lab: StructureLab) => lab.id);
+        const links: StringMap = _.map(allStructures[STRUCTURE_LINK], (link: StructureLab) => link.id);
+        const nukers: StringMap = _.map(allStructures[STRUCTURE_NUKER], (nuker: StructureLab) => nuker.id);
+        const observers: StringMap = _.map(allStructures[STRUCTURE_OBSERVER], (observer: StructureLab) => observer.id);
+        const ramparts: StringMap = _.map(allStructures[STRUCTURE_RAMPART], (rampart: StructureLab) => rampart.id);
+        const spawns: StringMap = _.map(allStructures[STRUCTURE_SPAWN], (spawn: StructureLab) => spawn.id);
+        const towers: StringMap = _.map(allStructures[STRUCTURE_TOWER], (tower: StructureLab) => tower.id);
+
+        // save the string map of id's into the room's memory
+        structureMemory[STRUCTURE_EXTENSION] = extensions;
+        structureMemory[STRUCTURE_EXTRACTOR] = extractors;
+        structureMemory[STRUCTURE_LAB] = labs;
+        structureMemory[STRUCTURE_LINK] = links;
+        structureMemory[STRUCTURE_NUKER] = nukers;
+        structureMemory[STRUCTURE_OBSERVER] = observers;
+        structureMemory[STRUCTURE_RAMPART] = ramparts;
+        structureMemory[STRUCTURE_SPAWN] = spawns;
+        structureMemory[STRUCTURE_TOWER] = towers;
     }
 
 
@@ -57,9 +71,15 @@ export class MemoryHelper_Room {
         // save each one of these into their spot in the memory
         let structureMemory: StringMap = Memory.rooms[room.name].structures;
 
-        structureMemory[STRUCTURE_ROAD] = allStructures[STRUCTURE_ROAD];
-        structureMemory[STRUCTURE_CONTAINER] = allStructures[STRUCTURE_CONTAINER];
-        structureMemory[STRUCTURE_WALL] = allStructures[STRUCTURE_WALL];
+        // get a string map of the id's of each structure
+        const roads: StringMap = _.map(allStructures[STRUCTURE_ROAD], (road: StructureRoad) => road.id);
+        const containers: StringMap = _.map(allStructures[STRUCTURE_CONTAINER], (container: StructureContainer) => container.id);
+        const walls: StringMap = _.map(allStructures[STRUCTURE_WALL], (wall: StructureWall) => wall.id);
+
+        // save the string map of id's into the room's memory
+        structureMemory[STRUCTURE_ROAD] = roads;
+        structureMemory[STRUCTURE_CONTAINER] = containers;
+        structureMemory[STRUCTURE_WALL] = walls;
     }
 
     /**
@@ -69,6 +89,12 @@ export class MemoryHelper_Room {
     public static updateConstructionSites(room: Room): void {
 
         // find construction sites and save into the memory
-        Memory.rooms[room.name].constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);
+        const constructionSites: ConstructionSite[] = room.find(FIND_MY_CONSTRUCTION_SITES);
+
+        // get a string map of the construction sites
+        const sites = _.map(constructionSites, (c: ConstructionSite) => c.id);
+
+        // save the map into the room's memory
+        Memory.rooms[room.name].constructionSites = sites;
     }
 }
