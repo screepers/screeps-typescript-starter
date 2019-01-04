@@ -1,5 +1,4 @@
 import { stringify } from "querystring";
-import { ROOM_STATE_INTRO, ROLE_COLONIZER } from "utils/Constants";
 
 // the api for the memory class
 export class MemoryApi {
@@ -37,7 +36,6 @@ export class MemoryApi {
     public static initRoomMemory(): void {
         _.forEach(Game.rooms, (room: Room) => {
             // Abort if Memory already exists
-            console.log("in MEMORY.API: ", ROLE_COLONIZER);
             if (Memory.rooms[room.name]) {
                 // delete Memory.rooms[room.name];
                 return;
@@ -53,7 +51,7 @@ export class MemoryApi {
                 defcon: 0,
                 hostiles: [],
                 roomState: ROOM_STATE_INTRO,
-                sources: room.find(FIND_SOURCES),
+                sources: _.map(room.find(FIND_SOURCES), source => source.id), 
                 structures: {}
             };
         });

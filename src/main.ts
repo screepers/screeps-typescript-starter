@@ -19,8 +19,6 @@ import { RoomManager } from "Managers/RoomManager";
 // @ts-ignore
 import { SpawnManager } from "Managers/SpawnManager"
 // @ts-ignore
-import { Constants } from "utils/Constants";
-// @ts-ignore
 import { ErrorMapper } from "utils/ErrorMapper";
 
 export const loop = ErrorMapper.wrapLoop(() => {
