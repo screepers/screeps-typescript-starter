@@ -32,12 +32,14 @@ export class MemoryApi {
      * @param room The room to initialize the memory of.
      */
     public static initialize_room_memories(): void {
-        
         _.forEach(Game.rooms, (room: Room) => {
-            console.log("Working on room", JSON.stringify(room.memory));
             // Abort if Memory already exists
-            if (Memory.rooms[room.name]) delete room.memory;
-    
+            if (Memory.rooms[room.name]) {
+                // delete Memory.rooms[room.name];
+                return;
+            }
+
+            console.log("Working on: ", JSON.stringify(Memory.rooms[room.name]))
             // Initialize Memory - Typescript requires it be done this way
             //                    unless we define a constructor for RoomMemory.
             Memory.rooms[room.name] = {
@@ -47,10 +49,9 @@ export class MemoryApi {
                 hostiles: [],
                 roomState: ROOM_STATE_INTRO,
                 sources: room.find(FIND_SOURCES),
-                structures: {},
-            };    
+                structures: {}
+            };
         });
-
     }
 
     /**
@@ -58,6 +59,6 @@ export class MemoryApi {
      * @param room The room to update the memory of
      */
     public static update_room_memory(room: Room): void {
-        
+        // Update all memory that will be stored in Room.memory
     }
 }

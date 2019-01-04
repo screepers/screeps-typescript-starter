@@ -2,14 +2,14 @@
 
 // room state constants
 
-declare const ROOM_STATE_INTRO = 0;
-declare const ROOM_STATE_BEGINNER = 1;
-declare const ROOM_STATE_INTER = 2;
-declare const ROOM_STATE_ADVANCED = 3;
-declare const ROOM_STATE_UPGRADER = 4;
-declare const ROOM_STATE_SEIGE = 5;
-declare const ROOM_STATE_STIMULATE = 6;
-declare const ROOM_STATE_NUKE_INBOUND = 7;
+declare const ROOM_STATE_INTRO: 0;
+declare const ROOM_STATE_BEGINNER: 1;
+declare const ROOM_STATE_INTER: 2;
+declare const ROOM_STATE_ADVANCED: 3;
+declare const ROOM_STATE_UPGRADER: 4;
+declare const ROOM_STATE_SEIGE: 5;
+declare const ROOM_STATE_STIMULATE: 6;
+declare const ROOM_STATE_NUKE_INBOUND: 7;
 
 type RoomStateConstant =
     | ROOM_STATE_INTRO
@@ -21,7 +21,7 @@ type RoomStateConstant =
     | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
-/**
+/**     
  * right when a room is starting and nothing is built/no creeps exist
  */
 type ROOM_STATE_INTRO = 0;
