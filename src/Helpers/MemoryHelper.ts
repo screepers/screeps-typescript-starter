@@ -1,5 +1,6 @@
 // Accessing Memory Helpers
 export class MemoryHelper {
+
     /**
      * return all the objects of a specified type in the room
      * @param room the room we want to get objects from
@@ -36,8 +37,8 @@ export class MemoryHelper {
     public static getObjectsInRoomBy(
         room: Room,
         filterFunction: (o: any) => boolean,
-        objectConst?: StructureConstant
-    ): StringMap {
+        objectConst?: StructureConstant): StringMap {
+
         let allObjects: StringMap;
 
         // if no structure was specified, get all of the structures
@@ -57,6 +58,7 @@ export class MemoryHelper {
      * @param creepConst [optional] the RoleConstant
      */
     public static getCreepsInRoom(room: Room, creepConst?: RoleConstant | any): StringMap {
+
         let allCreeps: StringMap;
 
         // if no role was specified, get all of the creeps
@@ -82,6 +84,7 @@ export class MemoryHelper {
      * @param creepConst [optional] the type of creep you want (RoleConstant)
      */
     public static getCreepsInRoomBy(room: Room, filterFunction: (c: any) => boolean, creepConst?: any): StringMap {
+
         let allCreeps: StringMap;
 
         // if no role was specified, get all of the creeps
@@ -102,6 +105,7 @@ export class MemoryHelper {
      * @param filterFunction [optional] the function we want to filter by
      */
     public static getNumCreepsInRoomBy(room: Room, creepConst?: any, filterFunction?: (c: any) => boolean): number {
+
         let allCreeps: StringMap;
 
         // if no role was specified, get all of the creeps
@@ -118,5 +122,25 @@ export class MemoryHelper {
         }
         // if filter function is provided, apply it
         return _.filter(allCreeps, filterFunction).length;
+    }
+
+    /**
+     * clear the memory structure for the creep
+     * @param creep the creep we want to clear the memory of
+     */
+    public static clearCreepMemory(creep: Creep) {
+
+        // check if the memory object exists and delete it
+        if (Memory.creeps[creep.name]) delete creep.memory;
+    }
+
+    /**
+     * clear the memory for a room
+     * @param room the room we want to clear the memory for
+     */
+    public static clearRoomMemory(room: Room) {
+
+        // check if the memory structures exists and delete it
+        if (Memory.rooms[room.name]) delete room.memory;
     }
 }

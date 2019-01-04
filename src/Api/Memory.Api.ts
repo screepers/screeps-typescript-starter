@@ -1,3 +1,4 @@
+
 // the api for the memory class
 export class MemoryApi {
     /**
@@ -31,7 +32,7 @@ export class MemoryApi {
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    public static initialize_room_memories(): void {
+    public static initRoomMemory(): void {
         _.forEach(Game.rooms, (room: Room) => {
             // Abort if Memory already exists
             if (Memory.rooms[room.name]) {
@@ -39,10 +40,11 @@ export class MemoryApi {
                 return;
             }
 
-            console.log("Working on: ", JSON.stringify(Memory.rooms[room.name]))
+            console.log("Working on: ", JSON.stringify(Memory.rooms[room.name]));
             // Initialize Memory - Typescript requires it be done this way
             //                    unless we define a constructor for RoomMemory.
             Memory.rooms[room.name] = {
+                constructionSites: [],
                 creepLimit: {},
                 creeps: [],
                 defcon: 0,
@@ -58,7 +60,33 @@ export class MemoryApi {
      * Calls all the helper functions to update room.memory
      * @param room The room to update the memory of
      */
-    public static update_room_memory(room: Room): void {
-        // Update all memory that will be stored in Room.memory
+    public static updateRoomMemory(room: Room): void {
+        // Update Room Memory
+    }
+
+    /**
+     * @param creep the creep we want to initialize memory for
+     */
+    public static initCreepMemory(
+        creep: Creep,
+        creepRole: RoleConstant,
+        creepHomeRoom: string,
+        creepOptions: CreepOptionsCiv | CreepOptionsMili,
+        creepTargetRoom?: string
+    ): void {
+        // abort if memory already exists
+        if (Memory.creeps[creep.name]) {
+            return;
+        }
+
+        // Initialize Memory
+        Memory.creeps[creep.name] = {
+            homeRoom: creepHomeRoom,
+            options: creepOptions,
+            role: creepRole,
+            targetRoom: creepTargetRoom || "",
+            workTarget: "",
+            working: false,
+        };
     }
 }
