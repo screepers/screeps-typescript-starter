@@ -1,5 +1,5 @@
 import { stringify } from "querystring";
-
+import { Constants } from "utils/Constants"
 // the api for the memory class
 export class MemoryApi {
 
@@ -35,12 +35,15 @@ export class MemoryApi {
      * @param room The room to initialize the memory of.
      */
     public static initRoomMemory(): void {
-
         _.forEach(Game.rooms, (room: Room) => {
-            console.log("Working on room", JSON.stringify(room.memory));
             // Abort if Memory already exists
-            if (Memory.rooms[room.name]) delete room.memory;
+            if (Memory.rooms[room.name]) {
+                // delete Memory.rooms[room.name];
+                return;
+            }
+            console.log("in MEMORY.API: ", Constants.TEST_CONSTANT);
 
+            console.log("Working on: ", JSON.stringify(Memory.rooms[room.name]));
             // Initialize Memory - Typescript requires it be done this way
             //                    unless we define a constructor for RoomMemory.
             Memory.rooms[room.name] = {
@@ -54,7 +57,6 @@ export class MemoryApi {
                 structures: {}
             };
         });
-
     }
 
     /**
@@ -62,26 +64,32 @@ export class MemoryApi {
      * @param room The room to update the memory of
      */
     public static updateRoomMemory(room: Room): void {
-
+        // Update Room Memory
     }
 
     /**
      * @param creep the creep we want to initialize memory for
      */
-    public static initCreepMemory(creep: Creep, creepRole: RoleConstant, creepHomeRoom: string,
-        creepOptions: CreepOptionsCiv | CreepOptionsMili, creepTargetRoom?: string): void {
-
+    public static initCreepMemory(
+        creep: Creep,
+        creepRole: RoleConstant,
+        creepHomeRoom: string,
+        creepOptions: CreepOptionsCiv | CreepOptionsMili,
+        creepTargetRoom?: string
+    ): void {
         // abort if memory already exists
-        if (Memory.creeps[creep.name]) delete creep.memory;
+        if (Memory.creeps[creep.name]) {
+            return;
+        }
 
         // Initialize Memory
         Memory.creeps[creep.name] = {
-            role: creepRole,
             homeRoom: creepHomeRoom,
+            options: creepOptions,
+            role: creepRole,
             targetRoom: creepTargetRoom || "",
             workTarget: "",
             working: false,
-            options: creepOptions
         };
     }
 }

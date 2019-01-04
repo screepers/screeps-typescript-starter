@@ -8,6 +8,7 @@
     "forin": false,
     "interface-name": [true, "never-prefix"],
     "member-ordering": [false],
+    "no-string-literal": false,
     "no-console": [false],
     "no-namespace": [true, "allow-declarations"],
     "variable-name": [
