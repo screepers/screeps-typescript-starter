@@ -9,6 +9,6 @@ export class MemoryManager {
     public static runMemoryManager(): void {
         MemoryApi.garbageCollection();
         console.log("Running Init");
-        MemoryApi.initialize_room_memories();
+        MemoryApi.initRoomMemory();
     }
 }

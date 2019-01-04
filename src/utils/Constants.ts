@@ -1,3 +1,3 @@
-export class Constants {
-    public TEST_CONSTANT = "testy consty";
-}
+export const Constants = {
+    TEST_CONSTANT: "testy testy"
+};

@@ -1,4 +1,5 @@
-
+import { stringify } from "querystring";
+import { Constants } from "utils/Constants"
 // the api for the memory class
 export class MemoryApi {
     /**
@@ -39,6 +40,7 @@ export class MemoryApi {
                 // delete Memory.rooms[room.name];
                 return;
             }
+            console.log("in MEMORY.API: ", Constants.TEST_CONSTANT);
 
             console.log("Working on: ", JSON.stringify(Memory.rooms[room.name]));
             // Initialize Memory - Typescript requires it be done this way

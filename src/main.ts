@@ -19,13 +19,13 @@ import { RoomManager } from "Managers/RoomManager";
 // @ts-ignore
 import { SpawnManager } from "Managers/SpawnManager"
 // @ts-ignore
-import { ErrorMapper } from "utils/ErrorMapper";
-
 import { Constants } from "utils/Constants";
+// @ts-ignore
+import { ErrorMapper } from "utils/ErrorMapper";
 
 export const loop = ErrorMapper.wrapLoop(() => {
 
-  console.log(Constants["TEST_CONSTANT"]);
+  console.log("IN main: ", Constants.TEST_CONSTANT);
 
   // clean up memory first
   try { MemoryManager.runMemoryManager(); } catch (e) { console.log("<font color=\"#efdc0e\">Error running MEMORY manager:\n</font>","<font color=\"#e04e4e\">", e.stack, "</font>") }
