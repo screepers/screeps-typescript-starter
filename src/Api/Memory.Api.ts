@@ -1,5 +1,5 @@
 import { stringify } from "querystring";
-import { ROLE_COLONIZER, ROOM_STATE_INTRO } from "utils/Constants";
+import { ROOM_STATE_INTRO, ROLE_COLONIZER } from "utils/Constants";
 
 // the api for the memory class
 export class MemoryApi {
