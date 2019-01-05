@@ -52,37 +52,14 @@ export class MemoryHelper {
         return _.filter(allObjects, filterFunction);
     }
 
-    /**
-     * get all the creeps in the room
-     * @param room the room we want to get creeps from
-     * @param creepConst [optional] the RoleConstant
-     */
-    public static getCreepsInRoom(room: Room, creepConst?: RoleConstant | any): StringMap {
-
-        let allCreeps: StringMap;
-
-        // if no role was specified, get all of the creeps
-        if (!creepConst) {
-            allCreeps = room.memory.creeps;
-        } else {
-            // if role was specified, get just those roles
-            allCreeps = room.memory.creeps[creepConst];
-        }
-
-        if (allCreeps !== undefined) {
-            return allCreeps;
-        }
-
-        // if not, throw memory not set exception
-        throw new Error(`Memory not set for creep ${creepConst} in room ${room.name}.`);
-    }
-
+    
     /**
      * get creeps in room by a filter function
      * @param room the room we want to get creeps from
      * @param filterFunction the filter for the creeps
      * @param creepConst [optional] the type of creep you want (RoleConstant)
      */
+    /*
     public static getCreepsInRoomBy(room: Room, filterFunction: (c: any) => boolean, creepConst?: any): StringMap {
 
         let allCreeps: StringMap;
@@ -97,6 +74,7 @@ export class MemoryHelper {
 
         return _.filter(allCreeps, filterFunction);
     }
+    */
 
     /**
      * get number of creeps in room (can pass a filter function)
@@ -104,6 +82,7 @@ export class MemoryHelper {
      * @param creepConst [optional] creep role we want
      * @param filterFunction [optional] the function we want to filter by
      */
+    /*
     public static getNumCreepsInRoomBy(room: Room, creepConst?: any, filterFunction?: (c: any) => boolean): number {
 
         let allCreeps: StringMap;
@@ -123,6 +102,7 @@ export class MemoryHelper {
         // if filter function is provided, apply it
         return _.filter(allCreeps, filterFunction).length;
     }
+    */
 
     /**
      * clear the memory structure for the creep
@@ -131,7 +111,7 @@ export class MemoryHelper {
     public static clearCreepMemory(creep: Creep) {
 
         // check if the memory object exists and delete it
-        if (Memory.creeps[creep.name]) delete creep.memory;
+        if (Memory.creeps[creep.name]) { delete creep.memory; }
     }
 
     /**
@@ -141,6 +121,6 @@ export class MemoryHelper {
     public static clearRoomMemory(room: Room) {
 
         // check if the memory structures exists and delete it
-        if (Memory.rooms[room.name]) delete room.memory;
+        if (Memory.rooms[room.name]) { delete room.memory; }
     }
 }

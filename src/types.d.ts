@@ -150,7 +150,7 @@ type JAKESBOY2 = "jakesboy2";
 type UHMBROCK = "uhmbrock";
 
 /**
- * global map function with string key
+ * Generic 
  */
 interface StringMap {
     [key: string]: any;
@@ -206,9 +206,9 @@ interface RoomMemory {
      */
     upgradeLink?: string;
     /**
-     * IDs of all creeps assigned to this room
+     * Cache of all creeps
      */
-    creeps: String[];
+    creeps: Cache;
     /**
      * the limit of each role for the room
      */
@@ -439,13 +439,13 @@ interface MilitaryCreepLimits {
  */
 interface Cache {
     /**
-     * The unique identifier string for the cache object
+     * The data that the Cache object validates
      */
-    id: string;
+    data: any;
     /**
-     * Cache Object
+     * Cache Object - used for validation
      */
-    object: StructureCache | CreepCache;
+    cache: any;
 }
 
 /**
