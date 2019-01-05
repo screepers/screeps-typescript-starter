@@ -10,6 +10,7 @@
     "ordered-imports": false,
     "member-ordering": [false],
     "no-string-literal": [false],
+    "class-name": [false],
     "no-console": [false],
     "no-namespace": [true, "allow-declarations"],
     "variable-name": [

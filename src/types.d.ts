@@ -189,49 +189,50 @@ interface CreepMemory {
 interface RoomMemory {
     roomState: RoomStateConstant;
     /**
-     * all structures in the room
+     * IDs of all structures in the room
+     * Stringmap : [structure.type] = String[]
      */
     structures: StringMap;
     /**
-     * construction sites in the room
+     * IDs of all construction sites in the room
      */
     constructionSites: StringMap;
     /**
-     * all sources in the room
+     * IDs of all sources in the room
      */
     sources: StringMap;
     /**
-     * the link the power upgrader pulls from
+     * IDs of the link the power upgrader pulls from
      */
     upgradeLink?: string;
     /**
-     * all creeps assigned to this room
+     * IDs of all creeps assigned to this room
      */
-    creeps: Creep[];
+    creeps: String[];
     /**
      * the limit of each role for the room
      */
     creepLimit: StringMap | CreepLimits;
     /**
-     * all hostile creeps in this room
+     * IDs of all hostile creeps in this room
      */
-    hostiles: Creep[];
+    hostiles: String[];
     /**
      * the defcon level for the room
      */
     defcon: number;
     /**
-     * all rooms flagged to attack
+     * Names of all rooms flagged to attack
      */
-    attackRooms?: Room[];
+    attackRooms?: String[];
     /**
-     * all rooms flagged to remote harvest
+     * Names of all rooms flagged to remote harvest
      */
-    remoteRooms?: Room[];
+    remoteRooms?: String[];
     /**
-     * all rooms flagged to colonize
+     * Names of all rooms flagged to colonize
      */
-    claimRooms?: Room[];
+    claimRooms?: String[];
 }
 
 interface EmpireMemory {}
