@@ -11,7 +11,7 @@ export class SpawnApi {
      * @param creepConst the role of the creep we want
      */
     public static getCreepCount(room: Room, creepConst: any): number {
-        return MemoryHelper.getNumCreepsInRoomBy(room, creepConst);
+        return 1;
     }
 
     /**
@@ -28,13 +28,6 @@ export class SpawnApi {
      * @param room the room we are checking the spawn for
      */
     public static getOpenSpawn(room: Room): StructureSpawn | undefined {
-        const allOpenSpawns = _.filter(room.memory.structures[STRUCTURE_SPAWN], (s: StructureSpawn) => !s.spawning);
-
-        // if there exists an open spawn, return it, or return undefined
-        if (allOpenSpawns.length > 0) {
-            return allOpenSpawns[0];
-        }
-
         return undefined;
     }
 
@@ -43,30 +36,36 @@ export class SpawnApi {
      * @param room the room we are checking the spawn for
      */
     public static isOpenSpawn(room: Room): boolean {
-        return _.some(room.memory.structures[STRUCTURE_SPAWN], (s: StructureSpawn) => !s.spawning);
+        return false;
     }
 
     /**
      * get next creep to spawn
      */
 
+
     /**
      * spawn the next creep
      */
+
 
     /**
      * get energy cost of creep
      */
 
+
     /**
      * check if we have enough energy to spawn this creep
      */
+
 
     /**
      * check what tier of this creep we are spawning
      */
 
+
     /**
      * get the memory options for this creep
      */
+
 }
