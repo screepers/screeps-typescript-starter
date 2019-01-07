@@ -1,5 +1,6 @@
 import { RoomHelper } from "../Helpers/RoomHelper";
 import { MemoryHelper } from "../Helpers/MemoryHelper";
+import { MemoryApi } from "./Memory.Api";
 
 /**
  * the api used by the spawn manager
@@ -11,7 +12,8 @@ export class SpawnApi {
      * @param creepConst the role of the creep we want
      */
     public static getCreepCount(room: Room, creepConst: any): number {
-        return 1;
+        return _.sum(MemoryApi.getMyCreeps(room,
+            (c: Creep) => c.memory.role === creepConst));
     }
 
     /**
@@ -27,16 +29,13 @@ export class SpawnApi {
      * get the first available open spawn for a room
      * @param room the room we are checking the spawn for
      */
-    public static getOpenSpawn(room: Room): StructureSpawn | undefined {
-        return undefined;
-    }
+    public static getOpenSpawn(room: Room): Structure<StructureConstant> | null {
 
-    /**
-     * check if theres an open spawn in the room
-     * @param room the room we are checking the spawn for
-     */
-    public static isOpenSpawn(room: Room): boolean {
-        return false;
+        // get all spawns then just take the first one from it
+        const allSpawns: (Structure<StructureConstant> | null)[] = MemoryApi.getStructures(room,
+            (s: Structure<StructureConstant>) => s.structureType === STRUCTURE_SPAWN);
+
+        return _.first(allSpawns);
     }
 
     /**

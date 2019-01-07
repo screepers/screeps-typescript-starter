@@ -1,3 +1,6 @@
+import { MemoryApi } from "./Memory.Api";
+import { O_NOFOLLOW, SSL_OP_CISCO_ANYCONNECT } from "constants";
+
 // an api used for functions related to the room
 export class RoomApi {
 
@@ -7,7 +10,8 @@ export class RoomApi {
      */
     public static isHostilesInRoom(room: Room): boolean {
 
-        return false;
+        const hostilesInRoom = MemoryApi.getHostileCreeps(room);
+        return (hostilesInRoom.length > 0);
     }
 
 
@@ -54,13 +58,26 @@ export class RoomApi {
      */
     public static runTowers(room: Room): void {
 
-        // get towers in room
-
-        // get hostile creeps in the room
-
+        const towers = MemoryApi.getStructures(room,
+            (t: Structure<StructureConstant>) => {
+                return t.structureType === STRUCTURE_TOWER;
+            });
+        const hostileCreeps = MemoryApi.getHostileCreeps(room);
         // --------
 
         // choose the most ideal target and have every tower attack it
+        const idealTarget = this.chooseTowerTarget(room);
+
+        // have each tower attack this target
+        towers.forEach(t => t.attack(idealTarget));
+    }
+
+    /**
+     * choose an ideal target for the towers to attack
+     * @param room the room we are in
+     */
+    private static chooseTowerTarget(room: Room): Structure<StructureConstant> | null {
+        return null;
     }
 
     /**
@@ -69,22 +86,6 @@ export class RoomApi {
      */
     public static setDefconLevel(room: Room): void {
         // Lint hates empty blocks
-    }
-
-    /**
-     * get optimal tower target
-     * @param room the room we are checking
-     */
-    private static getOptimalTowerTarget(room: Room, hostileCreeps: Creep[]): void {
-        // Lint hates empty blocks
-    }
-
-    /**
-     * check if theres hostile creeps in the room
-     * @param room the room we are checking if hostiles exist in
-     */
-    public static isHostileCreeps(room: Room): boolean {
-        return false;
     }
 
     /**
