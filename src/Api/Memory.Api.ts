@@ -20,7 +20,6 @@ export class MemoryApi {
             if (!(roomName in Game.rooms)) {
                 delete Memory.rooms[roomName];
             } else {
-                console.log("Getting room memory for: ", roomName);
                 this.getRoomMemory(Game.rooms[roomName]);
             }
         }
@@ -93,10 +92,10 @@ export class MemoryApi {
     public static getRoomMemory(room: Room): void {
         // Should validate room memory somehow and return if valid
 
-        // MemoryHelper_Room.updateRoomMemory(room);
+        // Example usage of the getMethods --- NOT HOW WE WILL USE THIS METHOD REGULARLY
         this.getMyCreeps(room, undefined, true);
-        this.getHostileCreeps(room, undefined, true);
-        this.getStructures(room, undefined, true);
+        this.getHostileCreeps(room);
+        this.getStructures(room, (object: Structure) => object.structureType === "extension" , true);
     }
 
     /**
@@ -130,7 +129,7 @@ export class MemoryApi {
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
         }
-        console.log(JSON.stringify(creeps));
+        
         return creeps;
     }
 
@@ -203,7 +202,7 @@ export class MemoryApi {
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
         }
-
+        console.log(structures);
         return structures;
     }
 }
