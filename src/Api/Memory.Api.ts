@@ -95,7 +95,7 @@ export class MemoryApi {
         // Example usage of the getMethods --- NOT HOW WE WILL USE THIS METHOD REGULARLY
         this.getMyCreeps(room, undefined, true);
         this.getHostileCreeps(room);
-        this.getStructures(room, (object: Structure) => object.structureType === "extension" , true);
+        this.getStructures(room, (object: Structure) => object.structureType === "extension", true);
     }
 
     /**
@@ -129,7 +129,7 @@ export class MemoryApi {
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
         }
-        
+
         return creeps;
     }
 
@@ -204,5 +204,37 @@ export class MemoryApi {
         }
         console.log(structures);
         return structures;
+    }
+
+    /**
+     * Get all construction sites in a room, updating if necessary
+     *
+     * [Cached] Memory.rooms[room.name].constructionSites
+     * @param room The room to retrieve from
+     * @param filterFunction [Optional] The function to filter all structure objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Array<ConstructionSite> -- An array of ConstructionSites
+     */
+    public static getConstructionSites(
+        room: Room,
+        filterFunction?: (object: ConstructionSite) => boolean,
+        forceUpdate?: boolean
+    ) {
+        const CacheTTL = 50;
+
+        if (
+            forceUpdate ||
+            !Memory.rooms[room.name].constructionSites ||
+            Memory.rooms[room.name].constructionSites.cache < Game.time - CacheTTL
+        ) {
+            MemoryHelper_Room.updateConstructionSites(room);
+        }
+
+        let constructionSites = _.map(Memory.rooms[room.name].constructionSites.data, (id: string) => Game.getObjectById(id));
+        if (filterFunction !== undefined){
+            constructionSites = _.filter(constructionSites, filterFunction);
+        }
+
+        return constructionSites;
     }
 }
