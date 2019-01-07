@@ -68,7 +68,7 @@ export class RoomApi {
      * @param room the room we are setting defcon for
      */
     public static setDefconLevel(room: Room): void {
-
+        // Lint hates empty blocks
     }
 
     /**
@@ -76,7 +76,7 @@ export class RoomApi {
      * @param room the room we are checking
      */
     private static getOptimalTowerTarget(room: Room, hostileCreeps: Creep[]): void {
-
+        // Lint hates empty blocks
     }
 
     /**
@@ -92,7 +92,7 @@ export class RoomApi {
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): void {
-
+        // Lint hates empty blocks
     }
 
     /**
@@ -100,7 +100,7 @@ export class RoomApi {
      * @param room the room we are getting spawns/extensions to be filled from
      */
     public static getExtensionsNeedFilled(room: Room): void {
-
+        // Lint hates empty blocks
     }
 
 
@@ -109,7 +109,7 @@ export class RoomApi {
      * @param room the room we are getting towers that need to be filled from
      */
     public static getTowersNeedFilled(room: Room): void {
-
+        // Lint hates empty blocks
     }
 
     /**
@@ -117,7 +117,7 @@ export class RoomApi {
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
     public static getWallRepairTargets(room: Room): void {
-
+        // Lint hates empty blocks
     }
 
 

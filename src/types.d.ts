@@ -192,15 +192,15 @@ interface RoomMemory {
      * IDs of all structures in the room
      * Stringmap : [structure.type] = String[]
      */
-    structures: StringMap;
+    structures: Cache;
     /**
      * IDs of all construction sites in the room
      */
-    constructionSites: StringMap;
+    constructionSites: Cache;
     /**
      * IDs of all sources in the room
      */
-    sources: StringMap;
+    sources: string[];
     /**
      * IDs of the link the power upgrader pulls from
      */
@@ -216,7 +216,7 @@ interface RoomMemory {
     /**
      * IDs of all hostile creeps in this room
      */
-    hostiles: String[];
+    hostiles: Cache;
     /**
      * the defcon level for the room
      */
@@ -224,15 +224,15 @@ interface RoomMemory {
     /**
      * Names of all rooms flagged to attack
      */
-    attackRooms?: String[];
+    attackRooms?: Cache;
     /**
      * Names of all rooms flagged to remote harvest
      */
-    remoteRooms?: String[];
+    remoteRooms?: Cache;
     /**
      * Names of all rooms flagged to colonize
      */
-    claimRooms?: String[];
+    claimRooms?: Cache;
 }
 
 interface EmpireMemory {}
@@ -446,47 +446,4 @@ interface Cache {
      * Cache Object - used for validation
      */
     cache: any;
-}
-
-/**
- * An object stored in a cache object that contains the data of a structure query
- */
-interface StructureCache {
-    /**
-     * The ID of the structure
-     */
-    id: string;
-    /**
-     * [optional] The type of structure
-     */
-    structureType?: StructureConstant;
-    /**
-     * [optional] The structure's ( hits / hitsMax )
-     */
-    hit_percent?: number;
-    /**
-     * [optional] Any extra data - In Object Form
-     */
-}
-
-/**
- * The data of a creep query - Stored in a Cache object
- */
-interface CreepCache {
-    /**
-     * The ID of the creep
-     */
-    id: string;
-    /**
-     * [optional] The role of the creep
-     */
-    role?: string;
-    /**
-     * [optional] The creep's ( hits / hitsMax )
-     */
-    hit_percent?: number;
-    /**
-     * [optional] Any extra data - In Object form
-     */
-    data?: object;
 }

@@ -9,6 +9,8 @@ export class MemoryManager {
     public static runMemoryManager(): void {
         MemoryApi.garbageCollection();
         console.log("Running Init");
-        MemoryApi.initRoomMemory();
+        _.forEach(Game.rooms, (room: Room) => {
+            MemoryApi.initRoomMemory(room);
+        });
     }
 }
