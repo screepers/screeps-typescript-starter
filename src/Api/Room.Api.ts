@@ -1,5 +1,6 @@
 import { MemoryApi } from "./Memory.Api";
 import { O_NOFOLLOW, SSL_OP_CISCO_ANYCONNECT } from "constants";
+import { RoomHelper } from "Helpers/RoomHelper";
 
 // an api used for functions related to the room
 export class RoomApi {
@@ -62,22 +63,27 @@ export class RoomApi {
             (t: Structure<StructureConstant>) => {
                 return t.structureType === STRUCTURE_TOWER;
             });
-        const hostileCreeps = MemoryApi.getHostileCreeps(room);
+        const hostileCreeps = MemoryApi.getHostileCreeps(room);;
         // --------
 
         // choose the most ideal target and have every tower attack it
         const idealTarget = this.chooseTowerTarget(room);
 
         // have each tower attack this target
-        towers.forEach(t => t.attack(idealTarget));
+        towers.forEach((t: any) => t.attack(idealTarget));
     }
 
     /**
      * choose an ideal target for the towers to attack
      * @param room the room we are in
      */
-    private static chooseTowerTarget(room: Room): Structure<StructureConstant> | null {
-        return null;
+    private static chooseTowerTarget(room: Room): Creep | null {
+
+        // get the creep we will do the most damage to
+        const hostileCreeps: (Creep | null)[] = MemoryApi.getHostileCreeps(room);
+
+        // temp, in future get one we do most dmg to
+        return hostileCreeps[0];
     }
 
     /**
@@ -89,11 +95,16 @@ export class RoomApi {
     }
 
     /**
-     * get repair targets for the room (ordered by priority)
+     * get repair targets for the room (any structure under 75% hp)
+     * TODO order by priority (fresh ramparts, towers, containers, roads, etc)
      * @param room the room we are checking for repair targets
      */
-    public static getRepairTargets(room: Room): void {
-        // Lint hates empty blocks
+    public static getRepairTargets(room: Room): (Structure<StructureConstant> | null)[] {
+
+        const REPAIR_THRESHOLD: number = .75;
+        return MemoryApi.getStructures(room, (s: Structure<StructureConstant>) => {
+            return s.hits < (s.hitsMax * REPAIR_THRESHOLD);
+        });
     }
 
     /**
@@ -106,19 +117,26 @@ export class RoomApi {
 
 
     /**
-     * get towers that need to be filled for the room (ordered by priority)
+     * get towers that need to be filled for the room
+     * TODO order by ascending
      * @param room the room we are getting towers that need to be filled from
      */
-    public static getTowersNeedFilled(room: Room): void {
-        // Lint hates empty blocks
+    public static getTowersNeedFilled(room: Room): (Structure<StructureConstant> | null)[] {
+
+        const TOWER_THRESHOLD: number = .85;
+        return MemoryApi.getStructures(room, (t: any) => {
+            return (t.structureType === STRUCTURE_TOWER && t.energy < (t.energyCapacity * TOWER_THRESHOLD));
+        })
     }
 
     /**
      * get ramparts, or ramparts and walls that need to be repaired
+     * TODO limit by something, not sure yet.. room state possibly... controller level? open to input
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
-    public static getWallRepairTargets(room: Room): void {
-        // Lint hates empty blocks
+    public static getWallRepairTargets(room: Room): (Structure<StructureConstant> | null)[] | null {
+
+        return null;
     }
 
 
