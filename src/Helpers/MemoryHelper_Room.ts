@@ -97,4 +97,24 @@ export class MemoryHelper_Room {
         Memory.rooms[room.name].sources.data = _.map(sources, (source: Source) => source.id);
         Memory.rooms[room.name].sources.cache = Infinity;
     }
+
+    /**
+     * update the room state
+     * @param room the room we are updating
+     * @param stateConst the state we are applying to the room
+     */
+    public static updateRoomState(room: Room, stateConst: RoomStateConstant): void {
+        Memory.rooms[room.name].roomState = stateConst;
+        return;
+    }
+
+    /**
+     * update the room defcon
+     * @param room the room we are updating
+     * @param stateConst the defcon we are applying to the room
+     */
+    public static updateDefcon(room: Room, defconLevel: number): void {
+        Memory.rooms[room.name].defcon = defconLevel;
+        return;
+    }
 }

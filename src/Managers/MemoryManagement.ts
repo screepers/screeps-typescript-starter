@@ -7,8 +7,10 @@ export class MemoryManager {
      * run the memory for the AI
      */
     public static runMemoryManager(): void {
+        
         MemoryApi.garbageCollection();
-        console.log("Running Init");
+        
+        //
         _.forEach(Game.rooms, (room: Room) => {
             MemoryApi.initRoomMemory(room);
         });

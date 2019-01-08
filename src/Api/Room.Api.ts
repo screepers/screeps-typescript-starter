@@ -2,6 +2,7 @@ import { MemoryApi } from "./Memory.Api";
 import { O_NOFOLLOW, SSL_OP_CISCO_ANYCONNECT } from "constants";
 import { RoomHelper } from "Helpers/RoomHelper";
 import { ROOM_STATE_INTRO } from "utils/constants";
+import { MemoryHelper_Room } from "Helpers/MemoryHelper_Room";
 
 // an api used for functions related to the room
 export class RoomApi {
@@ -44,14 +45,14 @@ export class RoomApi {
         // check if we are in nuke inbound room state
         // nuke is coming in and we need to gtfo
         if (incomingNukes.length > 0) {
-            MemoryApi.updateRoomState(room, ROOM_STATE_NUKE_INBOUND);
+            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_NUKE_INBOUND);
             return;
         }
 
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high
         if (defconLevel >= 3) {
-            MemoryApi.updateRoomState(room, ROOM_STATE_SEIGE);
+            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_SEIGE);
             return;
         }
 
@@ -64,7 +65,7 @@ export class RoomApi {
             // return;
 
             // otherwise, just upgrader room state
-            MemoryApi.updateRoomState(room, ROOM_STATE_UPGRADER);
+            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_UPGRADER);
             return;
         }
 
@@ -78,27 +79,27 @@ export class RoomApi {
             // return;
 
             // otherwise, just advanced room state
-            MemoryApi.updateRoomState(room, ROOM_STATE_ADVANCED);
+            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_ADVANCED);
             return;
         }
 
         // check if we are in intermediate room state
         // container mining set up, but no storage
         if (RoomHelper.isContainerMining(room, sources, containers) && storage === undefined) {
-            MemoryApi.updateRoomState(room, ROOM_STATE_INTER);
+            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_INTER);
             return;
         }
 
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
         if (creeps.length > 3) {
-            MemoryApi.updateRoomState(room, ROOM_STATE_BEGINNER);
+            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_BEGINNER);
             return;
         }
 
         // check if we are in intro room state
         // 3 or less creeps so we need to (re)start the room
-        MemoryApi.updateRoomState(room, ROOM_STATE_INTRO);
+        MemoryHelper_Room.updateRoomState(room, ROOM_STATE_INTRO);
         return;
     }
 

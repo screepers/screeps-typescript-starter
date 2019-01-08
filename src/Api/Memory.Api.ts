@@ -5,7 +5,7 @@ import { MemoryHelper_Room } from "Helpers/MemoryHelper_Room";
 // the api for the memory class
 export class MemoryApi {
     /**
-     * clear out all dead memory
+     * Remove all memory objects that are dead
      */
     public static garbageCollection(): void {
         // Remove all dead creeps from memory
@@ -20,7 +20,7 @@ export class MemoryApi {
             if (!(roomName in Game.rooms)) {
                 delete Memory.rooms[roomName];
             } else {
-                this.getRoomMemory(Game.rooms[roomName]);
+                // this.getRoomMemory(Game.rooms[roomName]);
             }
         }
 
@@ -277,23 +277,4 @@ export class MemoryApi {
         return sources;
     }
 
-    /**
-     * update the room state
-     * @param room the room we are updating
-     * @param stateConst the state we are applying to the room
-     */
-    public static updateRoomState(room: Room, stateConst: RoomStateConstant): void {
-        Memory.rooms[room.name].roomState = stateConst;
-        return;
-    }
-
-    /**
-     * update the room defcon
-     * @param room the room we are updating
-     * @param stateConst the defcon we are applying to the room
-     */
-    public static updateDefcon(room: Room, defconLevel: number): void {
-        Memory.rooms[room.name].defcon = defconLevel;
-        return;
-    }
 }
