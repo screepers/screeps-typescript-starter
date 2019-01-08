@@ -1,5 +1,5 @@
 import { stringify } from "querystring";
-import { ROOM_STATE_INTRO, AllStructureTypes } from "utils/constants";
+import { ROOM_STATE_INTRO } from "utils/constants";
 import { MemoryHelper_Room } from "Helpers/MemoryHelper_Room";
 
 // the api for the memory class

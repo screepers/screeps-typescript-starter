@@ -126,8 +126,8 @@ export class RoomHelper {
      */
     public static isContainerMining(
         room: Room,
-        sources: (Source | null)[],
-        containers: (Structure<StructureConstant> | null)[]): boolean {
+        sources: Array<Source | null>,
+        containers: Array<Structure<StructureConstant> | null>): boolean {
 
         return false;
     }
@@ -140,7 +140,7 @@ export class RoomHelper {
      */
     public static isUpgraderLink(
         room: Room,
-        links: (Structure<StructureConstant> | null)[]): boolean {
+        links: Array<Structure<StructureConstant> | null>): boolean {
 
         return false;
     }
@@ -153,7 +153,7 @@ export class RoomHelper {
     public static chooseTowerTarget(room: Room): Creep | null {
 
         // get the creep we will do the most damage to
-        const hostileCreeps: (Creep | null)[] = MemoryApi.getHostileCreeps(room);
+        const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
 
         // temp, in future get one we do most dmg to
         return hostileCreeps[0];

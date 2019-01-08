@@ -32,7 +32,7 @@ export class SpawnApi {
     public static getOpenSpawn(room: Room): Structure<StructureConstant> | null {
 
         // get all spawns then just take the first one from it
-        const allSpawns: (Structure<StructureConstant> | null)[] = MemoryApi.getStructures(room,
+        const allSpawns: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
             (s: Structure<StructureConstant>) => s.structureType === STRUCTURE_SPAWN);
 
         return _.first(allSpawns);

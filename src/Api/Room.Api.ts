@@ -28,16 +28,16 @@ export class RoomApi {
     public static setRoomState(room: Room): void {
 
         // get the structures and creeps we need from memory
-        const containers: (Structure<StructureConstant> | null)[] = MemoryApi.getStructures(room,
+        const containers: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
             (s) => s.structureType === STRUCTURE_CONTAINER);
-        const links: (Structure<StructureConstant> | null)[] = MemoryApi.getStructures(room,
+        const links: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
             (s) => s.structureType === STRUCTURE_LINK);
         const terminal: StructureTerminal | undefined = room.terminal;
         const storage: StructureStorage | undefined = room.storage;
         const incomingNukes: Nuke[] = room.find(FIND_NUKES);
         const defconLevel: number = Memory.rooms[room.name].defcon;
-        const sources: (Source | null)[] = MemoryApi.getSources(room);
-        const creeps: (Creep | null)[] = MemoryApi.getMyCreeps(room);
+        const sources: Array<Source | null> = MemoryApi.getSources(room);
+        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room);
         // ---------
 
 
@@ -59,7 +59,7 @@ export class RoomApi {
         // container mining and storage set up, and we got links online
         if (RoomHelper.isContainerMining(room, sources, containers) && RoomHelper.isUpgraderLink(room, links) && storage !== undefined) {
 
-            //if(stimulate flag is up)
+            // if(stimulate flag is up)
             // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
             // return;
 
@@ -73,7 +73,7 @@ export class RoomApi {
         // then check if we are flagged for sitmulate state
         if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
 
-            //if(stimulate flag is up)
+            // if(stimulate flag is up)
             // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
             // return;
 
@@ -164,7 +164,7 @@ export class RoomApi {
      * TODO order by priority (fresh ramparts, towers, containers, roads, etc)
      * @param room the room we are checking for repair targets
      */
-    public static getRepairTargets(room: Room): (Structure<StructureConstant> | null)[] {
+    public static getRepairTargets(room: Room): Array<Structure<StructureConstant> | null> {
 
         const REPAIR_THRESHOLD: number = .75;
         return MemoryApi.getStructures(room, (s: Structure<StructureConstant>) => {
@@ -186,7 +186,7 @@ export class RoomApi {
      * TODO order by ascending
      * @param room the room we are getting towers that need to be filled from
      */
-    public static getTowersNeedFilled(room: Room): (Structure<StructureConstant> | null)[] {
+    public static getTowersNeedFilled(room: Room): Array<Structure<StructureConstant> | null> {
 
         const TOWER_THRESHOLD: number = .85;
         return MemoryApi.getStructures(room, (t: any) => {
@@ -199,7 +199,7 @@ export class RoomApi {
      * TODO limit by something, not sure yet.. room state possibly... controller level? open to input
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
-    public static getWallRepairTargets(room: Room): (Structure<StructureConstant> | null)[] | null {
+    public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
 
         return null;
     }
