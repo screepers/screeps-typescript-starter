@@ -40,31 +40,53 @@ export class SpawnApi {
 
     /**
      * get next creep to spawn
+     * @param room the room we want to spawn them in
      */
+    public static getNextCreep(room: Room): void {
+        // brock hates empty blocks
+    }
 
 
     /**
      * spawn the next creep
+     * @param room the room we want to spawn them in
+     * @param BodyPartConstant[] the body array of the creep
+     * @param RoleConstant the role of the creep
      */
+    public static spawnNextCreep(room: Room): void {
+        // brock hates empty blocks
+    }
 
 
     /**
      * get energy cost of creep
+     * @param room the room we are spawning them in
+     * @param RoleConstant the role of the creep
+     * @param tier the tier of this creep we are spawning
      */
-
-
-    /**
-     * check if we have enough energy to spawn this creep
-     */
+    public static getEnergyCost(room: Room, roleConst: RoleConstant, tier: number): number {
+        return 1;
+    }
 
 
     /**
      * check what tier of this creep we are spawning
+     * @param room the room we are spawning them in
+     * @param RoleConstant the role of the creep
      */
+    public static getTier(room: Room, roleConst: RoleConstant): number {
+        return 1;
+    }
 
 
     /**
      * get the memory options for this creep
+     * @param room the room we are spawning it in
+     * @param RoleConstant the role of the creep
+     * @param tier the tier of this creep we are spawning
      */
+    private static getCreepOptions(room: Room, roleConst: RoleConstant, tier: number): void {
+
+    }
 
 }

@@ -209,4 +209,30 @@ export class RoomApi {
 
         return null;
     }
+
+    /**
+     * get a list of open sources in the room (not saturated)
+     * @param room the room we are checking
+     */
+    public static getOpenSources(room: Room): void {
+
+    }
+
+
+    /**
+     * gets the drop container next to the source
+     * @param room the room we are checking in
+     * @param source the source we are considering
+     */
+    public static getMiningContainer(room: Room, source: Source): void {
+        // brock hates empty blocks
+    }
+
+    /**
+     * checks if a structure or creep store is full
+     * @param target the structure or creep we are checking
+     */
+    public static isFull(target: any): boolean {
+        return false;
+    }
 }
