@@ -177,9 +177,9 @@ export class RoomApi {
      * get spawn/extensions that need to be filled for the room
      * @param room the room we are getting spawns/extensions to be filled from
      */
-    public static getExtensionsNeedFilled(room: Room): (Structure<StructureConstant> | null)[] {
+    public static getExtensionsNeedFilled(room: Room): Array<Structure<StructureConstant> | null> {
 
-        const extensionsNeedFilled: (Structure<StructureConstant> | null)[] = MemoryApi.getStructures(room,
+        const extensionsNeedFilled: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
             (e: any) => (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION)
                 && (e.energy < e.energyCapacity));
 
