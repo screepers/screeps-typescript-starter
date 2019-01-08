@@ -213,7 +213,7 @@ export class RoomApi {
         const TOWER_THRESHOLD: number = .85;
         return MemoryApi.getStructures(room, (t: any) => {
             return (t.structureType === STRUCTURE_TOWER && t.energy < (t.energyCapacity * TOWER_THRESHOLD));
-        })
+        });
     }
 
     /**
