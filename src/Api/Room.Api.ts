@@ -1,5 +1,4 @@
 import { MemoryApi } from "./Memory.Api";
-import { O_NOFOLLOW, SSL_OP_CISCO_ANYCONNECT } from "constants";
 import { RoomHelper } from "Helpers/RoomHelper";
 import { ROOM_STATE_INTRO } from "utils/constants";
 import { MemoryHelper_Room } from "Helpers/MemoryHelper_Room";
@@ -128,35 +127,30 @@ export class RoomApi {
      */
     public static setDefconLevel(room: Room): void {
 
-        // level 0 -- no danger
-        // level 1 -- less than 50 body parts
-        // level 2 -- 50 - 150 body parts
-        // level 3 -- 150+ body parts OR any boosted body parts
-        // level 4 -- full seige, 50+ boosted parts
+        const hostileCreeps: Array<Creep[] | null> = MemoryApi.getHostileCreeps(room);
+        const hostileBodyParts: number = _.sum(hostileCreeps,
+            (c: Creep | null) => c.body.length);
+
+        // todo: actually figure out if the parts are boosted or not lol and figure out how to figure it out
+        const boostedHostileBodyParts: number = _.sum(hostileCreeps,
+            (c: Creep | null) => c.body.length);
+        // -------------
+
         // level 5 -- nuke inbound
-        // please review these and let me know what you think ^^
-
-        /*
-            This is how to find inbound nukes to your room..
-            we probably want to put this behind a controller level so we
-            aren't calling it every tick on low level rooms you know
-
-            side note: should i stick with the function to update the memory or just do it directly?
-        // level 5
         if (room.find(FIND_NUKES) !== undefined) {
-            MemoryApi.updateDefcon(room, 5);
+            MemoryHelper_Room.updateDefcon(room, 5);
             return;
-        }*/
+        }
 
-        // level 4
+        // level 4 full seige, 50+ boosted parts
 
-        // level 3
+        // level 3 -- 150+ body parts OR any boosted body parts
 
-        // level 2
+        // level 2 -- 50 - 150 body parts
 
-        // level 1
+        // level 1 -- less than 50 body parts
 
-        // level 0
+        // level 0 -- no danger
 
     }
 
@@ -206,7 +200,6 @@ export class RoomApi {
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
     public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
-
         return null;
     }
 
@@ -215,7 +208,7 @@ export class RoomApi {
      * @param room the room we are checking
      */
     public static getOpenSources(room: Room): void {
-
+        // almost forgot brock hates empty blocks
     }
 
 
