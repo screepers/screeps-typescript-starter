@@ -200,11 +200,11 @@ interface RoomMemory {
     /**
      * IDs of all sources in the room
      */
-    sources: string[];
+    sources: Cache;
     /**
      * IDs of the link the power upgrader pulls from
      */
-    upgradeLink?: string;
+    upgradeLink: string;
     /**
      * Cache of all creeps
      */
@@ -224,15 +224,15 @@ interface RoomMemory {
     /**
      * Names of all rooms flagged to attack
      */
-    attackRooms?: Cache;
+    attackRooms: Cache;
     /**
      * Names of all rooms flagged to remote harvest
      */
-    remoteRooms?: Cache;
+    remoteRooms: Cache;
     /**
      * Names of all rooms flagged to colonize
      */
-    claimRooms?: Cache;
+    claimRooms: Cache;
 }
 
 interface EmpireMemory {}

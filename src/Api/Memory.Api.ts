@@ -40,19 +40,42 @@ export class MemoryApi {
 
         // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
-        // Slowly changing this so that each getXXX function will automatically initialize the memory.
         Memory.rooms[room.name] = {
+            attackRooms: { data: null, cache: null },
+            claimRooms: { data: null, cache: null },
             constructionSites: { data: null, cache: null },
             creepLimit: {},
             creeps: { data: null, cache: null },
             defcon: 0,
             hostiles: { data: null, cache: null },
+            remoteRooms: { data: null, cache: null },
             roomState: ROOM_STATE_INTRO,
-            sources: _.map(room.find(FIND_SOURCES), source => source.id),
-            structures: { data: null, cache: null }
+            sources: { data: null, cache: null },
+            structures: { data: null, cache: null },
+            upgradeLink: "",
         };
 
-        this.getRoomMemory(room);
+        this.getRoomMemory(room, true);
+    }
+
+    /**
+     * Validates Room Memory and calls update function as needed
+     * for the entire room memory.
+     *
+     * [Cached] Memory.rooms[room.name]
+     * @param room The name of the room to get memory for
+     * @param forceUpdate [Optional] Force all room memory to update
+     */
+    public static getRoomMemory(room: Room, forceUpdate?: boolean): void {
+        
+        this.getConstructionSites(room, undefined, forceUpdate);
+        this.getMyCreeps(room, undefined, forceUpdate);
+        this.getHostileCreeps(room, undefined, forceUpdate);
+        this.getSources(room, undefined, forceUpdate);
+        this.getStructures(room, undefined, forceUpdate);
+        // this.getCreepLimits(room, undefined, forceUpdate);
+        // this.getDefcon(room, undefined, forceUpdate);
+        // this.getRoomState(room, undefined, forceUpdate);
     }
 
     /**
@@ -82,21 +105,6 @@ export class MemoryApi {
         };
     }
 
-    /**
-     * Validates Room Memory and calls update function as needed
-     * for the entire room memory.
-     *
-     * [Cached] Memory.rooms[room.name]
-     * @param room The name of the room to get memory for
-     */
-    public static getRoomMemory(room: Room): void {
-        // Should validate room memory somehow and return if valid
-
-        // Example usage of the getMethods --- NOT HOW WE WILL USE THIS METHOD REGULARLY
-        this.getMyCreeps(room, undefined, true);
-        this.getHostileCreeps(room);
-        this.getStructures(room, (object: Structure) => object.structureType === "extension", true);
-    }
 
     /**
      * Gets the owned creeps in a room, updating memory if necessary.
@@ -186,7 +194,7 @@ export class MemoryApi {
 
         if (
             forceUpdate ||
-            !Memory.rooms[room.name].structures ||
+            Memory.rooms[room.name].structures === undefined ||
             Memory.rooms[room.name].structures.cache < Game.time - CacheTTL
         ) {
             MemoryHelper_Room.updateStructures(room);
@@ -230,12 +238,43 @@ export class MemoryApi {
             MemoryHelper_Room.updateConstructionSites(room);
         }
 
-        let constructionSites = _.map(Memory.rooms[room.name].constructionSites.data, (id: string) => Game.getObjectById(id));
+        let constructionSites = _.map(Memory.rooms[room.name].constructionSites.data, (id: string) =>
+            Game.getObjectById(id)
+        );
         if (filterFunction !== undefined) {
             constructionSites = _.filter(constructionSites, filterFunction);
         }
 
         return constructionSites;
+    }
+
+    /**
+     * get sources in the room
+     * @param room the room we want sources from
+     * @param filterFunction [Optional] The function to filter all source objects
+     * @param forceUpdate [Optional] Invalidate cache by force
+     * @returns Array<Source | null> An array of sources, if there are any
+     */
+    public static getSources(
+        room: Room,
+        filterFunction?: (object: Source) => boolean,
+        forceUpdate?: boolean
+    ): Array<Source | null> {
+        const CacheTTL = -1;
+
+        let sources: Array<Source | null>;
+
+        if (
+            forceUpdate ||
+            Memory.rooms[room.name].sources === undefined ||
+            Memory.rooms[room.name].sources.cache < Game.time - CacheTTL
+        ) {
+            MemoryHelper_Room.updateSources(room);
+        }
+
+        sources = _.map(Memory.rooms[room.name].sources.data, (id: string) => Game.getObjectById(id));
+
+        return sources;
     }
 
     /**
@@ -256,23 +295,5 @@ export class MemoryApi {
     public static updateDefcon(room: Room, defconLevel: number): void {
         Memory.rooms[room.name].defcon = defconLevel;
         return;
-    }
-
-    /**
-     * get sources in the room
-     * @param room the room we want sources from
-     */
-    public static getSources(room: Room): (Source | null)[] {
-
-        let sources: (Source | null)[];
-
-        if (_.some(Memory.rooms[room.name].sources, s => s === null)) {
-            Memory.rooms[room.name].sources = _.map(room.find(FIND_SOURCES), s => s.id);
-        }
-
-        sources = _.map(Memory.rooms[room.name].sources,
-            id => Game.getObjectById(id));
-
-        return sources;
     }
 }

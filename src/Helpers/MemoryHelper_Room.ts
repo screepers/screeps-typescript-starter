@@ -82,4 +82,19 @@ export class MemoryHelper_Room {
         Memory.rooms[room.name].structures.data = sortedStructureIDs;
         Memory.rooms[room.name].structures.cache = Game.time;
     }
+
+    /**
+     * Find all sources in room
+     * 
+     * [Cached] Room.memory.sources
+     * @param room The room to check in
+     */
+    public static updateSources(room: Room): void {
+        Memory.rooms[room.name].sources = { data: {}, cache: null };
+
+        const sources = room.find(FIND_SOURCES);
+
+        Memory.rooms[room.name].sources.data = _.map(sources, (source: Source) => source.id);
+        Memory.rooms[room.name].sources.cache = Infinity;
+    }
 }
