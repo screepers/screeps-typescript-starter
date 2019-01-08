@@ -1,6 +1,7 @@
 import { MemoryApi } from "./Memory.Api";
 import { O_NOFOLLOW, SSL_OP_CISCO_ANYCONNECT } from "constants";
 import { RoomHelper } from "Helpers/RoomHelper";
+import { ROOM_STATE_INTRO } from "utils/constants";
 
 // an api used for functions related to the room
 export class RoomApi {
@@ -18,39 +19,87 @@ export class RoomApi {
 
     /**
      * set the room's state
+     * Essentially backbone of the room, decides what flow
+     * of action will be taken at the beginning of each tick
+     * (note: assumes defcon already being found for simplicity sake)
+     *
      * @param room the room we are setting state for
      */
     public static setRoomState(room: Room): void {
 
-        // get the structures we need from memory
-
-        // get the creeps we need from memory
-
+        // get the structures and creeps we need from memory
+        const containers: (Structure<StructureConstant> | null)[] = MemoryApi.getStructures(room,
+            (s) => s.structureType === STRUCTURE_CONTAINER);
+        const links: (Structure<StructureConstant> | null)[] = MemoryApi.getStructures(room,
+            (s) => s.structureType === STRUCTURE_LINK);
+        const terminal: StructureTerminal | undefined = room.terminal;
+        const storage: StructureStorage | undefined = room.storage;
+        const incomingNukes: Nuke[] = room.find(FIND_NUKES);
+        const defconLevel: number = Memory.rooms[room.name].defcon;
+        const sources: (Source | null)[] = MemoryApi.getSources(room);
+        const creeps: (Creep | null)[] = MemoryApi.getMyCreeps(room);
         // ---------
 
-        // check if we are in intro room state
-        // 3 or less creeps so we need to (re)start the room
-
-        // check if we are in beginner room state
-        // no containers set up at sources so we are just running a bare knuckle room
-
-        // check if we are in intermediate room state
-        // container mining set up, but no storage
-
-        // check if we are in advanced room state
-        // container mining and storage set up
-
-        // check if we are in upgrader room state
-        // container mining and storage set up, and we got links online
-
-        // check if we are in stimulate room state
-        // room is flagged to stimulate AND storage/container mining is set up
-
-        // check if we are siege room state
-        // defcon is level 3+ and hostiles activity in the room is high
 
         // check if we are in nuke inbound room state
         // nuke is coming in and we need to gtfo
+        if (incomingNukes.length > 0) {
+            MemoryApi.updateRoomState(room, ROOM_STATE_NUKE_INBOUND);
+            return;
+        }
+
+        // check if we are siege room state
+        // defcon is level 3+ and hostiles activity in the room is high
+        if (defconLevel >= 3) {
+            MemoryApi.updateRoomState(room, ROOM_STATE_SEIGE);
+            return;
+        }
+
+        // check if we are in upgrader room state
+        // container mining and storage set up, and we got links online
+        if (RoomHelper.isContainerMining(room, sources, containers) && RoomHelper.isUpgraderLink(room, links) && storage !== undefined) {
+
+            //if(stimulate flag is up)
+            // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
+            // return;
+
+            // otherwise, just upgrader room state
+            MemoryApi.updateRoomState(room, ROOM_STATE_UPGRADER);
+            return;
+        }
+
+        // check if we are in advanced room state
+        // container mining and storage set up
+        // then check if we are flagged for sitmulate state
+        if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
+
+            //if(stimulate flag is up)
+            // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
+            // return;
+
+            // otherwise, just advanced room state
+            MemoryApi.updateRoomState(room, ROOM_STATE_ADVANCED);
+            return;
+        }
+
+        // check if we are in intermediate room state
+        // container mining set up, but no storage
+        if (RoomHelper.isContainerMining(room, sources, containers) && storage === undefined) {
+            MemoryApi.updateRoomState(room, ROOM_STATE_INTER);
+            return;
+        }
+
+        // check if we are in beginner room state
+        // no containers set up at sources so we are just running a bare knuckle room
+        if (creeps.length > 3) {
+            MemoryApi.updateRoomState(room, ROOM_STATE_BEGINNER);
+            return;
+        }
+
+        // check if we are in intro room state
+        // 3 or less creeps so we need to (re)start the room
+        MemoryApi.updateRoomState(room, ROOM_STATE_INTRO);
+        return;
     }
 
     /**
@@ -63,27 +112,13 @@ export class RoomApi {
             (t: Structure<StructureConstant>) => {
                 return t.structureType === STRUCTURE_TOWER;
             });
-        const hostileCreeps = MemoryApi.getHostileCreeps(room);;
         // --------
 
         // choose the most ideal target and have every tower attack it
-        const idealTarget = this.chooseTowerTarget(room);
+        const idealTarget = RoomHelper.chooseTowerTarget(room);
 
         // have each tower attack this target
         towers.forEach((t: any) => t.attack(idealTarget));
-    }
-
-    /**
-     * choose an ideal target for the towers to attack
-     * @param room the room we are in
-     */
-    private static chooseTowerTarget(room: Room): Creep | null {
-
-        // get the creep we will do the most damage to
-        const hostileCreeps: (Creep | null)[] = MemoryApi.getHostileCreeps(room);
-
-        // temp, in future get one we do most dmg to
-        return hostileCreeps[0];
     }
 
     /**
@@ -91,7 +126,37 @@ export class RoomApi {
      * @param room the room we are setting defcon for
      */
     public static setDefconLevel(room: Room): void {
-        // Lint hates empty blocks
+
+        // level 0 -- no danger
+        // level 1 -- less than 50 body parts
+        // level 2 -- 50 - 150 body parts
+        // level 3 -- 150+ body parts OR any boosted body parts
+        // level 4 -- full seige, 50+ boosted parts
+        // level 5 -- nuke inbound
+        // please review these and let me know what you think ^^
+
+        /*
+            This is how to find inbound nukes to your room..
+            we probably want to put this behind a controller level so we
+            aren't calling it every tick on low level rooms you know
+
+            side note: should i stick with the function to update the memory or just do it directly?
+        // level 5
+        if (room.find(FIND_NUKES) !== undefined) {
+            MemoryApi.updateDefcon(room, 5);
+            return;
+        }*/
+
+        // level 4
+
+        // level 3
+
+        // level 2
+
+        // level 1
+
+        // level 0
+
     }
 
     /**
@@ -138,6 +203,4 @@ export class RoomApi {
 
         return null;
     }
-
-
 }

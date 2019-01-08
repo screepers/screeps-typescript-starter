@@ -117,4 +117,45 @@ export class RoomHelper {
     public static excecuteEveryTicks(ticks: number): boolean {
         return Game.time % ticks === 0
     }
+
+    /**
+     * check if container mining is active in a room
+     * @param room the room we are checking
+     * @param sources the sources we are checking
+     * @param containers the containers we are checking
+     */
+    public static isContainerMining(
+        room: Room,
+        sources: (Source | null)[],
+        containers: (Structure<StructureConstant> | null)[]): boolean {
+
+        return false;
+    }
+
+    /**
+     * check if container mining is active in a room
+     * @param room the room we are checking
+     * @param sources the sources we are checking
+     * @param containers the containers we are checking
+     */
+    public static isUpgraderLink(
+        room: Room,
+        links: (Structure<StructureConstant> | null)[]): boolean {
+
+        return false;
+    }
+
+    /**
+     * choose an ideal target for the towers to attack
+     * TODO actually choose an ideal target not just the first one lol
+     * @param room the room we are in
+     */
+    public static chooseTowerTarget(room: Room): Creep | null {
+
+        // get the creep we will do the most damage to
+        const hostileCreeps: (Creep | null)[] = MemoryApi.getHostileCreeps(room);
+
+        // temp, in future get one we do most dmg to
+        return hostileCreeps[0];
+    }
 }
