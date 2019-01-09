@@ -2,6 +2,7 @@ import { MemoryApi } from "./Memory.Api";
 import { RoomHelper } from "Helpers/RoomHelper";
 import { ROOM_STATE_INTRO } from "utils/constants";
 import { MemoryHelper_Room } from "Helpers/MemoryHelper_Room";
+import { MemoryHelper } from "Helpers/MemoryHelper";
 
 // an api used for functions related to the room
 export class RoomApi {
@@ -127,14 +128,21 @@ export class RoomApi {
      */
     public static setDefconLevel(room: Room): void {
 
-        const hostileCreeps: Array<Creep[] | null> = MemoryApi.getHostileCreeps(room);
-        const hostileBodyParts: number = _.sum(hostileCreeps,
-            (c: Creep | null) => c.body.length);
+        const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
 
-        // todo: actually figure out if the parts are boosted or not lol and figure out how to figure it out
-        const boostedHostileBodyParts: number = _.sum(hostileCreeps,
-            (c: Creep | null) => c.body.length);
-        // -------------
+        // check level 0 first to reduce cpu drain as it will be the most common scenario
+        // level 0 -- no danger
+        if (hostileCreeps.length === 0) {
+            MemoryHelper_Room.updateDefcon(room, 0);
+            return;
+        }
+
+        // now define the variables we will need to check the other cases in the event
+        // we are not dealing with a level 0 defcon scenario
+        const hostileBodyParts: number = _.sum(hostileCreeps,
+            (c: any) => c.body.length);
+        const boostedHostileBodyParts: number = _.filter(_.flatten(_.map(hostileCreeps, 'body')),
+            (p: any) => !!p.boost).length;
 
         // level 5 -- nuke inbound
         if (room.find(FIND_NUKES) !== undefined) {
@@ -143,14 +151,28 @@ export class RoomApi {
         }
 
         // level 4 full seige, 50+ boosted parts
+        if (boostedHostileBodyParts >= 50) {
+            MemoryHelper_Room.updateDefcon(room, 4);
+            return;
+        }
 
         // level 3 -- 150+ body parts OR any boosted body parts
+        if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
+            MemoryHelper_Room.updateDefcon(room, 3);
+            return;
+        }
 
         // level 2 -- 50 - 150 body parts
+        if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
+            MemoryHelper_Room.updateDefcon(room, 2);
+            return;
+        }
 
         // level 1 -- less than 50 body parts
-
-        // level 0 -- no danger
+        if (hostileBodyParts > 0) {
+            MemoryHelper_Room.updateDefcon(room, 1);
+            return;
+        }
 
     }
 
