@@ -222,7 +222,11 @@ export class RoomApi {
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
     public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
-        return null;
+
+        //returns all walls and ramparts under the current wall/rampart limit
+        return MemoryApi.getStructures(room,
+            (s: any) => (s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART)
+                && s.hits < this.getWallLimit(room));
     }
 
     /**
@@ -249,5 +253,13 @@ export class RoomApi {
      */
     public static isFull(target: any): boolean {
         return false;
+    }
+
+    /**
+     * get the current hp limit for walls/ramparts
+     * @param room the current room
+     */
+    private static getWallLimit(room: Room): number {
+        return 1;
     }
 }
