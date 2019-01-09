@@ -223,7 +223,7 @@ export class RoomApi {
      */
     public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
 
-        //returns all walls and ramparts under the current wall/rampart limit
+        // returns all walls and ramparts under the current wall/rampart limit
         return MemoryApi.getStructures(room,
             (s: any) => (s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART)
                 && s.hits < this.getWallLimit(room));
@@ -243,8 +243,14 @@ export class RoomApi {
      * @param room the room we are checking in
      * @param source the source we are considering
      */
-    public static getMiningContainer(room: Room, source: Source): void {
-        // brock hates empty blocks
+    public static getMiningContainer(room: Room, source: Source): (Structure<StructureConstant> | null) {
+
+        const containers: any = MemoryApi.getStructures(room,
+            (s: any) => s.structureType === STRUCTURE_CONTAINER);
+
+
+        return _.find(containers,
+            (c: any) => Math.abs(c.pos.x - source.pos.x) <= 1 && Math.abs(c.pos.y - source.pos.y) <= 1);
     }
 
     /**
