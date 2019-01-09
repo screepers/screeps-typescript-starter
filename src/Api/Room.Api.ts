@@ -226,7 +226,7 @@ export class RoomApi {
         // returns all walls and ramparts under the current wall/rampart limit
         return MemoryApi.getStructures(room,
             (s: any) => (s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART)
-                && s.hits < this.getWallLimit(room));
+                && s.hits < this.getWallHpLimit(room));
     }
 
     /**
@@ -234,7 +234,7 @@ export class RoomApi {
      * @param room the room we are checking
      */
     public static getOpenSources(room: Room): void {
-        // almost forgot brock hates empty blocks
+        // lint installed again.. jake hates empty blocks
     }
 
 
@@ -265,7 +265,23 @@ export class RoomApi {
      * get the current hp limit for walls/ramparts
      * @param room the current room
      */
-    private static getWallLimit(room: Room): number {
-        return 1;
+    private static getWallHpLimit(room: Room): number {
+
+        // only do so if the room has a controller otherwise we have an exception
+        if (room.controller !== undefined) {
+
+            // % of way to next level
+            const controllerProgress: number = room.controller.progress / room.controller.progressTotal;
+            const controllerLevel: number = room.controller.level;
+            // difference between this levels max and last levels max
+            const wallLevelHpDiff: number = RoomHelper.getWallLevelDifference(controllerLevel);
+            // last levels max
+            const previousHpLimit: number = RoomHelper.calcPreviousWallHpLimit(controllerLevel, wallLevelHpDiff)
+
+            return previousHpLimit + (wallLevelHpDiff * controllerProgress);
+        }
+        else {
+            throw new Error("Error getting wall limit for room with undefined controller.");
+        }
     }
 }
