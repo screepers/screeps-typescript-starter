@@ -276,7 +276,7 @@ export class RoomApi {
             // difference between this levels max and last levels max
             const wallLevelHpDiff: number = RoomHelper.getWallLevelDifference(controllerLevel);
             // last levels max
-            const previousHpLimit: number = RoomHelper.calcPreviousWallHpLimit(controllerLevel, wallLevelHpDiff)
+            const previousHpLimit: number = RoomHelper.calcPreviousWallHpLimit(controllerLevel)
 
             return previousHpLimit + (wallLevelHpDiff * controllerProgress);
         }

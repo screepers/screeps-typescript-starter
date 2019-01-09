@@ -208,7 +208,7 @@ export class RoomHelper {
      * @param controllerLevel the level of the controller
      * @param levelDiff the difference between this and last controller hp limit
      */
-    public static calcPreviousWallHpLimit(controllerLevel: number, levelDiff: number): number {
+    public static calcPreviousWallHpLimit(controllerLevel: number): number {
         const WALL_LIMIT_1: number = 25000;   // 25k
         const WALL_LIMIT_2: number = 50000;   // 50k
         const WALL_LIMIT_3: number = 100000;  // 100k
