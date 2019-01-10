@@ -1,4 +1,4 @@
-import { ROOM_STATE_INTRO } from "utils/Constants";
+import { ROOM_STATE_INTRO, STRUCT_CACHE_TTL } from "utils/Constants";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 
 // the api for the memory class
@@ -51,7 +51,7 @@ export default class MemoryApi {
             roomState: ROOM_STATE_INTRO,
             sources: { data: null, cache: null },
             structures: { data: null, cache: null },
-            upgradeLink: "",
+            upgradeLink: ""
         };
 
         this.getRoomMemory(room, true);
@@ -66,7 +66,6 @@ export default class MemoryApi {
      * @param forceUpdate [Optional] Force all room memory to update
      */
     public static getRoomMemory(room: Room, forceUpdate?: boolean): void {
-        
         this.getConstructionSites(room, undefined, forceUpdate);
         this.getMyCreeps(room, undefined, forceUpdate);
         this.getHostileCreeps(room, undefined, forceUpdate);
@@ -103,7 +102,6 @@ export default class MemoryApi {
             working: false
         };
     }
-
 
     /**
      * Gets the owned creeps in a room, updating memory if necessary.
@@ -189,12 +187,10 @@ export default class MemoryApi {
         filterFunction?: (object: Structure) => boolean,
         forceUpdate?: boolean
     ): Array<Structure | null> {
-        const CacheTTL = 50;
-
         if (
             forceUpdate ||
             Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL
         ) {
             MemoryHelper_Room.updateStructures(room);
         }
@@ -210,6 +206,29 @@ export default class MemoryApi {
             structures = _.filter(structures, filterFunction);
         }
 
+        return structures;
+    }
+
+    /**
+     * Get structures of a single type in a room, updating if necessary
+     *
+     * [Cached] Memory.rooms[room.name].structures
+     * @param room
+     * @param filterFunction
+     * @param forceUpdate
+     * @returns Structure[] An array of structures of a single type
+     */
+    public static getStructureOfType(room: Room, type: StructureConstant, forceUpdate?: boolean): Array<Structure | null> {
+        if (
+            forceUpdate ||
+            Memory.rooms[room.name].structures === undefined ||
+            Memory.rooms[room.name].structures.data[type] === undefined ||
+            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateStructures(room);
+        }
+
+        const structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) => Game.getObjectById(id));
         return structures;
     }
 
@@ -275,5 +294,4 @@ export default class MemoryApi {
 
         return sources;
     }
-
 }

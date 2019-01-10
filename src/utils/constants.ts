@@ -58,3 +58,6 @@ export const WALL_LIMIT: number[] = [
     1500000, // RCL 7
     5000000  // RCL 8
 ];
+
+// Cache Tick Limits
+export const STRUCT_CACHE_TTL = 50;
