@@ -1,5 +1,6 @@
 // @ts-ignore
 import { MemoryApi } from "Api/Memory.Api";
+import { WALL_LIMIT } from "utils/constants";
 
 // helper functions for rooms
 export class RoomHelper {
@@ -164,43 +165,7 @@ export class RoomHelper {
      * @param controllerLevel the level of the controller in the room
      */
     public static getWallLevelDifference(controllerLevel: number): number {
-
-        const WALL_LIMIT_1: number = 25000;   // 25k
-        const WALL_LIMIT_2: number = 50000;   // 50k
-        const WALL_LIMIT_3: number = 100000;  // 100k
-        const WALL_LIMIT_4: number = 250000;  // 250k
-        const WALL_LIMIT_5: number = 500000;  // 500k
-        const WALL_LIMIT_6: number = 1000000; // 1 million
-        const WALL_LIMIT_7: number = 1500000; // 1.5 million
-        const WALL_LIMIT_8: number = 5000000; // 5 million
-        let levelDifference: number = 0;
-
-        if (controllerLevel === 1) {
-            levelDifference = WALL_LIMIT_1 - 0;
-        }
-        else if (controllerLevel === 2) {
-            levelDifference = WALL_LIMIT_2 - WALL_LIMIT_1;
-        }
-        else if (controllerLevel === 3) {
-            levelDifference = WALL_LIMIT_3 - WALL_LIMIT_2;
-        }
-        else if (controllerLevel === 4) {
-            levelDifference = WALL_LIMIT_4 - WALL_LIMIT_3;
-        }
-        else if (controllerLevel === 5) {
-            levelDifference = WALL_LIMIT_5 - WALL_LIMIT_4;
-        }
-        else if (controllerLevel === 6) {
-            levelDifference = WALL_LIMIT_6 - WALL_LIMIT_5;
-        }
-        else if (controllerLevel === 7) {
-            levelDifference = WALL_LIMIT_7 - WALL_LIMIT_6;
-        }
-        else if (controllerLevel === 8) {
-            levelDifference = WALL_LIMIT_8 - WALL_LIMIT_7;
-        }
-
-        return levelDifference;
+        return WALL_LIMIT[controllerLevel] - WALL_LIMIT[controllerLevel - 1];
     }
 
     /**
@@ -209,41 +174,6 @@ export class RoomHelper {
      * @param levelDiff the difference between this and last controller hp limit
      */
     public static calcPreviousWallHpLimit(controllerLevel: number): number {
-        const WALL_LIMIT_1: number = 25000;   // 25k
-        const WALL_LIMIT_2: number = 50000;   // 50k
-        const WALL_LIMIT_3: number = 100000;  // 100k
-        const WALL_LIMIT_4: number = 250000;  // 250k
-        const WALL_LIMIT_5: number = 500000;  // 500k
-        const WALL_LIMIT_6: number = 1000000; // 1 million
-        const WALL_LIMIT_7: number = 1500000; // 1.5 million
-        const WALL_LIMIT_8: number = 5000000; // 5 million
-        let previousHpLimit: number = 0;
-
-        if (controllerLevel === 1) {
-            previousHpLimit = WALL_LIMIT_1 - 0;
-        }
-        else if (controllerLevel === 2) {
-            previousHpLimit = WALL_LIMIT_1;
-        }
-        else if (controllerLevel === 3) {
-            previousHpLimit = WALL_LIMIT_2;
-        }
-        else if (controllerLevel === 4) {
-            previousHpLimit = WALL_LIMIT_3;
-        }
-        else if (controllerLevel === 5) {
-            previousHpLimit = WALL_LIMIT_4;
-        }
-        else if (controllerLevel === 6) {
-            previousHpLimit = WALL_LIMIT_5;
-        }
-        else if (controllerLevel === 7) {
-            previousHpLimit = WALL_LIMIT_6;
-        }
-        else if (controllerLevel === 8) {
-            previousHpLimit = WALL_LIMIT_7;
-        }
-
-        return previousHpLimit;
+        return WALL_LIMIT[controllerLevel];
     }
 }

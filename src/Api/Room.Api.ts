@@ -277,8 +277,12 @@ export class RoomApi {
             const wallLevelHpDiff: number = RoomHelper.getWallLevelDifference(controllerLevel);
             // last levels max
             const previousHpLimit: number = RoomHelper.calcPreviousWallHpLimit(controllerLevel)
-
-            return previousHpLimit + (wallLevelHpDiff * controllerProgress);
+            // Minimum hp chunk to increase limit
+            const chunkSize = 10000;
+            // The adjusted hp difference for controller progress and chunking
+            const numOfChunks = Math.floor( (wallLevelHpDiff * controllerProgress) / chunkSize );
+            
+            return previousHpLimit + (chunkSize * numOfChunks);
         }
         else {
             throw new Error("Error getting wall limit for room with undefined controller.");
