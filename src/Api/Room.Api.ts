@@ -1,8 +1,10 @@
 import MemoryApi from "./Memory.Api";
 import RoomHelper from "Helpers/RoomHelper";
-import { ROOM_STATE_INTRO, WALL_LIMIT } from "utils/constants";
+import { ROOM_STATE_INTRO, WALL_LIMIT, ERROR_ERROR } from "utils/constants";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import MemoryHelper from "Helpers/MemoryHelper";
+import { ErrorMapper } from "utils/ErrorMapper";
+import UtilHelper from "Helpers/UtilHelper";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -253,7 +255,17 @@ export default class RoomApi {
      * @param target the structure or creep we are checking
      */
     public static isFull(target: any): boolean {
-        return false;
+
+        if (target instanceof Creep) {
+            return (target.energy === target.energyCapacity);
+        }
+        else if (target.hasOwnProperty("store")) {
+            return (_.sum(target.store) === target.storeCapacity);
+        }
+
+        // if not one of these two, there was an error
+        UtilHelper.throwError("Invalid Target", "isFull called on target with no capacity for storage.",
+            ERROR_ERROR);
     }
 
     /**
