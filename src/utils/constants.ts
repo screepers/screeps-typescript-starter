@@ -1,3 +1,5 @@
+// tslint:disable:object-literal-sort-keys
+
 // Room State Constants
 export const ROOM_STATE_INTRO = 0;
 export const ROOM_STATE_BEGINNER = 1;
@@ -48,16 +50,29 @@ export const ALL_STRUCTURE_TYPES: StructureConstant[] = [
 
 // The Wall/Rampart HP Limit for each Controller level
 export const WALL_LIMIT: number[] = [
-    0,       // RCL 0
-    25000,   // RCL 1
-    50000,   // RCL 2
-    100000,  // RCL 3
-    250000,  // RCL 4
-    500000,  // RCL 5
+    0, // RCL 0
+    25000, // RCL 1
+    50000, // RCL 2
+    100000, // RCL 3
+    250000, // RCL 4
+    500000, // RCL 5
     1000000, // RCL 6
     1500000, // RCL 7
-    5000000  // RCL 8
+    5000000 // RCL 8
 ];
 
 // Cache Tick Limits
 export const STRUCT_CACHE_TTL = 50;
+
+// Error Severity Constants
+export const ERROR_FATAL = 3; // Very severe error - Game ruining
+export const ERROR_ERROR = 2; // Regular error - Creep/Room ruining
+export const ERROR_WARN = 1; // Small error - Something went wrong, but doesn't ruin anything
+export const ERROR_INFO = 0; // Non-error - Used to log when something happens (e.g. memory is updated)
+
+// Color Constants
+export const COLORS: any = {};
+COLORS[ERROR_FATAL] = "#FF0000";
+COLORS[ERROR_ERROR] = "#E300FF";
+COLORS[ERROR_WARN] = "#F0FF00";
+COLORS[ERROR_INFO] = "#0045FF";

@@ -216,10 +216,15 @@ export default class MemoryApi {
      * @param room The room to check in
      * @param type The type of structure to retrieve
      * @param filterFunction [Optional] A function to filter by
-     * @param forceUpdate [Optional] Force structures memory to be updated 
+     * @param forceUpdate [Optional] Force structures memory to be updated
      * @returns Structure[] An array of structures of a single type
      */
-    public static getStructureOfType(room: Room, type: StructureConstant, filterFunction?: (object: any) => boolean, forceUpdate?: boolean): Array<Structure | null> {
+    public static getStructureOfType(
+        room: Room,
+        type: StructureConstant,
+        filterFunction?: (object: any) => boolean,
+        forceUpdate?: boolean
+    ): Array<Structure | null> {
         if (
             forceUpdate ||
             Memory.rooms[room.name].structures === undefined ||
@@ -229,9 +234,11 @@ export default class MemoryApi {
             MemoryHelper_Room.updateStructures(room);
         }
 
-        let structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) => Game.getObjectById(id));
-        
-        if( filterFunction !== undefined ) {
+        let structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) =>
+            Game.getObjectById(id)
+        );
+
+        if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
         }
 

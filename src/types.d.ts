@@ -150,7 +150,7 @@ type JAKESBOY2 = "jakesboy2";
 type UHMBROCK = "uhmbrock";
 
 /**
- * Generic 
+ * Generic
  */
 interface StringMap {
     [key: string]: any;

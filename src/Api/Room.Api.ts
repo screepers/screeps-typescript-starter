@@ -212,9 +212,17 @@ export default class RoomApi {
     public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
         // returns all walls and ramparts under the current wall/rampart limit
         const hpLimit: number = this.getWallHpLimit(room);
-        const walls: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_WALL, (s: StructureWall) => s.hits < hpLimit);
-        const ramparts: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_RAMPART, (s: StructureRampart) => s.hits < hpLimit);
-        
+        const walls: Array<Structure | null> = MemoryApi.getStructureOfType(
+            room,
+            STRUCTURE_WALL,
+            (s: StructureWall) => s.hits < hpLimit
+        );
+        const ramparts: Array<Structure | null> = MemoryApi.getStructureOfType(
+            room,
+            STRUCTURE_RAMPART,
+            (s: StructureRampart) => s.hits < hpLimit
+        );
+
         return walls.concat(ramparts);
     }
 
