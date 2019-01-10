@@ -6,17 +6,14 @@ import MemoryHelper from "Helpers/MemoryHelper";
 
 // an api used for functions related to the room
 export default class RoomApi {
-
     /**
      * check if there are hostile creeps in the room
      * @param room the room we are checking
      */
     public static isHostilesInRoom(room: Room): boolean {
-
         const hostilesInRoom = MemoryApi.getHostileCreeps(room);
-        return (hostilesInRoom.length > 0);
+        return hostilesInRoom.length > 0;
     }
-
 
     /**
      * set the room's state
@@ -27,12 +24,9 @@ export default class RoomApi {
      * @param room the room we are setting state for
      */
     public static setRoomState(room: Room): void {
-
         // get the structures and creeps we need from memory
-        const containers: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
-            (s) => s.structureType === STRUCTURE_CONTAINER);
-        const links: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
-            (s) => s.structureType === STRUCTURE_LINK);
+        const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
+        const links: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
         const terminal: StructureTerminal | undefined = room.terminal;
         const storage: StructureStorage | undefined = room.storage;
         const incomingNukes: Nuke[] = room.find(FIND_NUKES);
@@ -40,7 +34,6 @@ export default class RoomApi {
         const sources: Array<Source | null> = MemoryApi.getSources(room);
         const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room);
         // ---------
-
 
         // check if we are in nuke inbound room state
         // nuke is coming in and we need to gtfo
@@ -58,8 +51,11 @@ export default class RoomApi {
 
         // check if we are in upgrader room state
         // container mining and storage set up, and we got links online
-        if (RoomHelper.isContainerMining(room, sources, containers) && RoomHelper.isUpgraderLink(room, links) && storage !== undefined) {
-
+        if (
+            RoomHelper.isContainerMining(room, sources, containers) &&
+            RoomHelper.isUpgraderLink(room, links) &&
+            storage !== undefined
+        ) {
             // if(stimulate flag is up)
             // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
             // return;
@@ -73,7 +69,6 @@ export default class RoomApi {
         // container mining and storage set up
         // then check if we are flagged for sitmulate state
         if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
-
             // if(stimulate flag is up)
             // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
             // return;
@@ -108,11 +103,7 @@ export default class RoomApi {
      * @param room the room we are defending
      */
     public static runTowers(room: Room): void {
-
-        const towers = MemoryApi.getStructures(room,
-            (t: Structure<StructureConstant>) => {
-                return t.structureType === STRUCTURE_TOWER;
-            });
+        const towers = MemoryApi.getStructureOfType(room, STRUCTURE_TOWER);
         // --------
 
         // choose the most ideal target and have every tower attack it
@@ -127,7 +118,6 @@ export default class RoomApi {
      * @param room the room we are setting defcon for
      */
     public static setDefconLevel(room: Room): void {
-
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
 
         // check level 0 first to reduce cpu drain as it will be the most common scenario
@@ -139,10 +129,9 @@ export default class RoomApi {
 
         // now define the variables we will need to check the other cases in the event
         // we are not dealing with a level 0 defcon scenario
-        const hostileBodyParts: number = _.sum(hostileCreeps,
-            (c: any) => c.body.length);
-        const boostedHostileBodyParts: number = _.filter(_.flatten(_.map(hostileCreeps, 'body')),
-            (p: any) => !!p.boost).length;
+        const hostileBodyParts: number = _.sum(hostileCreeps, (c: any) => c.body.length);
+        const boostedHostileBodyParts: number = _.filter(_.flatten(_.map(hostileCreeps, "body")), (p: any) => !!p.boost)
+            .length;
 
         // level 5 -- nuke inbound
         if (room.find(FIND_NUKES) !== undefined) {
@@ -173,7 +162,6 @@ export default class RoomApi {
             MemoryHelper_Room.updateDefcon(room, 1);
             return;
         }
-
     }
 
     /**
@@ -182,10 +170,9 @@ export default class RoomApi {
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): Array<Structure<StructureConstant> | null> {
-
-        const REPAIR_THRESHOLD: number = .75;
+        const REPAIR_THRESHOLD: number = 0.75;
         return MemoryApi.getStructures(room, (s: Structure<StructureConstant>) => {
-            return s.hits < (s.hitsMax * REPAIR_THRESHOLD);
+            return s.hits < s.hitsMax * REPAIR_THRESHOLD;
         });
     }
 
@@ -194,14 +181,15 @@ export default class RoomApi {
      * @param room the room we are getting spawns/extensions to be filled from
      */
     public static getExtensionsNeedFilled(room: Room): Array<Structure<StructureConstant> | null> {
-
-        const extensionsNeedFilled: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
-            (e: any) => (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION)
-                && (e.energy < e.energyCapacity));
+        const extensionsNeedFilled: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(
+            room,
+            (e: any) =>
+                (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION) &&
+                e.energy < e.energyCapacity
+        );
 
         return extensionsNeedFilled;
     }
-
 
     /**
      * get towers that need to be filled for the room
@@ -209,10 +197,10 @@ export default class RoomApi {
      * @param room the room we are getting towers that need to be filled from
      */
     public static getTowersNeedFilled(room: Room): Array<Structure<StructureConstant> | null> {
+        const TOWER_THRESHOLD: number = 0.85;
 
-        const TOWER_THRESHOLD: number = .85;
-        return MemoryApi.getStructures(room, (t: any) => {
-            return (t.structureType === STRUCTURE_TOWER && t.energy < (t.energyCapacity * TOWER_THRESHOLD));
+        return MemoryApi.getStructureOfType(room, STRUCTURE_TOWER, (t: StructureTower) => {
+            return t.energy < t.energyCapacity * TOWER_THRESHOLD;
         });
     }
 
@@ -222,11 +210,12 @@ export default class RoomApi {
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
     public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
-
         // returns all walls and ramparts under the current wall/rampart limit
-        return MemoryApi.getStructures(room,
-            (s: any) => (s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART)
-                && s.hits < this.getWallHpLimit(room));
+        const hpLimit: number = this.getWallHpLimit(room);
+        const walls: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_WALL, (s: StructureWall) => s.hits < hpLimit);
+        const ramparts: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_RAMPART, (s: StructureRampart) => s.hits < hpLimit);
+        
+        return walls.concat(ramparts);
     }
 
     /**
@@ -237,20 +226,18 @@ export default class RoomApi {
         // lint installed again.. jake hates empty blocks
     }
 
-
     /**
      * gets the drop container next to the source
      * @param room the room we are checking in
      * @param source the source we are considering
      */
-    public static getMiningContainer(room: Room, source: Source): (Structure<StructureConstant> | null) {
+    public static getMiningContainer(room: Room, source: Source): Structure<StructureConstant> | null {
+        const containers: any = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
 
-        const containers: any = MemoryApi.getStructures(room,
-            (s: any) => s.structureType === STRUCTURE_CONTAINER);
-
-
-        return _.find(containers,
-            (c: any) => Math.abs(c.pos.x - source.pos.x) <= 1 && Math.abs(c.pos.y - source.pos.y) <= 1);
+        return _.find(
+            containers,
+            (c: any) => Math.abs(c.pos.x - source.pos.x) <= 1 && Math.abs(c.pos.y - source.pos.y) <= 1
+        );
     }
 
     /**
@@ -266,22 +253,19 @@ export default class RoomApi {
      * @param room the current room
      */
     private static getWallHpLimit(room: Room): number {
-
         // only do so if the room has a controller otherwise we have an exception
         if (room.controller !== undefined) {
-
             // % of way to next level
             const controllerProgress: number = room.controller.progress / room.controller.progressTotal;
             // difference between this levels max and last levels max
             const wallLevelHpDiff: number = RoomHelper.getWallLevelDifference(room.controller.level);
             // Minimum hp chunk to increase limit
-            const chunkSize = 10000;
+            const chunkSize: number = 10000;
             // The adjusted hp difference for controller progress and chunking
-            const numOfChunks = Math.floor( (wallLevelHpDiff * controllerProgress) / chunkSize );
-            
-            return WALL_LIMIT[room.controller.level] + (chunkSize * numOfChunks);
-        }
-        else {
+            const numOfChunks: number = Math.floor((wallLevelHpDiff * controllerProgress) / chunkSize);
+
+            return WALL_LIMIT[room.controller.level] + chunkSize * numOfChunks;
+        } else {
             throw new Error("Error getting wall limit for room with undefined controller.");
         }
     }
