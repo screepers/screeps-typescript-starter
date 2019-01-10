@@ -1,7 +1,7 @@
 // tslint:disable:no-conditional-assignment
 import { SourceMapConsumer } from "source-map";
 
-export class ErrorMapper {
+export default class ErrorMapper {
   // Cache consumer
   private static _consumer?: SourceMapConsumer;
 
