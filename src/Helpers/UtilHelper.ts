@@ -1,5 +1,4 @@
 import { ERROR_FATAL, ERROR_ERROR, ERROR_WARN, COLORS } from "utils/Constants";
-import { ErrorConstant } from "types";
 
 export default class UtilHelper {
     /**
@@ -14,7 +13,7 @@ export default class UtilHelper {
         
         // For now we trust that we are passing a proper hex color
         const titleColor: string = useTitleColor !== undefined ? useTitleColor : COLORS[severity];
-        const bodyColor: string = useBodyColor !== undefined ? useBodyColor : "#da1414";
+        const bodyColor: string = useBodyColor !== undefined ? useBodyColor : "#ff0033";
         
         console.log('<font color="' + titleColor + '">' + title + '</font>');
         console.log('<font color="' + bodyColor + '">' + body + '</font>');

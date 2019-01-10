@@ -1,5 +1,29 @@
 // constants -----
 
+// Error Constants
+declare const ERROR_FATAL = 3;
+declare const ERROR_ERROR = 2;
+declare const ERROR_WARN = 1;
+declare const ERROR_INFO = 0;
+
+type ErrorConstant = ERROR_FATAL | ERROR_ERROR | ERROR_WARN | ERROR_INFO;
+/**
+ *  Very severe error - Game ruining
+ */
+type ERROR_FATAL = 3;
+/**
+ *  Regular error - Creep/Room ruining
+ */
+type ERROR_ERROR = 2;
+/**
+ *  Small error - Something went wrong, but doesn't ruin anything
+ */
+type ERROR_WARN = 1;
+/**
+ *  Non-error - Used to log when something happens (e.g. memory is updated)
+ */
+type ERROR_INFO = 0;
+
 // room state constants
 
 declare const ROOM_STATE_INTRO = 0;
