@@ -86,7 +86,7 @@ export default class SpawnApi {
      * @param tier the tier of this creep we are spawning
      */
     private static getCreepOptions(room: Room, roleConst: RoleConstant, tier: number): void {
-
+        // test
     }
 
 }

@@ -214,7 +214,7 @@ export default class RoomApi {
         const hpLimit: number = this.getWallHpLimit(room);
         const walls: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_WALL, (s: StructureWall) => s.hits < hpLimit);
         const ramparts: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_RAMPART, (s: StructureRampart) => s.hits < hpLimit);
-        
+
         return walls.concat(ramparts);
     }
 
@@ -265,7 +265,8 @@ export default class RoomApi {
             const numOfChunks: number = Math.floor((wallLevelHpDiff * controllerProgress) / chunkSize);
 
             return WALL_LIMIT[room.controller.level] + chunkSize * numOfChunks;
-        } else {
+        }
+        else {
             throw new Error("Error getting wall limit for room with undefined controller.");
         }
     }
