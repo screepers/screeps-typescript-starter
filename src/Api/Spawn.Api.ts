@@ -12,6 +12,7 @@ export default class SpawnApi {
      * @param creepConst the role of the creep we want
      */
     public static getCreepCount(room: Room, creepConst: any): number {
+
         return _.sum(MemoryApi.getMyCreeps(room,
             (c: Creep) => c.memory.role === creepConst));
     }
@@ -26,6 +27,14 @@ export default class SpawnApi {
     }
 
     /**
+     * set creep limits for the room
+     * @param room the room we are setting limits for
+     */
+    public static setCreepLimits(room: Room): void {
+        // empty bl0x pl0x
+    }
+
+    /**
      * get the first available open spawn for a room
      * @param room the room we are checking the spawn for
      */
@@ -35,6 +44,10 @@ export default class SpawnApi {
         const allSpawns: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
             (s: Structure<StructureConstant>) => s.structureType === STRUCTURE_SPAWN);
 
+        // not sure about this one, i read that _.first ONLY works on arrays and will NOT work on objects
+        // allSpawns[0] might be needed... just so we have solution if this ends up being a bug later lol
+        // i mean i could just change it to be safe but then nobody would read this
+        // so im just gonna leave it
         return _.first(allSpawns);
     }
 
@@ -85,8 +98,25 @@ export default class SpawnApi {
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning
      */
-    private static getCreepOptions(room: Room, roleConst: RoleConstant, tier: number): void {
-
+    private static generateCreepOptions(room: Room, roleConst: RoleConstant, tier: number): void {
+        // .keep
     }
+
+    /**
+     * generate a body for creeps given a specific set of paramters
+     * @param
+     */
+    private static generateCreepBody(): BodyPartConstant[] {
+        // not sure the implementation yet
+        // 2 options... paramter for each body part and you just supply a number
+        // but i prefer passing 2 arrays of equal length, one with body part constants
+        // and one with the number of these parts you wish for. Order can be in the order you
+        // make the body part constant array in, but i want some options for switching order around
+        // to be customizable if possible... idk yet but this function will be much nicer than
+        // manually creating the bodies
+        return [WORK, WORK, MOVE];
+    }
+
+
 
 }
