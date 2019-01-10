@@ -1,9 +1,9 @@
-import { AllStructureTypes } from "utils/Constants";
+import { ALL_STRUCTURE_TYPES } from "utils/Constants";
 
 /**
  * Contains all functions for initializing and updating room memory
  */
-export class MemoryHelper_Room {
+export default class MemoryHelper_Room {
     /**
      * Calls all the helper functions to update room.memory
      * @param room The room to update the memory of
@@ -72,7 +72,7 @@ export class MemoryHelper_Room {
         const allStructures: Structure[] = room.find(FIND_STRUCTURES);
         const sortedStructureIDs: StringMap = {};
         // For each structureType, remove the structures from allStructures and map them to ids in the memory object.
-        _.forEach(AllStructureTypes, (type: StructureConstant) => {
+        _.forEach(ALL_STRUCTURE_TYPES, (type: StructureConstant) => {
             sortedStructureIDs[type] = _.map(
                 _.remove(allStructures, (struct: Structure) => struct.structureType === type),
                 (struct: Structure) => struct.id

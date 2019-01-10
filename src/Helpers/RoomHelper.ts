@@ -1,9 +1,8 @@
-// @ts-ignore
-import { MemoryApi } from "Api/Memory.Api";
-import { WALL_LIMIT } from "utils/constants";
+import MemoryApi from "Api/Memory.Api";
+import { WALL_LIMIT } from "utils/Constants";
 
 // helper functions for rooms
-export class RoomHelper {
+export default class RoomHelper {
 
     /**
      * check if a specified room is owned by you
@@ -148,7 +147,7 @@ export class RoomHelper {
 
     /**
      * choose an ideal target for the towers to attack
-     * TODO actually choose an ideal target not just the first one lol
+     * [TODO] actually choose an ideal target not just the first one lol
      * @param room the room we are in
      */
     public static chooseTowerTarget(room: Room): Creep | null {
@@ -161,19 +160,11 @@ export class RoomHelper {
     }
 
     /**
-     * get the difference in wall hp limits for the current controller level (helper)
+     * Get the difference in Wall/Rampart HP between the current and previous RCL
      * @param controllerLevel the level of the controller in the room
      */
     public static getWallLevelDifference(controllerLevel: number): number {
         return WALL_LIMIT[controllerLevel] - WALL_LIMIT[controllerLevel - 1];
     }
 
-    /**
-     * calculate the hp wall limit (helper)
-     * @param controllerLevel the level of the controller
-     * @param levelDiff the difference between this and last controller hp limit
-     */
-    public static calcPreviousWallHpLimit(controllerLevel: number): number {
-        return WALL_LIMIT[controllerLevel];
-    }
 }

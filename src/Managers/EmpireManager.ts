@@ -1,5 +1,5 @@
 // empire-wide manager
-export class EmpireManager{
+export default class EmpireManager{
     
     /**
      * run the empire for the AI

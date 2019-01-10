@@ -1,5 +1,5 @@
 // Accessing Memory Helpers
-export class MemoryHelper {
+export default class MemoryHelper {
 
     /**
      * get number of creeps in room (can pass a filter function)

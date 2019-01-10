@@ -1,9 +1,8 @@
-import { stringify } from "querystring";
-import { ROOM_STATE_INTRO } from "utils/constants";
-import { MemoryHelper_Room } from "Helpers/MemoryHelper_Room";
+import { ROOM_STATE_INTRO } from "utils/Constants";
+import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 
 // the api for the memory class
-export class MemoryApi {
+export default class MemoryApi {
     /**
      * Remove all memory objects that are dead
      */

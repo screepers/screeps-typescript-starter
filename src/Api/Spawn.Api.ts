@@ -1,11 +1,11 @@
-import { RoomHelper } from "../Helpers/RoomHelper";
-import { MemoryHelper } from "../Helpers/MemoryHelper";
-import { MemoryApi } from "./Memory.Api";
+import RoomHelper from "../Helpers/RoomHelper";
+import MemoryHelper from "../Helpers/MemoryHelper";
+import MemoryApi from "./Memory.Api";
 
 /**
  * the api used by the spawn manager
  */
-export class SpawnApi {
+export default class SpawnApi {
     /**
      * get count for the specified creep
      * @param room the room we are getting the count for

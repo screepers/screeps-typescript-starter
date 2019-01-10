@@ -1,11 +1,11 @@
-import { MemoryApi } from "./Memory.Api";
-import { RoomHelper } from "Helpers/RoomHelper";
-import { ROOM_STATE_INTRO } from "utils/constants";
-import { MemoryHelper_Room } from "Helpers/MemoryHelper_Room";
-import { MemoryHelper } from "Helpers/MemoryHelper";
+import MemoryApi from "./Memory.Api";
+import RoomHelper from "Helpers/RoomHelper";
+import { ROOM_STATE_INTRO, WALL_LIMIT } from "utils/constants";
+import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import MemoryHelper from "Helpers/MemoryHelper";
 
 // an api used for functions related to the room
-export class RoomApi {
+export default class RoomApi {
 
     /**
      * check if there are hostile creeps in the room
@@ -272,17 +272,14 @@ export class RoomApi {
 
             // % of way to next level
             const controllerProgress: number = room.controller.progress / room.controller.progressTotal;
-            const controllerLevel: number = room.controller.level;
             // difference between this levels max and last levels max
-            const wallLevelHpDiff: number = RoomHelper.getWallLevelDifference(controllerLevel);
-            // last levels max
-            const previousHpLimit: number = RoomHelper.calcPreviousWallHpLimit(controllerLevel)
+            const wallLevelHpDiff: number = RoomHelper.getWallLevelDifference(room.controller.level);
             // Minimum hp chunk to increase limit
             const chunkSize = 10000;
             // The adjusted hp difference for controller progress and chunking
             const numOfChunks = Math.floor( (wallLevelHpDiff * controllerProgress) / chunkSize );
             
-            return previousHpLimit + (chunkSize * numOfChunks);
+            return WALL_LIMIT[room.controller.level] + (chunkSize * numOfChunks);
         }
         else {
             throw new Error("Error getting wall limit for room with undefined controller.");

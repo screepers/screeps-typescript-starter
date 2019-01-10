@@ -1,5 +1,5 @@
 // handles spawning for every room
-export class SpawnManager{
+export default class SpawnManager{
 
     /**
      * run the spawning for the AI

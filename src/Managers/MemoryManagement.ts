@@ -1,8 +1,8 @@
 // @ts-ignore
-import { MemoryApi } from "Api/Memory.Api";
+import MemoryApi from "Api/Memory.Api";
 
 // manager for the memory of the empire
-export class MemoryManager {
+export default class MemoryManager {
     /**
      * run the memory for the AI
      */

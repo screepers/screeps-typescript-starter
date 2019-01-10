@@ -24,7 +24,7 @@ export const ROLE_STALKER = "stalker";
 export const ROLE_MEDIC = "medic";
 
 // List of every structure in the game
-export const AllStructureTypes: StructureConstant[] = [
+export const ALL_STRUCTURE_TYPES: StructureConstant[] = [
     STRUCTURE_EXTENSION,
     STRUCTURE_RAMPART,
     STRUCTURE_ROAD,

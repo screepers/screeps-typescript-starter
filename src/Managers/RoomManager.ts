@@ -1,5 +1,5 @@
 // room-wide manager
-export class RoomManager{
+export default class RoomManager{
     
     /**
      * run the spawning for the AI

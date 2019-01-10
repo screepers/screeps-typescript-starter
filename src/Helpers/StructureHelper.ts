@@ -1,4 +1,4 @@
 // room-wide manager
-export class StructureHelper{
-    
+export default class StructureHelper{
+    // 
 }

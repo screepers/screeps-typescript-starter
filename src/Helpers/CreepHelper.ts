@@ -1,5 +1,5 @@
 // helper function for creeps
-export class CreepHelper {
+export default class CreepHelper {
 
     // 
 }

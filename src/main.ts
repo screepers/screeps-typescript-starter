@@ -9,17 +9,17 @@
 
 // ------ end imports
 // @ts-ignore
-import { ConsoleCommands } from "Helpers/ConsoleCommands";
+import ConsoleCommands from "Helpers/ConsoleCommands";
 // @ts-ignore
-import { EmpireManager } from "Managers/EmpireManager";
+import EmpireManager from "Managers/EmpireManager";
 // @ts-ignore
-import { MemoryManager } from "Managers/MemoryManagement";
+import MemoryManager from "Managers/MemoryManagement";
 // @ts-ignore
-import { RoomManager } from "Managers/RoomManager";
+import RoomManager from "Managers/RoomManager";
 // @ts-ignore
-import { SpawnManager } from "Managers/SpawnManager"
+import SpawnManager from "Managers/SpawnManager"
 // @ts-ignore
-import { ErrorMapper } from "utils/ErrorMapper";
+import ErrorMapper from "utils/ErrorMapper";
 
 export const loop = ErrorMapper.wrapLoop(() => {
 
