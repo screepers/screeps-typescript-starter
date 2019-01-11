@@ -31,7 +31,131 @@ export default class SpawnApi {
      * @param room the room we are setting limits for
      */
     public static setCreepLimits(room: Room): void {
-        // empty bl0x pl0x
+
+        let domesticLimits: DomesticCreepLimits = {
+            miner: 0,
+            harvester: 0,
+            worker: 0,
+            powerUpgrader: 0,
+            lorry: 0
+        };
+
+        let remoteLimits: RemoteCreepLimits = {
+            remoteMiner: 0,
+            remoteHarvester: 0,
+            remoteReserver: 0,
+            remoteColonizer: 0,
+            remoteDefender: 0
+        }
+
+        let militaryLimits: MilitaryCreepLimits = {
+            zealot: 0,
+            stalker: 0,
+            medic: 0
+        }
+
+        // check what room state we are in
+        switch (room.memory.roomState) {
+
+            // Intro
+            case ROOM_STATE_INTRO:
+
+                // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 0;
+                domesticLimits[ROLE_HARVESTER] = 0;
+                domesticLimits[ROLE_WORKER] = 0;
+                domesticLimits[ROLE_POWER_UPGRADER] = 0;
+                domesticLimits[ROLE_LORRY] = 0;
+
+                // Miltiary Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = 0;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
+                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
+                remoteLimits[ROLE_COLONIZER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+                // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
+
+                break;
+
+            // Beginner
+            case ROOM_STATE_BEGINNER:
+
+                // Domestic Creep Definitions
+
+                // Miltiary Creep Definitions
+
+                // No remote creeps at this room state
+
+                break;
+
+            // Intermediate
+            case ROOM_STATE_INTER:
+
+                // Domestic Creep Definitions
+
+                // Miltiary Creep Definitions
+
+                // Remote Creep Definitions --
+                // not sure if we will actually want them at this level
+                // since they have no storage, need to discuss
+
+                break;
+
+            //Advanced
+            case ROOM_STATE_ADVANCED:
+
+                // Domestic Creep Definitions
+
+                // Miltiary Creep Definitions
+
+                // Remote Creep Definitions
+
+                break;
+
+            // Upgrader
+            case ROOM_STATE_UPGRADER:
+
+                // Domestic Creep Definitions
+
+                // Miltiary Creep Definitions
+
+                // Remote Creep Definitions
+
+                break;
+
+            // Stimulate
+            case ROOM_STATE_STIMULATE:
+
+                // Domestic Creep Definitions
+
+                // Miltiary Creep Definitions
+
+                // Remote Creep Definitions
+
+                break;
+
+            // Seige
+            case ROOM_STATE_SEIGE:
+
+                // Domestic Creep Definitions
+
+                // Miltiary Creep Definitions
+
+                // Remote Creep Definitions
+
+                break;
+
+            // Nuke Inbound
+            case ROOM_STATE_NUKE_INBOUND:
+
+                // Do not spawn any additional creeps while nuke inbound
+
+                break;
+        }
     }
 
     /**

@@ -83,13 +83,13 @@ type ROOM_STATE_NUKE_INBOUND = 7;
 declare const ROLE_MINER = "miner";
 declare const ROLE_HARVESTER = "harvester";
 declare const ROLE_WORKER = "worker";
-declare const ROLE_POWER_UPGRADER = "power_upgrader";
+declare const ROLE_POWER_UPGRADER = "powerUpgrader";
 declare const ROLE_LORRY = "lorry";
-declare const ROLE_REMOTE_MINER = "remote_miner";
-declare const ROLE_REMOTE_HARVESTER = "remote_harvester";
-declare const ROLE_REMOTE_RESERVER = "remote_reserver";
-declare const ROLE_REMOTE_DEFENDER = "remote_defender";
-declare const ROLE_COLONIZER = "remote_colonizer";
+declare const ROLE_REMOTE_MINER = "remoteMiner";
+declare const ROLE_REMOTE_HARVESTER = "remoteHarvester";
+declare const ROLE_REMOTE_RESERVER = "remoteReserver";
+declare const ROLE_REMOTE_DEFENDER = "remoteDefender";
+declare const ROLE_COLONIZER = "remoteColonizer";
 declare const ROLE_ZEALOT = "zealot";
 declare const ROLE_STALKER = "stalker";
 declare const ROLE_MEDIC = "medic";
@@ -259,7 +259,7 @@ interface RoomMemory {
     claimRooms: Cache;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
