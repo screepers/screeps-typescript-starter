@@ -27,10 +27,10 @@ export default class SpawnApi {
     }
 
     /**
-     * set creep limits for the room
-     * @param room the room we are setting limits for
+     * set domestic creep limits
+     * @param room the room we want limits for
      */
-    public static setCreepLimits(room: Room): void {
+    public static generateDomesticCreepLimits(room: Room): DomesticCreepLimits {
 
         let domesticLimits: DomesticCreepLimits = {
             miner: 0,
@@ -40,19 +40,6 @@ export default class SpawnApi {
             lorry: 0
         };
 
-        let remoteLimits: RemoteCreepLimits = {
-            remoteMiner: 0,
-            remoteHarvester: 0,
-            remoteReserver: 0,
-            remoteColonizer: 0,
-            remoteDefender: 0
-        }
-
-        let militaryLimits: MilitaryCreepLimits = {
-            zealot: 0,
-            stalker: 0,
-            medic: 0
-        }
 
         // check what room state we are in
         switch (room.memory.roomState) {
@@ -61,18 +48,263 @@ export default class SpawnApi {
             case ROOM_STATE_INTRO:
 
                 // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 1;
+                domesticLimits[ROLE_HARVESTER] = 1;
+                domesticLimits[ROLE_WORKER] = 1;
+                domesticLimits[ROLE_POWER_UPGRADER] = 0;
+                domesticLimits[ROLE_LORRY] = 0;
+
+                break;
+
+            // Beginner
+            case ROOM_STATE_BEGINNER:
+
+                // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 4;
+                domesticLimits[ROLE_HARVESTER] = 4;
+                domesticLimits[ROLE_WORKER] = 4;
+                domesticLimits[ROLE_POWER_UPGRADER] = 0;
+                domesticLimits[ROLE_LORRY] = 0;
+
+                break;
+
+            // Intermediate
+            case ROOM_STATE_INTER:
+
+                // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_HARVESTER] = 3;
+                domesticLimits[ROLE_WORKER] = 5;
+                domesticLimits[ROLE_POWER_UPGRADER] = 0;
+                domesticLimits[ROLE_LORRY] = 0;
+
+                break;
+
+            //Advanced
+            case ROOM_STATE_ADVANCED:
+
+                // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_HARVESTER] = 2;
+                domesticLimits[ROLE_WORKER] = 4;
+                domesticLimits[ROLE_POWER_UPGRADER] = 0;
+                domesticLimits[ROLE_LORRY] = 0;
+
+                break;
+
+            // Upgrader
+            case ROOM_STATE_UPGRADER:
+
+                // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_HARVESTER] = 2;
+                domesticLimits[ROLE_WORKER] = 2;
+                domesticLimits[ROLE_POWER_UPGRADER] = 1;
+                domesticLimits[ROLE_LORRY] = 0;
+
+                break;
+
+            // Stimulate
+            case ROOM_STATE_STIMULATE:
+
+                // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_HARVESTER] = 3;
+                domesticLimits[ROLE_WORKER] = 3;
+                domesticLimits[ROLE_POWER_UPGRADER] = 2;
+                domesticLimits[ROLE_LORRY] = 2;
+
+                break;
+
+            // Seige
+            case ROOM_STATE_SEIGE:
+
+                // Domestic Creep Definitions
+                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_HARVESTER] = 3;
+                domesticLimits[ROLE_WORKER] = 2;
+                domesticLimits[ROLE_POWER_UPGRADER] = 0;
+                domesticLimits[ROLE_LORRY] = 1;
+
+                break;
+
+            // Nuke Inbound
+            case ROOM_STATE_NUKE_INBOUND:
+
+                // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 0;
                 domesticLimits[ROLE_HARVESTER] = 0;
                 domesticLimits[ROLE_WORKER] = 0;
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
                 domesticLimits[ROLE_LORRY] = 0;
 
-                // Miltiary Creep Definitions
+                break;
+        }
+
+        // Return the limits
+        return domesticLimits;
+    }
+
+    /**
+     * set remote creep limits
+     * TODO - get num of remote sources .. get remote defender to roll thru on call
+     * (we got shooters on deck)
+     * @param room the room we want limits for
+     */
+    public static generateRemoteCreepLimits(room: Room): RemoteCreepLimits {
+
+        let remoteLimits: RemoteCreepLimits = {
+            remoteMiner: 0,
+            remoteHarvester: 0,
+            remoteReserver: 0,
+            remoteColonizer: 0,
+            remoteDefender: 0
+        };
+
+        const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
+        const numClaimRooms: number = RoomHelper.numClaimRooms(room);
+
+        // will get this from the memory in remote rooms... btw should we
+        // have a seperate memory structure for remote/attack/claim rooms?
+        // I think thats a good idea
+        const numRemoteSources: number = 0;
+
+        // If we do not have any remote rooms, return the initial remote limits (Empty)
+        if (numRemoteRooms <= 0) {
+            return remoteLimits;
+        }
+
+
+        // check what room state we are in
+        switch (room.memory.roomState) {
+
+            // Intro
+            case ROOM_STATE_INTRO:
+
+                // None at intro level
+                // Remote Creep Definitions
                 remoteLimits[ROLE_REMOTE_MINER] = 0;
                 remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
                 remoteLimits[ROLE_REMOTE_RESERVER] = 0;
                 remoteLimits[ROLE_COLONIZER] = 0;
                 remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+                break;
+
+            // Beginner
+            case ROOM_STATE_BEGINNER:
+
+                // None at beginner level
+                // Remote Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = 0;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
+                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
+                remoteLimits[ROLE_COLONIZER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+                break;
+
+            // Intermediate
+            case ROOM_STATE_INTER:
+
+                // None at intermediate level
+                // Remote Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = 0;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
+                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
+                remoteLimits[ROLE_COLONIZER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+                break;
+
+            //Advanced
+            case ROOM_STATE_ADVANCED:
+
+                // 1 'Squad' per source (harvester and miner) and a reserver
+                // Remote Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
+                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
+                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+                break;
+
+            // Upgrader
+            case ROOM_STATE_UPGRADER:
+
+                // 1 'Squad' per source (harvester and miner) and a reserver
+                // Remote Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
+                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
+                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+
+                break;
+
+            // Stimulate
+            case ROOM_STATE_STIMULATE:
+
+                // 1 'Squad' per source (harvester and miner) and a reserver
+                // Remote Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
+                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
+                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+
+                break;
+
+            // Seige
+            case ROOM_STATE_SEIGE:
+
+                // Remote Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = 0;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
+                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
+                remoteLimits[ROLE_COLONIZER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+                break;
+
+            // Nuke Inbound
+            case ROOM_STATE_NUKE_INBOUND:
+
+                // Remote Creep Definitions
+                remoteLimits[ROLE_REMOTE_MINER] = 0;
+                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
+                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
+                remoteLimits[ROLE_COLONIZER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+
+                break;
+        }
+
+        // Return the limits
+        return remoteLimits;
+    }
+
+    /**
+     * set military creep limits
+     * @param room the room we want limits for
+     */
+    public static generateMilitaryCreepLimits(room: Room): MilitaryCreepLimits {
+
+        let militaryLimits: MilitaryCreepLimits = {
+            zealot: 0,
+            stalker: 0,
+            medic: 0
+        };
+
+
+        // check what room state we are in
+        switch (room.memory.roomState) {
+
+            // Intro
+            case ROOM_STATE_INTRO:
 
                 // No remote creeps at this room state
                 militaryLimits[ROLE_ZEALOT] = 0;
@@ -84,78 +316,92 @@ export default class SpawnApi {
             // Beginner
             case ROOM_STATE_BEGINNER:
 
-                // Domestic Creep Definitions
-
-                // Miltiary Creep Definitions
-
                 // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
 
                 break;
 
             // Intermediate
             case ROOM_STATE_INTER:
 
-                // Domestic Creep Definitions
-
-                // Miltiary Creep Definitions
-
-                // Remote Creep Definitions --
-                // not sure if we will actually want them at this level
-                // since they have no storage, need to discuss
+                // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
 
                 break;
 
             //Advanced
             case ROOM_STATE_ADVANCED:
 
-                // Domestic Creep Definitions
-
-                // Miltiary Creep Definitions
-
-                // Remote Creep Definitions
+                // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
 
                 break;
 
             // Upgrader
             case ROOM_STATE_UPGRADER:
 
-                // Domestic Creep Definitions
-
-                // Miltiary Creep Definitions
-
-                // Remote Creep Definitions
+                // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
 
                 break;
 
             // Stimulate
             case ROOM_STATE_STIMULATE:
 
-                // Domestic Creep Definitions
-
-                // Miltiary Creep Definitions
-
-                // Remote Creep Definitions
+                // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
 
                 break;
 
             // Seige
             case ROOM_STATE_SEIGE:
 
-                // Domestic Creep Definitions
-
-                // Miltiary Creep Definitions
-
-                // Remote Creep Definitions
+                // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
 
                 break;
 
             // Nuke Inbound
             case ROOM_STATE_NUKE_INBOUND:
 
-                // Do not spawn any additional creeps while nuke inbound
+                // No remote creeps at this room state
+                militaryLimits[ROLE_ZEALOT] = 0;
+                militaryLimits[ROLE_STALKER] = 0;
+                militaryLimits[ROLE_MEDIC] = 0;
 
                 break;
         }
+
+        // Return the limits
+        return militaryLimits;
+    }
+
+    /**
+     * set creep limits for the room
+     * @param room the room we are setting limits for
+     */
+    public static setCreepLimits(room: Room): void {
+
+        // Set Domestic Limits to Memory
+        Memory.rooms[room.name].creepLimit["domesticLimits"] = this.generateDomesticCreepLimits(room);
+
+        // Set Remote Limits to Memory
+        Memory.rooms[room.name].creepLimit["remoteLimits"] = this.generateRemoteCreepLimits(room);
+
+        // Set Military Limits to Memory
+        Memory.rooms[room.name].creepLimit["militaryLimits"] = this.generateMilitaryCreepLimits(room);
     }
 
     /**

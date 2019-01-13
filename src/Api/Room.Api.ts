@@ -257,7 +257,7 @@ export default class RoomApi {
     public static isFull(target: any): boolean {
 
         if (target instanceof Creep) {
-            return (target.energy === target.energyCapacity);
+            return (_.sum(target.carry) === target.carryCapacity);
         }
         else if (target.hasOwnProperty("store")) {
             return (_.sum(target.store) === target.storeCapacity);
@@ -266,6 +266,7 @@ export default class RoomApi {
         // if not one of these two, there was an error
         UtilHelper.throwError("Invalid Target", "isFull called on target with no capacity for storage.",
             ERROR_ERROR);
+        throw new Error("isFull called on invalid target.");
     }
 
     /**

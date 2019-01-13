@@ -167,4 +167,30 @@ export default class RoomHelper {
         return WALL_LIMIT[controllerLevel] - WALL_LIMIT[controllerLevel - 1];
     }
 
+    /**
+     * get number of associated remote rooms
+     */
+    public static numRemoteRooms(room: Room): number {
+
+        // Return the number of remote rooms associated with the given room
+        return Memory.rooms[Room.name].remoteRooms.data.length
+    }
+
+    /**
+     * get number of associated claim rooms
+     */
+    public static numClaimRooms(room: Room): number {
+
+        // Return the number of remote rooms associated with the given room
+        return Memory.rooms[Room.name].claimRooms.data.length
+    }
+
+    /**
+     * get number of associated attack rooms
+     */
+    public static numAttackRooms(room: Room): number {
+
+        // Return the number of remote rooms associated with the given room
+        return Memory.rooms[Room.name].attackRooms.data.length
+    }
 }
