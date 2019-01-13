@@ -173,7 +173,7 @@ export default class RoomHelper {
     public static numRemoteRooms(room: Room): number {
 
         // Return the number of remote rooms associated with the given room
-        return Memory.rooms[Room.name].remoteRooms.data.length
+        return Memory.rooms[room.name].remoteRooms.data.length
     }
 
     /**
@@ -182,7 +182,7 @@ export default class RoomHelper {
     public static numClaimRooms(room: Room): number {
 
         // Return the number of remote rooms associated with the given room
-        return Memory.rooms[Room.name].claimRooms.data.length
+        return Memory.rooms[room.name].claimRooms.data.length
     }
 
     /**
@@ -191,6 +191,6 @@ export default class RoomHelper {
     public static numAttackRooms(room: Room): number {
 
         // Return the number of remote rooms associated with the given room
-        return Memory.rooms[Room.name].attackRooms.data.length
+        return Memory.rooms[room.name].attackRooms.data.length
     }
 }
