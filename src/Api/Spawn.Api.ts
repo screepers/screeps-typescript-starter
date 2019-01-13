@@ -164,10 +164,8 @@ export default class SpawnApi {
         const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
         const numClaimRooms: number = RoomHelper.numClaimRooms(room);
 
-        // will get this from the memory in remote rooms... btw should we
-        // have a seperate memory structure for remote/attack/claim rooms?
-        // I think thats a good idea
-        const numRemoteSources: number = 0;
+        // I want to be able to do this.. can you make it happen?
+        const numRemoteSources: number = Memory.rooms[room.name].remoteRooms.data["sources"];
 
         // If we do not have any remote rooms, return the initial remote limits (Empty)
         if (numRemoteRooms <= 0) {
