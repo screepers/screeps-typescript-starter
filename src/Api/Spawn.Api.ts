@@ -176,45 +176,6 @@ export default class SpawnApi {
         // check what room state we are in
         switch (room.memory.roomState) {
 
-            // Intro
-            case ROOM_STATE_INTRO:
-
-                // None at intro level
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = 0;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
-                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
-                remoteLimits[ROLE_COLONIZER] = 0;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
-
-                break;
-
-            // Beginner
-            case ROOM_STATE_BEGINNER:
-
-                // None at beginner level
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = 0;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
-                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
-                remoteLimits[ROLE_COLONIZER] = 0;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
-
-                break;
-
-            // Intermediate
-            case ROOM_STATE_INTER:
-
-                // None at intermediate level
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = 0;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
-                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
-                remoteLimits[ROLE_COLONIZER] = 0;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
-
-                break;
-
             //Advanced
             case ROOM_STATE_ADVANCED:
 
@@ -253,30 +214,6 @@ export default class SpawnApi {
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
                 remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
 
-
-                break;
-
-            // Seige
-            case ROOM_STATE_SEIGE:
-
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = 0;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
-                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
-                remoteLimits[ROLE_COLONIZER] = 0;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
-
-                break;
-
-            // Nuke Inbound
-            case ROOM_STATE_NUKE_INBOUND:
-
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = 0;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = 0;
-                remoteLimits[ROLE_REMOTE_RESERVER] = 0;
-                remoteLimits[ROLE_COLONIZER] = 0;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
 
                 break;
         }
@@ -298,89 +235,9 @@ export default class SpawnApi {
         };
 
 
-        // check what room state we are in
-        switch (room.memory.roomState) {
+        // Check for attack flags and adjust accordingly
 
-            // Intro
-            case ROOM_STATE_INTRO:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-
-            // Beginner
-            case ROOM_STATE_BEGINNER:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-
-            // Intermediate
-            case ROOM_STATE_INTER:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-
-            //Advanced
-            case ROOM_STATE_ADVANCED:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-
-            // Upgrader
-            case ROOM_STATE_UPGRADER:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-
-            // Stimulate
-            case ROOM_STATE_STIMULATE:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-
-            // Seige
-            case ROOM_STATE_SEIGE:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-
-            // Nuke Inbound
-            case ROOM_STATE_NUKE_INBOUND:
-
-                // No remote creeps at this room state
-                militaryLimits[ROLE_ZEALOT] = 0;
-                militaryLimits[ROLE_STALKER] = 0;
-                militaryLimits[ROLE_MEDIC] = 0;
-
-                break;
-        }
+        // Check if we need defenders and adjust accordingly
 
         // Return the limits
         return militaryLimits;
@@ -485,6 +342,23 @@ export default class SpawnApi {
         return [WORK, WORK, MOVE];
     }
 
+    /**
+     * check if our remote room needs a remote defender
+     * @param room the home room associated with the remote room
+     */
+    private static needRemoteDefender(room: Room): boolean {
+        return false;
+    }
 
+    /**
+     * get the number of active miners
+     * ie miners with more than 50 TTL
+     * @param room the room we are checking in
+     */
+    private static getActiveMiners(room: Room): number {
+
+        // all miners with more than 50 TTL
+        return 1;
+    }
 
 }
