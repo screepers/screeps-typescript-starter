@@ -290,4 +290,74 @@ export default class RoomApi {
             throw new Error("Error getting wall limit for room with undefined controller.");
         }
     }
+
+    /**
+     * calls helper functions to create the full job queue for the room
+     * @param room the room we want to queue to be created for
+     */
+    public static createJobQueue(room: Room): void {
+        // this can call all the sub job queues maybe..
+    }
+
+    /**
+     * create a job queue for the room for worker creeps
+     * @param room the room we want the queue to be created for
+     */
+    public static createJobQueueWorker(room: Room): void {
+        // possibly a list of objects with 2 propeties, jobName and priority
+        // so we have some way thats less fragile than array order to
+        // figure out what jobs need to be tackled first.. idk just thinking
+    }
+
+    /**
+     * createa a job queue for the room for harvester creeps
+     * @param room the room we want the queue to be created for
+     */
+    public static createJobQueueLorry(room: Room): void {
+        //
+    }
+
+    /**
+     * create a list of ways to get energy from the room
+     * @param room the room we want the queue to be created for
+     */
+    public static createEnergyQueue(room: Room): void {
+        // we can access this list from memory for simplicity sake
+        // and creeps can decide which to pull from based on their creep options
+        // in memory... for example in room state advanced we cut off workers from containers
+        // but keep it open for harvesters.. creep options will make this simple i hope
+    }
+
+    /**
+     * run links for the room
+     * @param room the room we want to run links for
+     */
+    public static runLinks(room: Room): void {
+        // we find a way to get an upgrader link (closest one to controller)
+        // and make sure the other links keep this one full
+        // possibly also if all links energy together is below the
+        // carry cap of upgrader we could have workers fill it for them
+        // we might want to let workers help with spawning IF NEEDED in
+        // seige/military situation but im just rambling now
+    }
+
+    /**
+     * run terminal for the room
+     * @param room the room we want to run terminal for
+     */
+    public static runTerminal(room: Room): void {
+        // here we can do market stuff, send resources from room to room
+        // to each other, and make sure we have the ideal ratio of minerals
+        // we decide that we want
+    }
+
+    /**
+     * run labs for the room
+     * @param room the room we want to run labs for
+     */
+    public static runLabs(room: Room): void {
+        // i have no idea yet lol
+    }
+
+
 }

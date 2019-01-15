@@ -45,8 +45,6 @@ export default class SpawnApi {
                 domesticLimits[ROLE_MINER] = 1;
                 domesticLimits[ROLE_HARVESTER] = 1;
                 domesticLimits[ROLE_WORKER] = 1;
-                domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = 0;
 
                 break;
 
@@ -56,8 +54,6 @@ export default class SpawnApi {
                 domesticLimits[ROLE_MINER] = 4;
                 domesticLimits[ROLE_HARVESTER] = 4;
                 domesticLimits[ROLE_WORKER] = 4;
-                domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = 0;
 
                 break;
 
@@ -67,8 +63,6 @@ export default class SpawnApi {
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 5;
-                domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = 0;
 
                 break;
 
@@ -90,7 +84,6 @@ export default class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_POWER_UPGRADER] = 1;
-                domesticLimits[ROLE_LORRY] = 0;
 
                 break;
 
@@ -111,19 +104,7 @@ export default class SpawnApi {
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 2;
-                domesticLimits[ROLE_POWER_UPGRADER] = 0;
                 domesticLimits[ROLE_LORRY] = 1;
-
-                break;
-
-            // Nuke Inbound
-            case ROOM_STATE_NUKE_INBOUND:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 0;
-                domesticLimits[ROLE_HARVESTER] = 0;
-                domesticLimits[ROLE_WORKER] = 0;
-                domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = 0;
 
                 break;
         }
@@ -149,6 +130,7 @@ export default class SpawnApi {
 
         const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
         const numClaimRooms: number = RoomHelper.numClaimRooms(room);
+        const numRemoteDefenders = RoomHelper.numRemoteDefenders(room);
 
         // I want to be able to do this.. can you make it happen?
         const numRemoteSources: number = Memory.rooms[room.name].remoteRooms.data["sources"];
@@ -168,7 +150,7 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
 
                 break;
 
@@ -180,7 +162,7 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
 
                 break;
 
@@ -192,7 +174,7 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
+                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
 
                 break;
         }

@@ -106,7 +106,7 @@ export default class RoomHelper {
         return (
             TOWER_POWER_ATTACK -
             (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
-                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+            (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
         );
     }
 
@@ -209,5 +209,21 @@ export default class RoomHelper {
             numSources += RoomHelper.numSources(remoteRoom);
         });
         return numSources;
+    }
+
+    /**
+     * get number of remote defenders we need
+     */
+    public static numRemoteDefenders(room: Room): number {
+        const remoteRoomNames: string[] = Memory.rooms[room.name].remoteRooms.data;
+        let numRemoteDefenders: number = 0;
+
+        _.forEach(remoteRoomNames, (name: string) => {
+            const remoteRoom: Room = Game.rooms[name];
+            // insert here however we are going to check for hostile creeps in a room
+            // halp mr memory man lol
+        });
+
+        return numRemoteDefenders;
     }
 }
