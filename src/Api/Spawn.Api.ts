@@ -12,9 +12,7 @@ export default class SpawnApi {
      * @param creepConst the role of the creep we want
      */
     public static getCreepCount(room: Room, creepConst: any): number {
-
-        return _.sum(MemoryApi.getMyCreeps(room,
-            (c: Creep) => c.memory.role === creepConst));
+        return _.sum(MemoryApi.getMyCreeps(room, (c: Creep) => c.memory.role === creepConst));
     }
 
     /**
@@ -31,8 +29,7 @@ export default class SpawnApi {
      * @param room the room we want limits for
      */
     public static generateDomesticCreepLimits(room: Room): DomesticCreepLimits {
-
-        let domesticLimits: DomesticCreepLimits = {
+        const domesticLimits: DomesticCreepLimits = {
             miner: 0,
             harvester: 0,
             worker: 0,
@@ -40,13 +37,10 @@ export default class SpawnApi {
             lorry: 0
         };
 
-
         // check what room state we are in
         switch (room.memory.roomState) {
-
             // Intro
             case ROOM_STATE_INTRO:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 1;
                 domesticLimits[ROLE_HARVESTER] = 1;
@@ -58,7 +52,6 @@ export default class SpawnApi {
 
             // Beginner
             case ROOM_STATE_BEGINNER:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 4;
                 domesticLimits[ROLE_HARVESTER] = 4;
@@ -70,7 +63,6 @@ export default class SpawnApi {
 
             // Intermediate
             case ROOM_STATE_INTER:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 3;
@@ -80,9 +72,8 @@ export default class SpawnApi {
 
                 break;
 
-            //Advanced
+            // Advanced
             case ROOM_STATE_ADVANCED:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 2;
@@ -94,7 +85,6 @@ export default class SpawnApi {
 
             // Upgrader
             case ROOM_STATE_UPGRADER:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 2;
@@ -106,7 +96,6 @@ export default class SpawnApi {
 
             // Stimulate
             case ROOM_STATE_STIMULATE:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 3;
@@ -118,7 +107,6 @@ export default class SpawnApi {
 
             // Seige
             case ROOM_STATE_SEIGE:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 3;
@@ -130,7 +118,6 @@ export default class SpawnApi {
 
             // Nuke Inbound
             case ROOM_STATE_NUKE_INBOUND:
-
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = 0;
                 domesticLimits[ROLE_HARVESTER] = 0;
@@ -152,8 +139,7 @@ export default class SpawnApi {
      * @param room the room we want limits for
      */
     public static generateRemoteCreepLimits(room: Room): RemoteCreepLimits {
-
-        let remoteLimits: RemoteCreepLimits = {
+        const remoteLimits: RemoteCreepLimits = {
             remoteMiner: 0,
             remoteHarvester: 0,
             remoteReserver: 0,
@@ -172,13 +158,10 @@ export default class SpawnApi {
             return remoteLimits;
         }
 
-
         // check what room state we are in
         switch (room.memory.roomState) {
-
-            //Advanced
+            // Advanced
             case ROOM_STATE_ADVANCED:
-
                 // 1 'Squad' per source (harvester and miner) and a reserver
                 // Remote Creep Definitions
                 remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
@@ -191,7 +174,6 @@ export default class SpawnApi {
 
             // Upgrader
             case ROOM_STATE_UPGRADER:
-
                 // 1 'Squad' per source (harvester and miner) and a reserver
                 // Remote Creep Definitions
                 remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
@@ -199,13 +181,11 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
                 remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
-
 
                 break;
 
             // Stimulate
             case ROOM_STATE_STIMULATE:
-
                 // 1 'Squad' per source (harvester and miner) and a reserver
                 // Remote Creep Definitions
                 remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
@@ -213,7 +193,6 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
                 remoteLimits[ROLE_REMOTE_DEFENDER] = 0;
-
 
                 break;
         }
@@ -227,13 +206,11 @@ export default class SpawnApi {
      * @param room the room we want limits for
      */
     public static generateMilitaryCreepLimits(room: Room): MilitaryCreepLimits {
-
-        let militaryLimits: MilitaryCreepLimits = {
+        const militaryLimits: MilitaryCreepLimits = {
             zealot: 0,
             stalker: 0,
             medic: 0
         };
-
 
         // Check for attack flags and adjust accordingly
 
@@ -248,7 +225,6 @@ export default class SpawnApi {
      * @param room the room we are setting limits for
      */
     public static setCreepLimits(room: Room): void {
-
         // Set Domestic Limits to Memory
         Memory.rooms[room.name].creepLimit["domesticLimits"] = this.generateDomesticCreepLimits(room);
 
@@ -264,10 +240,11 @@ export default class SpawnApi {
      * @param room the room we are checking the spawn for
      */
     public static getOpenSpawn(room: Room): Structure<StructureConstant> | null {
-
         // get all spawns then just take the first one from it
-        const allSpawns: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(room,
-            (s: Structure<StructureConstant>) => s.structureType === STRUCTURE_SPAWN);
+        const allSpawns: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(
+            room,
+            (s: Structure<StructureConstant>) => s.structureType === STRUCTURE_SPAWN
+        );
 
         // not sure about this one, i read that _.first ONLY works on arrays and will NOT work on objects
         // allSpawns[0] might be needed... just so we have solution if this ends up being a bug later lol
@@ -284,7 +261,6 @@ export default class SpawnApi {
         // brock hates empty blocks
     }
 
-
     /**
      * spawn the next creep
      * @param room the room we want to spawn them in
@@ -294,7 +270,6 @@ export default class SpawnApi {
     public static spawnNextCreep(room: Room): void {
         // brock hates empty blocks
     }
-
 
     /**
      * get energy cost of creep
@@ -306,7 +281,6 @@ export default class SpawnApi {
         return 1;
     }
 
-
     /**
      * check what tier of this creep we are spawning
      * @param room the room we are spawning them in
@@ -315,7 +289,6 @@ export default class SpawnApi {
     public static getTier(room: Room, roleConst: RoleConstant): number {
         return 1;
     }
-
 
     /**
      * get the memory options for this creep
@@ -356,9 +329,7 @@ export default class SpawnApi {
      * @param room the room we are checking in
      */
     private static getActiveMiners(room: Room): number {
-
         // all miners with more than 50 TTL
         return 1;
     }
-
 }

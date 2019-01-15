@@ -1,6 +1,8 @@
+import { STRUCT_CACHE_TTL } from "utils/constants";
+import MemoryHelper_Room from "./MemoryHelper_Room";
+
 // Accessing Memory Helpers
 export default class MemoryHelper {
-
     /**
      * Get structures of a single type in a room, updating if necessary
      *
@@ -10,7 +12,11 @@ export default class MemoryHelper {
      * @param forceUpdate
      * @returns Structure[] An array of structures of a single type
      */
-    public static getStructureOfType(room: Room, type: StructureConstant, forceUpdate?: boolean): Array<Structure | null> {
+    public static getStructureOfType(
+        room: Room,
+        type: StructureConstant,
+        forceUpdate?: boolean
+    ): Array<Structure | null> {
         if (
             forceUpdate ||
             Memory.rooms[room.name].structures === undefined ||
@@ -20,7 +26,9 @@ export default class MemoryHelper {
             MemoryHelper_Room.updateStructures(room);
         }
 
-        const structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) => Game.getObjectById(id));
+        const structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) =>
+            Game.getObjectById(id)
+        );
         return structures;
     }
 
@@ -29,9 +37,10 @@ export default class MemoryHelper {
      * @param creep the creep we want to clear the memory of
      */
     public static clearCreepMemory(creep: Creep) {
-
         // check if the memory object exists and delete it
-        if (Memory.creeps[creep.name]) { delete creep.memory; }
+        if (Memory.creeps[creep.name]) {
+            delete creep.memory;
+        }
     }
 
     /**
@@ -39,8 +48,9 @@ export default class MemoryHelper {
      * @param room the room we want to clear the memory for
      */
     public static clearRoomMemory(room: Room) {
-
         // check if the memory structures exists and delete it
-        if (Memory.rooms[room.name]) { delete room.memory; }
+        if (Memory.rooms[room.name]) {
+            delete room.memory;
+        }
     }
 }

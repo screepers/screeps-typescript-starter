@@ -8,10 +8,12 @@
     "forin": false,
     "interface-name": [true, "never-prefix"],
     "ordered-imports": false,
+    "object-literal-sort-keys": false,
     "member-ordering": [false],
     "no-string-literal": [false],
     "class-name": [false],
     "no-console": [false],
+    "no-angle-bracket-type-assertion": false,
     "no-namespace": [true, "allow-declarations"],
     "variable-name": [
       true,

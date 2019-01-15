@@ -4,15 +4,13 @@ import MemoryHelper_Room from "./MemoryHelper_Room";
 
 // helper functions for rooms
 export default class RoomHelper {
-
     /**
      * check if a specified room is owned by you
      * @param room the room we want to check
      */
     public static isOwnedRoom(room: Room): boolean {
-
         // check if the room name is the same as any you own
-        return !_.some(Game.rooms, r => r.name === room.name)
+        return !_.some(Game.rooms, r => r.name === room.name);
     }
 
     /**
@@ -20,9 +18,11 @@ export default class RoomHelper {
      * @param room the room we want to check
      */
     public static isAllyRoom(room: any): boolean {
-
         // returns true if a room has one of our names but is not owned by us
-        return (!this.isOwnedRoom(room) && (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2"))
+        return (
+            !this.isOwnedRoom(room) &&
+            (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2")
+        );
     }
 
     /**
@@ -56,9 +56,7 @@ export default class RoomHelper {
      * @param objectConst the object we want to check for
      */
     public static isExistInRoom(room: any, objectConst: StructureConstant): boolean {
-
-        return (MemoryApi.getStructures(room,
-            s => s.structureType === objectConst).length > 0);
+        return MemoryApi.getStructures(room, s => s.structureType === objectConst).length > 0;
     }
 
     /**
@@ -67,14 +65,11 @@ export default class RoomHelper {
      * @param resourceType the resource we want to check the storage for
      */
     public static getStoredAmount(target: any, resourceType: ResourceConstant): number | undefined {
-
         if (target instanceof Creep) {
             return target.carry[resourceType];
-        }
-        else if (target.hasOwnProperty("store")) {
+        } else if (target.hasOwnProperty("store")) {
             return target.store[resourceType];
-        }
-        else if (resourceType === RESOURCE_ENERGY && target.hasOwnProperty("energy")) {
+        } else if (resourceType === RESOURCE_ENERGY && target.hasOwnProperty("energy")) {
             return target.energy;
         }
 
@@ -86,14 +81,11 @@ export default class RoomHelper {
      * @param target the target we want to check the capacity of
      */
     public static getStoredCapacity(target: any): number {
-
         if (target instanceof Creep) {
             return target.carryCapacity;
-        }
-        else if (target.hasOwnProperty("store")) {
+        } else if (target.hasOwnProperty("store")) {
             return target.storeCapacity;
-        }
-        else if (target.hasOwnProperty("energyCapacity")) {
+        } else if (target.hasOwnProperty("energyCapacity")) {
             return target.energyCapacity;
         }
 
@@ -105,10 +97,17 @@ export default class RoomHelper {
      * @param range the distance the target is from the tower
      */
     public static getTowerDamageAtRange(range: number) {
-        if (range <= TOWER_OPTIMAL_RANGE) { return TOWER_POWER_ATTACK; }
-        if (range >= TOWER_FALLOFF_RANGE) { range = TOWER_FALLOFF_RANGE; }
-        return TOWER_POWER_ATTACK - (TOWER_POWER_ATTACK * TOWER_FALLOFF *
-            (range - TOWER_OPTIMAL_RANGE) / (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE));
+        if (range <= TOWER_OPTIMAL_RANGE) {
+            return TOWER_POWER_ATTACK;
+        }
+        if (range >= TOWER_FALLOFF_RANGE) {
+            range = TOWER_FALLOFF_RANGE;
+        }
+        return (
+            TOWER_POWER_ATTACK -
+            (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
+                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+        );
     }
 
     /**
@@ -116,7 +115,7 @@ export default class RoomHelper {
      * @param ticks the number of ticks you want between executions
      */
     public static excecuteEveryTicks(ticks: number): boolean {
-        return Game.time % ticks === 0
+        return Game.time % ticks === 0;
     }
 
     /**
@@ -128,8 +127,8 @@ export default class RoomHelper {
     public static isContainerMining(
         room: Room,
         sources: Array<Source | null>,
-        containers: Array<Structure<StructureConstant> | null>): boolean {
-
+        containers: Array<Structure<StructureConstant> | null>
+    ): boolean {
         return false;
     }
 
@@ -139,10 +138,7 @@ export default class RoomHelper {
      * @param sources the sources we are checking
      * @param containers the containers we are checking
      */
-    public static isUpgraderLink(
-        room: Room,
-        links: Array<Structure<StructureConstant> | null>): boolean {
-
+    public static isUpgraderLink(room: Room, links: Array<Structure<StructureConstant> | null>): boolean {
         return false;
     }
 
@@ -152,7 +148,6 @@ export default class RoomHelper {
      * @param room the room we are in
      */
     public static chooseTowerTarget(room: Room): Creep | null {
-
         // get the creep we will do the most damage to
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
 
@@ -173,9 +168,8 @@ export default class RoomHelper {
      * @param room
      */
     public static numRemoteRooms(room: Room): number {
-
         // Return the number of remote rooms associated with the given room
-        return Memory.rooms[room.name].remoteRooms.data.length
+        return Memory.rooms[room.name].remoteRooms.data.length;
     }
 
     /**
@@ -183,9 +177,8 @@ export default class RoomHelper {
      * @param room
      */
     public static numClaimRooms(room: Room): number {
-
         // Return the number of remote rooms associated with the given room
-        return Memory.rooms[room.name].claimRooms.data.length
+        return Memory.rooms[room.name].claimRooms.data.length;
     }
 
     /**
@@ -193,9 +186,8 @@ export default class RoomHelper {
      * @param room
      */
     public static numAttackRooms(room: Room): number {
-
         // Return the number of remote rooms associated with the given room
-        return Memory.rooms[room.name].attackRooms.data.length
+        return Memory.rooms[room.name].attackRooms.data.length;
     }
 
     /**

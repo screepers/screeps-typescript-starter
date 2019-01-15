@@ -85,7 +85,7 @@ export default class MemoryHelper_Room {
 
     /**
      * Find all sources in room
-     * 
+     *
      * [Cached] Room.memory.sources
      * @param room The room to check in
      */
