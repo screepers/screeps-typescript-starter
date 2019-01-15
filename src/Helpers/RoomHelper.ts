@@ -1,5 +1,6 @@
 import MemoryApi from "Api/Memory.Api";
 import { WALL_LIMIT } from "utils/Constants";
+import MemoryHelper_Room from "./MemoryHelper_Room";
 
 // helper functions for rooms
 export default class RoomHelper {
@@ -21,7 +22,7 @@ export default class RoomHelper {
     public static isAllyRoom(room: any): boolean {
 
         // returns true if a room has one of our names but is not owned by us
-        return (!this.isOwnedRoom(room) && (room.controller.owner.username === "Uhmbrock" || room.controller.owner.username === "Jakesboy2"))
+        return (!this.isOwnedRoom(room) && (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2"))
     }
 
     /**
@@ -169,6 +170,7 @@ export default class RoomHelper {
 
     /**
      * get number of associated remote rooms
+     * @param room
      */
     public static numRemoteRooms(room: Room): number {
 
@@ -178,6 +180,7 @@ export default class RoomHelper {
 
     /**
      * get number of associated claim rooms
+     * @param room
      */
     public static numClaimRooms(room: Room): number {
 
@@ -187,10 +190,32 @@ export default class RoomHelper {
 
     /**
      * get number of associated attack rooms
+     * @param room
      */
     public static numAttackRooms(room: Room): number {
 
         // Return the number of remote rooms associated with the given room
         return Memory.rooms[room.name].attackRooms.data.length
+    }
+
+    /**
+     * Returns the number of sources in a room
+     * @param room The room to check
+     */
+    public static numSources(room: Room): number {
+        return Memory.rooms[room.name].sources.data.length;
+    }
+    /**
+     * Returns the number of sources in all remoteRooms connected to room
+     * @param room The room to check the remoteRooms of
+     */
+    public static numRemoteSources(room: Room): number {
+        const remoteRoomNames: string[] = Memory.rooms[room.name].remoteRooms.data;
+        let numSources: number = 0;
+        _.forEach(remoteRoomNames, (name: string) => {
+            const remoteRoom: Room = Game.rooms[name];
+            numSources += RoomHelper.numSources(remoteRoom);
+        });
+        return numSources;
     }
 }

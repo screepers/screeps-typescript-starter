@@ -17,7 +17,5 @@ export default class UtilHelper {
         
         console.log('<font color="' + titleColor + '">' + title + '</font>');
         console.log('<font color="' + bodyColor + '">' + body + '</font>');
-
-        //
     }
 }
