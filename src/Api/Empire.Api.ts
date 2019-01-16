@@ -51,5 +51,16 @@ export default class Empire {
         // a flag for it, call remove flag function if we need to
     }
 
+    /**
+     * finds the closest colonized room to support a
+     * Remote/Attack/Claim room
+     * @param targetRoom the room we want to support
+     */
+    public static findDependentRoom(): string {
+        // find the closest room, maybe some additional filters to make
+        // sure the room is actually closest not just by distance idk
+        return "";
+    }
+
 
 };

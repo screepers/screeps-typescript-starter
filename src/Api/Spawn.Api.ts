@@ -1,5 +1,6 @@
 import RoomHelper from "../Helpers/RoomHelper";
 import MemoryHelper from "../Helpers/MemoryHelper";
+import MemoryHelperRoom from "../Helpers/MemoryHelper_Room"
 import MemoryApi from "./Memory.Api";
 
 /**
@@ -208,13 +209,13 @@ export default class SpawnApi {
      */
     public static setCreepLimits(room: Room): void {
         // Set Domestic Limits to Memory
-        Memory.rooms[room.name].creepLimit["domesticLimits"] = this.generateDomesticCreepLimits(room);
+        MemoryHelperRoom.updateDomesticLimits(room, this.generateDomesticCreepLimits(room));
 
         // Set Remote Limits to Memory
-        Memory.rooms[room.name].creepLimit["remoteLimits"] = this.generateRemoteCreepLimits(room);
+        MemoryHelperRoom.updateRemoteLimits(room, this.generateRemoteCreepLimits(room));
 
         // Set Military Limits to Memory
-        Memory.rooms[room.name].creepLimit["militaryLimits"] = this.generateMilitaryCreepLimits(room);
+        MemoryHelperRoom.updateMilitaryLimits(room, this.generateMilitaryCreepLimits(room));
     }
 
     /**

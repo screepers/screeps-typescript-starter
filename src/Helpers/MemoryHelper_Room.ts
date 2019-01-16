@@ -117,4 +117,31 @@ export default class MemoryHelper_Room {
         Memory.rooms[room.name].defcon = defconLevel;
         return;
     }
+
+    /**
+     * update creep limits for domestic creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    public static updateDomesticLimits(room: Room, newLimits: DomesticCreepLimits): void {
+        Memory.rooms[room.name].creepLimit["domesticLimits"] = newLimits;
+    }
+
+    /**
+     * update creep limits for remote creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    public static updateRemoteLimits(room: Room, newLimits: RemoteCreepLimits): void {
+        Memory.rooms[room.name].creepLimit["remoteLimits"] = newLimits;
+    }
+
+    /**
+     * update creep limits for military creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    public static updateMilitaryLimits(room: Room, newLimits: MilitaryCreepLimits): void {
+        Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
+    }
 }

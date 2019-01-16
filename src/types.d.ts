@@ -471,3 +471,28 @@ interface Cache {
      */
     cache: any;
 }
+
+/**
+ * Memory for flags. Allows us to tell if a flag should be
+ * deleted from memory or if it still needs to be processed
+ */
+interface FlagMemory {
+    /**
+     * if the flag has been set into the proper memory channels
+     */
+    processed: boolean;
+    /**
+     * if the flag has been removed from the game
+     */
+    deleted: boolean;
+}
+
+// Attack Flag Options
+/**
+ * Red - Red
+ * Zealot/Stalker/Medic Squad
+ */
+type ATTACK_BASIC_SQUAD = "basic_squad"; //
+
+
+
