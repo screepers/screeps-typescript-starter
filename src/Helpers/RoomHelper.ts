@@ -75,7 +75,11 @@ export default class RoomHelper {
             return target.energy;
         }
         // Throw an error to identify when this fail condition is met
-        UtilHelper.throwError("Failed to getStoredAmount of a target", "ID: " + target.id + "\n" + JSON.stringify(target), ERROR_ERROR);
+        UtilHelper.throwError(
+            "Failed to getStoredAmount of a target",
+            "ID: " + target.id + "\n" + JSON.stringify(target),
+            ERROR_ERROR
+        );
         return -1;
     }
 
@@ -176,11 +180,11 @@ export default class RoomHelper {
     }
     /**
      * Return the number of remote rooms associated with the given room
-     * TODO Change this method to use a MemoryApi function so that we are sure to validate cache
      * @param room
      */
     public static numRemoteRooms(room: Room): number {
-        return Memory.rooms[room.name].remoteRooms.data.length;
+        const remoteRooms = MemoryApi.getRemoteRooms(room);
+        return remoteRooms.length;
     }
 
     /**
@@ -188,8 +192,8 @@ export default class RoomHelper {
      * @param room
      */
     public static numClaimRooms(room: Room): number {
-        // Return the number of remote rooms associated with the given room
-        return Memory.rooms[room.name].claimRooms.data.length;
+        const claimRooms = MemoryApi.getClaimRooms(room);
+        return claimRooms.length;
     }
 
     /**
@@ -197,8 +201,8 @@ export default class RoomHelper {
      * @param room
      */
     public static numAttackRooms(room: Room): number {
-        // Return the number of remote rooms associated with the given room
-        return Memory.rooms[room.name].attackRooms.data.length;
+        const attackRooms = MemoryApi.getAttackRooms(room);
+        return attackRooms.length;
     }
 
     /**
@@ -233,7 +237,7 @@ export default class RoomHelper {
         _.forEach(remoteRoomNames, (name: string) => {
             const remoteRoom: Room = Game.rooms[name];
             // If there are any hostile creeps, add one to remoteDefenderCount
-            if (this.numHostileCreeps(remoteRoom) > 0){
+            if (this.numHostileCreeps(remoteRoom) > 0) {
                 numRemoteDefenders++;
             }
         });

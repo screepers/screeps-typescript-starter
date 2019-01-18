@@ -16,6 +16,20 @@ export default class MemoryHelper_Room {
     }
 
     /**
+     * Update room memory for all dependent room types
+     * TODO Implement this function - Decide how we plan to do it
+     * @param room The room to update the dependencies of
+     */
+    public static updateDependentRooms(room: Room): void {
+        // Cycle through all flags and check for any claim rooms or remote rooms
+        // ? Should we check for the closest main room?
+        // ? I have an idea of a system where we plant a remoteFlag/claimFlag
+        // ? and then we place a different colored flag in the room that we want
+        // ? to assign that remote/claim room to. Once the program detects the assignment flag
+        // ? and the room it assigns to, it removes the assignment flag and could optionally remove
+        // ? the remoteFlag as well (but I think it would be more clear to leave the flag in the room)
+    }
+    /**
      * Find all hostile creeps in room
      *
      * [Cached] Room.memory.hostiles

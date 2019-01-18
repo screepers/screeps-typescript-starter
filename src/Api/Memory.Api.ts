@@ -307,4 +307,78 @@ export default class MemoryApi {
 
         return sources;
     }
+
+    /**
+     * Get the remoteRoom objects
+     *
+     * Updates all dependencies if the cache is invalid, for efficiency
+     * @param room The room to check dependencies of
+     * @param filterFunction [Optional] The function to filter the room objects
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getRemoteRooms(
+        room: Room,
+        filterFunction?: (object: Room) => boolean,
+        forceUpdate?: boolean
+    ): Room[] {
+        const RemoteTTL = -1;
+
+        if (
+            forceUpdate ||
+            Memory.rooms[room.name].remoteRooms === undefined ||
+            Memory.rooms[room.name].remoteRooms.cache < Game.time - RemoteTTL
+        ) {
+            // ! Not implemented yet - Empty function
+            MemoryHelper_Room.updateDependentRooms(room);
+        }
+
+        const remoteRooms: Room[] = _.map(Memory.rooms[room.name].remoteRooms.data, (name: string) => Game.rooms[name]);
+
+        return remoteRooms;
+    }
+
+    /**
+     * Get the claimRoom objects
+     *
+     * Updates all dependencies if the cache is invalid
+     * @param room The room to check the dependencies of
+     * @param filterFunction [Optional] THe function to filter the room objects
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getClaimRooms(room: Room, filterFunction?: (object: Room) => boolean, forceUpdate?: boolean): Room[] {
+        const ClaimTTL = -1;
+
+        if (
+            forceUpdate ||
+            Memory.rooms[room.name].remoteRooms === undefined ||
+            Memory.rooms[room.name].claimRooms.cache < Game.time - ClaimTTL
+        ) {
+            // ! Not implemented yet - Empty function
+            MemoryHelper_Room.updateDependentRooms(room);
+        }
+
+        const claimRooms: Room[] = _.map(Memory.rooms[room.name].claimRooms.data, (name: string) => Game.rooms[name]);
+
+        return claimRooms;
+    }
+
+    public static getAttackRooms(
+        room: Room,
+        filterFUnction?: (object: Room) => boolean,
+        forceUpdate?: boolean
+    ): Room[] {
+        const AttackTTL = -1;
+
+        if (
+            forceUpdate ||
+            Memory.rooms[room.name].attackRooms === undefined ||
+            Memory.rooms[room.name].attackRooms.cache < Game.time - AttackTTL
+        ) {
+            MemoryHelper_Room.updateDependentRooms(room);
+        }
+
+        const attackRooms: Room[] = _.map(Memory.rooms[room.name].attackRooms.data, (name: string) => Game.rooms[name]);
+
+        return attackRooms;
+    }
 }
