@@ -12,6 +12,7 @@ import {
 } from "utils/Constants";
 import UtilHelper from "Helpers/UtilHelper";
 import MemoryHelper_Room from "../Helpers/MemoryHelper_Room";
+import { SpawnHelper } from "Helpers/SpawnHelper";
 
 /**
  * The API used by the spawn manager
@@ -132,8 +133,6 @@ export default class SpawnApi {
 
     /**
      * set remote creep limits
-     * TODO - get remote defender to roll thru on call --
-     * ! ^^ Did I complete this? ^^
      * (we got shooters on deck)
      * @param room the room we want limits for
      */
@@ -241,7 +240,11 @@ export default class SpawnApi {
      */
     public static getOpenSpawn(room: Room): Structure<StructureConstant> | null {
         // Get all openSpawns, and return the first
-        const openSpawns = MemoryApi.getStructureOfType(room, STRUCTURE_SPAWN, (spawn: StructureSpawn) => !spawn.spawning);
+        const openSpawns = MemoryApi.getStructureOfType(
+            room,
+            STRUCTURE_SPAWN,
+            (spawn: StructureSpawn) => !spawn.spawning
+        );
         return _.first(openSpawns);
     }
 
@@ -316,6 +319,27 @@ export default class SpawnApi {
     }
 
     /**
+     * Generate a body for a creep given a descriptor object
+     * @param descriptor An object that looks like { BodyPartConstant: NumberOfParts, ... }
+     * @param mixType [Optional] How to order the body parts - Default is to group like parts in the order provided
+     */
+    private static getBodyFromObject(descriptor: StringMap, mixType?: string): BodyPartConstant[] {
+        // * Temporarily defined here, will move to Constants.ts
+        const GROUPED: string = "grouped";
+        const COLLATED: string = "collated"; // ? Is that the right word for this?
+
+        let creepBody: BodyPartConstant[] = [];
+
+        if (mixType === undefined || mixType === GROUPED) {
+            // Group them by part type -- e.g. MOVE MOVE MOVE CARRY CARRY WORK WORK WORK
+            creepBody = SpawnHelper.getBody_Grouped(descriptor);
+        } else if (mixType === COLLATED) {
+            // Layer the parts -- e.g. MOVE CARRY WORK MOVE CARRY WORK
+        }
+
+        return creepBody;
+    }
+    /**
      * generate a body for creeps given a specific set of paramters
      * @param
      */
@@ -330,13 +354,13 @@ export default class SpawnApi {
             throw new Error("Body part and number of part part arrays are not of equal length.");
         }
 
-        let creepBody: BodyPartConstant[] = [];
-        let size: number = parts.length;
+        const creepBody: BodyPartConstant[] = [];
+        const size: number = parts.length;
 
         // Loop over the parts and push the associated amount of parts onto the array
         for (let i = 0; i < size; ++i) {
-            let currentPart: BodyPartConstant = parts[i];
-            let currentCount: number = numEach[i];
+            const currentPart: BodyPartConstant = parts[i];
+            const currentCount: number = numEach[i];
 
             for (let j = 0; j < currentCount; ++j) {
                 creepBody.push(currentPart);
