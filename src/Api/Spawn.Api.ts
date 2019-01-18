@@ -2,6 +2,9 @@ import RoomHelper from "../Helpers/RoomHelper";
 import MemoryHelper from "../Helpers/MemoryHelper";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room"
 import MemoryApi from "./Memory.Api";
+import CreepDomestic from "./CreepDomestic.Api";
+import { ROLE_REMOTE_RESERVER } from "utils/Constants";
+import UtilHelper from "Helpers/UtilHelper";
 
 /**
  * the api used by the spawn manager
@@ -17,12 +20,18 @@ export default class SpawnApi {
     }
 
     /**
-     * get the limit for the specified creep
-     * @param room the room we are getting the limits for
-     * @param creepConst the role of the creep we want
+     * get creep limits
+     * @param room the room we want the limits for
      */
-    public static getCreepLimits(room: Room, creepConst: RoleConstant): CreepLimits {
-        return room.memory.creepLimit[creepConst];
+    public static getCreepLimits(room: Room): CreepLimits {
+
+        const creepLimits: CreepLimits = {
+            domesticLimits: Memory.rooms[room.name].creepLimit['remoteLimits'],
+            remoteLimits: Memory.rooms[room.name].creepLimit['remoteLimits'],
+            militaryLimits: Memory.rooms[room.name].creepLimit['militaryLimits']
+        }
+
+        return creepLimits;
     }
 
     /**
@@ -240,8 +249,68 @@ export default class SpawnApi {
      * get next creep to spawn
      * @param room the room we want to spawn them in
      */
-    public static getNextCreep(room: Room): void {
-        // brock hates empty blocks
+    public static getNextCreep(room: Room): string | null {
+
+        /* !Important
+            Note to Brock:
+            There has to be a better way to do this lol
+            Please refactor if you find a better way to do it.
+            Or run your idea by me and I'll implement it
+            I tried doing it with loops but honestly couldn't really figure it out
+            But didn't spend very much time figuring it out
+            So theres that
+        */
+        let nextCreep: string | null = null;
+
+        // Get Limits for each creep department
+        const creepLimits: CreepLimits = this.getCreepLimits(room);
+        const domesticLimits: DomesticCreepLimits = creepLimits['domesticLimits'];
+        const remoteLimits: RemoteCreepLimits = creepLimits['remoteLimits'];
+        const militaryLimits: MilitaryCreepLimits = creepLimits['militaryLimits'];
+
+        // Current Creep count for domestic creeps
+        const minerCount: number = this.getCreepCount(room, ROLE_MINER);
+        const harvesterCount: number = this.getCreepCount(room, ROLE_HARVESTER);
+        const workerCount: number = this.getCreepCount(room, ROLE_WORKER);
+        const powerUpgraderCount: number = this.getCreepCount(room, ROLE_POWER_UPGRADER);
+        const lorryCount: number = this.getCreepCount(room, ROLE_LORRY);
+
+        // Current Creep count for remote creeps
+        const remoteMinerCount: number = this.getCreepCount(room, ROLE_REMOTE_MINER);
+        const remoteHarvesterCount: number = this.getCreepCount(room, ROLE_REMOTE_HARVESTER);
+        const remoteDefenderCount: number = this.getCreepCount(room, ROLE_REMOTE_DEFENDER);
+        const remoteReserverCount: number = this.getCreepCount(room, ROLE_REMOTE_RESERVER);
+        const remoteColonizerCount: number = this.getCreepCount(room, ROLE_COLONIZER);
+
+        // Current Creep count for military creeps
+        const zealotCount: number = this.getCreepCount(room, ROLE_ZEALOT)
+        const stalkerCount: number = this.getCreepCount(room, ROLE_STALKER)
+        const medicCount: number = this.getCreepCount(room, ROLE_MEDIC)
+
+        // Check if we need a domestic creep --
+        if (minerCount < domesticLimits[ROLE_MINER]) { return ROLE_MINER; }
+        else if (harvesterCount < domesticLimits[ROLE_HARVESTER]) { return ROLE_HARVESTER; }
+        else if (workerCount < domesticLimits[ROLE_WORKER]) { return ROLE_WORKER; }
+        else if (powerUpgraderCount < domesticLimits[ROLE_POWER_UPGRADER]) { return ROLE_POWER_UPGRADER; }
+        else if (lorryCount < domesticLimits[ROLE_LORRY]) { return ROLE_LORRY; }
+
+
+        // Check if we need a miltary creep --
+        if (remoteMinerCount < remoteLimits[ROLE_REMOTE_MINER]) { return ROLE_REMOTE_MINER; }
+        else if (remoteHarvesterCount < remoteLimits[ROLE_REMOTE_HARVESTER]) { return ROLE_REMOTE_HARVESTER; }
+        else if (remoteDefenderCount < remoteLimits[ROLE_REMOTE_DEFENDER]) { return ROLE_REMOTE_DEFENDER; }
+        else if (remoteReserverCount < remoteLimits[ROLE_REMOTE_RESERVER]) { return ROLE_REMOTE_RESERVER; }
+        else if (remoteColonizerCount < remoteLimits[ROLE_COLONIZER]) { return ROLE_COLONIZER; }
+
+
+        // Check if we need a remote creep --
+        if (zealotCount < militaryLimits[ROLE_ZEALOT]) { return ROLE_ZEALOT; }
+        else if (stalkerCount < militaryLimits[ROLE_STALKER]) { return ROLE_STALKER; }
+        else if (medicCount < militaryLimits[ROLE_MEDIC]) { return ROLE_MEDIC; }
+
+
+        // Return null if we don't need to spawn anything
+        return nextCreep;
     }
 
     /**
@@ -287,15 +356,29 @@ export default class SpawnApi {
      * generate a body for creeps given a specific set of paramters
      * @param
      */
-    private static generateCreepBody(): BodyPartConstant[] {
-        // not sure the implementation yet
-        // 2 options... paramter for each body part and you just supply a number
-        // but i prefer passing 2 arrays of equal length, one with body part constants
-        // and one with the number of these parts you wish for. Order can be in the order you
-        // make the body part constant array in, but i want some options for switching order around
-        // to be customizable if possible... idk yet but this function will be much nicer than
-        // manually creating the bodies
-        return [WORK, WORK, MOVE];
+    private static generateCreepBody(parts: BodyPartConstant[], numEach: number[]): BodyPartConstant[] {
+
+        // Ensure that the arrays are of equal size
+        if (parts.length !== numEach.length) {
+            UtilHelper.throwError("Invalid parameters", "GenerateCreepBody was passed 2 differing array sizes",
+                ERROR_ERROR);
+            throw new Error("Body part and number of part part arrays are not of equal length.")
+        }
+
+        let creepBody: BodyPartConstant[] = [];
+        let size: number = parts.length;
+
+        // Loop over the parts and push the associated amount of parts onto the array
+        for (let i = 0; i < size; ++i) {
+            let currentPart: BodyPartConstant = parts[i];
+            let currentCount: number = numEach[i];
+
+            for (let j = 0; j < currentCount; ++j) {
+                creepBody.push(currentPart);
+            }
+        }
+
+        return creepBody;
     }
 
     /**
