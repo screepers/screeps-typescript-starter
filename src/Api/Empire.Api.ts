@@ -54,11 +54,30 @@ export default class Empire {
     /**
      * finds the closest colonized room to support a
      * Remote/Attack/Claim room
+     * Calls helper functions to decide auto or over-ride
      * @param targetRoom the room we want to support
      */
-    public static findDependentRoom(): string {
+    public static findDependentRoom(targetRoom: Room): string {
         // find the closest room, maybe some additional filters to make
         // sure the room is actually closest not just by distance idk
+        return "";
+    }
+
+    /**
+     * Automatically come up with a dependent room
+     * @param targetRoom the room we want to support
+     */
+    private static findDependentRoomAuto(targetRoom: Room): string {
+        // This will be called if theres no override in place
+        return "";
+    }
+
+    /**
+     * Manually get the dependent room based on flags
+     * @param targetRoom the room we want to support
+     */
+    private static findDependentRoomManual(targetRoom: Room): string {
+        // This will be called if an override is requested via flag
         return "";
     }
 
