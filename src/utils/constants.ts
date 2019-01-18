@@ -25,6 +25,28 @@ export const ROLE_ZEALOT = "zealot";
 export const ROLE_STALKER = "stalker";
 export const ROLE_MEDIC = "medic";
 
+// Role Priority List
+// ! Keep this list ordered by spawn priority
+export const domesticRolePriority: RoleConstant[] = [
+    ROLE_MINER,
+    ROLE_HARVESTER,
+    ROLE_WORKER,
+    ROLE_POWER_UPGRADER,
+    ROLE_LORRY
+];
+
+// ! Keep this list ordered by spawn priority
+export const remoteRolePriority: RoleConstant[] = [
+    ROLE_REMOTE_RESERVER,
+    ROLE_REMOTE_MINER,
+    ROLE_REMOTE_HARVESTER,
+    ROLE_REMOTE_DEFENDER,
+    ROLE_COLONIZER
+];
+
+// ! Keep this list ordered by spawn priority
+export const militaryRolePriority: RoleConstant[] = [ROLE_MEDIC, ROLE_STALKER, ROLE_ZEALOT];
+
 // List of every structure in the game
 export const ALL_STRUCTURE_TYPES: StructureConstant[] = [
     STRUCTURE_EXTENSION,

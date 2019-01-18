@@ -3,7 +3,13 @@ import MemoryHelper from "../Helpers/MemoryHelper";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import MemoryApi from "./Memory.Api";
 import CreepDomestic from "./CreepDomestic.Api";
-import { ROLE_REMOTE_RESERVER, ROLE_REMOTE_MINER } from "utils/Constants";
+import {
+    ROLE_REMOTE_RESERVER,
+    ROLE_REMOTE_MINER,
+    domesticRolePriority,
+    militaryRolePriority,
+    remoteRolePriority
+} from "utils/Constants";
 import UtilHelper from "Helpers/UtilHelper";
 import MemoryHelper_Room from "../Helpers/MemoryHelper_Room";
 
@@ -234,52 +240,16 @@ export default class SpawnApi {
      * @param room the room we are checking the spawn for
      */
     public static getOpenSpawn(room: Room): Structure<StructureConstant> | null {
-        // get all spawns then just take the first one from it
-        const allSpawns: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(
-            room,
-            (s: Structure<StructureConstant>) => s.structureType === STRUCTURE_SPAWN
-        );
-
-        //// not sure about this one, i read that _.first ONLY works on arrays and will NOT work on objects
-        //// allSpawns[0] might be needed... just so we have solution if this ends up being a bug later lol
-        //// i mean i could just change it to be safe but then nobody would read this
-        //// so im just gonna leave it
-        // MemoryApi.getStructures returns an array of objects, so _.first will be fine
-        return _.first(allSpawns);
+        // Get all openSpawns, and return the first
+        const openSpawns = MemoryApi.getStructureOfType(room, STRUCTURE_SPAWN, (spawn: StructureSpawn) => !spawn.spawning);
+        return _.first(openSpawns);
     }
 
     /**
      * get next creep to spawn
-     * ? Should we declare the RolePriority lists in Constants.ts or keep them local?
      * @param room the room we want to spawn them in
      */
     public static getNextCreep(room: Room): string | null {
-
-        // ! Keep this list ordered by spawn priority
-        const domesticRolePriority: RoleConstant[] = [
-            ROLE_MINER,
-            ROLE_HARVESTER,
-            ROLE_WORKER,
-            ROLE_POWER_UPGRADER,
-            ROLE_LORRY
-        ];
-
-        // ! Keep this list ordered by spawn priority
-        const remoteRolePriority: RoleConstant[] = [
-            ROLE_REMOTE_RESERVER,
-            ROLE_REMOTE_MINER,
-            ROLE_REMOTE_HARVESTER,
-            ROLE_REMOTE_DEFENDER,
-            ROLE_COLONIZER
-        ];
-
-        // ! Keep this list ordered by spawn priority
-        const militaryRolePriority: RoleConstant[] = [
-            ROLE_MEDIC,
-            ROLE_STALKER,
-            ROLE_ZEALOT
-        ];
-
         // Get Limits for each creep department
         const creepLimits: CreepLimits = this.getCreepLimits(room);
 
@@ -301,7 +271,7 @@ export default class SpawnApi {
                 return role;
             }
         }
-        
+
         // Return null if we don't need to spawn anything
         return null;
     }
