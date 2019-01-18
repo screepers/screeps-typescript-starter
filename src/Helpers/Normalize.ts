@@ -10,7 +10,7 @@ export default class Normalize {
         if (room instanceof Room) {
             room = room.name;
         }
-        return room;
+        return <string>room;
     }
 
     /**
@@ -34,5 +34,23 @@ export default class Normalize {
             return object;
         }
         return object.pos;
+    }
+
+    /**
+     * Normalizes to a creep object given an ID or Name
+     * @param creep
+     */
+    public static creepObject(creep: Creep | string): Creep {
+        if (creep instanceof Creep) {
+            return creep;
+        }
+        // If passed a name - Tested first since hash keys are faster than the Game.getObjectById function
+        let obj: Creep | null = Game.creeps[creep];
+        // If passed an ID instead of a name, use the slower getObjectById function
+        if (obj === undefined) {
+            obj = Game.getObjectById(creep);
+        }
+        // Risks returning null instead of a creep object, but I think that is outside the scope of a normalize method
+        return <Creep>obj;
     }
 }

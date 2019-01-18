@@ -127,7 +127,7 @@ type ROLE_WORKER = "worker"; //
 /**
  * sits at the controller and upgrades full-time
  */
-type ROLE_POWER_UPGRADER = "power_upgrader"; //
+type ROLE_POWER_UPGRADER = "powerUpgrader"; //
 /**
  * moves energy around the room to where it needs to be
  */
@@ -135,23 +135,23 @@ type ROLE_LORRY = "lorry";
 /**
  * goes into remote room and sits on source to mine full-time
  */
-type ROLE_REMOTE_MINER = "remote_miner"; //
+type ROLE_REMOTE_MINER = "remoteMiner"; //
 /**
  * goes into remote room and brings energy back to main room
  */
-type ROLE_REMOTE_HARVESTER = "remote_harvester"; //
+type ROLE_REMOTE_HARVESTER = "remoteHarvester"; //
 /**
  * goes into remote room and reserves the controller full-time
  */
-type ROLE_REMOTE_RESERVER = "remote_reserver"; //
+type ROLE_REMOTE_RESERVER = "remoteReserver"; //
 /**
  * goes into remote room and clears out invaders
  */
-type ROLE_REMOTE_DEFENDER = "remote_defender"; //
+type ROLE_REMOTE_DEFENDER = "remoteDefender"; //
 /**
  * goes into claim room and helps get the spawn up and running
  */
-type ROLE_COLONIZER = "remote_colonizer"; //
+type ROLE_COLONIZER = "remoteColonizer"; //
 /**
  * Military Creep - To be described
  */
@@ -392,6 +392,7 @@ interface CreepLimits extends StringMap {
  * creep limits for remote creeps
  */
 interface RemoteCreepLimits {
+    [index: string]: number;
     /**
      * limit for remote miners
      */
@@ -418,6 +419,7 @@ interface RemoteCreepLimits {
  * creep limits for domestic creeps
  */
 interface DomesticCreepLimits {
+    [index: string]: number;
     /**
      * limit for domestic miners
      */
@@ -444,6 +446,7 @@ interface DomesticCreepLimits {
  * creep limits for military creeps
  */
 interface MilitaryCreepLimits {
+    [index: string]: number;
     /**
      * limit for military zealots
      */

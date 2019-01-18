@@ -1,22 +1,24 @@
 import RoomHelper from "../Helpers/RoomHelper";
 import MemoryHelper from "../Helpers/MemoryHelper";
-import MemoryHelperRoom from "../Helpers/MemoryHelper_Room"
+import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import MemoryApi from "./Memory.Api";
 import CreepDomestic from "./CreepDomestic.Api";
-import { ROLE_REMOTE_RESERVER } from "utils/Constants";
+import { ROLE_REMOTE_RESERVER, ROLE_REMOTE_MINER } from "utils/Constants";
 import UtilHelper from "Helpers/UtilHelper";
+import MemoryHelper_Room from "../Helpers/MemoryHelper_Room";
 
 /**
- * the api used by the spawn manager
+ * The API used by the spawn manager
  */
 export default class SpawnApi {
     /**
-     * get count for the specified creep
+     * Get count of all creeps, or of one if creepConst is specified
      * @param room the room we are getting the count for
-     * @param creepConst the role of the creep we want
+     * @param creepConst [Optional] Count only one role
      */
-    public static getCreepCount(room: Room, creepConst: any): number {
-        return _.sum(MemoryApi.getMyCreeps(room, (c: Creep) => c.memory.role === creepConst));
+    public static getCreepCount(room: Room, creepConst?: RoleConstant): number {
+        const filterFunction = creepConst === undefined ? undefined : (c: Creep) => c.memory.role === creepConst;
+        return MemoryApi.getMyCreeps(room, filterFunction).length;
     }
 
     /**
@@ -24,12 +26,11 @@ export default class SpawnApi {
      * @param room the room we want the limits for
      */
     public static getCreepLimits(room: Room): CreepLimits {
-
         const creepLimits: CreepLimits = {
-            domesticLimits: Memory.rooms[room.name].creepLimit['remoteLimits'],
-            remoteLimits: Memory.rooms[room.name].creepLimit['remoteLimits'],
-            militaryLimits: Memory.rooms[room.name].creepLimit['militaryLimits']
-        }
+            domesticLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
+            remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
+            militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
+        };
 
         return creepLimits;
     }
@@ -125,7 +126,8 @@ export default class SpawnApi {
 
     /**
      * set remote creep limits
-     * TODO - get num of remote sources .. get remote defender to roll thru on call
+     * TODO - get remote defender to roll thru on call --
+     * ! ^^ Did I complete this? ^^
      * (we got shooters on deck)
      * @param room the room we want limits for
      */
@@ -140,15 +142,15 @@ export default class SpawnApi {
 
         const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
         const numClaimRooms: number = RoomHelper.numClaimRooms(room);
-        const numRemoteDefenders = RoomHelper.numRemoteDefenders(room);
-
-        // I want to be able to do this.. can you make it happen?
-        const numRemoteSources: number = Memory.rooms[room.name].remoteRooms.data["sources"];
 
         // If we do not have any remote rooms, return the initial remote limits (Empty)
-        if (numRemoteRooms <= 0) {
+        if (numRemoteRooms <= 0 && numClaimRooms <= 0) {
             return remoteLimits;
         }
+
+        // Gather the rest of the data only if we have a remote room or a claim room
+        const numRemoteDefenders = RoomHelper.numRemoteDefenders(room);
+        const numRemoteSources: number = RoomHelper.numRemoteSources(room);
 
         // check what room state we are in
         switch (room.memory.roomState) {
@@ -238,79 +240,70 @@ export default class SpawnApi {
             (s: Structure<StructureConstant>) => s.structureType === STRUCTURE_SPAWN
         );
 
-        // not sure about this one, i read that _.first ONLY works on arrays and will NOT work on objects
-        // allSpawns[0] might be needed... just so we have solution if this ends up being a bug later lol
-        // i mean i could just change it to be safe but then nobody would read this
-        // so im just gonna leave it
+        //// not sure about this one, i read that _.first ONLY works on arrays and will NOT work on objects
+        //// allSpawns[0] might be needed... just so we have solution if this ends up being a bug later lol
+        //// i mean i could just change it to be safe but then nobody would read this
+        //// so im just gonna leave it
+        // MemoryApi.getStructures returns an array of objects, so _.first will be fine
         return _.first(allSpawns);
     }
 
     /**
      * get next creep to spawn
+     * ? Should we declare the RolePriority lists in Constants.ts or keep them local?
      * @param room the room we want to spawn them in
      */
     public static getNextCreep(room: Room): string | null {
 
-        /* !Important
-            Note to Brock:
-            There has to be a better way to do this lol
-            Please refactor if you find a better way to do it.
-            Or run your idea by me and I'll implement it
-            I tried doing it with loops but honestly couldn't really figure it out
-            But didn't spend very much time figuring it out
-            So theres that
-        */
-        let nextCreep: string | null = null;
+        // ! Keep this list ordered by spawn priority
+        const domesticRolePriority: RoleConstant[] = [
+            ROLE_MINER,
+            ROLE_HARVESTER,
+            ROLE_WORKER,
+            ROLE_POWER_UPGRADER,
+            ROLE_LORRY
+        ];
+
+        // ! Keep this list ordered by spawn priority
+        const remoteRolePriority: RoleConstant[] = [
+            ROLE_REMOTE_RESERVER,
+            ROLE_REMOTE_MINER,
+            ROLE_REMOTE_HARVESTER,
+            ROLE_REMOTE_DEFENDER,
+            ROLE_COLONIZER
+        ];
+
+        // ! Keep this list ordered by spawn priority
+        const militaryRolePriority: RoleConstant[] = [
+            ROLE_MEDIC,
+            ROLE_STALKER,
+            ROLE_ZEALOT
+        ];
 
         // Get Limits for each creep department
         const creepLimits: CreepLimits = this.getCreepLimits(room);
-        const domesticLimits: DomesticCreepLimits = creepLimits['domesticLimits'];
-        const remoteLimits: RemoteCreepLimits = creepLimits['remoteLimits'];
-        const militaryLimits: MilitaryCreepLimits = creepLimits['militaryLimits'];
 
-        // Current Creep count for domestic creeps
-        const minerCount: number = this.getCreepCount(room, ROLE_MINER);
-        const harvesterCount: number = this.getCreepCount(room, ROLE_HARVESTER);
-        const workerCount: number = this.getCreepCount(room, ROLE_WORKER);
-        const powerUpgraderCount: number = this.getCreepCount(room, ROLE_POWER_UPGRADER);
-        const lorryCount: number = this.getCreepCount(room, ROLE_LORRY);
-
-        // Current Creep count for remote creeps
-        const remoteMinerCount: number = this.getCreepCount(room, ROLE_REMOTE_MINER);
-        const remoteHarvesterCount: number = this.getCreepCount(room, ROLE_REMOTE_HARVESTER);
-        const remoteDefenderCount: number = this.getCreepCount(room, ROLE_REMOTE_DEFENDER);
-        const remoteReserverCount: number = this.getCreepCount(room, ROLE_REMOTE_RESERVER);
-        const remoteColonizerCount: number = this.getCreepCount(room, ROLE_COLONIZER);
-
-        // Current Creep count for military creeps
-        const zealotCount: number = this.getCreepCount(room, ROLE_ZEALOT)
-        const stalkerCount: number = this.getCreepCount(room, ROLE_STALKER)
-        const medicCount: number = this.getCreepCount(room, ROLE_MEDIC)
-
-        // Check if we need a domestic creep --
-        if (minerCount < domesticLimits[ROLE_MINER]) { return ROLE_MINER; }
-        else if (harvesterCount < domesticLimits[ROLE_HARVESTER]) { return ROLE_HARVESTER; }
-        else if (workerCount < domesticLimits[ROLE_WORKER]) { return ROLE_WORKER; }
-        else if (powerUpgraderCount < domesticLimits[ROLE_POWER_UPGRADER]) { return ROLE_POWER_UPGRADER; }
-        else if (lorryCount < domesticLimits[ROLE_LORRY]) { return ROLE_LORRY; }
-
-
-        // Check if we need a miltary creep --
-        if (remoteMinerCount < remoteLimits[ROLE_REMOTE_MINER]) { return ROLE_REMOTE_MINER; }
-        else if (remoteHarvesterCount < remoteLimits[ROLE_REMOTE_HARVESTER]) { return ROLE_REMOTE_HARVESTER; }
-        else if (remoteDefenderCount < remoteLimits[ROLE_REMOTE_DEFENDER]) { return ROLE_REMOTE_DEFENDER; }
-        else if (remoteReserverCount < remoteLimits[ROLE_REMOTE_RESERVER]) { return ROLE_REMOTE_RESERVER; }
-        else if (remoteColonizerCount < remoteLimits[ROLE_COLONIZER]) { return ROLE_COLONIZER; }
-
-
-        // Check if we need a remote creep --
-        if (zealotCount < militaryLimits[ROLE_ZEALOT]) { return ROLE_ZEALOT; }
-        else if (stalkerCount < militaryLimits[ROLE_STALKER]) { return ROLE_STALKER; }
-        else if (medicCount < militaryLimits[ROLE_MEDIC]) { return ROLE_MEDIC; }
-
-
+        // Check if we need a domestic creep -- Return role if one is found
+        for (const role of domesticRolePriority) {
+            if (this.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
+                return role;
+            }
+        }
+        // Check if we need a military creep -- Return role if one is found
+        for (const role of militaryRolePriority) {
+            if (this.getCreepCount(room, role) < creepLimits.militaryLimits[role]) {
+                return role;
+            }
+        }
+        // Check if we need a remote creep -- Return role if one is found
+        for (const role of remoteRolePriority) {
+            if (this.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
+                return role;
+            }
+        }
+        
         // Return null if we don't need to spawn anything
-        return nextCreep;
+        return null;
     }
 
     /**
@@ -357,12 +350,14 @@ export default class SpawnApi {
      * @param
      */
     private static generateCreepBody(parts: BodyPartConstant[], numEach: number[]): BodyPartConstant[] {
-
         // Ensure that the arrays are of equal size
         if (parts.length !== numEach.length) {
-            UtilHelper.throwError("Invalid parameters", "GenerateCreepBody was passed 2 differing array sizes",
-                ERROR_ERROR);
-            throw new Error("Body part and number of part part arrays are not of equal length.")
+            UtilHelper.throwError(
+                "Invalid parameters",
+                "GenerateCreepBody was passed 2 differing array sizes",
+                ERROR_ERROR
+            );
+            throw new Error("Body part and number of part part arrays are not of equal length.");
         }
 
         let creepBody: BodyPartConstant[] = [];

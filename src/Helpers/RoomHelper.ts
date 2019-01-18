@@ -1,6 +1,8 @@
+import Normalize from "Helpers/Normalize";
 import MemoryApi from "Api/Memory.Api";
-import { WALL_LIMIT } from "utils/Constants";
 import MemoryHelper_Room from "./MemoryHelper_Room";
+import { WALL_LIMIT } from "utils/Constants";
+import UtilHelper from "./UtilHelper";
 
 // helper functions for rooms
 export default class RoomHelper {
@@ -72,7 +74,8 @@ export default class RoomHelper {
         } else if (resourceType === RESOURCE_ENERGY && target.hasOwnProperty("energy")) {
             return target.energy;
         }
-
+        // Throw an error to identify when this fail condition is met
+        UtilHelper.throwError("Failed to getStoredAmount of a target", "ID: " + target.id + "\n" + JSON.stringify(target), ERROR_ERROR);
         return -1;
     }
 
@@ -106,7 +109,7 @@ export default class RoomHelper {
         return (
             TOWER_POWER_ATTACK -
             (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
-            (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
         );
     }
 
@@ -144,7 +147,7 @@ export default class RoomHelper {
 
     /**
      * choose an ideal target for the towers to attack
-     * [TODO] actually choose an ideal target not just the first one lol
+     * TODO actually choose an ideal target not just the first one lol
      * @param room the room we are in
      */
     public static chooseTowerTarget(room: Room): Creep | null {
@@ -164,11 +167,19 @@ export default class RoomHelper {
     }
 
     /**
-     * get number of associated remote rooms
+     * Returns the number of hostile creeps recorded in the room
+     * @param room The room to check
+     */
+    public static numHostileCreeps(room: Room): number {
+        const hostiles = MemoryApi.getHostileCreeps(room);
+        return hostiles.length;
+    }
+    /**
+     * Return the number of remote rooms associated with the given room
+     * TODO Change this method to use a MemoryApi function so that we are sure to validate cache
      * @param room
      */
     public static numRemoteRooms(room: Room): number {
-        // Return the number of remote rooms associated with the given room
         return Memory.rooms[room.name].remoteRooms.data.length;
     }
 
@@ -213,6 +224,7 @@ export default class RoomHelper {
 
     /**
      * get number of remote defenders we need
+     * @param room The room to check the dependencies of
      */
     public static numRemoteDefenders(room: Room): number {
         const remoteRoomNames: string[] = Memory.rooms[room.name].remoteRooms.data;
@@ -220,8 +232,10 @@ export default class RoomHelper {
 
         _.forEach(remoteRoomNames, (name: string) => {
             const remoteRoom: Room = Game.rooms[name];
-            // insert here however we are going to check for hostile creeps in a room
-            // halp mr memory man lol
+            // If there are any hostile creeps, add one to remoteDefenderCount
+            if (this.numHostileCreeps(remoteRoom) > 0){
+                numRemoteDefenders++;
+            }
         });
 
         return numRemoteDefenders;
