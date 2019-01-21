@@ -21,6 +21,11 @@ export default class UtilHelper {
         const bodyColor: string = useBodyColor !== undefined ? useBodyColor : "#ff1113";
 
         console.log('<font color="' + titleColor + '">' + title + "</font>");
-        console.log('<font color="' + bodyColor + '">' + body + "</font>");
+        if( severity > ERROR_WARN) {
+            throw new Error(body);
+        }
+        else{
+            console.log('<font color="' + bodyColor + '">' + body + "</font>");
+        }
     }
 }
