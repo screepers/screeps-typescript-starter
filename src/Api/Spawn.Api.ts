@@ -320,7 +320,7 @@ export default class SpawnApi {
      * @param descriptor An object that looks like { BodyPartConstant: NumberOfParts, ... }
      * @param mixType [Optional] How to order the body parts - Default is to group like parts in the order provided
      */
-    private static getBodyFromObject(descriptor: StringMap, mixType?: string): BodyPartConstant[] {
+    public static getBodyFromObject(descriptor: StringMap, mixType?: string): BodyPartConstant[] {
         // * Temporarily defined here, will move to Constants.ts
         const GROUPED: string = "grouped";
         const COLLATED: string = "collated"; // ? Is that the right word for this?
