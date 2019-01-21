@@ -278,6 +278,7 @@ export default class SpawnApi {
 
     /**
      * spawn the next creep
+     * TODO Complete this
      * @param room the room we want to spawn them in
      * @param BodyPartConstant[] the body array of the creep
      * @param RoleConstant the role of the creep
@@ -288,6 +289,7 @@ export default class SpawnApi {
 
     /**
      * get energy cost of creep
+     * TODO Complete this
      * @param room the room we are spawning them in
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning
@@ -298,6 +300,7 @@ export default class SpawnApi {
 
     /**
      * check what tier of this creep we are spawning
+     * TODO Complete this
      * @param room the room we are spawning them in
      * @param RoleConstant the role of the creep
      */
@@ -307,6 +310,7 @@ export default class SpawnApi {
 
     /**
      * get the memory options for this creep
+     * TODO Complete this
      * @param room the room we are spawning it in
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning

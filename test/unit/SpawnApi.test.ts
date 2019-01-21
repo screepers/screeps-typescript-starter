@@ -11,7 +11,7 @@ import { GROUPED } from "../../src/utils/constants";
 describe("Spawn.Api", () => {
 
     // This is how mocha recommends we define functions, but we can reformat if we want.
-    describe("getBodyFromObject", function() {
+    describe("getBodyFromObject()", function() {
 
         // * If you would like to write a "pending test", meaning "someone should write this test code eventually", just leave off the callback function.
         it("Should return null if an invalid body descriptor is passed to it."); // This will not be considered a failed test
