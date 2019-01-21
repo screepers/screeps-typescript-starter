@@ -1,3 +1,33 @@
+/**
+ *
+ * GAME CONSTANTS
+ *
+ */
+const STRUCTURE_EXTENSION = "extension";
+const STRUCTURE_RAMPART = "rampart";
+const STRUCTURE_ROAD = "road";
+const STRUCTURE_SPAWN = "spawn";
+const STRUCTURE_LINK = "link";
+const STRUCTURE_WALL = "constructedWall";
+const STRUCTURE_KEEPER_LAIR = "keeperLair";
+const STRUCTURE_CONTROLLER = "controller";
+const STRUCTURE_STORAGE = "storage";
+const STRUCTURE_TOWER = "tower";
+const STRUCTURE_OBSERVER = "observer";
+const STRUCTURE_POWER_BANK = "powerBank";
+const STRUCTURE_POWER_SPAWN = "powerSpawn";
+const STRUCTURE_EXTRACTOR = "extractor";
+const STRUCTURE_LAB = "lab";
+const STRUCTURE_TERMINAL = "terminal";
+const STRUCTURE_CONTAINER = "container";
+const STRUCTURE_NUKER = "nuker";
+const STRUCTURE_PORTAL = "portal";
+/**
+ *
+ * END GAME CONSTANTS
+ *
+ */
+
 // tslint:disable:object-literal-sort-keys
 
 // Room State Constants
@@ -25,8 +55,12 @@ export const ROLE_ZEALOT = "zealot";
 export const ROLE_STALKER = "stalker";
 export const ROLE_MEDIC = "medic";
 
+// Creep Body Layout Constants
+export const GROUPED = "grouped";
+export const COLLATED = "collated";
+
 // Role Priority List
-// ! Keep this list ordered by spawn priority
+// * Keep this list ordered by spawn priority
 export const domesticRolePriority: RoleConstant[] = [
     ROLE_MINER,
     ROLE_HARVESTER,
@@ -35,7 +69,7 @@ export const domesticRolePriority: RoleConstant[] = [
     ROLE_LORRY
 ];
 
-// ! Keep this list ordered by spawn priority
+// * Keep this list ordered by spawn priority
 export const remoteRolePriority: RoleConstant[] = [
     ROLE_REMOTE_RESERVER,
     ROLE_REMOTE_MINER,
@@ -44,7 +78,7 @@ export const remoteRolePriority: RoleConstant[] = [
     ROLE_COLONIZER
 ];
 
-// ! Keep this list ordered by spawn priority
+// * Keep this list ordered by spawn priority
 export const militaryRolePriority: RoleConstant[] = [ROLE_MEDIC, ROLE_STALKER, ROLE_ZEALOT];
 
 // List of every structure in the game

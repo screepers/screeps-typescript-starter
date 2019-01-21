@@ -259,7 +259,7 @@ interface RoomMemory {
     claimRooms: Cache;
 }
 
-interface EmpireMemory { }
+interface EmpireMemory {}
 // ----------------------------------
 
 /**
@@ -496,6 +496,3 @@ interface FlagMemory {
  * Zealot/Stalker/Medic Squad
  */
 type ATTACK_BASIC_SQUAD = "basic_squad"; //
-
-
-
