@@ -9,8 +9,8 @@ const DIST_MAIN_JS = 'dist/main.js';
  * manipulating the terrain and game state.
  */
 class IntegrationTestHelper {
-  private _server;
-  private _player;
+  private _server: any;
+  private _player: any;
 
   get server() {
     return this._server;
@@ -20,6 +20,7 @@ class IntegrationTestHelper {
     return this._player;
   }
 
+  // tslint:disable-next-line:member-access
   async beforeEach() {
     this._server = new ScreepsServer();
 
@@ -39,6 +40,7 @@ class IntegrationTestHelper {
     await this._server.start();
   }
 
+  // tslint:disable-next-line:member-access
   async afterEach() {
     await this._server.stop();
   }

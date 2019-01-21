@@ -15,6 +15,8 @@
     "no-console": [false],
     "no-angle-bracket-type-assertion": false,
     "no-namespace": [true, "allow-declarations"],
+    "only-arrow-functions": false,
+    "no-var-requires": false,
     "variable-name": [
       true,
       "ban-keywords",

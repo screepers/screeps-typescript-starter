@@ -27,6 +27,6 @@ export default {
     commonjs(),
     typescript({tsconfig: "./tsconfig.json"}),
     multiEntry(),
-    buble()
+    buble( {transforms: { forOf: false } })
   ]
 }

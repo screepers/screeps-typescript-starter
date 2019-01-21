@@ -1,18 +1,15 @@
-import RoomHelper from "../Helpers/RoomHelper";
-import MemoryHelper from "../Helpers/MemoryHelper";
-import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
-import MemoryApi from "./Memory.Api";
-import CreepDomestic from "./CreepDomestic.Api";
+import { SpawnHelper } from "Helpers/SpawnHelper";
+import UtilHelper from "Helpers/UtilHelper";
 import {
-    ROLE_REMOTE_RESERVER,
-    ROLE_REMOTE_MINER,
     domesticRolePriority,
     militaryRolePriority,
-    remoteRolePriority
+    remoteRolePriority,
+    ROLE_REMOTE_MINER,
+    ROLE_REMOTE_RESERVER
 } from "utils/Constants";
-import UtilHelper from "Helpers/UtilHelper";
-import MemoryHelper_Room from "../Helpers/MemoryHelper_Room";
-import { SpawnHelper } from "Helpers/SpawnHelper";
+import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
+import RoomHelper from "../Helpers/RoomHelper";
+import MemoryApi from "./Memory.Api";
 
 /**
  * The API used by the spawn manager

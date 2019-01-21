@@ -1,7 +1,7 @@
 import RoomHelper from "Helpers/RoomHelper";
 
 // add various commands to the console for empire management
-export var ConsoleCommands = {
+export const ConsoleCommands = {
 
     /**
      * remove all construction sites from the room when called
