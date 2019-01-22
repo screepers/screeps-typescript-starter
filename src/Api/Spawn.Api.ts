@@ -336,6 +336,7 @@ export default class SpawnApi {
             creepBody = SpawnHelper.getBody_Grouped(descriptor);
         } else if (mixType === COLLATED) {
             // Layer the parts -- e.g. MOVE CARRY WORK MOVE CARRY WORK
+            creepBody = SpawnHelper.getBody_Collated(descriptor);
         }
 
         return creepBody;
@@ -352,7 +353,6 @@ export default class SpawnApi {
                 "GenerateCreepBody was passed 2 differing array sizes",
                 ERROR_ERROR
             );
-            throw new Error("Body part and number of part part arrays are not of equal length.");
         }
 
         const creepBody: BodyPartConstant[] = [];

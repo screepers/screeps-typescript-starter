@@ -33,7 +33,7 @@ export class SpawnHelper {
 
         while( creepBody.length < numParts ){
             
-            for(const part in Object.keys(descriptor)){
+            for(const part in partNames){
                 if(counts[part] < descriptor[part]){
                     creepBody.push(<BodyPartConstant>part);
                     counts[part]++;
