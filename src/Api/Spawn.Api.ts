@@ -320,6 +320,16 @@ export default class SpawnApi {
     }
 
     /**
+     * Generate the body for the creep based on the tier and role
+     * @param tier the tier our room is at
+     * @param role the role of the creep we want
+     */
+    public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] {
+        // Call the helper functions based on creep role
+        return [WORK];
+    }
+
+    /**
      * Generate a body for a creep given a descriptor object
      * @param descriptor An object that looks like { BodyPartConstant: NumberOfParts, ... }
      * @param mixType [Optional] How to order the body parts - Default is to group like parts in the order provided
@@ -337,35 +347,6 @@ export default class SpawnApi {
         } else if (mixType === COLLATED) {
             // Layer the parts -- e.g. MOVE CARRY WORK MOVE CARRY WORK
             creepBody = SpawnHelper.getBody_Collated(descriptor);
-        }
-
-        return creepBody;
-    }
-    /**
-     * generate a body for creeps given a specific set of paramters
-     * @param
-     */
-    private static generateCreepBody(parts: BodyPartConstant[], numEach: number[]): BodyPartConstant[] {
-        // Ensure that the arrays are of equal size
-        if (parts.length !== numEach.length) {
-            UtilHelper.throwError(
-                "Invalid parameters",
-                "GenerateCreepBody was passed 2 differing array sizes",
-                ERROR_ERROR
-            );
-        }
-
-        const creepBody: BodyPartConstant[] = [];
-        const size: number = parts.length;
-
-        // Loop over the parts and push the associated amount of parts onto the array
-        for (let i = 0; i < size; ++i) {
-            const currentPart: BodyPartConstant = parts[i];
-            const currentCount: number = numEach[i];
-
-            for (let j = 0; j < currentCount; ++j) {
-                creepBody.push(currentPart);
-            }
         }
 
         return creepBody;

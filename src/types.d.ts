@@ -259,7 +259,7 @@ interface RoomMemory {
     claimRooms: Cache;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
@@ -496,3 +496,34 @@ interface FlagMemory {
  * Zealot/Stalker/Medic Squad
  */
 type ATTACK_BASIC_SQUAD = "basic_squad"; //
+
+/**
+ * Tier Definitions
+ */
+declare const TIER_1 = 1;
+declare const TIER_2 = 2;
+declare const TIER_3 = 3;
+declare const TIER_4 = 4;
+declare const TIER_5 = 5;
+declare const TIER_6 = 6;
+declare const TIER_7 = 7;
+declare const TIER_8 = 8;
+
+type TierConstant =
+    TIER_1 |
+    TIER_2 |
+    TIER_3 |
+    TIER_4 |
+    TIER_5 |
+    TIER_6 |
+    TIER_7 |
+    TIER_8;
+
+type TIER_1 = 1;
+type TIER_2 = 2;
+type TIER_3 = 3;
+type TIER_4 = 4;
+type TIER_5 = 5;
+type TIER_6 = 6;
+type TIER_7 = 7;
+type TIER_8 = 8;
