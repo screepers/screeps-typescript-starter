@@ -324,9 +324,80 @@ export default class SpawnApi {
      * @param tier the tier our room is at
      * @param role the role of the creep we want
      */
-    public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] {
-        // Call the helper functions based on creep role
-        return [WORK];
+    public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
+
+        // Call the correct helper function based on creep role
+        // Miner
+        if (role === ROLE_MINER) {
+            return SpawnHelper.generateMinerBody(tier);
+        }
+
+        // Harvester
+        if (role === ROLE_HARVESTER) {
+            return SpawnHelper.generateHarvesterBody(tier);
+        }
+
+        if (role === ROLE_WORKER) {
+            return SpawnHelper.generateWorkerBody(tier);
+        }
+
+        // Lorry
+        if (role === ROLE_LORRY) {
+            return SpawnHelper.generateLorryBody(tier);
+        }
+
+        // Power Upgrader
+        if (role === ROLE_POWER_UPGRADER) {
+            return SpawnHelper.generatePowerUpgraderBody(tier);
+        }
+
+        // Remote Miner
+        if (role === ROLE_REMOTE_MINER) {
+            return SpawnHelper.generateRemoteMinerBody(tier);
+        }
+
+        // Remote Harvester
+        if (role === ROLE_REMOTE_HARVESTER) {
+            return SpawnHelper.generateRemoteHarvesterBody(tier);
+        }
+
+        // Remote Colonizer
+        if (role === ROLE_COLONIZER) {
+            return SpawnHelper.generateRemoteColonizerBody(tier);
+        }
+
+        // Remote Defender
+        if (role === ROLE_REMOTE_DEFENDER) {
+            return SpawnHelper.generateRemoteDefenderBody(tier);
+        }
+
+        // Remote Reserver
+        if (role === ROLE_REMOTE_RESERVER) {
+            return SpawnHelper.generateRemoteReserverBody(tier);
+        }
+
+        // Zealot
+        if (role === ROLE_ZEALOT) {
+            return SpawnHelper.generateZealotBody(tier);
+        }
+
+        // Medic
+        if (role === ROLE_MEDIC) {
+            return SpawnHelper.generateMedicBody(tier);
+        }
+
+        // Stalker
+        if (role === ROLE_STALKER) {
+            return SpawnHelper.generateStalkerBody(tier);
+        }
+
+        // If the role provided does not exist, throw an error and return undefined
+        UtilHelper.throwError(
+            "Creep body failed generating.",
+            "The role specified was invalid for generating the creep body.",
+            ERROR_ERROR
+        );
+        return undefined;
     }
 
     /**
