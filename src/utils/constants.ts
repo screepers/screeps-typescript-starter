@@ -55,6 +55,16 @@ export const ROLE_ZEALOT = "zealot";
 export const ROLE_STALKER = "stalker";
 export const ROLE_MEDIC = "medic";
 
+// Tier Constants
+export const TIER_1 = 300;
+export const TIER_2 = 550;
+export const TIER_3 = 800;
+export const TIER_4 = 1300;
+export const TIER_5 = 1800;
+export const TIER_6 = 2300;
+export const TIER_7 = 5300;
+export const TIER_8 = 12300;
+
 // Creep Body Layout Constants
 export const GROUPED = "grouped";
 export const COLLATED = "collated";

@@ -500,14 +500,14 @@ type ATTACK_BASIC_SQUAD = "basic_squad"; //
 /**
  * Tier Definitions
  */
-declare const TIER_1 = 1;
-declare const TIER_2 = 2;
-declare const TIER_3 = 3;
-declare const TIER_4 = 4;
-declare const TIER_5 = 5;
-declare const TIER_6 = 6;
-declare const TIER_7 = 7;
-declare const TIER_8 = 8;
+declare const TIER_1 = 300;
+declare const TIER_2 = 550;
+declare const TIER_3 = 800;
+declare const TIER_4 = 1300;
+declare const TIER_5 = 1800;
+declare const TIER_6 = 2300;
+declare const TIER_7 = 5300;
+declare const TIER_8 = 12300;
 
 type TierConstant =
     TIER_1 |
