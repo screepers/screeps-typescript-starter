@@ -5,7 +5,9 @@ import {
     militaryRolePriority,
     remoteRolePriority,
     ROLE_REMOTE_MINER,
-    ROLE_REMOTE_RESERVER
+    ROLE_REMOTE_RESERVER,
+    GROUPED,
+    COLLATED
 } from "utils/Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
@@ -325,7 +327,6 @@ export default class SpawnApi {
      * @param role the role of the creep we want
      */
     public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
-
         // Call the correct helper function based on creep role
         // Miner
         if (role === ROLE_MINER) {
@@ -406,10 +407,6 @@ export default class SpawnApi {
      * @param mixType [Optional] How to order the body parts - Default is to group like parts in the order provided
      */
     public static getBodyFromObject(descriptor: StringMap, mixType?: string): BodyPartConstant[] {
-        // * Temporarily defined here, will move to Constants.ts
-        const GROUPED: string = "grouped";
-        const COLLATED: string = "collated"; // ? Is that the right word for this?
-
         let creepBody: BodyPartConstant[] = [];
 
         if (mixType === undefined || mixType === GROUPED) {
@@ -423,6 +420,54 @@ export default class SpawnApi {
         return creepBody;
     }
 
+    /**
+     * Returns a creep body part array, or null if invalid parameters were passed in
+     * @param bodyObject The object that describes the creep's body parts
+     * @param opts The options for generating the creep body from the descriptor
+     */
+    public static getCreepBody(bodyObject: CreepBodyDescriptor, opts?: CreepBodyOptions): BodyPartConstant[] | null {
+        let creepBody: BodyPartConstant[] = [];
+        let numHealParts = 0;
+        //
+        if (opts === undefined) {
+            opts = { mixType: GROUPED, toughFirst: false, healLast: false };
+        }
+
+        /**
+         * Verify bodyObject - Return null if invalid
+         */
+        if (SpawnHelper.verifyDescriptor(bodyObject) === false) {
+            UtilHelper.throwError(
+                "Invalid Creep Body Descriptor",
+                "Ensure that the object being passed to getCreepBody is in the format { BodyPartConstant: NumberParts } and that NumberParts is > 0.",
+                ERROR_ERROR
+            );
+            return null;
+        }
+
+        /**
+         * Append tough parts on creepBody first - Delete tough property from bodyObject
+         */
+        if (opts.toughFirst && bodyObject.tough) {
+            creepBody = SpawnHelper.generateParts(TOUGH, bodyObject.tough);
+            delete bodyObject.tough;
+        }
+
+        /**
+         * Retain Heal Information to append on the end of creepBody - Delete heal property from bodyObject
+         */
+        if (opts.healLast && bodyObject.heal) {
+            numHealParts = bodyObject.heal;
+            delete bodyObject.heal;
+        }
+
+        if (opts.healLast) {
+            const healArray: BodyPartConstant[] = SpawnHelper.generateParts(HEAL, numHealParts);
+            creepBody.push(...healArray); // * TBH not sure what this does
+            // Push healArray onto creepBody - Causes an error for some reason
+        }
+        return creepBody;
+    }
     /**
      * check if our remote room needs a remote defender
      * @param room the home room associated with the remote room
