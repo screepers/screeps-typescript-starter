@@ -1,3 +1,5 @@
+import UtilHelper from "./UtilHelper";
+
 /**
  * Functions to help keep Spawn.Api clean go here
  */
@@ -49,40 +51,270 @@ export class SpawnHelper {
      * Generate body for miner creep
      * @param tier the tier of the room
      */
-    public static generateMinerBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateMinerBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for harvester creep
     * @param tier the tier of the room
     */
-    public static generateHarvesterBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateHarvesterBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for worker creep
     * @param tier the tier of the room
     */
-    public static generateWorkerBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateWorkerBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for lorry creep
     * @param tier the tier of the room
     */
-    public static generateLorryBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateLorryBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for power upgrader creep
     * @param tier the tier of the room
     */
-    public static generatePowerUpgraderBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generatePowerUpgraderBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
     // ------------
 
@@ -91,40 +323,270 @@ export class SpawnHelper {
     * Generate body for remote miner creep
     * @param tier the tier of the room
     */
-    public static generateRemoteMinerBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateRemoteMinerBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for remote harvester creep
     * @param tier the tier of the room
     */
-    public static generateRemoteHarvesterBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateRemoteHarvesterBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for remote reserver creep
     * @param tier the tier of the room
     */
-    public static generateRemoteReserverBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateRemoteReserverBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for remote colonizer creep
     * @param tier the tier of the room
     */
-    public static generateRemoteColonizerBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateRemoteColonizerBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for remote defender creep
     * @param tier the tier of the room
     */
-    public static generateRemoteDefenderBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateRemoteDefenderBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
     // ----------
 
@@ -133,8 +595,54 @@ export class SpawnHelper {
     * Generate body for zealot creep
     * @param tier the tier of the room
     */
-    public static generateZealotBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateZealotBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
 
@@ -142,16 +650,108 @@ export class SpawnHelper {
     * Generate body for medic creep
     * @param tier the tier of the room
     */
-    public static generateMedicBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateMedicBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
 
     /**
     * Generate body for stalker creep
     * @param tier the tier of the room
     */
-    public static generateStalkerBody(tier: TierConstant): BodyPartConstant[] {
-        return [WORK];
+    public static generateStalkerBody(tier: number): BodyPartConstant[] | undefined {
+
+        // Tier 1
+        if (tier == TIER_1) {
+
+        }
+
+        // Tier 2
+        if (tier == TIER_2) {
+
+        }
+
+        // Tier 3
+        if (tier == TIER_3) {
+
+        }
+
+        // Tier 4
+        if (tier == TIER_4) {
+
+        }
+
+        // Tier 5
+        if (tier == TIER_5) {
+
+        }
+
+        // Tier 6
+        if (tier == TIER_6) {
+
+        }
+
+        // Tier 7
+        if (tier == TIER_7) {
+
+        }
+
+        // Tier 8
+        if (tier == TIER_8) {
+
+        }
+
+        // Throw error if we didn't find a valid tier
+        UtilHelper.throwError(
+            "Invalid Tier List",
+            "generate body helper didn't find the tier it was passed",
+            ERROR_ERROR);
+        return undefined;
     }
     // --------------
 }
