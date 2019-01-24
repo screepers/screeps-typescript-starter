@@ -1,4 +1,5 @@
 import UtilHelper from "./UtilHelper";
+import SpawnApi from "Api/Spawn.Api";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -61,35 +62,14 @@ export class SpawnHelper {
         // Tier 2
         if (tier == TIER_2) {
 
+            // Almost standard miner, 5 work 1 move
         }
 
-        // Tier 3
-        if (tier == TIER_3) {
+        // Tier 3 - 8, Because miners stay constant from tier 3 and up
+        if (tier == TIER_3 || tier == TIER_4 || tier == TIER_5 ||
+            tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
 
-        }
-
-        // Tier 4
-        if (tier == TIER_4) {
-
-        }
-
-        // Tier 5
-        if (tier == TIER_5) {
-
-        }
-
-        // Tier 6
-        if (tier == TIER_6) {
-
-        }
-
-        // Tier 7
-        if (tier == TIER_7) {
-
-        }
-
-        // Tier 8
-        if (tier == TIER_8) {
+            // We have a standard miner here, 5 work 2 move
 
         }
 
