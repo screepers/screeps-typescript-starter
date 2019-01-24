@@ -92,20 +92,23 @@ export class SpawnHelper {
         // Tier 1
         if (tier == TIER_1) {
 
+            // Beginner miner, 2 work, 2 move - total cost: 300
+            this.getBody_Grouped({ WORK: 2, MOVE: 2 });
         }
 
         // Tier 2
         if (tier == TIER_2) {
 
-            // Almost standard miner, 5 work 1 move
+            // Almost standard miner, 5 work 1 move - total cost: 550
+            this.getBody_Grouped({ WORK: 5, MOVE: 1 });
         }
 
         // Tier 3 - 8, Because miners stay constant from tier 3 and up
         if (tier == TIER_3 || tier == TIER_4 || tier == TIER_5 ||
             tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
 
-            // We have a standard miner here, 5 work 2 move
-
+            // We have a standard miner here, 5 work 2 move - total cost: 600
+            this.getBody_Grouped({ WORK: 5, MOVE: 2 });
         }
 
         // Throw error if we didn't find a valid tier
