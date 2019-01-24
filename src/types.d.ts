@@ -167,6 +167,28 @@ type ROLE_MEDIC = "medic";
 // --------------------------------------------------------------------
 
 /**
+ * Creep Body Options Object
+ */
+interface CreepBodyOptions {
+    mixType?: string;
+    toughFirst?: boolean;
+    healLast?: boolean;
+}
+
+/**
+ * Creep Body Descriptor Object
+ */
+interface CreepBodyDescriptor {
+    move?: number;
+    work?: number;
+    carry?: number;
+    tough?: number;
+    attack?: number;
+    ranged_attack?: number;
+    heal?: number;
+    claim?: number;
+}
+/**
  * Ally Names
  */
 type AllyConstant = JAKESBOY2 | UHMBROCK;
@@ -259,7 +281,7 @@ interface RoomMemory {
     claimRooms: Cache;
 }
 
-interface EmpireMemory { }
+interface EmpireMemory {}
 // ----------------------------------
 
 /**
@@ -509,15 +531,7 @@ declare const TIER_6 = 2300;
 declare const TIER_7 = 5300;
 declare const TIER_8 = 12300;
 
-type TierConstant =
-    TIER_1 |
-    TIER_2 |
-    TIER_3 |
-    TIER_4 |
-    TIER_5 |
-    TIER_6 |
-    TIER_7 |
-    TIER_8;
+type TierConstant = TIER_1 | TIER_2 | TIER_3 | TIER_4 | TIER_5 | TIER_6 | TIER_7 | TIER_8;
 
 type TIER_1 = 1;
 type TIER_2 = 2;
