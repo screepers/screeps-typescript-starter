@@ -128,7 +128,7 @@ export class SpawnHelper {
         // Tier 1
         if (tier == TIER_1) {
 
-            // Beginner harvester, 1 work, 2 carry, 2 move - total cost: 300
+            // 1 work, 2 carry, 2 move - total cost: 300
             this.getBody_Grouped({ WORK: 1, CARRY: 2, MOVE: 2 });
         }
 
@@ -164,14 +164,14 @@ export class SpawnHelper {
         if (tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
 
             // Largest harvester we want, potential to adjust later
-            // 2 work, 21 carry, 21 move - total cost: 2300
-            this.getBody_Grouped({ WORK: 2, CARRY: 21, MOVE: 21 });
+            // 2 work, 21 carry, 21 move - total cost: 2200
+            this.getBody_Grouped({ WORK: 2, CARRY: 20, MOVE: 20 });
         }
 
         // Throw error if we didn't find a valid tier
         UtilHelper.throwError(
             "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
+            "generateBody helper didn't find the tier requested",
             ERROR_ERROR);
         return undefined;
     }
@@ -185,41 +185,39 @@ export class SpawnHelper {
         // Tier 1
         if (tier == TIER_1) {
 
+            // 1 work, 2 carry, 2 move - total cost: 300
+            this.getBody_Grouped({ WORK: 1, CARRY: 2, MOVE: 2 });
         }
 
         // Tier 2
         if (tier == TIER_2) {
 
+            // 2 work, 4 carry, 3 move - total cost: 550
+            this.getBody_Grouped({ WORK: 2, CARRY: 5, MOVE: 3 });
         }
 
         // Tier 3
         if (tier == TIER_3) {
 
+            // 4 work, 4 carry, 4 move - total cost: 800
+            this.getBody_Grouped({ WORK: 4, CARRY: 4, MOVE: 4 });
         }
 
         // Tier 4
         if (tier == TIER_4) {
 
+            // 7 work, 6 carry, 6 move - total cost: 1300
+            this.getBody_Grouped({ WORK: 7, CARRY: 6, MOVE: 6 });
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier == TIER_5 || tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
 
-        }
-
-        // Tier 6
-        if (tier == TIER_6) {
-
-        }
-
-        // Tier 7
-        if (tier == TIER_7) {
-
-        }
-
-        // Tier 8
-        if (tier == TIER_8) {
-
+            // Want to cap workers at 400 ish energy so they don't monopolize the energy
+            // And I think 10 work will suffice since they have been essentially
+            // demoted to janitors and builders by tier 6, so no need to increase from here
+            // 10 work, 8 carry, 8 move - total cost: 1800
+            this.getBody_Grouped({ WORK: 10, CARRY: 8, MOVE: 8 });
         }
 
         // Throw error if we didn't find a valid tier
