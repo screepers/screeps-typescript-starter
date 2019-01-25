@@ -463,7 +463,7 @@ export default class SpawnApi {
 
         if (opts.healLast) {
             const healArray: BodyPartConstant[] = SpawnHelper.generateParts(HEAL, numHealParts);
-            creepBody.push(...healArray); // * TBH not sure what this does
+            creepBody.push(...healArray); // * I guess this expands the array into a series of arguments
             // Push healArray onto creepBody - Causes an error for some reason
         }
         return creepBody;
