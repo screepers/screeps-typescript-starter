@@ -128,41 +128,44 @@ export class SpawnHelper {
         // Tier 1
         if (tier == TIER_1) {
 
+            // Beginner harvester, 1 work, 2 carry, 2 move - total cost: 300
+            this.getBody_Grouped({ WORK: 1, CARRY: 2, MOVE: 2 });
         }
 
         // Tier 2
         if (tier == TIER_2) {
 
+            // 2 work, 4 carry, 3 move - total cost: 550
+            this.getBody_Grouped({ WORK: 2, CARRY: 5, MOVE: 3 });
         }
 
         // Tier 3
         if (tier == TIER_3) {
 
+            // 2 work, 6 carry, 2 move - total cost: 800
+            this.getBody_Grouped({ WORK: 2, CARRY: 6, MOVE: 6 });
         }
 
         // Tier 4
         if (tier == TIER_4) {
 
+            // 2 work, 11 carry, 11 move - total cost: 1300
+            this.getBody_Grouped({ WORK: 2, CARRY: 11, MOVE: 11 });
         }
 
         // Tier 5
         if (tier == TIER_5) {
 
+            // 2 work, 16 carry, 16 move - total cost: 1800
+            this.getBody_Grouped({ WORK: 2, CARRY: 16, MOVE: 16 });
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
 
-        }
-
-        // Tier 7
-        if (tier == TIER_7) {
-
-        }
-
-        // Tier 8
-        if (tier == TIER_8) {
-
+            // Largest harvester we want, potential to adjust later
+            // 2 work, 21 carry, 21 move - total cost: 2300
+            this.getBody_Grouped({ WORK: 2, CARRY: 21, MOVE: 21 });
         }
 
         // Throw error if we didn't find a valid tier
