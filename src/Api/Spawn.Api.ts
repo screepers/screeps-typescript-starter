@@ -449,7 +449,6 @@ export default class SpawnApi {
             }
         }
 
-        console.log(" Creep BODY ======== :: ", creepBody);
         return creepBody;
     }
     /**
