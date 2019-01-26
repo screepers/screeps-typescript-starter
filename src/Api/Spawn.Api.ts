@@ -329,76 +329,31 @@ export default class SpawnApi {
     public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
         // Call the correct helper function based on creep role
         // Miner
-        if (role === ROLE_MINER) {
-            return SpawnHelper.generateMinerBody(tier);
-        }
+        switch(role){
 
-        // Harvester
-        if (role === ROLE_HARVESTER) {
-            return SpawnHelper.generateHarvesterBody(tier);
-        }
-
-        if (role === ROLE_WORKER) {
-            return SpawnHelper.generateWorkerBody(tier);
-        }
-
-        // Lorry
-        if (role === ROLE_LORRY) {
-            return SpawnHelper.generateLorryBody(tier);
-        }
-
-        // Power Upgrader
-        if (role === ROLE_POWER_UPGRADER) {
-            return SpawnHelper.generatePowerUpgraderBody(tier);
-        }
-
-        // Remote Miner
-        if (role === ROLE_REMOTE_MINER) {
-            return SpawnHelper.generateRemoteMinerBody(tier);
-        }
-
-        // Remote Harvester
-        if (role === ROLE_REMOTE_HARVESTER) {
-            return SpawnHelper.generateRemoteHarvesterBody(tier);
-        }
-
-        // Remote Colonizer
-        if (role === ROLE_COLONIZER) {
-            return SpawnHelper.generateRemoteColonizerBody(tier);
-        }
-
-        // Remote Defender
-        if (role === ROLE_REMOTE_DEFENDER) {
-            return SpawnHelper.generateRemoteDefenderBody(tier);
-        }
-
-        // Remote Reserver
-        if (role === ROLE_REMOTE_RESERVER) {
-            return SpawnHelper.generateRemoteReserverBody(tier);
-        }
-
-        // Zealot
-        if (role === ROLE_ZEALOT) {
-            return SpawnHelper.generateZealotBody(tier);
-        }
-
-        // Medic
-        if (role === ROLE_MEDIC) {
-            return SpawnHelper.generateMedicBody(tier);
-        }
-
-        // Stalker
-        if (role === ROLE_STALKER) {
-            return SpawnHelper.generateStalkerBody(tier);
+            case ROLE_MINER: return SpawnHelper.generateMinerBody(tier);
+            case ROLE_HARVESTER: return SpawnHelper.generateHarvesterBody(tier); 
+            case ROLE_WORKER: return SpawnHelper.generateWorkerBody(tier); 
+            case ROLE_LORRY: return SpawnHelper.generateLorryBody(tier); 
+            case ROLE_POWER_UPGRADER: return SpawnHelper.generatePowerUpgraderBody(tier); 
+            case ROLE_REMOTE_MINER: return SpawnHelper.generateRemoteMinerBody(tier); 
+            case ROLE_REMOTE_HARVESTER: return SpawnHelper.generateRemoteHarvesterBody(tier); 
+            case ROLE_COLONIZER: return SpawnHelper.generateRemoteColonizerBody(tier); 
+            case ROLE_REMOTE_DEFENDER: return SpawnHelper.generateRemoteDefenderBody(tier); 
+            case ROLE_REMOTE_RESERVER: return SpawnHelper.generateRemoteReserverBody(tier); 
+            case ROLE_ZEALOT: return SpawnHelper.generateZealotBody(tier); 
+            case ROLE_MEDIC: return SpawnHelper.generateMedicBody(tier); 
+            case ROLE_STALKER: return SpawnHelper.generateStalkerBody(tier); 
+            default: 
+                UtilHelper.throwError(
+                    "Creep body failed generating.",
+                    "The role specified was invalid for generating the creep body.",
+                    ERROR_ERROR
+                );
+                return undefined;
         }
 
         // If the role provided does not exist, throw an error and return undefined
-        UtilHelper.throwError(
-            "Creep body failed generating.",
-            "The role specified was invalid for generating the creep body.",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
@@ -428,7 +383,10 @@ export default class SpawnApi {
     public static getCreepBody(bodyObject: CreepBodyDescriptor, opts?: CreepBodyOptions): BodyPartConstant[] | null {
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
-        //
+        
+        /**
+         * If opts is undefined, use default options
+         */
         if (opts === undefined) {
             opts = { mixType: GROUPED, toughFirst: false, healLast: false };
         }
