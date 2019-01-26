@@ -35,31 +35,75 @@ describe("Spawn.Api", () => {
                     const actualResults = SpawnApi.getCreepBody(body, opts);
                     assert.deepEqual(actualResults, expectedResults);
                 });
-                describe("Options.toughFirst: true", function() {
-                    it("Should return tough first, then grouped", function() {
-                        const opts = { mixType: GROUPED, toughFirst: true };
-                        const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
-                        const expectedResults: BodyPartConstant[] = [
-                            TOUGH,
-                            TOUGH,
-                            TOUGH,
-                            TOUGH,
-                            HEAL,
-                            HEAL,
-                            HEAL,
-                            WORK,
-                            MOVE,
-                            MOVE,
-                            MOVE,
-                            MOVE,
-                            MOVE,
-                            CARRY,
-                            CARRY
-                        ];
+                it("Should return tough first, then grouped (opt.toughFirst)", function() {
+                    const opts = { mixType: GROUPED, toughFirst: true };
+                    const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
+                    const expectedResults: BodyPartConstant[] = [
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        HEAL,
+                        HEAL,
+                        HEAL,
+                        WORK,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        CARRY,
+                        CARRY
+                    ];
 
-                        const actualResults = SpawnApi.getCreepBody(body, opts);
-                        assert.deepEqual(actualResults, expectedResults);
-                    });
+                    const actualResults = SpawnApi.getCreepBody(body, opts);
+                    assert.deepEqual(actualResults, expectedResults);
+                });
+                it("Should return grouped, with heal last (opt.healLast)", function() {
+                    const opts = { mixType: GROUPED, healLast: true };
+                    const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
+                    const expectedResults: BodyPartConstant[] = [
+                        WORK,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        CARRY,
+                        CARRY,
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        HEAL,
+                        HEAL,
+                        HEAL
+                    ];
+                    const actualResults = SpawnApi.getCreepBody(body, opts);
+                    assert.deepEqual(actualResults, expectedResults);
+                });
+                it("Should return tough first, grouped, and then heal last (opt.toughFirst && opt.healLast)", function() {
+                    const opts = { mixType: GROUPED, toughFirst: true, healLast: true };
+                    const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
+                    const expectedResults: BodyPartConstant[] = [
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        WORK,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        CARRY,
+                        CARRY,
+                        HEAL,
+                        HEAL,
+                        HEAL
+                    ];
+                    const actualResults = SpawnApi.getCreepBody(body, opts);
+                    assert.deepEqual(actualResults, expectedResults);
                 });
             });
             describe("Options.mixType: COLLATED", function() {
@@ -87,31 +131,75 @@ describe("Spawn.Api", () => {
 
                     assert.deepEqual(actualResults, expectedResults);
                 });
-                describe("Options.toughFirst: true", function() {
-                    it("Should return tough first, the collated", function() {
-                        const opts = { mixType: COLLATED, toughFirst: true };
-                        const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
-                        const expectedResults: BodyPartConstant[] = [
-                            TOUGH,
-                            TOUGH,
-                            TOUGH,
-                            TOUGH,
-                            HEAL,
-                            WORK,
-                            MOVE,
-                            CARRY,
-                            HEAL,
-                            MOVE,
-                            CARRY,
-                            HEAL,
-                            MOVE,
-                            MOVE,
-                            MOVE
-                        ];
-                        const actualResults = SpawnApi.getCreepBody(body, opts);
-                        
-                        assert.deepEqual(actualResults, expectedResults);
-                    });
+                it("Should return tough first, the collated (opt.toughFirst)", function() {
+                    const opts = { mixType: COLLATED, toughFirst: true };
+                    const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
+                    const expectedResults: BodyPartConstant[] = [
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        HEAL,
+                        WORK,
+                        MOVE,
+                        CARRY,
+                        HEAL,
+                        MOVE,
+                        CARRY,
+                        HEAL,
+                        MOVE,
+                        MOVE,
+                        MOVE
+                    ];
+                    const actualResults = SpawnApi.getCreepBody(body, opts);
+
+                    assert.deepEqual(actualResults, expectedResults);
+                });
+                it("Should return collated, then heal last (opt.healLast)", function() {
+                    const opts = { mixType: COLLATED, healLast: true };
+                    const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
+                    const expectedResults: BodyPartConstant[] = [
+                        WORK,
+                        MOVE,
+                        CARRY,
+                        TOUGH,
+                        MOVE,
+                        CARRY,
+                        TOUGH,
+                        MOVE,
+                        TOUGH,
+                        MOVE,
+                        TOUGH,
+                        MOVE,
+                        HEAL,
+                        HEAL,
+                        HEAL
+                    ];
+                    const actualResults = SpawnApi.getCreepBody(body, opts);
+                    assert.deepEqual(actualResults, expectedResults);
+                });
+                it("Should return tough first, collated, then heal last (opt.toughFirst && opt.healLast)", function() {
+                    const opts = { mixType: COLLATED, toughFirst: true, healLast: true };
+                    const body = { heal: 3, work: 1, move: 5, carry: 2, tough: 4 };
+                    const expectedResults: BodyPartConstant[] = [
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        TOUGH,
+                        WORK,
+                        MOVE,
+                        CARRY,
+                        MOVE,
+                        CARRY,
+                        MOVE,
+                        MOVE,
+                        MOVE,
+                        HEAL,
+                        HEAL,
+                        HEAL
+                    ];
+                    const actualResults = SpawnApi.getCreepBody(body, opts);
+                    assert.deepEqual(actualResults, expectedResults);
                 });
             });
         });
