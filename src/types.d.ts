@@ -179,6 +179,7 @@ interface CreepBodyOptions {
  * Creep Body Descriptor Object
  */
 interface CreepBodyDescriptor {
+    [index: string]: any;
     move?: number;
     work?: number;
     carry?: number;

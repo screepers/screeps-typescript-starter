@@ -436,6 +436,7 @@ export default class SpawnApi {
         /**
          * Verify bodyObject - Return null if invalid
          */
+
         if (SpawnHelper.verifyDescriptor(bodyObject) === false) {
             UtilHelper.throwError(
                 "Invalid Creep Body Descriptor",
@@ -449,7 +450,7 @@ export default class SpawnApi {
          * Append tough parts on creepBody first - Delete tough property from bodyObject
          */
         if (opts.toughFirst && bodyObject.tough) {
-            creepBody = SpawnHelper.generateParts(TOUGH, bodyObject.tough);
+            creepBody = SpawnHelper.generateParts("tough", bodyObject.tough);
             delete bodyObject.tough;
         }
 
@@ -461,11 +462,36 @@ export default class SpawnApi {
             delete bodyObject.heal;
         }
 
-        if (opts.healLast) {
-            const healArray: BodyPartConstant[] = SpawnHelper.generateParts(HEAL, numHealParts);
-            creepBody.push(...healArray); // * I guess this expands the array into a series of arguments
-            // Push healArray onto creepBody - Causes an error for some reason
+        /**
+         * If mixType is grouped, add onto creepBody
+         */
+        if (opts.mixType === GROUPED) {
+            const bodyParts = SpawnHelper.getBody_Grouped(bodyObject);
+            for (let i = 0; i < bodyParts.length; i++) {
+                creepBody.push(bodyParts[i]);
+            }
         }
+
+        /**
+         * If mixType is collated, add onto creepBody
+         */
+        if (opts.mixType === COLLATED) {
+            const bodyParts = SpawnHelper.getBody_Collated(bodyObject);
+            for (let i = 0; i < bodyParts.length; i++) {
+                creepBody.push(bodyParts[i]);
+            }
+        }
+
+        /**
+         * Append Heal Information that was retained at the beginning of the function
+         */
+        if (opts.healLast) {
+            for (let i = 0; i < numHealParts; i++) {
+                creepBody.push("heal");
+            }
+        }
+
+        console.log(" Creep BODY ======== :: ", creepBody);
         return creepBody;
     }
     /**

@@ -8,15 +8,18 @@ import { GROUPED, COLLATED } from "utils/Constants";
 export class SpawnHelper {
     /**
      * Returns a boolean indicating if the object is a valid creepBody descriptor
-     * TODO Complete this function - Might not be necessary since I defined a type for descriptor now
      * @param bodyObject The description of the creep body to verify
      */
-    public static verifyDescriptor(bodyObject: object): boolean {
+    public static verifyDescriptor(bodyObject: CreepBodyDescriptor): boolean {
         const partNames = Object.keys(bodyObject);
-        // Figure out how to verify the bodyObject here
-        // Mostly just need to ensure that each key is a BodyPartConstant
-        // and that the value is a number that is > 0
-        return true;
+        let valid: boolean = true;
+        // Check that no body parts have a definition of 0 or negative
+        for (const part in partNames) {
+            if (bodyObject[part] <= 0) {
+                valid = false;
+            }
+        }
+        return valid;
     }
 
     /**
@@ -36,10 +39,11 @@ export class SpawnHelper {
      * Groups the body parts -- e.g. WORK, WORK, CARRY, CARRY, MOVE, MOVE
      * @param descriptor A StringMap of creepbody limits -- { MOVE: 3, CARRY: 2, ... }
      */
-    public static getBody_Grouped(descriptor: StringMap): BodyPartConstant[] {
+    public static getBody_Grouped(descriptor: CreepBodyDescriptor): BodyPartConstant[] {
         const creepBody: BodyPartConstant[] = [];
         _.forEach(Object.keys(descriptor), (part: BodyPartConstant) => {
-            for (let i = 0; i < descriptor[part]; i++) {
+            // Having ! after property removes 'null' and 'undefined'
+            for (let i = 0; i < descriptor[part]!; i++) {
                 creepBody.push(part);
             }
         });
@@ -48,29 +52,25 @@ export class SpawnHelper {
 
     /**
      * Collates the body parts -- e.g. WORK, CARRY, MOVE, WORK, CARRY, ...
-     * TODO Test this method -- Hard to test in a code only environment
      * @param descriptor A StringMap of creepbody limits -- { MOVE: 3, CARRY: 2, ... }
      */
-    public static getBody_Collated(descriptor: StringMap): BodyPartConstant[] {
-        const creepBody: BodyPartConstant[] = [];
-        const numParts = _.sum(descriptor);
-        const partNames = Object.keys(descriptor);
-        const counts: StringMap = {};
-        // Initialize Counts
-        for (const part in partNames) {
-            counts[part] = 0;
-        }
+    public static getBody_Collated(descriptor: CreepBodyDescriptor): BodyPartConstant[] {
+        const returnParts: BodyPartConstant[] = [];
+        const numParts: number = _.sum(_.values(descriptor));
+        const partNames = <BodyPartConstant[]>Object.keys(descriptor);
 
-        while (creepBody.length < numParts) {
-            for (const part in partNames) {
-                if (counts[part] < descriptor[part]) {
-                    creepBody.push(<BodyPartConstant>part);
-                    counts[part]++;
+        let i = 0;
+        while (i < numParts) {
+            for (let j = 0; j < partNames.length; j++) {
+                const currPart: BodyPartConstant = partNames[j];
+                if (descriptor[currPart]! >= 1) {
+                    returnParts.push(currPart);
+                    descriptor[currPart]!--;
+                    i++;
                 }
             }
         }
-
-        return creepBody;
+        return returnParts;
     }
 
     /**
@@ -109,8 +109,9 @@ export class SpawnHelper {
             return SpawnApi.getCreepBody(body, opts);
         } else {
             UtilHelper.throwError(
-                "Issue generating creep in function: " + this.name,
-                "Ensure that the tier being passed to the function is valid. Ensure that there is a body descriptor created for that tier.",
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return null;
@@ -122,19 +123,26 @@ export class SpawnHelper {
      */
     public static generateMinerBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
             // Beginner miner, 2 work, 2 move - total cost: 300
             this.getBody_Grouped({ WORK: 2, MOVE: 2 });
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
             // Almost standard miner, 5 work 1 move - total cost: 550
             this.getBody_Grouped({ WORK: 5, MOVE: 1 });
         }
 
         // Tier 3 - 8, Because miners stay constant from tier 3 and up
-        if (tier == TIER_3 || tier == TIER_4 || tier == TIER_5 || tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
+        if (
+            tier === TIER_3 ||
+            tier === TIER_4 ||
+            tier === TIER_5 ||
+            tier === TIER_6 ||
+            tier === TIER_7 ||
+            tier === TIER_8
+        ) {
             // We have a standard miner here, 5 work 2 move - total cost: 600
             this.getBody_Grouped({ WORK: 5, MOVE: 2 });
         }
@@ -154,37 +162,37 @@ export class SpawnHelper {
      */
     public static generateHarvesterBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
             // 1 work, 2 carry, 2 move - total cost: 300
             this.getBody_Grouped({ WORK: 1, CARRY: 2, MOVE: 2 });
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
             // 2 work, 4 carry, 3 move - total cost: 550
             this.getBody_Grouped({ WORK: 2, CARRY: 5, MOVE: 3 });
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
             // 2 work, 6 carry, 2 move - total cost: 800
             this.getBody_Grouped({ WORK: 2, CARRY: 6, MOVE: 6 });
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
             // 2 work, 11 carry, 11 move - total cost: 1300
             this.getBody_Grouped({ WORK: 2, CARRY: 11, MOVE: 11 });
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
             // 2 work, 16 carry, 16 move - total cost: 1800
             this.getBody_Grouped({ WORK: 2, CARRY: 16, MOVE: 16 });
         }
 
         // Tier 6
-        if (tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
+        if (tier === TIER_6 || tier === TIER_7 || tier === TIER_8) {
             // Largest harvester we want, potential to adjust later
             // 2 work, 21 carry, 21 move - total cost: 2200
             this.getBody_Grouped({ WORK: 2, CARRY: 20, MOVE: 20 });
@@ -201,31 +209,31 @@ export class SpawnHelper {
      */
     public static generateWorkerBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
             // 1 work, 2 carry, 2 move - total cost: 300
             this.getBody_Grouped({ WORK: 1, CARRY: 2, MOVE: 2 });
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
             // 2 work, 4 carry, 3 move - total cost: 550
             this.getBody_Grouped({ WORK: 2, CARRY: 5, MOVE: 3 });
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
             // 4 work, 4 carry, 4 move - total cost: 800
             this.getBody_Grouped({ WORK: 4, CARRY: 4, MOVE: 4 });
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
             // 7 work, 6 carry, 6 move - total cost: 1300
             this.getBody_Grouped({ WORK: 7, CARRY: 6, MOVE: 6 });
         }
 
         // Tier 5
-        if (tier == TIER_5 || tier == TIER_6 || tier == TIER_7 || tier == TIER_8) {
+        if (tier === TIER_5 || tier === TIER_6 || tier === TIER_7 || tier === TIER_8) {
             // Want to cap workers at 400 ish energy so they don't monopolize the energy
             // And I think 10 work will suffice since they have been essentially
             // demoted to janitors and builders by tier 6, so no need to increase from here
@@ -248,35 +256,35 @@ export class SpawnHelper {
      */
     public static generateLorryBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -294,35 +302,35 @@ export class SpawnHelper {
      */
     public static generatePowerUpgraderBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -342,35 +350,35 @@ export class SpawnHelper {
      */
     public static generateRemoteMinerBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -388,35 +396,35 @@ export class SpawnHelper {
      */
     public static generateRemoteHarvesterBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -434,35 +442,35 @@ export class SpawnHelper {
      */
     public static generateRemoteReserverBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -480,35 +488,35 @@ export class SpawnHelper {
      */
     public static generateRemoteColonizerBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -526,35 +534,35 @@ export class SpawnHelper {
      */
     public static generateRemoteDefenderBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -574,35 +582,35 @@ export class SpawnHelper {
      */
     public static generateZealotBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -620,35 +628,35 @@ export class SpawnHelper {
      */
     public static generateMedicBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
@@ -666,35 +674,35 @@ export class SpawnHelper {
      */
     public static generateStalkerBody(tier: number): BodyPartConstant[] | undefined {
         // Tier 1
-        if (tier == TIER_1) {
+        if (tier === TIER_1) {
         }
 
         // Tier 2
-        if (tier == TIER_2) {
+        if (tier === TIER_2) {
         }
 
         // Tier 3
-        if (tier == TIER_3) {
+        if (tier === TIER_3) {
         }
 
         // Tier 4
-        if (tier == TIER_4) {
+        if (tier === TIER_4) {
         }
 
         // Tier 5
-        if (tier == TIER_5) {
+        if (tier === TIER_5) {
         }
 
         // Tier 6
-        if (tier == TIER_6) {
+        if (tier === TIER_6) {
         }
 
         // Tier 7
-        if (tier == TIER_7) {
+        if (tier === TIER_7) {
         }
 
         // Tier 8
-        if (tier == TIER_8) {
+        if (tier === TIER_8) {
         }
 
         // Throw error if we didn't find a valid tier
