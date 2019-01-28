@@ -1,6 +1,6 @@
 import { assert } from "chai";
 import { loop } from "../../src/main";
-import { Game, Memory, WORK, MOVE, CARRY, TOUGH, HEAL, CLAIM, ATTACK, RANGED_ATTACK } from "./mock"; // Ensure you import this on any tests, this is where game constants are defined
+import { Game, Memory, BODYPARTS_ALL, WORK, MOVE, CARRY, TOUGH, HEAL, CLAIM, ATTACK, RANGED_ATTACK } from "./mock"; // Ensure you import this on any tests, this is where game constants are defined
 import { AssertionError } from "assert";
 import SpawnApi from "../../src/Api/Spawn.Api";
 import { GROUPED, COLLATED } from "../../src/utils/constants";
@@ -10,6 +10,12 @@ import { GROUPED, COLLATED } from "../../src/utils/constants";
 // or else it will not get run when we call `npm run test-unit`
 describe("Spawn.Api", () => {
     describe("#getCreepBody()", function() {
+        it("should return undefined if given invalid, or no arguments", function() {
+            const expectedResults = undefined;
+            const actualResults = SpawnApi.getCreepBody({}, undefined);
+            // const actualResults = SpawnApi.getCreepBody({ pitter: 2, patter: 2 }, undefined);
+            assert.equal(actualResults, expectedResults);
+        });
         describe("Input of { heal: 3, work: 1, move: 5, carry: 2, tough: 4 }", function() {
             describe("Options.mixType: GROUPED", function() {
                 it("Should return grouped in the order they were written", function() {

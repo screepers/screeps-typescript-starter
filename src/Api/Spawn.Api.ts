@@ -329,22 +329,34 @@ export default class SpawnApi {
     public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
         // Call the correct helper function based on creep role
         // Miner
-        switch(role){
-
-            case ROLE_MINER: return SpawnHelper.generateMinerBody(tier);
-            case ROLE_HARVESTER: return SpawnHelper.generateHarvesterBody(tier); 
-            case ROLE_WORKER: return SpawnHelper.generateWorkerBody(tier); 
-            case ROLE_LORRY: return SpawnHelper.generateLorryBody(tier); 
-            case ROLE_POWER_UPGRADER: return SpawnHelper.generatePowerUpgraderBody(tier); 
-            case ROLE_REMOTE_MINER: return SpawnHelper.generateRemoteMinerBody(tier); 
-            case ROLE_REMOTE_HARVESTER: return SpawnHelper.generateRemoteHarvesterBody(tier); 
-            case ROLE_COLONIZER: return SpawnHelper.generateRemoteColonizerBody(tier); 
-            case ROLE_REMOTE_DEFENDER: return SpawnHelper.generateRemoteDefenderBody(tier); 
-            case ROLE_REMOTE_RESERVER: return SpawnHelper.generateRemoteReserverBody(tier); 
-            case ROLE_ZEALOT: return SpawnHelper.generateZealotBody(tier); 
-            case ROLE_MEDIC: return SpawnHelper.generateMedicBody(tier); 
-            case ROLE_STALKER: return SpawnHelper.generateStalkerBody(tier); 
-            default: 
+        switch (role) {
+            case ROLE_MINER:
+                return SpawnHelper.generateMinerBody(tier);
+            case ROLE_HARVESTER:
+                return SpawnHelper.generateHarvesterBody(tier);
+            case ROLE_WORKER:
+                return SpawnHelper.generateWorkerBody(tier);
+            case ROLE_LORRY:
+                return SpawnHelper.generateLorryBody(tier);
+            case ROLE_POWER_UPGRADER:
+                return SpawnHelper.generatePowerUpgraderBody(tier);
+            case ROLE_REMOTE_MINER:
+                return SpawnHelper.generateRemoteMinerBody(tier);
+            case ROLE_REMOTE_HARVESTER:
+                return SpawnHelper.generateRemoteHarvesterBody(tier);
+            case ROLE_COLONIZER:
+                return SpawnHelper.generateRemoteColonizerBody(tier);
+            case ROLE_REMOTE_DEFENDER:
+                return SpawnHelper.generateRemoteDefenderBody(tier);
+            case ROLE_REMOTE_RESERVER:
+                return SpawnHelper.generateRemoteReserverBody(tier);
+            case ROLE_ZEALOT:
+                return SpawnHelper.generateZealotBody(tier);
+            case ROLE_MEDIC:
+                return SpawnHelper.generateMedicBody(tier);
+            case ROLE_STALKER:
+                return SpawnHelper.generateStalkerBody(tier);
+            default:
                 UtilHelper.throwError(
                     "Creep body failed generating.",
                     "The role specified was invalid for generating the creep body.",
@@ -357,33 +369,17 @@ export default class SpawnApi {
     }
 
     /**
-     * Generate a body for a creep given a descriptor object
-     * @param descriptor An object that looks like { BodyPartConstant: NumberOfParts, ... }
-     * @param mixType [Optional] How to order the body parts - Default is to group like parts in the order provided
-     */
-    public static getBodyFromObject(descriptor: StringMap, mixType?: string): BodyPartConstant[] {
-        let creepBody: BodyPartConstant[] = [];
-
-        if (mixType === undefined || mixType === GROUPED) {
-            // Group them by part type -- e.g. MOVE MOVE MOVE CARRY CARRY WORK WORK WORK
-            creepBody = SpawnHelper.getBody_Grouped(descriptor);
-        } else if (mixType === COLLATED) {
-            // Layer the parts -- e.g. MOVE CARRY WORK MOVE CARRY WORK
-            creepBody = SpawnHelper.getBody_Collated(descriptor);
-        }
-
-        return creepBody;
-    }
-
-    /**
      * Returns a creep body part array, or null if invalid parameters were passed in
      * @param bodyObject The object that describes the creep's body parts
      * @param opts The options for generating the creep body from the descriptor
      */
-    public static getCreepBody(bodyObject: CreepBodyDescriptor, opts?: CreepBodyOptions): BodyPartConstant[] | null {
+    public static getCreepBody(
+        bodyObject: CreepBodyDescriptor,
+        opts?: CreepBodyOptions
+    ): BodyPartConstant[] | undefined {
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
-        
+
         /**
          * If opts is undefined, use default options
          */
@@ -401,7 +397,7 @@ export default class SpawnApi {
                 "Ensure that the object being passed to getCreepBody is in the format { BodyPartConstant: NumberParts } and that NumberParts is > 0.",
                 ERROR_ERROR
             );
-            return null;
+            return undefined;
         }
 
         /**
@@ -449,7 +445,12 @@ export default class SpawnApi {
             }
         }
 
-        return creepBody;
+        // If creepBody is empty, return undefined
+        if (creepBody.length === 0) {
+            return undefined;
+        } else {
+            return creepBody;
+        }
     }
     /**
      * check if our remote room needs a remote defender

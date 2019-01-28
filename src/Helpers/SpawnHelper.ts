@@ -18,6 +18,10 @@ export class SpawnHelper {
             if (bodyObject[part] <= 0) {
                 valid = false;
             }
+            if (BODYPARTS_ALL[part] === undefined) {
+                // ! Technically invalid for testing atm - Need to fix
+                valid = false;
+            }
         }
         return valid;
     }
@@ -88,7 +92,7 @@ export class SpawnHelper {
      * Generate body for miner creep
      * @param tier The tier of the room
      */
-    public static new_generateMinerBody(tier: number): BodyPartConstant[] | null {
+    public static generateMinerBody(tier: number): BodyPartConstant[] | undefined {
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED }; // Set any default values for the miner here
 
@@ -114,46 +118,8 @@ export class SpawnHelper {
                     "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
-            return null;
+            return undefined;
         }
-    }
-    /**
-     * Generate body for miner creep
-     * @param tier the tier of the room
-     */
-    public static generateMinerBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
-            // Beginner miner, 2 work, 2 move - total cost: 300
-            this.getBody_Grouped({ WORK: 2, MOVE: 2 });
-        }
-
-        // Tier 2
-        if (tier === TIER_2) {
-            // Almost standard miner, 5 work 1 move - total cost: 550
-            this.getBody_Grouped({ WORK: 5, MOVE: 1 });
-        }
-
-        // Tier 3 - 8, Because miners stay constant from tier 3 and up
-        if (
-            tier === TIER_3 ||
-            tier === TIER_4 ||
-            tier === TIER_5 ||
-            tier === TIER_6 ||
-            tier === TIER_7 ||
-            tier === TIER_8
-        ) {
-            // We have a standard miner here, 5 work 2 move - total cost: 600
-            this.getBody_Grouped({ WORK: 5, MOVE: 2 });
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**

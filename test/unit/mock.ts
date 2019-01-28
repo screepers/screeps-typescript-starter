@@ -1,12 +1,12 @@
 export const Game = {
-  creeps: [],
-  rooms: [],
-  spawns: {},
-  time: 12345
+    creeps: [],
+    rooms: [],
+    spawns: {},
+    time: 12345
 };
 
 export const Memory = {
-  creeps: []
+    creeps: []
 };
 
 export const OK = 0;
@@ -111,7 +111,7 @@ export const RAMPART_HITS_MAX = {
     5: 10000000,
     6: 30000000,
     7: 100000000,
-    8: 300000000,
+    8: 300000000
 };
 
 export const SPAWN_HITS = 5000;
@@ -135,7 +135,7 @@ export const EXTENSION_ENERGY_CAPACITY = {
     5: 50,
     6: 50,
     7: 100,
-    8: 200,
+    8: 200
 };
 
 export const ROAD_HITS = 5000;
@@ -173,6 +173,8 @@ export const RANGED_ATTACK = "ranged_attack";
 export const TOUGH = "tough";
 export const HEAL = "heal";
 export const CLAIM = "claim";
+
+export const BODYPARTS_ALL = [MOVE, WORK, CARRY, ATTACK, RANGED_ATTACK, TOUGH, HEAL, CLAIM];
 
 export const CONSTRUCTION_COST_ROAD_SWAMP_RATIO = 5;
 
