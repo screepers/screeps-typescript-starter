@@ -326,31 +326,31 @@ export default class SpawnApi {
      * @param tier the tier our room is at
      * @param role the role of the creep we want
      */
-    public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
+    public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | null {
         // Call the correct helper function based on creep role
         // Miner
-        switch(role){
+        switch (role) {
 
             case ROLE_MINER: return SpawnHelper.generateMinerBody(tier);
-            case ROLE_HARVESTER: return SpawnHelper.generateHarvesterBody(tier); 
-            case ROLE_WORKER: return SpawnHelper.generateWorkerBody(tier); 
-            case ROLE_LORRY: return SpawnHelper.generateLorryBody(tier); 
-            case ROLE_POWER_UPGRADER: return SpawnHelper.generatePowerUpgraderBody(tier); 
-            case ROLE_REMOTE_MINER: return SpawnHelper.generateRemoteMinerBody(tier); 
-            case ROLE_REMOTE_HARVESTER: return SpawnHelper.generateRemoteHarvesterBody(tier); 
-            case ROLE_COLONIZER: return SpawnHelper.generateRemoteColonizerBody(tier); 
-            case ROLE_REMOTE_DEFENDER: return SpawnHelper.generateRemoteDefenderBody(tier); 
-            case ROLE_REMOTE_RESERVER: return SpawnHelper.generateRemoteReserverBody(tier); 
-            case ROLE_ZEALOT: return SpawnHelper.generateZealotBody(tier); 
-            case ROLE_MEDIC: return SpawnHelper.generateMedicBody(tier); 
-            case ROLE_STALKER: return SpawnHelper.generateStalkerBody(tier); 
-            default: 
+            case ROLE_HARVESTER: return SpawnHelper.generateHarvesterBody(tier);
+            case ROLE_WORKER: return SpawnHelper.generateWorkerBody(tier);
+            case ROLE_LORRY: return SpawnHelper.generateLorryBody(tier);
+            case ROLE_POWER_UPGRADER: return SpawnHelper.generatePowerUpgraderBody(tier);
+            case ROLE_REMOTE_MINER: return SpawnHelper.generateRemoteMinerBody(tier);
+            case ROLE_REMOTE_HARVESTER: return SpawnHelper.generateRemoteHarvesterBody(tier);
+            case ROLE_COLONIZER: return SpawnHelper.generateRemoteColonizerBody(tier);
+            case ROLE_REMOTE_DEFENDER: return SpawnHelper.generateRemoteDefenderBody(tier);
+            case ROLE_REMOTE_RESERVER: return SpawnHelper.generateRemoteReserverBody(tier);
+            case ROLE_ZEALOT: return SpawnHelper.generateZealotBody(tier);
+            case ROLE_MEDIC: return SpawnHelper.generateMedicBody(tier);
+            case ROLE_STALKER: return SpawnHelper.generateStalkerBody(tier);
+            default:
                 UtilHelper.throwError(
                     "Creep body failed generating.",
                     "The role specified was invalid for generating the creep body.",
                     ERROR_ERROR
                 );
-                return undefined;
+                return null;
         }
 
         // If the role provided does not exist, throw an error and return undefined
@@ -383,7 +383,7 @@ export default class SpawnApi {
     public static getCreepBody(bodyObject: CreepBodyDescriptor, opts?: CreepBodyOptions): BodyPartConstant[] | null {
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
-        
+
         /**
          * If opts is undefined, use default options
          */
@@ -394,7 +394,7 @@ export default class SpawnApi {
         /**
          * Verify bodyObject - Return null if invalid
          */
-
+        // super dope example of fail first practice that we should be implementing, :taco:
         if (SpawnHelper.verifyDescriptor(bodyObject) === false) {
             UtilHelper.throwError(
                 "Invalid Creep Body Descriptor",
@@ -451,16 +451,10 @@ export default class SpawnApi {
 
         return creepBody;
     }
-    /**
-     * check if our remote room needs a remote defender
-     * @param room the home room associated with the remote room
-     */
-    private static needRemoteDefender(room: Room): boolean {
-        return false;
-    }
 
     /**
      * get the number of active miners
+     * TODO Complete this
      * ie miners with more than 50 TTL
      * @param room the room we are checking in
      */
