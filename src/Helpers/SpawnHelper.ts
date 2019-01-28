@@ -87,6 +87,7 @@ export class SpawnHelper {
         const name = role + "_" + tier + "_" + modifier;
         return name;
     }
+
     // Domestic ----
     /**
      * Generate body for miner creep
@@ -94,21 +95,24 @@ export class SpawnHelper {
      */
     public static generateMinerBody(tier: number): BodyPartConstant[] | undefined {
         let body: CreepBodyDescriptor | undefined;
-        const opts: CreepBodyOptions = { mixType: GROUPED }; // Set any default values for the miner here
+        const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
-            case TIER_1:
+            case TIER_1: // 2 Work, 2 Move - Total Cost: 300
                 body = { work: 2, move: 2 };
                 opts.mixType = COLLATED; // Just as an example of how we could change opts by tier as well
                 break;
-            case TIER_2:
+
+            case TIER_2: // 5 Work, 1 Move - Total Cost: 550
                 body = { work: 5, move: 1 };
                 break;
-            case TIER_3 || TIER_4 || TIER_5 || TIER_6 || TIER_7 || TIER_8:
+
+            case TIER_3 || TIER_4 || TIER_5 || TIER_6 || TIER_7 || TIER_8: // 5 Work, 2 Move - Total Cost: 600
                 body = { work: 5, move: 2 };
                 break;
         }
 
+        // Generate the creep body based on the body array and options
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
@@ -123,50 +127,52 @@ export class SpawnHelper {
     }
 
     /**
-     * Generate body for harvester creep
+     * Generate body for Harvester creep
      * @param tier the tier of the room
      */
     public static generateHarvesterBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
-            // 1 work, 2 carry, 2 move - total cost: 300
-            this.getBody_Grouped({ WORK: 1, CARRY: 2, MOVE: 2 });
+        // Default Values for harvester
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
+                body = { work: 1, carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
+                body = { work: 2, carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 2 Work, 6 Carry, 6 Move - Total Cost: 800
+                body = { work: 2, carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 2 Work, 11 Carry, 11 Move - Total Cost: 1300
+                body = { work: 2, carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 2 Work, 16 Carry, 16 Move - Total Cost: 1800
+                body = { work: 2, carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
+                body = { work: 2, carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
-            // 2 work, 4 carry, 3 move - total cost: 550
-            this.getBody_Grouped({ WORK: 2, CARRY: 5, MOVE: 3 });
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-            // 2 work, 6 carry, 2 move - total cost: 800
-            this.getBody_Grouped({ WORK: 2, CARRY: 6, MOVE: 6 });
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-            // 2 work, 11 carry, 11 move - total cost: 1300
-            this.getBody_Grouped({ WORK: 2, CARRY: 11, MOVE: 11 });
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-            // 2 work, 16 carry, 16 move - total cost: 1800
-            this.getBody_Grouped({ WORK: 2, CARRY: 16, MOVE: 16 });
-        }
-
-        // Tier 6
-        if (tier === TIER_6 || tier === TIER_7 || tier === TIER_8) {
-            // Largest harvester we want, potential to adjust later
-            // 2 work, 21 carry, 21 move - total cost: 2200
-            this.getBody_Grouped({ WORK: 2, CARRY: 20, MOVE: 20 });
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError("Invalid Tier List", "generateBody helper didn't find the tier requested", ERROR_ERROR);
-        return undefined;
     }
 
     /**
@@ -174,510 +180,552 @@ export class SpawnHelper {
      * @param tier the tier of the room
      */
     public static generateWorkerBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
-            // 1 work, 2 carry, 2 move - total cost: 300
-            this.getBody_Grouped({ WORK: 1, CARRY: 2, MOVE: 2 });
+        // Default Values for Worker
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
+                body = { work: 1, carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
+                body = { work: 2, carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 4 Work, 4 Carry, 4 Move - Total Cost: 800
+                body = { work: 4, carry: 4, move: 4 };
+                break;
+
+            case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
+                body = { work: 7, carry: 6, move: 6 };
+                break;
+
+            case TIER_5 || TIER_6 || TIER_7 || TIER_8: // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
+                body = { work: 10, carry: 8, move: 8 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
-            // 2 work, 4 carry, 3 move - total cost: 550
-            this.getBody_Grouped({ WORK: 2, CARRY: 5, MOVE: 3 });
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-            // 4 work, 4 carry, 4 move - total cost: 800
-            this.getBody_Grouped({ WORK: 4, CARRY: 4, MOVE: 4 });
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-            // 7 work, 6 carry, 6 move - total cost: 1300
-            this.getBody_Grouped({ WORK: 7, CARRY: 6, MOVE: 6 });
-        }
-
-        // Tier 5
-        if (tier === TIER_5 || tier === TIER_6 || tier === TIER_7 || tier === TIER_8) {
-            // Want to cap workers at 400 ish energy so they don't monopolize the energy
-            // And I think 10 work will suffice since they have been essentially
-            // demoted to janitors and builders by tier 6, so no need to increase from here
-            // 10 work, 8 carry, 8 move - total cost: 1800
-            this.getBody_Grouped({ WORK: 10, CARRY: 8, MOVE: 8 });
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for lorry creep
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateLorryBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Lorry
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for power upgrader creep
+     * extra for commit
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generatePowerUpgraderBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Power Upgrader
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
     // ------------
 
     // Remote -----
     /**
      * Generate body for remote miner creep
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateRemoteMinerBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Remote Miner
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for remote harvester creep
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateRemoteHarvesterBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Remote Harvester
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for remote reserver creep
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateRemoteReserverBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Remote Reserver
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for remote colonizer creep
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateRemoteColonizerBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Remote Colonizer
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for remote defender creep
+     * TODO Complete this
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateRemoteDefenderBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Remote Defender
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
     // ----------
 
     // Military -----
     /**
      * Generate body for zealot creep
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateZealotBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Zealot
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for medic creep
+     * TODO Complete this
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateMedicBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Medic
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
 
     /**
      * Generate body for stalker creep
+     * TODO Complete this
+     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateStalkerBody(tier: number): BodyPartConstant[] | undefined {
-        // Tier 1
-        if (tier === TIER_1) {
+        // Default Values for Stalker
+        let body: CreepBodyDescriptor | undefined;
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
+                body = { carry: 2, move: 2 };
+                break;
+
+            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
+                body = { carry: 5, move: 3 };
+                break;
+
+            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
+                body = { carry: 6, move: 6 };
+                break;
+
+            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
+                body = { carry: 11, move: 11 };
+                break;
+
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
+                body = { carry: 16, move: 16 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+                body = { carry: 20, move: 20 };
+                break;
         }
 
-        // Tier 2
-        if (tier === TIER_2) {
+        // Generate creep body based on body array and options
+        if (body !== undefined) {
+            return SpawnApi.getCreepBody(body, opts);
+        } else {
+            UtilHelper.throwError(
+                "Invalid Tier List",
+                "Ensure that the tier being passed to the function is valid." +
+                    "Ensure that there is a body descriptor created for that tier.",
+                ERROR_ERROR
+            );
+            return undefined;
         }
-
-        // Tier 3
-        if (tier === TIER_3) {
-        }
-
-        // Tier 4
-        if (tier === TIER_4) {
-        }
-
-        // Tier 5
-        if (tier === TIER_5) {
-        }
-
-        // Tier 6
-        if (tier === TIER_6) {
-        }
-
-        // Tier 7
-        if (tier === TIER_7) {
-        }
-
-        // Tier 8
-        if (tier === TIER_8) {
-        }
-
-        // Throw error if we didn't find a valid tier
-        UtilHelper.throwError(
-            "Invalid Tier List",
-            "generate body helper didn't find the tier it was passed",
-            ERROR_ERROR
-        );
-        return undefined;
     }
     // --------------
 }

@@ -390,7 +390,7 @@ export default class SpawnApi {
         /**
          * Verify bodyObject - Return null if invalid
          */
-
+        // super dope example of fail first practice that we should be implementing, :taco:
         if (SpawnHelper.verifyDescriptor(bodyObject) === false) {
             UtilHelper.throwError(
                 "Invalid Creep Body Descriptor",
@@ -452,16 +452,10 @@ export default class SpawnApi {
             return creepBody;
         }
     }
-    /**
-     * check if our remote room needs a remote defender
-     * @param room the home room associated with the remote room
-     */
-    private static needRemoteDefender(room: Room): boolean {
-        return false;
-    }
 
     /**
      * get the number of active miners
+     * TODO Complete this
      * ie miners with more than 50 TTL
      * @param room the room we are checking in
      */
