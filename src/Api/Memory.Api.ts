@@ -1,5 +1,13 @@
-import { ROOM_STATE_INTRO, STRUCT_CACHE_TTL } from "utils/Constants";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import {
+    ROOM_STATE_INTRO,
+    SOURCE_CACHE_TTL,
+    STRUCT_CACHE_TTL,
+    CONSTR_CACHE_TTL,
+    HCREEP_CACHE_TTL,
+    FCREEP_CACHE_TTL,
+    DEPNDT_CACHE_TTL
+} from "utils/Constants";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -18,13 +26,18 @@ export default class MemoryApi {
         for (const roomName in Memory.rooms) {
             if (!(roomName in Game.rooms)) {
                 delete Memory.rooms[roomName];
-            } else {
-                // this.getRoomMemory(Game.rooms[roomName]);
             }
         }
 
         // dead flags
-        /** This will be a complex method depending on implementation of flags */
+        // TODO Complete a method to remove flag effects
+        for (const flagName in Memory.flags) {
+            if (!(flagName in Game.flags)) {
+                // * Call a function to handle removing the effects of a flag removal here
+                // RoomHelper/MemoryHelper.unassignFlag()
+                delete Memory.flags[flagName];
+            }
+        }
     }
 
     /**
@@ -117,12 +130,10 @@ export default class MemoryApi {
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
     ): Array<Creep | null> {
-        const CacheTTL = 50;
-
         if (
             forceUpdate ||
             !Memory.rooms[room.name].creeps ||
-            Memory.rooms[room.name].creeps.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].creeps.cache < Game.time - FCREEP_CACHE_TTL
         ) {
             MemoryHelper_Room.updateMyCreeps(room);
         }
@@ -152,12 +163,10 @@ export default class MemoryApi {
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
     ): Array<Creep | null> {
-        const CacheTTL = 1;
-
         if (
             forceUpdate ||
             !Memory.rooms[room.name].hostiles ||
-            Memory.rooms[room.name].creeps.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].creeps.cache < Game.time - HCREEP_CACHE_TTL
         ) {
             MemoryHelper_Room.updateHostileCreeps(room);
         }
@@ -259,12 +268,10 @@ export default class MemoryApi {
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
     ) {
-        const CacheTTL = 50;
-
         if (
             forceUpdate ||
             !Memory.rooms[room.name].constructionSites ||
-            Memory.rooms[room.name].constructionSites.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].constructionSites.cache < Game.time - CONSTR_CACHE_TTL
         ) {
             MemoryHelper_Room.updateConstructionSites(room);
         }
@@ -291,19 +298,20 @@ export default class MemoryApi {
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
     ): Array<Source | null> {
-        const CacheTTL = -1;
-
         let sources: Array<Source | null>;
 
         if (
             forceUpdate ||
             Memory.rooms[room.name].sources === undefined ||
-            Memory.rooms[room.name].sources.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].sources.cache < Game.time - SOURCE_CACHE_TTL
         ) {
             MemoryHelper_Room.updateSources(room);
         }
 
         sources = _.map(Memory.rooms[room.name].sources.data, (id: string) => Game.getObjectById(id));
+        if (filterFunction !== undefined) {
+            _.filter(sources, filterFunction);
+        }
 
         return sources;
     }
@@ -321,12 +329,10 @@ export default class MemoryApi {
         filterFunction?: (object: Room) => boolean,
         forceUpdate?: boolean
     ): Room[] {
-        const RemoteTTL = -1;
-
         if (
             forceUpdate ||
             Memory.rooms[room.name].remoteRooms === undefined ||
-            Memory.rooms[room.name].remoteRooms.cache < Game.time - RemoteTTL
+            Memory.rooms[room.name].remoteRooms.cache < Game.time - DEPNDT_CACHE_TTL
         ) {
             // ! Not implemented yet - Empty function
             MemoryHelper_Room.updateDependentRooms(room);
@@ -346,12 +352,10 @@ export default class MemoryApi {
      * @param forceUpdate [Optional] Forcibly invalidate the cache
      */
     public static getClaimRooms(room: Room, filterFunction?: (object: Room) => boolean, forceUpdate?: boolean): Room[] {
-        const ClaimTTL = -1;
-
         if (
             forceUpdate ||
             Memory.rooms[room.name].remoteRooms === undefined ||
-            Memory.rooms[room.name].claimRooms.cache < Game.time - ClaimTTL
+            Memory.rooms[room.name].claimRooms.cache < Game.time - DEPNDT_CACHE_TTL
         ) {
             // ! Not implemented yet - Empty function
             MemoryHelper_Room.updateDependentRooms(room);
@@ -367,12 +371,10 @@ export default class MemoryApi {
         filterFUnction?: (object: Room) => boolean,
         forceUpdate?: boolean
     ): Room[] {
-        const AttackTTL = -1;
-
         if (
             forceUpdate ||
             Memory.rooms[room.name].attackRooms === undefined ||
-            Memory.rooms[room.name].attackRooms.cache < Game.time - AttackTTL
+            Memory.rooms[room.name].attackRooms.cache < Game.time - DEPNDT_CACHE_TTL
         ) {
             MemoryHelper_Room.updateDependentRooms(room);
         }

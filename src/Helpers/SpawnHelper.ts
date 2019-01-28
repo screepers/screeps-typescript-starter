@@ -1,6 +1,6 @@
 import UtilHelper from "./UtilHelper";
 import SpawnApi from "Api/Spawn.Api";
-import { GROUPED, COLLATED } from "utils/Constants";
+import { GROUPED, COLLATED, BODYPARTS_ALL } from "utils/Constants";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -18,10 +18,10 @@ export class SpawnHelper {
             if (bodyObject[part] <= 0) {
                 valid = false;
             }
-            if (BODYPARTS_ALL[part] === undefined) {
-                // ! Technically invalid for testing atm - Need to fix
-                valid = false;
-            }
+            // if (!(part in BODYPARTS_ALL)) {
+            //     // ! Technically invalid for testing atm - Need to fix
+            //     valid = false;
+            // }
         }
         return valid;
     }

@@ -12,6 +12,7 @@ import {
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
 import MemoryApi from "./Memory.Api";
+import MemoryHelper from "Helpers/MemoryHelper";
 
 /**
  * The API used by the spawn manager
@@ -328,7 +329,6 @@ export default class SpawnApi {
      */
     public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
         // Call the correct helper function based on creep role
-        // Miner
         switch (role) {
             case ROLE_MINER:
                 return SpawnHelper.generateMinerBody(tier);
@@ -390,7 +390,6 @@ export default class SpawnApi {
         /**
          * Verify bodyObject - Return null if invalid
          */
-        // super dope example of fail first practice that we should be implementing, :taco:
         if (SpawnHelper.verifyDescriptor(bodyObject) === false) {
             UtilHelper.throwError(
                 "Invalid Creep Body Descriptor",
@@ -454,13 +453,15 @@ export default class SpawnApi {
     }
 
     /**
-     * get the number of active miners
-     * TODO Complete this
-     * ie miners with more than 50 TTL
+     * Returns the number of miners that are not spawning, and have > 50 ticksToLive
      * @param room the room we are checking in
      */
     private static getActiveMiners(room: Room): number {
-        // all miners with more than 50 TTL
-        return 1;
+        let miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER);
+        miners = _.filter(miners, (creep: Creep) => {
+            // False if miner is spawning or has less than 50 ticks to live
+            return !creep.spawning && creep.ticksToLive! > 50;
+        });
+        return miners.length;
     }
 }

@@ -1,5 +1,6 @@
 import { STRUCT_CACHE_TTL } from "utils/constants";
 import MemoryHelper_Room from "./MemoryHelper_Room";
+import MemoryApi from "Api/Memory.Api";
 
 // Accessing Memory Helpers
 export default class MemoryHelper {
@@ -30,6 +31,18 @@ export default class MemoryHelper {
             Game.getObjectById(id)
         );
         return structures;
+    }
+
+    /**
+     * Returns an array of creeps of a role
+     * @param role The role to check for
+     */
+    public static getCreepOfRole(room: Room, role: RoleConstant, forceUpdate?: boolean): Array<Creep | null> {
+        const filterByRole = (creep: Creep) => {
+            return creep.memory.role === role;
+        };
+        const creepsOfRole = MemoryApi.getMyCreeps(room, filterByRole);
+        return creepsOfRole;
     }
 
     /**

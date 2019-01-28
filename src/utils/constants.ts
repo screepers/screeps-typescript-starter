@@ -1,6 +1,6 @@
 /**
  *
- * GAME CONSTANTS
+ * GAME CONSTANTS - For easy test purposes.. Need to find a better way to handle this
  *
  */
 const STRUCTURE_EXTENSION = "extension";
@@ -24,11 +24,9 @@ const STRUCTURE_NUKER = "nuker";
 const STRUCTURE_PORTAL = "portal";
 /**
  *
- * END GAME CONSTANTS
+ * END GAME-CONSTANTS
  *
  */
-
-// tslint:disable:object-literal-sort-keys
 
 // Room State Constants
 export const ROOM_STATE_INTRO = 0;
@@ -128,7 +126,13 @@ export const WALL_LIMIT: number[] = [
 ];
 
 // Cache Tick Limits
-export const STRUCT_CACHE_TTL = 50;
+export const STRUCT_CACHE_TTL = 50; // Structures
+export const SOURCE_CACHE_TTL = -1; // Sources
+export const CONSTR_CACHE_TTL = 50; // Construction Sites
+export const FCREEP_CACHE_TTL = 20; // Friendly Creep
+export const HCREEP_CACHE_TTL = 1; // Hostile Creep
+// ? Should we change DEPNDT to be 3 seperate consts? Attack, Remote, Claim?
+export const DEPNDT_CACHE_TTL = 50; // Dependent Rooms - Attack, Remote, Claim
 
 // Error Severity Constants
 export const ERROR_FATAL = 3; // Very severe error - Game ruining
