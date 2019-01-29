@@ -282,7 +282,7 @@ interface RoomMemory {
     claimRooms: Cache;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
@@ -534,11 +534,11 @@ declare const TIER_8 = 12300;
 
 type TierConstant = TIER_1 | TIER_2 | TIER_3 | TIER_4 | TIER_5 | TIER_6 | TIER_7 | TIER_8;
 
-type TIER_1 = 1;
-type TIER_2 = 2;
-type TIER_3 = 3;
-type TIER_4 = 4;
-type TIER_5 = 5;
-type TIER_6 = 6;
-type TIER_7 = 7;
-type TIER_8 = 8;
+type TIER_1 = 300;
+type TIER_2 = 550;
+type TIER_3 = 800;
+type TIER_4 = 1300;
+type TIER_5 = 1800;
+type TIER_6 = 2300;
+type TIER_7 = 5300;
+type TIER_8 = 12300;

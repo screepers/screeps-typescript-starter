@@ -1,6 +1,6 @@
 import UtilHelper from "./UtilHelper";
 import SpawnApi from "Api/Spawn.Api";
-import { GROUPED, COLLATED, BODYPARTS_ALL } from "utils/Constants";
+import { GROUPED, COLLATED } from "utils/Constants";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -93,7 +93,7 @@ export class SpawnHelper {
      * Generate body for miner creep
      * @param tier The tier of the room
      */
-    public static generateMinerBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateMinerBody(tier: TierConstant): BodyPartConstant[] | undefined {
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
@@ -119,7 +119,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -130,7 +130,7 @@ export class SpawnHelper {
      * Generate body for Harvester creep
      * @param tier the tier of the room
      */
-    public static generateHarvesterBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateHarvesterBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for harvester
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -168,7 +168,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -179,7 +179,7 @@ export class SpawnHelper {
      * Generate body for worker creep
      * @param tier the tier of the room
      */
-    public static generateWorkerBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateWorkerBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Worker
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -213,7 +213,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -222,36 +222,32 @@ export class SpawnHelper {
 
     /**
      * Generate body for lorry creep
-     * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateLorryBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateLorryBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Lorry
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
+        // There are currently no plans to use lorry before terminal becomes available
         switch (tier) {
-            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
-                body = { carry: 2, move: 2 };
+            case TIER_1: // 3 Carry, 3 Move - Total Cost: 300
+                body = { carry: 3, move: 3 };
                 break;
 
-            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
-                body = { carry: 5, move: 3 };
+            case TIER_2: // 6 Carry, 5 Move - Total Cost: 550
+                body = { carry: 6, move: 5 };
                 break;
 
-            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
-                body = { carry: 6, move: 6 };
+            case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
+                body = { carry: 8, move: 8 };
                 break;
 
-            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
-                body = { carry: 11, move: 11 };
+            case TIER_4 || TIER_5: // 10 Carry, 10 Move - Total Cost: 1000
+                body = { carry: 10, move: 10 };
                 break;
 
-            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
-                body = { carry: 16, move: 16 };
-                break;
-
-            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
+            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2000
                 body = { carry: 20, move: 20 };
                 break;
         }
@@ -263,7 +259,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -272,38 +268,28 @@ export class SpawnHelper {
 
     /**
      * Generate body for power upgrader creep
-     * extra for commit
-     * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generatePowerUpgraderBody(tier: number): BodyPartConstant[] | undefined {
+    public static generatePowerUpgraderBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Power Upgrader
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
+        // There are currently no plans to use power upgraders before links become available
+        // Need to experiment with work parts here and find out whats keeps up with the links
+        // Without over draining the storage, but still puts up numbers
         switch (tier) {
-            case TIER_1: // 2 Carry, 2 Move - Total Cost: 300
-                body = { carry: 2, move: 2 };
+
+            case TIER_6: // 15 Work, 1 Carry, 1 Move - Total Cost: 2300
+                body = { work: 18, carry: 8, move: 4 };
                 break;
 
-            case TIER_2: // 5 Carry, 3 Move - Total Cost: 550
-                body = { carry: 5, move: 3 };
+            case TIER_7: // 1 Work, 8 Carry, 4 Move - Total Cost: 2800
+                body = { work: 22, carry: 8, move: 4 };
                 break;
 
-            case TIER_3: // 6 Carry, 6 Move - Total Cost: 800
-                body = { carry: 6, move: 6 };
-                break;
-
-            case TIER_4: // 11 Carry, 11 Move - Total Cost: 1300
-                body = { carry: 11, move: 11 };
-                break;
-
-            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1800
-                body = { carry: 16, move: 16 };
-                break;
-
-            case TIER_6 || TIER_7 || TIER_8: // 20 Carry, 20 Move - Total Cost: 2200
-                body = { carry: 20, move: 20 };
+            case TIER_8: // 1 Work, 8 Carry, 4 Move - Total Cost: 2100
+                body = { work: 15, carry: 8, move: 4 }; // RCL 8 you can only do 15 per tick
                 break;
         }
 
@@ -314,7 +300,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -328,7 +314,7 @@ export class SpawnHelper {
      * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateRemoteMinerBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateRemoteMinerBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Remote Miner
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -366,7 +352,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -378,7 +364,7 @@ export class SpawnHelper {
      * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateRemoteHarvesterBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateRemoteHarvesterBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Remote Harvester
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -416,7 +402,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -428,7 +414,7 @@ export class SpawnHelper {
      * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateRemoteReserverBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateRemoteReserverBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Remote Reserver
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -466,7 +452,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -478,7 +464,7 @@ export class SpawnHelper {
      * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateRemoteColonizerBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateRemoteColonizerBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Remote Colonizer
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -516,7 +502,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -526,10 +512,9 @@ export class SpawnHelper {
     /**
      * Generate body for remote defender creep
      * TODO Complete this
-     * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateRemoteDefenderBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateRemoteDefenderBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Remote Defender
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -567,7 +552,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -581,7 +566,7 @@ export class SpawnHelper {
      * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateZealotBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateZealotBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Zealot
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -619,7 +604,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -632,7 +617,7 @@ export class SpawnHelper {
      * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateMedicBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateMedicBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Medic
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -670,7 +655,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;
@@ -683,7 +668,7 @@ export class SpawnHelper {
      * TODO Complete this
      * @param tier the tier of the room
      */
-    public static generateStalkerBody(tier: number): BodyPartConstant[] | undefined {
+    public static generateStalkerBody(tier: TierConstant): BodyPartConstant[] | undefined {
         // Default Values for Stalker
         let body: CreepBodyDescriptor | undefined;
         const opts: CreepBodyOptions = { mixType: GROUPED };
@@ -721,7 +706,7 @@ export class SpawnHelper {
             UtilHelper.throwError(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
-                    "Ensure that there is a body descriptor created for that tier.",
+                "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
             return undefined;

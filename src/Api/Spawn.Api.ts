@@ -291,35 +291,93 @@ export default class SpawnApi {
     }
 
     /**
-     * get energy cost of creep
-     * TODO Complete this
+     * get energy cost of creep body
      * @param room the room we are spawning them in
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning
      */
-    public static getEnergyCost(room: Room, roleConst: RoleConstant, tier: number): number {
-        return 1;
+    public static getEnergyCostOfBody(room: Room, body: BodyPartConstant[]): number {
+
+        // Create the object with the costs of each body part
+        let totalCost = 0;
+        let bodyPartCost: StringMap = {
+            work: 100,
+            carry: 50,
+            move: 50,
+            attack: 80,
+            ranged_attack: 150,
+            heal: 250,
+            claim: 600,
+            tough: 10
+        };
+
+        // Loop over the creep body array summing the total cost of the body parts
+        for (let i = 0; i < body.length; ++i) {
+            let currBodyPart = body[i];
+            totalCost += bodyPartCost[currBodyPart];
+        }
+
+        return totalCost;
     }
 
     /**
      * check what tier of this creep we are spawning
-     * TODO Complete this
      * @param room the room we are spawning them in
      * @param RoleConstant the role of the creep
      */
-    public static getTier(room: Room, roleConst: RoleConstant): number {
-        return 1;
+    public static getTier(room: Room, roleConst: RoleConstant): TierConstant {
+
+        let energyAvailable: number = room.energyAvailable;
+
+        // Check what tier we are in based on the amount of energy the room has
+        if (energyAvailable === TIER_8) {
+            return TIER_8;
+        }
+
+        if (energyAvailable >= TIER_7) {
+            return TIER_7;
+        }
+
+        if (energyAvailable >= TIER_6) {
+            return TIER_6;
+        }
+
+        if (energyAvailable >= TIER_5) {
+            return TIER_5;
+        }
+
+        if (energyAvailable >= TIER_4) {
+            return TIER_4;
+        }
+
+        if (energyAvailable >= TIER_3) {
+            return TIER_3;
+        }
+
+        if (energyAvailable >= TIER_2) {
+            return TIER_2;
+        }
+
+        // If we make it here, we are simply tier 1
+        return TIER_1;
+
     }
 
     /**
      * get the memory options for this creep
      * TODO Complete this
+     * !Note  check comment inside block
      * @param room the room we are spawning it in
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning
      */
     private static generateCreepOptions(room: Room, roleConst: RoleConstant, tier: number): void {
-        // .keep
+        // i tihnk im gonna tackle this the exact same way we're handling creep bodies... just have a helper
+        // function for every role, check the tier, and decide the options for it
+        // will keep it nice and easy to change and organoized and stuff too so should be good
+        // spawn api will be kinda crowded, but we're really close to being done with spawn
+        // just gotta finish bodies, do options, and write the spawn creep function
+        // then its off to the manager
     }
 
     /**
@@ -328,6 +386,7 @@ export default class SpawnApi {
      * @param role the role of the creep we want
      */
     public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
+
         // Call the correct helper function based on creep role
         switch (role) {
             case ROLE_MINER:
@@ -364,8 +423,6 @@ export default class SpawnApi {
                 );
                 return undefined;
         }
-
-        // If the role provided does not exist, throw an error and return undefined
     }
 
     /**
@@ -377,6 +434,7 @@ export default class SpawnApi {
         bodyObject: CreepBodyDescriptor,
         opts?: CreepBodyOptions
     ): BodyPartConstant[] | undefined {
+
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
 
