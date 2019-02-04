@@ -31,22 +31,32 @@ export default class MemoryHelper_Room {
     }
     /**
      * Find all hostile creeps in room
-     *
+     * TODO Check for boosted creeps
      * [Cached] Room.memory.hostiles
      * @param room The Room to update
      */
     public static updateHostileCreeps(room: Room): void {
-        Memory.rooms[room.name].hostiles = { data: null, cache: null };
+        Memory.rooms[room.name].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
 
         const enemies = room.find(FIND_HOSTILE_CREEPS);
-        // TODO: Sort enemies by type (ranged/melee/healer) AND also add TypeScript types that define types of enemy
-        Memory.rooms[room.name].hostiles.data = _.map(enemies, (creep: Creep) => creep.id);
+        // Sort creeps into categories
+        _.forEach(enemies, (enemy: Creep) => {
+            // * Check for boosted creeps and put them at the front of the if else stack
+            if (enemy.getActiveBodyparts(HEAL) > 0) {
+                Memory.rooms[room.name].hostiles.data.heal.push(enemy.id);
+            } else if (enemy.getActiveBodyparts(RANGED_ATTACK) > 0) {
+                Memory.rooms[room.name].hostiles.data.ranged.push(enemy.id);
+            } else if (enemy.getActiveBodyparts(ATTACK) > 0) {
+                Memory.rooms[room.name].hostiles.data.melee.push(enemy.id);
+            }
+        });
+
         Memory.rooms[room.name].hostiles.cache = Game.time;
     }
 
     /**
      * Find all owned creeps in room
-     *
+     * ? Should we filter these by role into memory? E.g. creeps.data.miners
      * [Cached] Room.memory.creeps
      * @param room The Room we are checking in
      */

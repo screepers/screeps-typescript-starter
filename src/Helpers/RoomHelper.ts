@@ -11,41 +11,63 @@ export default class RoomHelper {
      * @param room the room we want to check
      */
     public static isOwnedRoom(room: Room): boolean {
-        // check if the room name is the same as any you own
-        return !_.some(Game.rooms, r => r.name === room.name);
+        if (room.controller !== undefined) {
+            return room.controller.my;
+        } else {
+            return false;
+        }
     }
 
     /**
      * check if a specified room is an ally room
      * @param room the room we want to check
      */
-    public static isAllyRoom(room: any): boolean {
+    public static isAllyRoom(room: Room): boolean {
         // returns true if a room has one of our names but is not owned by us
-        return (
-            !this.isOwnedRoom(room) &&
-            (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2")
-        );
+        if (room.controller === undefined) {
+            return false;
+        } else {
+            return (
+                !this.isOwnedRoom(room) &&
+                (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2")
+            );
+        }
     }
 
     /**
-     * check if a room is a source keeper room -- IN PROGRESS
+     * check if a room is a source keeper room
      * @param room the room we want to check
      */
-    public static isSourceKeeperRoom(room: any): boolean {
-        // Just do that regex thing to check, we have it in our old code
-        return false;
+    public static isSourceKeeperRoom(room: Room): boolean {
+        // Contains x pos in [1], y pos in [2]
+        const parsedName: any = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(room.name);
+        const xOffset = parsedName[1] % 10;
+        const yOffset = parsedName[2] % 10;
+        // If x & y === 5 it's not SK, but both must be between 4 and 6
+        const isSK =
+            !(xOffset === 5 && xOffset === 5) && (xOffset >= 4 && xOffset <= 6) && (yOffset >= 4 && yOffset <= 6);
+        return isSK;
     }
 
     /**
-     * check if a room is a highway room -- IN PROGRESS
+     * check if a room is a highway room
      * @param room the room we want to check
      */
-    public static isHighwayRoom(room: any): boolean {
-        return false;
+    public static isHighwayRoom(room: Room): boolean {
+        // Contains x pos in [1], y pos in [2]
+        const parsedName: any = /^[WE]([0-9]+)[NS]([0-9]+)$/.exec(room.name);
+        // If x || y is divisible by 10, it's a highway
+        if (parsedName[1] % 10 === 0 || parsedName[2] % 10 === 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
-     * check if a room is close enough to send a creep to -- IN PROGRESS
+     * check if a room is close enough to send a creep to
+     * ? What are we doing with this? Checking if room is within roomdistance * 50 tiles - CreepTTL?
+     * TODO Complete this
      * @param room the room we want to check
      */
     public static inTravelRange(room: Room): boolean {
@@ -57,7 +79,7 @@ export default class RoomHelper {
      * @param room the room we want to check
      * @param objectConst the object we want to check for
      */
-    public static isExistInRoom(room: any, objectConst: StructureConstant): boolean {
+    public static isExistInRoom(room: Room, objectConst: StructureConstant): boolean {
         return MemoryApi.getStructures(room, s => s.structureType === objectConst).length > 0;
     }
 
@@ -141,6 +163,7 @@ export default class RoomHelper {
 
     /**
      * check if container mining is active in a room
+     * TODO Complete this
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
