@@ -297,10 +297,9 @@ export default class SpawnApi {
      * @param tier the tier of this creep we are spawning
      */
     public static getEnergyCostOfBody(room: Room, body: BodyPartConstant[]): number {
-
         // Create the object with the costs of each body part
         let totalCost = 0;
-        let bodyPartCost: StringMap = {
+        const bodyPartCost: StringMap = {
             work: 100,
             carry: 50,
             move: 50,
@@ -313,7 +312,7 @@ export default class SpawnApi {
 
         // Loop over the creep body array summing the total cost of the body parts
         for (let i = 0; i < body.length; ++i) {
-            let currBodyPart = body[i];
+            const currBodyPart = body[i];
             totalCost += bodyPartCost[currBodyPart];
         }
 
@@ -326,8 +325,7 @@ export default class SpawnApi {
      * @param RoleConstant the role of the creep
      */
     public static getTier(room: Room, roleConst: RoleConstant): TierConstant {
-
-        let energyAvailable: number = room.energyAvailable;
+        const energyAvailable: number = room.energyAvailable;
 
         // Check what tier we are in based on the amount of energy the room has
         if (energyAvailable === TIER_8) {
@@ -360,7 +358,6 @@ export default class SpawnApi {
 
         // If we make it here, we are simply tier 1
         return TIER_1;
-
     }
 
     /**
@@ -386,7 +383,6 @@ export default class SpawnApi {
      * @param role the role of the creep we want
      */
     public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
-
         // Call the correct helper function based on creep role
         switch (role) {
             case ROLE_MINER:
@@ -434,7 +430,6 @@ export default class SpawnApi {
         bodyObject: CreepBodyDescriptor,
         opts?: CreepBodyOptions
     ): BodyPartConstant[] | undefined {
-
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
 
