@@ -36,7 +36,7 @@
     "@types/sinon": "^5.0.5",
     "@types/sinon-chai": "^3.2.0",
     "chai": "^4.2.0",
-    "lodash": "^4.17.11",
+    "lodash": "^3.10.1",
     "mocha": "^5.2.0",
     "prettier": "^1.14.0",
     "rollup": "^0.63.4",
