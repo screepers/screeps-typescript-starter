@@ -127,6 +127,14 @@ export class SpawnHelper {
     }
 
     /**
+     * Generate options for miner creep
+     * @param tier the tier of the room
+     */
+    public static generateMinerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
+    }
+
+    /**
      * Generate body for Harvester creep
      * @param tier the tier of the room
      */
@@ -176,6 +184,14 @@ export class SpawnHelper {
     }
 
     /**
+     * Generate options for harvester creep
+     * @param tier the tier of the room
+     */
+    public static generateHarvesterOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
+    }
+
+    /**
      * Generate body for worker creep
      * @param tier the tier of the room
      */
@@ -218,6 +234,14 @@ export class SpawnHelper {
             );
             return undefined;
         }
+    }
+
+    /**
+     * Generate options for worker creep
+     * @param tier the tier of the room
+     */
+    public static generateWorkerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
     }
 
     /**
@@ -267,6 +291,14 @@ export class SpawnHelper {
     }
 
     /**
+     * Generate options for lorry creep
+     * @param tier the tier of the room
+     */
+    public static generateLorryOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
+    }
+
+    /**
      * Generate body for power upgrader creep
      * @param tier the tier of the room
      */
@@ -306,6 +338,14 @@ export class SpawnHelper {
             return undefined;
         }
     }
+
+    /**
+     * Generate options for power upgrader creep
+     * @param tier the tier of the room
+     */
+    public static generatePowerUpgraderOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
+    }
     // ------------
 
 
@@ -344,6 +384,14 @@ export class SpawnHelper {
             );
             return undefined;
         }
+    }
+
+    /**
+     * Generate options for remote miner creep
+     * @param tier the tier of the room
+     */
+    public static generateRemoteMinerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
     }
 
     /**
@@ -389,6 +437,14 @@ export class SpawnHelper {
     }
 
     /**
+     * Generate options for remote harvester creep
+     * @param tier the tier of the room
+     */
+    public static generateRemoteHarvesterOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
+    }
+
+    /**
      * Generate body for remote reserver creep
      * @param tier the tier of the room
      */
@@ -417,6 +473,14 @@ export class SpawnHelper {
             );
             return undefined;
         }
+    }
+
+    /**
+     * Generate options for remote reserver creep
+     * @param tier the tier of the room
+     */
+    public static generateRemoteReserverOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
     }
 
     /**
@@ -455,6 +519,14 @@ export class SpawnHelper {
             );
             return undefined;
         }
+    }
+
+    /**
+     * Generate options for remote colonizer creep
+     * @param tier the tier of the room
+     */
+    public static generateRemoteColonizerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
     }
 
     /**
@@ -497,6 +569,14 @@ export class SpawnHelper {
             );
             return undefined;
         }
+    }
+
+    /**
+     * Generate options for remote defender creep
+     * @param tier the tier of the room
+     */
+    public static generateRemoteDefenderOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+        return undefined;
     }
     // ----------
 
@@ -551,6 +631,14 @@ export class SpawnHelper {
     }
 
     /**
+     * Generate options for zealot creep
+     * @param tier the tier of the room
+     */
+    public static generateZealotOptions(tier: TierConstant): CreepOptionsMili | undefined {
+        return undefined;
+    }
+
+    /**
      * Generate body for medic creep
      * @param tier the tier of the room
      */
@@ -600,9 +688,15 @@ export class SpawnHelper {
     }
 
     /**
+     * Generate options for medic creep
+     * @param tier the tier of the room
+     */
+    public static generateMedicOptions(tier: TierConstant): CreepOptionsMili | undefined {
+        return undefined;
+    }
+
+    /**
      * Generate body for stalker creep
-     * TODO Complete this
-     * TODO Complete this
      * @param tier the tier of the room
      */
     public static generateStalkerBody(tier: TierConstant): BodyPartConstant[] | undefined {
@@ -648,6 +742,14 @@ export class SpawnHelper {
             );
             return undefined;
         }
+    }
+
+    /**
+     * Generate options for stalker creep
+     * @param tier the tier of the room
+     */
+    public static generateStalkerOptions(tier: TierConstant): CreepOptionsMili | undefined {
+        return undefined;
     }
     // --------------
 }

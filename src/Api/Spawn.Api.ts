@@ -362,19 +362,47 @@ export default class SpawnApi {
 
     /**
      * get the memory options for this creep
-     * TODO Complete this
-     * !Note  check comment inside block
      * @param room the room we are spawning it in
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning
      */
-    private static generateCreepOptions(room: Room, roleConst: RoleConstant, tier: number): void {
-        // i tihnk im gonna tackle this the exact same way we're handling creep bodies... just have a helper
-        // function for every role, check the tier, and decide the options for it
-        // will keep it nice and easy to change and organoized and stuff too so should be good
-        // spawn api will be kinda crowded, but we're really close to being done with spawn
-        // just gotta finish bodies, do options, and write the spawn creep function
-        // then its off to the manager
+    private static generateCreepOptions(room: Room, role: RoleConstant, tier: TierConstant): CreepOptionsCiv | CreepOptionsMili | undefined {
+        // Call the correct helper function based on creep role
+        switch (role) {
+            case ROLE_MINER:
+                return SpawnHelper.generateMinerOptions(tier);
+            case ROLE_HARVESTER:
+                return SpawnHelper.generateHarvesterOptions(tier);
+            case ROLE_WORKER:
+                return SpawnHelper.generateWorkerOptions(tier);
+            case ROLE_LORRY:
+                return SpawnHelper.generateLorryOptions(tier);
+            case ROLE_POWER_UPGRADER:
+                return SpawnHelper.generatePowerUpgraderOptions(tier);
+            case ROLE_REMOTE_MINER:
+                return SpawnHelper.generateRemoteMinerOptions(tier);
+            case ROLE_REMOTE_HARVESTER:
+                return SpawnHelper.generateRemoteHarvesterOptions(tier);
+            case ROLE_COLONIZER:
+                return SpawnHelper.generateRemoteColonizerOptions(tier);
+            case ROLE_REMOTE_DEFENDER:
+                return SpawnHelper.generateRemoteDefenderOptions(tier);
+            case ROLE_REMOTE_RESERVER:
+                return SpawnHelper.generateRemoteReserverOptions(tier);
+            case ROLE_ZEALOT:
+                return SpawnHelper.generateZealotOptions(tier);
+            case ROLE_MEDIC:
+                return SpawnHelper.generateMedicOptions(tier);
+            case ROLE_STALKER:
+                return SpawnHelper.generateStalkerOptions(tier);
+            default:
+                UtilHelper.throwError(
+                    "Creep body failed generating.",
+                    "The role specified was invalid for generating the creep body.",
+                    ERROR_ERROR
+                );
+                return undefined;
+        }
     }
 
     /**
