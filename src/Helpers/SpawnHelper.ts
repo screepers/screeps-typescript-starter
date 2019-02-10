@@ -131,7 +131,34 @@ export class SpawnHelper {
      * @param tier the tier of the room
      */
     public static generateMinerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
-        return undefined;
+
+        let creepOptions: CreepOptionsCiv = this.getDefaultCreepOptionsCiv();
+
+        switch (tier) {
+            case TIER_1 || TIER_2 || TIER_3 || TIER_4 || TIER_5 || TIER_6 || TIER_7 || TIER_8:
+
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+
+                break;
+        }
+
+        return creepOptions;
     }
 
     /**
@@ -409,11 +436,11 @@ export class SpawnHelper {
                 body = { carry: 8, move: 8 }
                 break;
 
-            case TIER_4: // 10 Reserve, 10 Move- Total Cost: 1000
+            case TIER_4: // 10 Carry, 10 Move- Total Cost: 1000
                 body = { carry: 10, move: 10 };
                 break;
 
-            case TIER_5: // 12 Carry, 12 Move - Total Cost: 1200
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1600
                 body = { carry: 16, move: 16 };
                 break;
 
@@ -752,4 +779,45 @@ export class SpawnHelper {
         return undefined;
     }
     // --------------
+
+    /**
+     * returns a set of creep options with all default values
+     */
+    public static getDefaultCreepOptionsCiv(): CreepOptionsCiv {
+
+        return {
+            build: false,
+            upgrade: false,
+            repair: false,
+            wallRepair: false,
+            fillTower: false,
+            fillStorage: false,
+            fillContainer: false,
+            fillLink: false,
+            fillTerminal: false,
+            fillLab: false,
+            getFromStorage: false,
+            getFromContainer: false,
+            getDroppedEnergy: false,
+            getFromLink: false,
+            getFromTerminal: false,
+        };
+    }
+
+    /**
+     * returns set of mili creep options with all default values
+     */
+    public static getDefaultCreepOptionsMili(): CreepOptionsMili {
+        return {
+            squadSize: 0,
+            squadUUID: null,
+            rallyLocation: null,
+            seige: false,
+            dismantler: false,
+            healer: false,
+            attacker: false,
+            defender: false,
+            flee: false
+        };
+    }
 }

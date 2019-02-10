@@ -545,4 +545,11 @@ export default class SpawnApi {
         });
         return miners.length;
     }
+
+    /**
+     * generates a UUID for a squad
+     */
+    public static generateSquadUUID(seed?: number) {
+        return Math.random() * 10000000;
+    }
 }
