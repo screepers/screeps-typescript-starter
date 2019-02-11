@@ -112,7 +112,11 @@ export default class RoomApi {
         const idealTarget = RoomHelper.chooseTowerTarget(room);
 
         // have each tower attack this target
-        towers.forEach((t: any) => t.attack(idealTarget));
+        towers.forEach((t: any) => {
+            if (t !== null) {
+                t.attack(idealTarget);
+            }
+        });
     }
 
     /**
@@ -255,17 +259,14 @@ export default class RoomApi {
      * @param target the structure or creep we are checking
      */
     public static isFull(target: any): boolean {
-
         if (target instanceof Creep) {
-            return (_.sum(target.carry) === target.carryCapacity);
-        }
-        else if (target.hasOwnProperty("store")) {
-            return (_.sum(target.store) === target.storeCapacity);
+            return _.sum(target.carry) === target.carryCapacity;
+        } else if (target.hasOwnProperty("store")) {
+            return _.sum(target.store) === target.storeCapacity;
         }
 
         // if not one of these two, there was an error
-        UtilHelper.throwError("Invalid Target", "isFull called on target with no capacity for storage.",
-            ERROR_ERROR);
+        UtilHelper.throwError("Invalid Target", "isFull called on target with no capacity for storage.", ERROR_ERROR);
         throw new Error("isFull called on invalid target.");
     }
 
@@ -358,6 +359,4 @@ export default class RoomApi {
     public static runLabs(room: Room): void {
         // i have no idea yet lol
     }
-
-
 }

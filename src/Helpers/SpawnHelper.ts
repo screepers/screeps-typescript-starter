@@ -19,7 +19,7 @@ export class SpawnHelper {
                 valid = false;
             }
             // if (!(part in BODYPARTS_ALL)) {
-            //     // ! Technically invalid for testing atm - Need to fix
+            // * Technically invalid for testing atm - Need to fix
             //     valid = false;
             // }
         }

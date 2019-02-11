@@ -8,6 +8,7 @@ import {
     FCREEP_CACHE_TTL,
     DEPNDT_CACHE_TTL
 } from "utils/Constants";
+import { NO_CACHING_MEMORY } from "utils/config";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -131,6 +132,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Array<Creep | null> {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[room.name].creeps ||
             Memory.rooms[room.name].creeps.cache < Game.time - FCREEP_CACHE_TTL
@@ -164,6 +166,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Array<Creep | null> {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[room.name].hostiles ||
             Memory.rooms[room.name].creeps.cache < Game.time - HCREEP_CACHE_TTL
@@ -197,6 +200,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Array<Structure | null> {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].structures === undefined ||
             Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL
@@ -235,6 +239,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Array<Structure | null> {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].structures === undefined ||
             Memory.rooms[room.name].structures.data[type] === undefined ||
@@ -269,6 +274,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ) {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[room.name].constructionSites ||
             Memory.rooms[room.name].constructionSites.cache < Game.time - CONSTR_CACHE_TTL
@@ -301,6 +307,7 @@ export default class MemoryApi {
         let sources: Array<Source | null>;
 
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].sources === undefined ||
             Memory.rooms[room.name].sources.cache < Game.time - SOURCE_CACHE_TTL
@@ -330,6 +337,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Room[] {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].remoteRooms === undefined ||
             Memory.rooms[room.name].remoteRooms.cache < Game.time - DEPNDT_CACHE_TTL
@@ -353,6 +361,7 @@ export default class MemoryApi {
      */
     public static getClaimRooms(room: Room, filterFunction?: (object: Room) => boolean, forceUpdate?: boolean): Room[] {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].remoteRooms === undefined ||
             Memory.rooms[room.name].claimRooms.cache < Game.time - DEPNDT_CACHE_TTL
@@ -372,6 +381,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Room[] {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].attackRooms === undefined ||
             Memory.rooms[room.name].attackRooms.cache < Game.time - DEPNDT_CACHE_TTL

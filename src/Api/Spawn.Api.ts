@@ -366,7 +366,11 @@ export default class SpawnApi {
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning
      */
-    private static generateCreepOptions(room: Room, role: RoleConstant, tier: TierConstant): CreepOptionsCiv | CreepOptionsMili | undefined {
+    private static generateCreepOptions(
+        room: Room,
+        role: RoleConstant,
+        tier: TierConstant
+    ): CreepOptionsCiv | CreepOptionsMili | undefined {
         // Call the correct helper function based on creep role
         switch (role) {
             case ROLE_MINER:
@@ -398,7 +402,7 @@ export default class SpawnApi {
             default:
                 UtilHelper.throwError(
                     "Creep body failed generating.",
-                    "The role specified was invalid for generating the creep body.",
+                    'The role "' + role + '" was invalid for generating the creep body.',
                     ERROR_ERROR
                 );
                 return undefined;
@@ -442,7 +446,7 @@ export default class SpawnApi {
             default:
                 UtilHelper.throwError(
                     "Creep body failed generating.",
-                    "The role specified was invalid for generating the creep body.",
+                    'The role "' + role + '" was invalid for generating the creep body.',
                     ERROR_ERROR
                 );
                 return undefined;

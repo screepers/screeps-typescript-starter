@@ -1,4 +1,5 @@
 import { ERROR_FATAL, ERROR_ERROR, ERROR_WARN, COLORS } from "utils/Constants";
+import { ALLOW_CUSTOM_ERRORS } from "utils/config";
 
 export default class UtilHelper {
     /**
@@ -21,10 +22,10 @@ export default class UtilHelper {
         const bodyColor: string = useBodyColor !== undefined ? useBodyColor : "#ff1113";
 
         console.log('<font color="' + titleColor + '">' + title + "</font>");
-        if( severity > ERROR_WARN) {
+        // If error is sever enough, and config allows thrown errors
+        if (severity > ERROR_WARN && ALLOW_CUSTOM_ERRORS) {
             throw new Error(body);
-        }
-        else{
+        } else {
             console.log('<font color="' + bodyColor + '">' + body + "</font>");
         }
     }
