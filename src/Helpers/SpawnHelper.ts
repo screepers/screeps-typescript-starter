@@ -130,13 +130,16 @@ export class SpawnHelper {
      * Generate options for miner creep
      * @param tier the tier of the room
      */
-    public static generateMinerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+    public static generateMinerOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
 
         let creepOptions: CreepOptionsCiv = this.getDefaultCreepOptionsCiv();
 
-        switch (tier) {
-            case TIER_1 || TIER_2 || TIER_3 || TIER_4 || TIER_5 || TIER_6 || TIER_7 || TIER_8:
-
+        // Miners are unique in that they are focused on what job no matter what
+        // This is reflected in almost all their options being default values
+        switch (roomState) {
+            case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER || ROOM_STATE_INTER
+                || ROOM_STATE_ADVANCED || ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE
+                || ROOM_STATE_SEIGE || ROOM_STATE_NUKE_INBOUND || ROOM_STATE_SEIGE:
                 creepOptions = {
                     build: false,
                     upgrade: false,
@@ -144,7 +147,7 @@ export class SpawnHelper {
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
-                    fillContainer: false,
+                    fillContainer: true,        //
                     fillLink: false,
                     fillTerminal: false,
                     fillLab: false,
@@ -214,8 +217,114 @@ export class SpawnHelper {
      * Generate options for harvester creep
      * @param tier the tier of the room
      */
-    public static generateHarvesterOptions(tier: TierConstant): CreepOptionsCiv | undefined {
-        return undefined;
+    public static generateHarvesterOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
+
+        let creepOptions: CreepOptionsCiv = this.getDefaultCreepOptionsCiv();
+
+        switch (roomState) {
+            case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER:
+                // the comment marker on a line means its overwriting the defaults
+                creepOptions = {
+                    build: true,        //
+                    upgrade: true,      //
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: true,     //
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+                break;
+
+            case ROOM_STATE_INTER:
+                creepOptions = {
+                    build: true,        //
+                    upgrade: true,      //
+                    repair: true,       //
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,     //
+                    getDroppedEnergy: true,     //
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+                break;
+
+            case ROOM_STATE_ADVANCED:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: true,      //
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,       //
+                    getFromContainer: true,     //
+                    getDroppedEnergy: true,     //
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+                break;
+
+            case ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: true,      //
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,       //
+                    getFromContainer: true,     //
+                    getDroppedEnergy: true,     //
+                    getFromLink: false,
+                    getFromTerminal: true,      //
+                };
+                break;
+
+            case ROOM_STATE_SEIGE:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: true,        //
+                    fillStorage: true,      //
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,       //
+                    getFromContainer: true,     //
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+                break;
+        }
+
+        return creepOptions;
     }
 
     /**
@@ -267,8 +376,114 @@ export class SpawnHelper {
      * Generate options for worker creep
      * @param tier the tier of the room
      */
-    public static generateWorkerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
-        return undefined;
+    public static generateWorkerOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
+
+        let creepOptions: CreepOptionsCiv = this.getDefaultCreepOptionsCiv();
+
+        switch (roomState) {
+            case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER:
+                // the comment marker on a line means its overwriting the defaults
+                creepOptions = {
+                    build: true,        //
+                    upgrade: true,      //
+                    repair: true,       //
+                    wallRepair: true,   //
+                    fillTower: true,    //
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: true,     //
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+                break;
+
+            case ROOM_STATE_INTER:
+                creepOptions = {
+                    build: true,        //
+                    upgrade: true,      //
+                    repair: true,       //
+                    wallRepair: true,   //
+                    fillTower: true,    //
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,     //
+                    getDroppedEnergy: true,     //
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+                break;
+
+            case ROOM_STATE_ADVANCED:
+                creepOptions = {
+                    build: true,        //
+                    upgrade: true,      //
+                    repair: true,       //
+                    wallRepair: true,       //
+                    fillTower: true,        //
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,       //
+                    getFromContainer: true,     //
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false,
+                };
+                break;
+
+            case ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: true,      //
+                    fillContainer: false,
+                    fillLink: true,         //
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,       //
+                    getFromContainer: true,     //
+                    getDroppedEnergy: true,     //
+                    getFromLink: false,
+                    getFromTerminal: true,      //
+                };
+                break;
+
+            case ROOM_STATE_SEIGE:
+                creepOptions = {
+                    build: false,
+                    upgrade: true,      //
+                    repair: true,       //
+                    wallRepair: true,       //
+                    fillTower: true,        //
+                    fillStorage: true,      //
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,       //
+                    getFromContainer: true,     //
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: true,      //
+                };
+                break;
+        }
+
+        return creepOptions;
     }
 
     /**
@@ -321,8 +536,36 @@ export class SpawnHelper {
      * Generate options for lorry creep
      * @param tier the tier of the room
      */
-    public static generateLorryOptions(tier: TierConstant): CreepOptionsCiv | undefined {
-        return undefined;
+    public static generateLorryOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
+
+        let creepOptions: CreepOptionsCiv = this.getDefaultCreepOptionsCiv();
+
+        switch (roomState) {
+            case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER || ROOM_STATE_INTER
+                || ROOM_STATE_ADVANCED || ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE
+                || ROOM_STATE_SEIGE:
+                // the comment marker on a line means its overwriting the defaults
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: true,        //
+                    fillStorage: true,      //
+                    fillContainer: true,    //
+                    fillLink: true,         //
+                    fillTerminal: true,     //
+                    fillLab: true,          //
+                    getFromStorage: true,       //
+                    getFromContainer: true,     //
+                    getDroppedEnergy: true,     //
+                    getFromLink: true,          //
+                    getFromTerminal: true,      //
+                };
+                break;
+        }
+
+        return creepOptions;
     }
 
     /**
@@ -370,8 +613,35 @@ export class SpawnHelper {
      * Generate options for power upgrader creep
      * @param tier the tier of the room
      */
-    public static generatePowerUpgraderOptions(tier: TierConstant): CreepOptionsCiv | undefined {
-        return undefined;
+    public static generatePowerUpgraderOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
+
+        let creepOptions: CreepOptionsCiv = this.getDefaultCreepOptionsCiv();
+
+        // Fairly unique as well, they only upgrade
+        switch (roomState) {
+
+            case ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE || ROOM_STATE_SEIGE:
+                creepOptions = {
+                    build: false,
+                    upgrade: true,      //
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: true,          //
+                    getFromTerminal: false,
+                };
+                break;
+        }
+
+        return creepOptions;
     }
     // ------------
 
@@ -417,7 +687,7 @@ export class SpawnHelper {
      * Generate options for remote miner creep
      * @param tier the tier of the room
      */
-    public static generateRemoteMinerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+    public static generateRemoteMinerOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
         return undefined;
     }
 
@@ -467,7 +737,7 @@ export class SpawnHelper {
      * Generate options for remote harvester creep
      * @param tier the tier of the room
      */
-    public static generateRemoteHarvesterOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+    public static generateRemoteHarvesterOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
         return undefined;
     }
 
@@ -506,7 +776,7 @@ export class SpawnHelper {
      * Generate options for remote reserver creep
      * @param tier the tier of the room
      */
-    public static generateRemoteReserverOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+    public static generateRemoteReserverOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
         return undefined;
     }
 
@@ -552,7 +822,7 @@ export class SpawnHelper {
      * Generate options for remote colonizer creep
      * @param tier the tier of the room
      */
-    public static generateRemoteColonizerOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+    public static generateRemoteColonizerOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
         return undefined;
     }
 
@@ -602,7 +872,7 @@ export class SpawnHelper {
      * Generate options for remote defender creep
      * @param tier the tier of the room
      */
-    public static generateRemoteDefenderOptions(tier: TierConstant): CreepOptionsCiv | undefined {
+    public static generateRemoteDefenderOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
         return undefined;
     }
     // ----------
@@ -661,7 +931,7 @@ export class SpawnHelper {
      * Generate options for zealot creep
      * @param tier the tier of the room
      */
-    public static generateZealotOptions(tier: TierConstant): CreepOptionsMili | undefined {
+    public static generateZealotOptions(roomState: RoomStateConstant): CreepOptionsMili | undefined {
         return undefined;
     }
 
@@ -718,7 +988,7 @@ export class SpawnHelper {
      * Generate options for medic creep
      * @param tier the tier of the room
      */
-    public static generateMedicOptions(tier: TierConstant): CreepOptionsMili | undefined {
+    public static generateMedicOptions(roomState: RoomStateConstant): CreepOptionsMili | undefined {
         return undefined;
     }
 
@@ -775,7 +1045,7 @@ export class SpawnHelper {
      * Generate options for stalker creep
      * @param tier the tier of the room
      */
-    public static generateStalkerOptions(tier: TierConstant): CreepOptionsMili | undefined {
+    public static generateStalkerOptions(roomState: RoomStateConstant): CreepOptionsMili | undefined {
         return undefined;
     }
     // --------------

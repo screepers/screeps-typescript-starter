@@ -369,36 +369,36 @@ export default class SpawnApi {
     private static generateCreepOptions(
         room: Room,
         role: RoleConstant,
-        tier: TierConstant
+        roomState: RoomStateConstant
     ): CreepOptionsCiv | CreepOptionsMili | undefined {
         // Call the correct helper function based on creep role
         switch (role) {
             case ROLE_MINER:
-                return SpawnHelper.generateMinerOptions(tier);
+                return SpawnHelper.generateMinerOptions(roomState);
             case ROLE_HARVESTER:
-                return SpawnHelper.generateHarvesterOptions(tier);
+                return SpawnHelper.generateHarvesterOptions(roomState);
             case ROLE_WORKER:
-                return SpawnHelper.generateWorkerOptions(tier);
+                return SpawnHelper.generateWorkerOptions(roomState);
             case ROLE_LORRY:
-                return SpawnHelper.generateLorryOptions(tier);
+                return SpawnHelper.generateLorryOptions(roomState);
             case ROLE_POWER_UPGRADER:
-                return SpawnHelper.generatePowerUpgraderOptions(tier);
+                return SpawnHelper.generatePowerUpgraderOptions(roomState);
             case ROLE_REMOTE_MINER:
-                return SpawnHelper.generateRemoteMinerOptions(tier);
+                return SpawnHelper.generateRemoteMinerOptions(roomState);
             case ROLE_REMOTE_HARVESTER:
-                return SpawnHelper.generateRemoteHarvesterOptions(tier);
+                return SpawnHelper.generateRemoteHarvesterOptions(roomState);
             case ROLE_COLONIZER:
-                return SpawnHelper.generateRemoteColonizerOptions(tier);
+                return SpawnHelper.generateRemoteColonizerOptions(roomState);
             case ROLE_REMOTE_DEFENDER:
-                return SpawnHelper.generateRemoteDefenderOptions(tier);
+                return SpawnHelper.generateRemoteDefenderOptions(roomState);
             case ROLE_REMOTE_RESERVER:
-                return SpawnHelper.generateRemoteReserverOptions(tier);
+                return SpawnHelper.generateRemoteReserverOptions(roomState);
             case ROLE_ZEALOT:
-                return SpawnHelper.generateZealotOptions(tier);
+                return SpawnHelper.generateZealotOptions(roomState);
             case ROLE_MEDIC:
-                return SpawnHelper.generateMedicOptions(tier);
+                return SpawnHelper.generateMedicOptions(roomState);
             case ROLE_STALKER:
-                return SpawnHelper.generateStalkerOptions(tier);
+                return SpawnHelper.generateStalkerOptions(roomState);
             default:
                 UtilHelper.throwError(
                     "Creep body failed generating.",
