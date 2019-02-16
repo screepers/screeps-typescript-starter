@@ -1,5 +1,14 @@
-import { ROOM_STATE_INTRO, STRUCT_CACHE_TTL } from "utils/Constants";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import {
+    ROOM_STATE_INTRO,
+    SOURCE_CACHE_TTL,
+    STRUCT_CACHE_TTL,
+    CONSTR_CACHE_TTL,
+    HCREEP_CACHE_TTL,
+    FCREEP_CACHE_TTL,
+    DEPNDT_CACHE_TTL
+} from "utils/Constants";
+import { NO_CACHING_MEMORY } from "utils/config";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -18,13 +27,18 @@ export default class MemoryApi {
         for (const roomName in Memory.rooms) {
             if (!(roomName in Game.rooms)) {
                 delete Memory.rooms[roomName];
-            } else {
-                // this.getRoomMemory(Game.rooms[roomName]);
             }
         }
 
         // dead flags
-        /** This will be a complex method depending on implementation of flags */
+        // TODO Complete a method to remove flag effects
+        for (const flagName in Memory.flags) {
+            if (!(flagName in Game.flags)) {
+                // * Call a function to handle removing the effects of a flag removal here
+                // RoomHelper/MemoryHelper.unassignFlag()
+                delete Memory.flags[flagName];
+            }
+        }
     }
 
     /**
@@ -117,12 +131,11 @@ export default class MemoryApi {
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
     ): Array<Creep | null> {
-        const CacheTTL = 50;
-
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[room.name].creeps ||
-            Memory.rooms[room.name].creeps.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].creeps.cache < Game.time - FCREEP_CACHE_TTL
         ) {
             MemoryHelper_Room.updateMyCreeps(room);
         }
@@ -152,12 +165,11 @@ export default class MemoryApi {
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
     ): Array<Creep | null> {
-        const CacheTTL = 1;
-
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[room.name].hostiles ||
-            Memory.rooms[room.name].creeps.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].creeps.cache < Game.time - HCREEP_CACHE_TTL
         ) {
             MemoryHelper_Room.updateHostileCreeps(room);
         }
@@ -188,6 +200,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Array<Structure | null> {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].structures === undefined ||
             Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL
@@ -216,11 +229,17 @@ export default class MemoryApi {
      * @param room The room to check in
      * @param type The type of structure to retrieve
      * @param filterFunction [Optional] A function to filter by
-     * @param forceUpdate [Optional] Force structures memory to be updated 
+     * @param forceUpdate [Optional] Force structures memory to be updated
      * @returns Structure[] An array of structures of a single type
      */
-    public static getStructureOfType(room: Room, type: StructureConstant, filterFunction?: (object: any) => boolean, forceUpdate?: boolean): Array<Structure | null> {
+    public static getStructureOfType(
+        room: Room,
+        type: StructureConstant,
+        filterFunction?: (object: any) => boolean,
+        forceUpdate?: boolean
+    ): Array<Structure | null> {
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].structures === undefined ||
             Memory.rooms[room.name].structures.data[type] === undefined ||
@@ -229,9 +248,11 @@ export default class MemoryApi {
             MemoryHelper_Room.updateStructures(room);
         }
 
-        let structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) => Game.getObjectById(id));
-        
-        if( filterFunction !== undefined ) {
+        let structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) =>
+            Game.getObjectById(id)
+        );
+
+        if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
         }
 
@@ -252,12 +273,11 @@ export default class MemoryApi {
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
     ) {
-        const CacheTTL = 50;
-
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[room.name].constructionSites ||
-            Memory.rooms[room.name].constructionSites.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].constructionSites.cache < Game.time - CONSTR_CACHE_TTL
         ) {
             MemoryHelper_Room.updateConstructionSites(room);
         }
@@ -284,20 +304,93 @@ export default class MemoryApi {
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
     ): Array<Source | null> {
-        const CacheTTL = -1;
-
         let sources: Array<Source | null>;
 
         if (
+            NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[room.name].sources === undefined ||
-            Memory.rooms[room.name].sources.cache < Game.time - CacheTTL
+            Memory.rooms[room.name].sources.cache < Game.time - SOURCE_CACHE_TTL
         ) {
             MemoryHelper_Room.updateSources(room);
         }
 
         sources = _.map(Memory.rooms[room.name].sources.data, (id: string) => Game.getObjectById(id));
+        if (filterFunction !== undefined) {
+            _.filter(sources, filterFunction);
+        }
 
         return sources;
+    }
+
+    /**
+     * Get the remoteRoom objects
+     *
+     * Updates all dependencies if the cache is invalid, for efficiency
+     * @param room The room to check dependencies of
+     * @param filterFunction [Optional] The function to filter the room objects
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getRemoteRooms(
+        room: Room,
+        filterFunction?: (object: Room) => boolean,
+        forceUpdate?: boolean
+    ): Room[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            Memory.rooms[room.name].remoteRooms === undefined ||
+            Memory.rooms[room.name].remoteRooms.cache < Game.time - DEPNDT_CACHE_TTL
+        ) {
+            // ! Not implemented yet - Empty function
+            MemoryHelper_Room.updateDependentRooms(room);
+        }
+
+        const remoteRooms: Room[] = _.map(Memory.rooms[room.name].remoteRooms.data, (name: string) => Game.rooms[name]);
+
+        return remoteRooms;
+    }
+
+    /**
+     * Get the claimRoom objects
+     *
+     * Updates all dependencies if the cache is invalid
+     * @param room The room to check the dependencies of
+     * @param filterFunction [Optional] THe function to filter the room objects
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getClaimRooms(room: Room, filterFunction?: (object: Room) => boolean, forceUpdate?: boolean): Room[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            Memory.rooms[room.name].remoteRooms === undefined ||
+            Memory.rooms[room.name].claimRooms.cache < Game.time - DEPNDT_CACHE_TTL
+        ) {
+            // ! Not implemented yet - Empty function
+            MemoryHelper_Room.updateDependentRooms(room);
+        }
+
+        const claimRooms: Room[] = _.map(Memory.rooms[room.name].claimRooms.data, (name: string) => Game.rooms[name]);
+
+        return claimRooms;
+    }
+
+    public static getAttackRooms(
+        room: Room,
+        filterFUnction?: (object: Room) => boolean,
+        forceUpdate?: boolean
+    ): Room[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            Memory.rooms[room.name].attackRooms === undefined ||
+            Memory.rooms[room.name].attackRooms.cache < Game.time - DEPNDT_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateDependentRooms(room);
+        }
+
+        const attackRooms: Room[] = _.map(Memory.rooms[room.name].attackRooms.data, (name: string) => Game.rooms[name]);
+
+        return attackRooms;
     }
 }

@@ -1,5 +1,29 @@
 // constants -----
 
+// Error Constants
+declare const ERROR_FATAL = 3;
+declare const ERROR_ERROR = 2;
+declare const ERROR_WARN = 1;
+declare const ERROR_INFO = 0;
+
+type ErrorConstant = ERROR_FATAL | ERROR_ERROR | ERROR_WARN | ERROR_INFO;
+/**
+ *  Very severe error - Game ruining
+ */
+type ERROR_FATAL = 3;
+/**
+ *  Regular error - Creep/Room ruining
+ */
+type ERROR_ERROR = 2;
+/**
+ *  Small error - Something went wrong, but doesn't ruin anything
+ */
+type ERROR_WARN = 1;
+/**
+ *  Non-error - Used to log when something happens (e.g. memory is updated)
+ */
+type ERROR_INFO = 0;
+
 // room state constants
 
 declare const ROOM_STATE_INTRO = 0;
@@ -59,13 +83,13 @@ type ROOM_STATE_NUKE_INBOUND = 7;
 declare const ROLE_MINER = "miner";
 declare const ROLE_HARVESTER = "harvester";
 declare const ROLE_WORKER = "worker";
-declare const ROLE_POWER_UPGRADER = "power_upgrader";
+declare const ROLE_POWER_UPGRADER = "powerUpgrader";
 declare const ROLE_LORRY = "lorry";
-declare const ROLE_REMOTE_MINER = "remote_miner";
-declare const ROLE_REMOTE_HARVESTER = "remote_harvester";
-declare const ROLE_REMOTE_RESERVER = "remote_reserver";
-declare const ROLE_REMOTE_DEFENDER = "remote_defender";
-declare const ROLE_COLONIZER = "remote_colonizer";
+declare const ROLE_REMOTE_MINER = "remoteMiner";
+declare const ROLE_REMOTE_HARVESTER = "remoteHarvester";
+declare const ROLE_REMOTE_RESERVER = "remoteReserver";
+declare const ROLE_REMOTE_DEFENDER = "remoteDefender";
+declare const ROLE_COLONIZER = "remoteColonizer";
 declare const ROLE_ZEALOT = "zealot";
 declare const ROLE_STALKER = "stalker";
 declare const ROLE_MEDIC = "medic";
@@ -103,7 +127,7 @@ type ROLE_WORKER = "worker"; //
 /**
  * sits at the controller and upgrades full-time
  */
-type ROLE_POWER_UPGRADER = "power_upgrader"; //
+type ROLE_POWER_UPGRADER = "powerUpgrader"; //
 /**
  * moves energy around the room to where it needs to be
  */
@@ -111,23 +135,23 @@ type ROLE_LORRY = "lorry";
 /**
  * goes into remote room and sits on source to mine full-time
  */
-type ROLE_REMOTE_MINER = "remote_miner"; //
+type ROLE_REMOTE_MINER = "remoteMiner"; //
 /**
  * goes into remote room and brings energy back to main room
  */
-type ROLE_REMOTE_HARVESTER = "remote_harvester"; //
+type ROLE_REMOTE_HARVESTER = "remoteHarvester"; //
 /**
  * goes into remote room and reserves the controller full-time
  */
-type ROLE_REMOTE_RESERVER = "remote_reserver"; //
+type ROLE_REMOTE_RESERVER = "remoteReserver"; //
 /**
  * goes into remote room and clears out invaders
  */
-type ROLE_REMOTE_DEFENDER = "remote_defender"; //
+type ROLE_REMOTE_DEFENDER = "remoteDefender"; //
 /**
  * goes into claim room and helps get the spawn up and running
  */
-type ROLE_COLONIZER = "remote_colonizer"; //
+type ROLE_COLONIZER = "remoteColonizer"; //
 /**
  * Military Creep - To be described
  */
@@ -143,6 +167,29 @@ type ROLE_MEDIC = "medic";
 // --------------------------------------------------------------------
 
 /**
+ * Creep Body Options Object
+ */
+interface CreepBodyOptions {
+    mixType?: string;
+    toughFirst?: boolean;
+    healLast?: boolean;
+}
+
+/**
+ * Creep Body Descriptor Object
+ */
+interface CreepBodyDescriptor {
+    [index: string]: any;
+    move?: number;
+    work?: number;
+    carry?: number;
+    tough?: number;
+    attack?: number;
+    ranged_attack?: number;
+    heal?: number;
+    claim?: number;
+}
+/**
  * Ally Names
  */
 type AllyConstant = JAKESBOY2 | UHMBROCK;
@@ -150,7 +197,7 @@ type JAKESBOY2 = "jakesboy2";
 type UHMBROCK = "uhmbrock";
 
 /**
- * Generic 
+ * Generic
  */
 interface StringMap {
     [key: string]: any;
@@ -235,7 +282,7 @@ interface RoomMemory {
     claimRooms: Cache;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
@@ -368,6 +415,7 @@ interface CreepLimits extends StringMap {
  * creep limits for remote creeps
  */
 interface RemoteCreepLimits {
+    [index: string]: number;
     /**
      * limit for remote miners
      */
@@ -394,6 +442,7 @@ interface RemoteCreepLimits {
  * creep limits for domestic creeps
  */
 interface DomesticCreepLimits {
+    [index: string]: number;
     /**
      * limit for domestic miners
      */
@@ -420,6 +469,7 @@ interface DomesticCreepLimits {
  * creep limits for military creeps
  */
 interface MilitaryCreepLimits {
+    [index: string]: number;
     /**
      * limit for military zealots
      */
@@ -447,3 +497,48 @@ interface Cache {
      */
     cache: any;
 }
+
+/**
+ * Memory for flags. Allows us to tell if a flag should be
+ * deleted from memory or if it still needs to be processed
+ */
+interface FlagMemory {
+    /**
+     * if the flag has been set into the proper memory channels
+     */
+    processed: boolean;
+    /**
+     * if the flag has been removed from the game
+     */
+    deleted: boolean;
+}
+
+// Attack Flag Options
+/**
+ * Red - Red
+ * Zealot/Stalker/Medic Squad
+ */
+type ATTACK_BASIC_SQUAD = "basic_squad"; //
+
+/**
+ * Tier Definitions
+ */
+declare const TIER_1 = 300;
+declare const TIER_2 = 550;
+declare const TIER_3 = 800;
+declare const TIER_4 = 1300;
+declare const TIER_5 = 1800;
+declare const TIER_6 = 2300;
+declare const TIER_7 = 5300;
+declare const TIER_8 = 12300;
+
+type TierConstant = TIER_1 | TIER_2 | TIER_3 | TIER_4 | TIER_5 | TIER_6 | TIER_7 | TIER_8;
+
+type TIER_1 = 300;
+type TIER_2 = 550;
+type TIER_3 = 800;
+type TIER_4 = 1300;
+type TIER_5 = 1800;
+type TIER_6 = 2300;
+type TIER_7 = 5300;
+type TIER_8 = 12300;

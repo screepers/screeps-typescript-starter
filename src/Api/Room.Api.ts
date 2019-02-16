@@ -1,8 +1,10 @@
 import MemoryApi from "./Memory.Api";
 import RoomHelper from "Helpers/RoomHelper";
-import { ROOM_STATE_INTRO, WALL_LIMIT } from "utils/constants";
+import { ROOM_STATE_INTRO, WALL_LIMIT, ERROR_ERROR } from "utils/constants";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import MemoryHelper from "Helpers/MemoryHelper";
+import { ErrorMapper } from "utils/ErrorMapper";
+import UtilHelper from "Helpers/UtilHelper";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -110,7 +112,11 @@ export default class RoomApi {
         const idealTarget = RoomHelper.chooseTowerTarget(room);
 
         // have each tower attack this target
-        towers.forEach((t: any) => t.attack(idealTarget));
+        towers.forEach((t: any) => {
+            if (t !== null) {
+                t.attack(idealTarget);
+            }
+        });
     }
 
     /**
@@ -212,8 +218,21 @@ export default class RoomApi {
     public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
         // returns all walls and ramparts under the current wall/rampart limit
         const hpLimit: number = this.getWallHpLimit(room);
+<<<<<<< HEAD
         const walls: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_WALL, (s: StructureWall) => s.hits < hpLimit);
         const ramparts: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_RAMPART, (s: StructureRampart) => s.hits < hpLimit);
+=======
+        const walls: Array<Structure | null> = MemoryApi.getStructureOfType(
+            room,
+            STRUCTURE_WALL,
+            (s: StructureWall) => s.hits < hpLimit
+        );
+        const ramparts: Array<Structure | null> = MemoryApi.getStructureOfType(
+            room,
+            STRUCTURE_RAMPART,
+            (s: StructureRampart) => s.hits < hpLimit
+        );
+>>>>>>> 3e0bc9ea015f34f50868d6190b074a63c8d2bc69
 
         return walls.concat(ramparts);
     }
@@ -245,7 +264,15 @@ export default class RoomApi {
      * @param target the structure or creep we are checking
      */
     public static isFull(target: any): boolean {
-        return false;
+        if (target instanceof Creep) {
+            return _.sum(target.carry) === target.carryCapacity;
+        } else if (target.hasOwnProperty("store")) {
+            return _.sum(target.store) === target.storeCapacity;
+        }
+
+        // if not one of these two, there was an error
+        UtilHelper.throwError("Invalid Target", "isFull called on target with no capacity for storage.", ERROR_ERROR);
+        throw new Error("isFull called on invalid target.");
     }
 
     /**
@@ -269,5 +296,73 @@ export default class RoomApi {
         else {
             throw new Error("Error getting wall limit for room with undefined controller.");
         }
+    }
+
+    /**
+     * calls helper functions to create the full job queue for the room
+     * @param room the room we want to queue to be created for
+     */
+    public static createJobQueue(room: Room): void {
+        // this can call all the sub job queues maybe..
+    }
+
+    /**
+     * create a job queue for the room for worker creeps
+     * @param room the room we want the queue to be created for
+     */
+    public static createJobQueueWorker(room: Room): void {
+        // possibly a list of objects with 2 propeties, jobName and priority
+        // so we have some way thats less fragile than array order to
+        // figure out what jobs need to be tackled first.. idk just thinking
+    }
+
+    /**
+     * createa a job queue for the room for harvester creeps
+     * @param room the room we want the queue to be created for
+     */
+    public static createJobQueueLorry(room: Room): void {
+        //
+    }
+
+    /**
+     * create a list of ways to get energy from the room
+     * @param room the room we want the queue to be created for
+     */
+    public static createEnergyQueue(room: Room): void {
+        // we can access this list from memory for simplicity sake
+        // and creeps can decide which to pull from based on their creep options
+        // in memory... for example in room state advanced we cut off workers from containers
+        // but keep it open for harvesters.. creep options will make this simple i hope
+    }
+
+    /**
+     * run links for the room
+     * @param room the room we want to run links for
+     */
+    public static runLinks(room: Room): void {
+        // we find a way to get an upgrader link (closest one to controller)
+        // and make sure the other links keep this one full
+        // possibly also if all links energy together is below the
+        // carry cap of upgrader we could have workers fill it for them
+        // we might want to let workers help with spawning IF NEEDED in
+        // seige/military situation but im just rambling now
+    }
+
+    /**
+     * run terminal for the room
+     * @param room the room we want to run terminal for
+     */
+    public static runTerminal(room: Room): void {
+        // here we can do market stuff, send resources from room to room
+        // to each other, and make sure we have the ideal ratio of minerals
+        // we decide that we want
+    }
+
+    /**
+     * run labs for the room
+     * @param room the room we want to run labs for
+     */
+    public static runLabs(room: Room): void {
+        // i have no idea yet lol
     }
 }

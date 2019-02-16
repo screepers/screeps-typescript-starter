@@ -16,23 +16,47 @@ export default class MemoryHelper_Room {
     }
 
     /**
+     * Update room memory for all dependent room types
+     * TODO Implement this function - Decide how we plan to do it
+     * @param room The room to update the dependencies of
+     */
+    public static updateDependentRooms(room: Room): void {
+        // Cycle through all flags and check for any claim rooms or remote rooms
+        // ? Should we check for the closest main room?
+        // ? I have an idea of a system where we plant a remoteFlag/claimFlag
+        // ? and then we place a different colored flag in the room that we want
+        // ? to assign that remote/claim room to. Once the program detects the assignment flag
+        // ? and the room it assigns to, it removes the assignment flag and could optionally remove
+        // ? the remoteFlag as well (but I think it would be more clear to leave the flag in the room)
+    }
+    /**
      * Find all hostile creeps in room
-     *
+     * TODO Check for boosted creeps
      * [Cached] Room.memory.hostiles
      * @param room The Room to update
      */
     public static updateHostileCreeps(room: Room): void {
-        Memory.rooms[room.name].hostiles = { data: null, cache: null };
+        Memory.rooms[room.name].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
 
         const enemies = room.find(FIND_HOSTILE_CREEPS);
-        // TODO: Sort enemies by type (ranged/melee/healer) AND also add TypeScript types that define types of enemy
-        Memory.rooms[room.name].hostiles.data = _.map(enemies, (creep: Creep) => creep.id);
+        // Sort creeps into categories
+        _.forEach(enemies, (enemy: Creep) => {
+            // * Check for boosted creeps and put them at the front of the if else stack
+            if (enemy.getActiveBodyparts(HEAL) > 0) {
+                Memory.rooms[room.name].hostiles.data.heal.push(enemy.id);
+            } else if (enemy.getActiveBodyparts(RANGED_ATTACK) > 0) {
+                Memory.rooms[room.name].hostiles.data.ranged.push(enemy.id);
+            } else if (enemy.getActiveBodyparts(ATTACK) > 0) {
+                Memory.rooms[room.name].hostiles.data.melee.push(enemy.id);
+            }
+        });
+
         Memory.rooms[room.name].hostiles.cache = Game.time;
     }
 
     /**
      * Find all owned creeps in room
-     *
+     * ? Should we filter these by role into memory? E.g. creeps.data.miners
      * [Cached] Room.memory.creeps
      * @param room The Room we are checking in
      */
@@ -85,7 +109,7 @@ export default class MemoryHelper_Room {
 
     /**
      * Find all sources in room
-     * 
+     *
      * [Cached] Room.memory.sources
      * @param room The room to check in
      */
@@ -116,5 +140,32 @@ export default class MemoryHelper_Room {
     public static updateDefcon(room: Room, defconLevel: number): void {
         Memory.rooms[room.name].defcon = defconLevel;
         return;
+    }
+
+    /**
+     * update creep limits for domestic creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    public static updateDomesticLimits(room: Room, newLimits: DomesticCreepLimits): void {
+        Memory.rooms[room.name].creepLimit["domesticLimits"] = newLimits;
+    }
+
+    /**
+     * update creep limits for remote creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    public static updateRemoteLimits(room: Room, newLimits: RemoteCreepLimits): void {
+        Memory.rooms[room.name].creepLimit["remoteLimits"] = newLimits;
+    }
+
+    /**
+     * update creep limits for military creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    public static updateMilitaryLimits(room: Room, newLimits: MilitaryCreepLimits): void {
+        Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
     }
 }

@@ -1,3 +1,33 @@
+/**
+ *
+ * GAME CONSTANTS - For easy test purposes.. Need to find a better way to handle this
+ *
+ */
+const STRUCTURE_EXTENSION = "extension";
+const STRUCTURE_RAMPART = "rampart";
+const STRUCTURE_ROAD = "road";
+const STRUCTURE_SPAWN = "spawn";
+const STRUCTURE_LINK = "link";
+const STRUCTURE_WALL = "constructedWall";
+const STRUCTURE_KEEPER_LAIR = "keeperLair";
+const STRUCTURE_CONTROLLER = "controller";
+const STRUCTURE_STORAGE = "storage";
+const STRUCTURE_TOWER = "tower";
+const STRUCTURE_OBSERVER = "observer";
+const STRUCTURE_POWER_BANK = "powerBank";
+const STRUCTURE_POWER_SPAWN = "powerSpawn";
+const STRUCTURE_EXTRACTOR = "extractor";
+const STRUCTURE_LAB = "lab";
+const STRUCTURE_TERMINAL = "terminal";
+const STRUCTURE_CONTAINER = "container";
+const STRUCTURE_NUKER = "nuker";
+const STRUCTURE_PORTAL = "portal";
+/**
+ *
+ * END GAME-CONSTANTS
+ *
+ */
+
 // Room State Constants
 export const ROOM_STATE_INTRO = 0;
 export const ROOM_STATE_BEGINNER = 1;
@@ -12,16 +42,52 @@ export const ROOM_STATE_NUKE_INBOUND = 7;
 export const ROLE_MINER = "miner";
 export const ROLE_HARVESTER = "harvester";
 export const ROLE_WORKER = "worker";
-export const ROLE_POWER_UPGRADER = "power_upgrader";
+export const ROLE_POWER_UPGRADER = "powerUpgrader";
 export const ROLE_LORRY = "lorry";
-export const ROLE_REMOTE_MINER = "remote_miner";
-export const ROLE_REMOTE_HARVESTER = "remote_harvester";
-export const ROLE_REMOTE_RESERVER = "remote_reserver";
-export const ROLE_REMOTE_DEFENDER = "remote_defender";
-export const ROLE_COLONIZER = "remote_colonizer";
+export const ROLE_REMOTE_MINER = "remoteMiner";
+export const ROLE_REMOTE_HARVESTER = "remoteHarvester";
+export const ROLE_REMOTE_RESERVER = "remoteReserver";
+export const ROLE_REMOTE_DEFENDER = "remoteDefender";
+export const ROLE_COLONIZER = "remoteColonizer";
 export const ROLE_ZEALOT = "zealot";
 export const ROLE_STALKER = "stalker";
 export const ROLE_MEDIC = "medic";
+
+// Tier Constants
+export const TIER_1 = 300;
+export const TIER_2 = 550;
+export const TIER_3 = 800;
+export const TIER_4 = 1300;
+export const TIER_5 = 1800;
+export const TIER_6 = 2300;
+export const TIER_7 = 5300;
+export const TIER_8 = 12300;
+
+// Creep Body Layout Constants
+export const GROUPED = "grouped";
+export const COLLATED = "collated";
+
+// Role Priority List
+// * Keep this list ordered by spawn priority
+export const domesticRolePriority: RoleConstant[] = [
+    ROLE_MINER,
+    ROLE_HARVESTER,
+    ROLE_WORKER,
+    ROLE_POWER_UPGRADER,
+    ROLE_LORRY
+];
+
+// * Keep this list ordered by spawn priority
+export const remoteRolePriority: RoleConstant[] = [
+    ROLE_REMOTE_RESERVER,
+    ROLE_REMOTE_MINER,
+    ROLE_REMOTE_HARVESTER,
+    ROLE_REMOTE_DEFENDER,
+    ROLE_COLONIZER
+];
+
+// * Keep this list ordered by spawn priority
+export const militaryRolePriority: RoleConstant[] = [ROLE_MEDIC, ROLE_STALKER, ROLE_ZEALOT];
 
 // List of every structure in the game
 export const ALL_STRUCTURE_TYPES: StructureConstant[] = [
@@ -48,16 +114,35 @@ export const ALL_STRUCTURE_TYPES: StructureConstant[] = [
 
 // The Wall/Rampart HP Limit for each Controller level
 export const WALL_LIMIT: number[] = [
-    0,       // RCL 0
-    25000,   // RCL 1
-    50000,   // RCL 2
-    100000,  // RCL 3
-    250000,  // RCL 4
-    500000,  // RCL 5
+    0, // RCL 0
+    25000, // RCL 1
+    50000, // RCL 2
+    100000, // RCL 3
+    250000, // RCL 4
+    500000, // RCL 5
     1000000, // RCL 6
     1500000, // RCL 7
-    5000000  // RCL 8
+    5000000 // RCL 8
 ];
 
 // Cache Tick Limits
-export const STRUCT_CACHE_TTL = 50;
+export const STRUCT_CACHE_TTL = 50; // Structures
+export const SOURCE_CACHE_TTL = -1; // Sources
+export const CONSTR_CACHE_TTL = 50; // Construction Sites
+export const FCREEP_CACHE_TTL = 20; // Friendly Creep
+export const HCREEP_CACHE_TTL = 1; // Hostile Creep
+// ? Should we change DEPNDT to be 3 seperate consts? Attack, Remote, Claim?
+export const DEPNDT_CACHE_TTL = 50; // Dependent Rooms - Attack, Remote, Claim
+
+// Error Severity Constants
+export const ERROR_FATAL = 3; // Very severe error - Game ruining
+export const ERROR_ERROR = 2; // Regular error - Creep/Room ruining
+export const ERROR_WARN = 1; // Small error - Something went wrong, but doesn't ruin anything
+export const ERROR_INFO = 0; // Non-error - Used to log when something happens (e.g. memory is updated)
+
+// Color Constants
+export const COLORS: any = {};
+COLORS[ERROR_FATAL] = "#FF0000";
+COLORS[ERROR_ERROR] = "#E300FF";
+COLORS[ERROR_WARN] = "#F0FF00";
+COLORS[ERROR_INFO] = "#0045FF";
