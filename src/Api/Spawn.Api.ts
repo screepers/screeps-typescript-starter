@@ -246,6 +246,11 @@ export default class SpawnApi {
             STRUCTURE_SPAWN,
             (spawn: StructureSpawn) => !spawn.spawning
         );
+
+        if (openSpawns.length === 0) {
+            return null;
+        }
+
         return _.first(openSpawns);
     }
 
