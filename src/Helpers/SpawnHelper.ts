@@ -1350,4 +1350,24 @@ export class SpawnHelper {
             flee: false
         };
     }
+
+    /**
+     * generates a creep memory to give to a creep being spawned
+     */
+    public static generateDefaultCreepMemory(
+        roleConst: RoleConstant,
+        room: Room,
+        targetRoomParam: string,
+        creepOptions: CreepOptionsCiv | CreepOptionsMili
+    ): CreepMemory {
+
+        return {
+            role: roleConst,
+            homeRoom: room.name,
+            targetRoom: targetRoomParam,
+            workTarget: null,
+            options: creepOptions,
+            working: false
+        }
+    }
 }
