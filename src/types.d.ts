@@ -175,6 +175,14 @@ interface CreepBodyOptions {
     healLast?: boolean;
 }
 
+interface UserException {
+    title: string;
+    body: string;
+    severity: number;
+    titleColor: any;
+    bodyColor: string;
+}
+
 /**
  * Creep Body Descriptor Object
  */

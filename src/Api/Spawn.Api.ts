@@ -11,9 +11,10 @@ import {
 } from "utils/Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
-import RoomApi from "./Room.Api"
+import RoomApi from "./Room.Api";
 import MemoryApi from "./Memory.Api";
 import MemoryHelper from "Helpers/MemoryHelper";
+import UserException from "utils/UserException";
 
 /**
  * The API used by the spawn manager
@@ -302,10 +303,9 @@ export default class SpawnApi {
         spawn: StructureSpawn,
         targetRoom: string
     ): void {
-
         // Throw error if we don't have enough energy to spawn this creep
         if (this.getEnergyCostOfBody(body) > room.energyAvailable) {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Creep failed to spawn.",
                 'The role "' + role + '" was unable to spawn in room "' + room.name + '": Not enough energy .',
                 ERROR_WARN
@@ -402,7 +402,6 @@ export default class SpawnApi {
         squadUUID?: number | null,
         rallyLocation?: RoomPosition | null
     ): CreepOptionsCiv | CreepOptionsMili | undefined {
-
         // Set default values if military options aren't provided
         // If one of these aren't provided, then the entire purpose of them is nix,
         // So we just check if any of them aren't provided and set defaults for all in that case
@@ -441,12 +440,11 @@ export default class SpawnApi {
             case ROLE_STALKER:
                 return SpawnHelper.generateStalkerOptions(roomState, squadSize, squadUUID, rallyLocation);
             default:
-                UtilHelper.throwError(
+                throw new UserException(
                     "Creep body failed generating.",
                     'The role "' + role + '" was invalid for generating the creep body.',
                     ERROR_ERROR
                 );
-                return undefined;
         }
     }
 
@@ -485,13 +483,11 @@ export default class SpawnApi {
             case ROLE_STALKER:
                 return SpawnHelper.generateStalkerBody(tier);
             default:
-                UtilHelper.throwError(
+                throw new UserException(
                     "Creep body failed generating.",
                     'The role "' + role + '" was invalid for generating the creep body.',
                     ERROR_ERROR
                 );
-
-                return [];
         }
     }
 
@@ -518,7 +514,7 @@ export default class SpawnApi {
          * Verify bodyObject - Return null if invalid
          */
         if (SpawnHelper.verifyDescriptor(bodyObject) === false) {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Creep Body Descriptor",
                 "Ensure that the object being passed to getCreepBody is in the format { BodyPartConstant: NumberParts } and that NumberParts is > 0.",
                 ERROR_ERROR

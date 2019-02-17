@@ -1,6 +1,7 @@
 import UtilHelper from "./UtilHelper";
 import SpawnApi from "Api/Spawn.Api";
 import { GROUPED, COLLATED } from "utils/Constants";
+import UserException from "utils/UserException";
 
 /**
  * Functions to help keep Spawn.Api clean go here

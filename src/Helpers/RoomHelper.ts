@@ -3,6 +3,7 @@ import MemoryApi from "Api/Memory.Api";
 import MemoryHelper_Room from "./MemoryHelper_Room";
 import { WALL_LIMIT } from "utils/Constants";
 import UtilHelper from "./UtilHelper";
+import UserException from "utils/UserException";
 
 // helper functions for rooms
 export default class RoomHelper {
@@ -97,12 +98,11 @@ export default class RoomHelper {
             return target.energy;
         }
         // Throw an error to identify when this fail condition is met
-        UtilHelper.throwError(
+        throw new UserException(
             "Failed to getStoredAmount of a target",
             "ID: " + target.id + "\n" + JSON.stringify(target),
             ERROR_ERROR
         );
-        return -1;
     }
 
     /**
