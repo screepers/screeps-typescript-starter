@@ -5,6 +5,7 @@ import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import MemoryHelper from "Helpers/MemoryHelper";
 import { ErrorMapper } from "utils/ErrorMapper";
 import UtilHelper from "Helpers/UtilHelper";
+import UserException from "utils/UserException";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -266,8 +267,7 @@ export default class RoomApi {
         }
 
         // if not one of these two, there was an error
-        UtilHelper.throwError("Invalid Target", "isFull called on target with no capacity for storage.", ERROR_ERROR);
-        throw new Error("isFull called on invalid target.");
+        throw new UserException("Invalid Target", "isFull called on target with no capacity for storage.", ERROR_ERROR);
     }
 
     /**
@@ -289,7 +289,7 @@ export default class RoomApi {
             return WALL_LIMIT[room.controller.level] + chunkSize * numOfChunks;
         }
         else {
-            throw new Error("Error getting wall limit for room with undefined controller.");
+            throw new UserException("Error getting wall hp limit", "Room likely has an undefined controller.", ERROR_ERROR);
         }
     }
 

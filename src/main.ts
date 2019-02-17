@@ -26,19 +26,20 @@ import UtilHelper from "Helpers/UtilHelper";
 import { ERROR_FATAL, ERROR_ERROR, ERROR_INFO, ERROR_WARN } from "utils/Constants";
 
 export const loop = ErrorMapper.wrapLoop(() => {
+    try {
+        // clean up memory first
+        MemoryManager.runMemoryManager();
 
-  UtilHelper.throwError("This is a test title", "This is where the body message would be", ERROR_WARN);
-  // clean up memory first
-  try { MemoryManager.runMemoryManager(); } catch (e) { console.log("<font color=\"#efdc0e\">Error running MEMORY manager:\n</font>","<font color=\"#e04e4e\">", e.stack, "</font>") }
+        // run the empire and get all relevant info from that into memory
+        EmpireManager.runEmpireManager();
 
-  // run the empire and get all relevant info from that into memory
-  try { EmpireManager.runEmpireManager(); } catch (e) { console.log("<font color=\"#efdc0e\">Error running EMPIRE manager:\n</font>","<font color=\"#e04e4e\">", e.stack, "</font>") }
+        // run rooms
+        RoomManager.runRoomManager();
 
-  // run rooms
-  try { RoomManager.runRoomManager(); } catch (e) { console.log("<font color=\"#efdc0e\">Error running ROOM manager:\n</font>","<font color=\"#e04e4e\">", e.stack, "</font>") }
-
-  // run spawning
-  try { SpawnManager.runSpawnManager(); } catch (e) { console.log("<font color=\"#efdc0e\">Error running SPAWN manager:\n</font>","<font color=\"#e04e4e\">", e.stack, "</font>") }
-/*  */
-  // -------- end managers --------
+        // run spawning
+        SpawnManager.runSpawnManager();
+    } catch (e) {
+        UtilHelper.printError(e);
+    }
+    // -------- end managers --------
 });

@@ -1,6 +1,7 @@
 import UtilHelper from "./UtilHelper";
 import SpawnApi from "Api/Spawn.Api";
 import { GROUPED, COLLATED } from "utils/Constants";
+import UserException from "utils/UserException";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -116,13 +117,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
-            return undefined;
         }
     }
 
@@ -203,13 +203,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
-            return undefined;
         }
     }
 
@@ -354,13 +353,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
-            return undefined;
         }
     }
 
@@ -506,13 +504,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
             );
-            return undefined;
         }
     }
 
@@ -584,13 +581,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -659,13 +655,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -736,13 +731,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -847,13 +841,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -923,13 +916,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -1002,13 +994,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -1084,13 +1075,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -1175,13 +1165,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
@@ -1260,13 +1249,12 @@ export class SpawnHelper {
         if (body !== undefined) {
             return SpawnApi.getCreepBody(body, opts);
         } else {
-            UtilHelper.throwError(
+            throw new UserException(
                 "Invalid Tier List",
                 "Ensure that the tier being passed to the function is valid." +
                 "Ensure that there is a body descriptor created for that tier.",
                 ERROR_ERROR
-            );
-            return undefined;
+            ); 
         }
     }
 
