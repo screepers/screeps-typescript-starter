@@ -293,6 +293,40 @@ export default class MemoryApi {
     }
 
     /**
+     * Returns a list of tombstones in the room, updating if necessary
+     *
+     * @param room The room we want to look in
+     * @param filterFunction [Optional] The function to filter the tombstones objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Array<Tombstone | null> An array of tombstones, if there are any
+     */
+    public static getTombstones(
+        room: Room,
+        filterFunction?: (object: Tombstone) => boolean,
+        forceUpdate?: boolean
+    ): Array<Tombstone | null> {
+        // TODO Fill this out for Room.Api.CreateEnergyQueue
+        return [null];
+    }
+
+    /**
+     * Returns a list of the energy objects in a room, updating if necessary
+     *
+     * @param room The room we want to look in
+     * @param filterFunction [Optional] The function to filter the energy objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Array<RESOURCE_ENERGY | null> An array of dropped energy, if there are any
+     */
+    public static getDroppedEnergy(
+        room: Room,
+        filterFunction?: (object: RESOURCE_ENERGY) => boolean,
+        forceUpdate?: boolean
+    ): Array<RESOURCE_ENERGY | null> {
+        // TODO Fill this out for Room.Api.CreateEnergyQueue
+        return [null];
+    }
+
+    /**
      * get sources in the room
      * @param room the room we want sources from
      * @param filterFunction [Optional] The function to filter all source objects
@@ -386,6 +420,7 @@ export default class MemoryApi {
             Memory.rooms[room.name].attackRooms === undefined ||
             Memory.rooms[room.name].attackRooms.cache < Game.time - DEPNDT_CACHE_TTL
         ) {
+            // ! Not implemented yet - Empty Function
             MemoryHelper_Room.updateDependentRooms(room);
         }
 

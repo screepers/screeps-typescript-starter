@@ -237,8 +237,28 @@ export default class RoomApi {
      * get a list of open sources in the room (not saturated)
      * @param room the room we are checking
      */
-    public static getOpenSources(room: Room): void {
-        // lint installed again.. jake hates empty blocks
+    public static getOpenSources(room: Room): Array<Source | null> {
+        const sources = MemoryApi.getSources(room);
+        // ? this assumes that we are only using this for domestic rooms
+        // ? if we use it on domestic rooms then I'll need to distinguish between ROLE_REMOTE_MINER
+        const miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER);
+        const lowSources = _.filter(sources, (source: Source) => {
+            let totalWorkParts = 0;
+            // Count the number of work parts targeting the source
+            _.remove(miners, (miner: Creep) => {
+                if (miner.memory.workTarget === source.id) {
+                    const workPartCount = miner.getActiveBodyparts(WORK);
+                    totalWorkParts += workPartCount;
+                    return true;
+                }
+                return false;
+            });
+
+            // filter out sources where the totalWorkParts < workPartsNeeded ( energyCap / ticksToReset / energyPerPart )
+            return totalWorkParts < source.energyCapacity / 300 / 2;
+        });
+
+        return lowSources;
     }
 
     /**
@@ -287,9 +307,12 @@ export default class RoomApi {
             const numOfChunks: number = Math.floor((wallLevelHpDiff * controllerProgress) / chunkSize);
 
             return WALL_LIMIT[room.controller.level] + chunkSize * numOfChunks;
-        }
-        else {
-            throw new UserException("Error getting wall hp limit", "Room likely has an undefined controller.", ERROR_ERROR);
+        } else {
+            throw new UserException(
+                "Undefined Controller",
+                "Error getting wall limit for room with undefined controller.",
+                ERROR_ERROR
+            );
         }
     }
 

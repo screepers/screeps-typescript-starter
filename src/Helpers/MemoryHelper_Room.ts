@@ -123,6 +123,24 @@ export default class MemoryHelper_Room {
     }
 
     /**
+     * Finds all tombstones in room
+     *
+     * @param room The room to check in
+     */
+    public static updateTombstones(room: Room): void {
+        // TODO Fill this out
+    }
+
+    /**
+     * Find all dropped energy in a room
+     *
+     * @param room The room to check in
+     */
+    public static updateDroppedEnergy(room: Room): void {
+        // TODO Fill this out
+    }
+
+    /**
      * update the room state
      * @param room the room we are updating
      * @param stateConst the state we are applying to the room
