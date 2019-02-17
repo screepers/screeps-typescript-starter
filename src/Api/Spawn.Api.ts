@@ -239,7 +239,7 @@ export default class SpawnApi {
      * get the first available open spawn for a room
      * @param room the room we are checking the spawn for
      */
-    public static getOpenSpawn(room: Room): Structure<StructureConstant> | null {
+    public static getOpenSpawn(room: Room): any {
         // Get all openSpawns, and return the first
         const openSpawns = MemoryApi.getStructureOfType(
             room,
@@ -258,7 +258,7 @@ export default class SpawnApi {
      * get next creep to spawn
      * @param room the room we want to spawn them in
      */
-    public static getNextCreep(room: Room): string | null {
+    public static getNextCreep(room: Room): RoleConstant | null {
         // Get Limits for each creep department
         const creepLimits: CreepLimits = this.getCreepLimits(room);
 
@@ -352,7 +352,7 @@ export default class SpawnApi {
      * @param room the room we are spawning them in
      * @param RoleConstant the role of the creep
      */
-    public static getTier(room: Room, roleConst: RoleConstant): TierConstant {
+    public static getTier(room: Room, roleConst: RoleConstant | null): TierConstant {
         const energyAvailable: number = room.energyAvailable;
 
         // Check what tier we are in based on the amount of energy the room has
@@ -394,9 +394,9 @@ export default class SpawnApi {
      * @param RoleConstant the role of the creep
      * @param tier the tier of this creep we are spawning
      */
-    private static generateCreepOptions(
+    public static generateCreepOptions(
         room: Room,
-        role: RoleConstant,
+        role: RoleConstant | null,
         roomState: RoomStateConstant,
         squadSize?: number,
         squadUUID?: number | null,
@@ -455,7 +455,7 @@ export default class SpawnApi {
      * @param tier the tier our room is at
      * @param role the role of the creep we want
      */
-    public static generateCreepBody(tier: TierConstant, role: RoleConstant): BodyPartConstant[] | undefined {
+    public static generateCreepBody(tier: TierConstant, role: RoleConstant | null): BodyPartConstant[] {
         // Call the correct helper function based on creep role
         switch (role) {
             case ROLE_MINER:
@@ -490,7 +490,8 @@ export default class SpawnApi {
                     'The role "' + role + '" was invalid for generating the creep body.',
                     ERROR_ERROR
                 );
-                return undefined;
+
+                return [];
         }
     }
 
@@ -502,7 +503,7 @@ export default class SpawnApi {
     public static getCreepBody(
         bodyObject: CreepBodyDescriptor,
         opts?: CreepBodyOptions
-    ): BodyPartConstant[] | undefined {
+    ): BodyPartConstant[] {
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
 
@@ -522,7 +523,6 @@ export default class SpawnApi {
                 "Ensure that the object being passed to getCreepBody is in the format { BodyPartConstant: NumberParts } and that NumberParts is > 0.",
                 ERROR_ERROR
             );
-            return undefined;
         }
 
         /**
@@ -572,7 +572,7 @@ export default class SpawnApi {
 
         // If creepBody is empty, return undefined
         if (creepBody.length === 0) {
-            return undefined;
+            return [];
         } else {
             return creepBody;
         }
@@ -596,5 +596,31 @@ export default class SpawnApi {
      */
     public static generateSquadUUID(seed?: number) {
         return Math.random() * 10000000;
+    }
+
+    /**
+     * generates options for spawning a squad based on the attack room's specifications
+     * @param room the room we are spawning the squad in
+     */
+    public static generateSquadOptions(room: Room): StringMap {
+
+        const squadOptions: StringMap = {
+            squadSize: 0,
+            squadUUID: null,
+            rallyLocation: null
+        }
+
+        // use the attack room memory to get the actual values of the options
+
+        return squadOptions
+    }
+
+    /**
+     * get the target room for the creep
+     * TODO
+     * @param room the room we are spawning the squad in
+     */
+    public static getCreepTargetRoom(room: Room): string {
+        return "";
     }
 }

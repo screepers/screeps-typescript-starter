@@ -93,8 +93,8 @@ export class SpawnHelper {
      * Generate body for miner creep
      * @param tier The tier of the room
      */
-    public static generateMinerBody(tier: TierConstant): BodyPartConstant[] | undefined {
-        let body: CreepBodyDescriptor | undefined;
+    public static generateMinerBody(tier: TierConstant): BodyPartConstant[] {
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -113,17 +113,7 @@ export class SpawnHelper {
         }
 
         // Generate the creep body based on the body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -168,9 +158,9 @@ export class SpawnHelper {
      * Generate body for Harvester creep
      * @param tier the tier of the room
      */
-    public static generateHarvesterBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateHarvesterBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for harvester
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -200,17 +190,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -323,9 +303,9 @@ export class SpawnHelper {
      * Generate body for worker creep
      * @param tier the tier of the room
      */
-    public static generateWorkerBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateWorkerBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Worker
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -351,17 +331,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -474,9 +444,9 @@ export class SpawnHelper {
      * Generate body for lorry creep
      * @param tier the tier of the room
      */
-    public static generateLorryBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateLorryBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Lorry
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         // There are currently no plans to use lorry before terminal becomes available
@@ -503,17 +473,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -557,9 +517,9 @@ export class SpawnHelper {
      * Generate body for power upgrader creep
      * @param tier the tier of the room
      */
-    public static generatePowerUpgraderBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generatePowerUpgraderBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Power Upgrader
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         // There are currently no plans to use power upgraders before links become available
@@ -581,17 +541,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -638,9 +588,9 @@ export class SpawnHelper {
      * Generate body for remote miner creep
      * @param tier the tier of the room
      */
-    public static generateRemoteMinerBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateRemoteMinerBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Remote Miner
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         // Cap the remote miner at 6 work parts (6 so they finish mining early and can build/repair their container)
@@ -656,17 +606,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -708,9 +648,9 @@ export class SpawnHelper {
      * Generate body for remote harvester creep
      * @param tier the tier of the room
      */
-    public static generateRemoteHarvesterBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateRemoteHarvesterBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Remote Harvester
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -733,17 +673,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -830,9 +760,9 @@ export class SpawnHelper {
      * Generate body for remote reserver creep
      * @param tier the tier of the room
      */
-    public static generateRemoteReserverBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateRemoteReserverBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Remote Reserver
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
 
@@ -844,17 +774,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -899,9 +819,9 @@ export class SpawnHelper {
      * Generate body for remote colonizer creep
      * @param tier the tier of the room
      */
-    public static generateRemoteColonizerBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateRemoteColonizerBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Remote Colonizer
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -920,17 +840,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -974,9 +884,9 @@ export class SpawnHelper {
      * Generate body for remote defender creep
      * @param tier the tier of the room
      */
-    public static generateRemoteDefenderBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateRemoteDefenderBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Remote Defender
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -999,17 +909,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -1049,9 +949,9 @@ export class SpawnHelper {
      * Generate body for zealot creep
      * @param tier the tier of the room
      */
-    public static generateZealotBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateZealotBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Zealot
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -1081,17 +981,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -1140,9 +1030,9 @@ export class SpawnHelper {
      * @param squadUUIDParam the squad id that the zealot is a member of
      * @param rallyLocationParam the meeting place for the squad
      */
-    public static generateMedicBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateMedicBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Medic
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -1172,17 +1062,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -1225,9 +1105,9 @@ export class SpawnHelper {
      * Generate body for stalker creep
      * @param tier the tier of the room
      */
-    public static generateStalkerBody(tier: TierConstant): BodyPartConstant[] | undefined {
+    public static generateStalkerBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Stalker
-        let body: CreepBodyDescriptor | undefined;
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
@@ -1257,17 +1137,7 @@ export class SpawnHelper {
         }
 
         // Generate creep body based on body array and options
-        if (body !== undefined) {
-            return SpawnApi.getCreepBody(body, opts);
-        } else {
-            UtilHelper.throwError(
-                "Invalid Tier List",
-                "Ensure that the tier being passed to the function is valid." +
-                "Ensure that there is a body descriptor created for that tier.",
-                ERROR_ERROR
-            );
-            return undefined;
-        }
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**

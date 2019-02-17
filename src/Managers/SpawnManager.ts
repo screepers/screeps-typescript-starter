@@ -30,7 +30,7 @@ export default class SpawnManager {
      */
     public static runSpawnForRoom(room: Room): void {
 
-        const openSpawn: Structure<StructureConstant> | null = SpawnApi.getOpenSpawn(room);
+        const openSpawn: StructureSpawn | null = SpawnApi.getOpenSpawn(room);
         // get tier
 
         // if we don't have an open spawn, return early
@@ -39,8 +39,28 @@ export default class SpawnManager {
         }
 
         // add method to generate the over ride values from flags for the military creeps
-        const creepOptions: CreepOptionsCiv | CreepOptionsMili;
-        const energyAvailable: number = room.energyAvailable;
-        const creepBody: BodyPartConstant[] = SpawnApi.generateCreepBody()
+        const nextCreepRole: RoleConstant | null = SpawnApi.getNextCreep(room);
+
+        // If we are spawning a creep this tick, continue from here
+        if (nextCreepRole) {
+
+            // Get all the information we will need to spawn the next creep
+            const energyAvailable: number = room.energyAvailable;
+            const roomTier: TierConstant = SpawnApi.getTier(room, nextCreepRole);
+            const creepBody: BodyPartConstant[] = SpawnApi.generateCreepBody(roomTier, nextCreepRole);
+            const roomState: RoomStateConstant = room.memory.roomState;
+            const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room);
+            const creepOptions: any = SpawnApi.generateCreepOptions(room, nextCreepRole, roomState);
+            const targetRoom: string = SpawnApi.getCreepTargetRoom(room);
+
+            // Spawn the creep
+            SpawnApi.spawnNextCreep(
+                room,
+                creepBody,
+                creepOptions,
+                nextCreepRole,
+                openSpawn,
+                targetRoom);
+        }
     }
 }
