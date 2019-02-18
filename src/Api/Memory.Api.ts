@@ -416,7 +416,9 @@ export default class MemoryApi {
             );
         }
         else {  // No target room provided, just return them all
-            remoteRooms = Memory.rooms[room.name].attackRooms.data;
+            remoteRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+                (roomMemory: RemoteRoomMemory) => filterFunction
+            );
         }
 
         return remoteRooms;
@@ -461,7 +463,9 @@ export default class MemoryApi {
             );
         }
         else {  // No target room provided, just return them all
-            claimRooms = Memory.rooms[room.name].attackRooms.data;
+            claimRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+                (roomMemory: ClaimRoomMemory) => filterFunction
+            );
         }
 
         return claimRooms;
@@ -507,7 +511,9 @@ export default class MemoryApi {
             );
         }
         else {  // No target room provided, just return them all
-            attackRooms = Memory.rooms[room.name].attackRooms.data;
+            attackRooms = _.filter(Memory.rooms[room.name].attackRooms.data,
+                (roomMemory: AttackRoomMemory) => filterFunction
+            );
         }
 
         return attackRooms;
