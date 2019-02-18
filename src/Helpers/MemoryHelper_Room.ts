@@ -5,14 +5,25 @@ import { ALL_STRUCTURE_TYPES } from "utils/Constants";
  */
 export default class MemoryHelper_Room {
     /**
-     * Calls all the helper functions to update room.memory
+     * Calls all the helper functions (that don't need additional input) to update room.memory.
+     * NOTE: This will update the entire memory tree, so use this function sparingly
+     * TODO Make sure this updates every aspect of room memory - currently does not
      * @param room The room to update the memory of
      */
     public static updateRoomMemory(room: Room): void {
         // Update All Creeps
         this.updateHostileCreeps(room);
         this.updateMyCreeps(room);
-        //
+        // Update structures/construction sites
+        this.updateConstructionSites(room);
+        this.updateStructures(room);
+        // Update sources, minerals, energy, tombstones
+        this.updateSources(room);
+        this.updateMinerals(room);
+        this.updateDroppedEnergy(room);
+        this.updateTombstones(room);
+        // Update Custom Memory Components
+        this.updateDependentRooms(room);
     }
 
     /**
@@ -123,6 +134,16 @@ export default class MemoryHelper_Room {
     }
 
     /**
+     * Find all sources in room
+     *
+     * [Cached] Room.memory.sources
+     * @param room The room to check in
+     */
+    public static updateMinerals(room: Room): void {
+        // TODO Fill this out
+    }
+
+    /**
      * Finds all tombstones in room
      *
      * @param room The room to check in
@@ -166,6 +187,7 @@ export default class MemoryHelper_Room {
      * @param newLimits new limits we are setting
      */
     public static updateDomesticLimits(room: Room, newLimits: DomesticCreepLimits): void {
+        // * Optionally apply a filter or otherwise check the limits before assigning them
         Memory.rooms[room.name].creepLimit["domesticLimits"] = newLimits;
     }
 
@@ -175,6 +197,7 @@ export default class MemoryHelper_Room {
      * @param newLimits new limits we are setting
      */
     public static updateRemoteLimits(room: Room, newLimits: RemoteCreepLimits): void {
+        // * Optionally apply a filter or otherwise check the limits before assigning them
         Memory.rooms[room.name].creepLimit["remoteLimits"] = newLimits;
     }
 
@@ -184,6 +207,7 @@ export default class MemoryHelper_Room {
      * @param newLimits new limits we are setting
      */
     public static updateMilitaryLimits(room: Room, newLimits: MilitaryCreepLimits): void {
+        // * Optionally apply a filter or otherwise check the limits before assigning them
         Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
     }
 }

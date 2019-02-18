@@ -358,6 +358,25 @@ export default class MemoryApi {
     }
 
     /**
+     * get minerals in the room
+     * @param room the room we want minerals from
+     * @param filterFunction [Optional] The function to filter all mineral objects
+     * @param forceUpdate [Optional] Invalidate cache by force
+     * @returns Array<Mineral | null> An array of minerals, if there are any
+     */
+    public static getMinerals(
+        room: Room,
+        filterFunction?: (object: Source) => boolean,
+        forceUpdate?: boolean
+    ): Array<Mineral | null> {
+        //
+
+        // TODO Fill this out
+
+        return [null];
+    }
+
+    /**
      * Get the remoteRoom objects
      *
      * Updates all dependencies if the cache is invalid, for efficiency
