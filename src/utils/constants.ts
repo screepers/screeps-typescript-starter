@@ -1,33 +1,3 @@
-/**
- *
- * GAME CONSTANTS - For easy test purposes.. Need to find a better way to handle this
- *
- */
-const STRUCTURE_EXTENSION = "extension";
-const STRUCTURE_RAMPART = "rampart";
-const STRUCTURE_ROAD = "road";
-const STRUCTURE_SPAWN = "spawn";
-const STRUCTURE_LINK = "link";
-const STRUCTURE_WALL = "constructedWall";
-const STRUCTURE_KEEPER_LAIR = "keeperLair";
-const STRUCTURE_CONTROLLER = "controller";
-const STRUCTURE_STORAGE = "storage";
-const STRUCTURE_TOWER = "tower";
-const STRUCTURE_OBSERVER = "observer";
-const STRUCTURE_POWER_BANK = "powerBank";
-const STRUCTURE_POWER_SPAWN = "powerSpawn";
-const STRUCTURE_EXTRACTOR = "extractor";
-const STRUCTURE_LAB = "lab";
-const STRUCTURE_TERMINAL = "terminal";
-const STRUCTURE_CONTAINER = "container";
-const STRUCTURE_NUKER = "nuker";
-const STRUCTURE_PORTAL = "portal";
-/**
- *
- * END GAME-CONSTANTS
- *
- */
-
 // Room State Constants
 export const ROOM_STATE_INTRO = 0;
 export const ROOM_STATE_BEGINNER = 1;

@@ -4,10 +4,37 @@ import {
     domesticRolePriority,
     militaryRolePriority,
     remoteRolePriority,
+    ROLE_COLONIZER,
     ROLE_REMOTE_MINER,
     ROLE_REMOTE_RESERVER,
+    ROLE_LORRY,
+    ROLE_HARVESTER,
+    ROLE_MEDIC,
+    ROLE_MINER,
+    ROLE_POWER_UPGRADER,
+    ROLE_REMOTE_DEFENDER,
+    ROLE_REMOTE_HARVESTER,
+    ROLE_STALKER,
+    ROLE_WORKER,
+    ROLE_ZEALOT,
     GROUPED,
-    COLLATED
+    COLLATED,
+    ROOM_STATE_INTRO,
+    ROOM_STATE_BEGINNER,
+    ROOM_STATE_INTER,
+    ROOM_STATE_ADVANCED,
+    ROOM_STATE_NUKE_INBOUND,
+    ROOM_STATE_SEIGE,
+    ROOM_STATE_STIMULATE,
+    ROOM_STATE_UPGRADER,
+    TIER_1,
+    TIER_2,
+    TIER_3,
+    TIER_4,
+    TIER_5,
+    TIER_6,
+    TIER_7,
+    TIER_8
 } from "utils/Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
@@ -36,7 +63,7 @@ export default class SpawnApi {
      */
     public static getCreepLimits(room: Room): CreepLimits {
         const creepLimits: CreepLimits = {
-            domesticLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
+            domesticLimits: Memory.rooms[room.name].creepLimit["domesticLimits"],
             remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
             militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
         };
@@ -497,10 +524,7 @@ export default class SpawnApi {
      * @param bodyObject The object that describes the creep's body parts
      * @param opts The options for generating the creep body from the descriptor
      */
-    public static getCreepBody(
-        bodyObject: CreepBodyDescriptor,
-        opts?: CreepBodyOptions
-    ): BodyPartConstant[] {
+    public static getCreepBody(bodyObject: CreepBodyDescriptor, opts?: CreepBodyOptions): BodyPartConstant[] {
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
 
@@ -600,16 +624,15 @@ export default class SpawnApi {
      * @param room the room we are spawning the squad in
      */
     public static generateSquadOptions(room: Room): StringMap {
-
         const squadOptions: StringMap = {
             squadSize: 0,
             squadUUID: null,
             rallyLocation: null
-        }
+        };
 
         // use the attack room memory to get the actual values of the options
 
-        return squadOptions
+        return squadOptions;
     }
 
     /**
@@ -626,7 +649,6 @@ export default class SpawnApi {
      * @param room the room the creep is spawning in
      */
     public static getCreepHomeRoom(room: Room): string {
-
         // incomplete for now, need to handle special case (only reason this is in a function really)
         // for colonizers. We just wanna set their home room to their target room basically so they automatically will go there
         // handle their budniss. Another potential use case of this would be sending creeps to other rooms
