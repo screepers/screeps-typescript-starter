@@ -82,8 +82,8 @@ export default class SpawnManager {
             if (energyAvailable >= bodyEnergyCost) {
                 // Get all the information we will need to spawn the next creep
                 const roomState: RoomStateConstant = room.memory.roomState;
-                const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room);
                 const targetRoom: string = SpawnApi.getCreepTargetRoom(room);
+                const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room, targetRoom);
                 const homeRoom: string = SpawnApi.getCreepHomeRoom(room);
                 const creepOptions: any = SpawnApi.generateCreepOptions(
                     room,

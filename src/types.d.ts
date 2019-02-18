@@ -528,6 +528,69 @@ interface FlagMemory {
  */
 type ATTACK_BASIC_SQUAD = "basic_squad"; //
 
+// Memory for remote/attack/claim rooms
+/**
+ * Attack room memory structure
+ */
+interface AttackRoomMemory {
+    /**
+     * the name of the room for lookup purposes
+     */
+    roomName: string;
+    /**
+     * reference to the attack flags placed in the room
+     */
+    flags: Cache;
+    /**
+     * hostiles in the room
+     */
+    hostiles: Cache;
+    /**
+     * structures in room
+     */
+    structures: Cache;
+}
+
+/**
+ * Remote room memory structure
+ */
+interface RemoteRoomMemory {
+    /**
+     * the name of the room for lookup purposes
+     */
+    roomName: string;
+    /**
+     * reference to the remote flags placed in the room
+     */
+    flags: Cache;
+    /**
+     * sources in the room
+     */
+    sources: Cache;
+    /**
+     * hostiles in the room
+     */
+    hostiles: Cache;
+    /**
+     * structures in room
+     */
+    structures: Cache;
+}
+
+/**
+ * Claim room memory structure
+ */
+interface ClaimRoomMemory {
+    /**
+     * the name of the room for lookup purposes
+     */
+    roomName: string;
+    /**
+     * reference to the claim flags placed in the room
+     */
+    flags: Cache;
+}
+
 /**
  * Tier Definitions
  */

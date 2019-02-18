@@ -383,12 +383,15 @@ export default class MemoryApi {
      * @param room The room to check dependencies of
      * @param filterFunction [Optional] The function to filter the room objects
      * @param forceUpdate [Optional] Forcibly invalidate the cache
+     * @param targetRoom [Optional] the name of the room we want to grab if we already know it
      */
     public static getRemoteRooms(
         room: Room,
         filterFunction?: (object: Room) => boolean,
-        forceUpdate?: boolean
-    ): Room[] {
+        forceUpdate?: boolean,
+        targetRoom?: string
+    ): Array<RemoteRoomMemory | undefined> {
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -399,7 +402,22 @@ export default class MemoryApi {
             MemoryHelper_Room.updateDependentRooms(room);
         }
 
-        const remoteRooms: Room[] = _.map(Memory.rooms[room.name].remoteRooms.data, (name: string) => Game.rooms[name]);
+        let remoteRooms: Array<RemoteRoomMemory | undefined>;
+
+        // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
+        if (!filterFunction) {
+            filterFunction = (badPractice: Room) => true;
+        }
+
+        // TargetRoom parameter provided
+        if (targetRoom) {
+            remoteRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+                (roomMemory: RemoteRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
+            );
+        }
+        else {  // No target room provided, just return them all
+            remoteRooms = Memory.rooms[room.name].attackRooms.data;
+        }
 
         return remoteRooms;
     }
@@ -411,8 +429,14 @@ export default class MemoryApi {
      * @param room The room to check the dependencies of
      * @param filterFunction [Optional] THe function to filter the room objects
      * @param forceUpdate [Optional] Forcibly invalidate the cache
+     * @param targetRoom the name of the room we want to grab if we already know it
      */
-    public static getClaimRooms(room: Room, filterFunction?: (object: Room) => boolean, forceUpdate?: boolean): Room[] {
+    public static getClaimRooms(
+        room: Room,
+        filterFunction?: (object: Room) => boolean,
+        forceUpdate?: boolean,
+        targetRoom?: string): Array<ClaimRoomMemory | undefined> {
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -423,16 +447,42 @@ export default class MemoryApi {
             MemoryHelper_Room.updateDependentRooms(room);
         }
 
-        const claimRooms: Room[] = _.map(Memory.rooms[room.name].claimRooms.data, (name: string) => Game.rooms[name]);
+        let claimRooms: Array<ClaimRoomMemory | undefined>;
+
+        // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
+        if (!filterFunction) {
+            filterFunction = (badPractice: Room) => true;
+        }
+
+        // TargetRoom parameter provided
+        if (targetRoom) {
+            claimRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+                (roomMemory: ClaimRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
+            );
+        }
+        else {  // No target room provided, just return them all
+            claimRooms = Memory.rooms[room.name].attackRooms.data;
+        }
 
         return claimRooms;
     }
 
+    /**
+     * Get the attack room objects
+     *
+     * Updates all dependencies if the cache is invalid, for efficiency
+     * @param room The room to check dependencies of
+     * @param filterFunction [Optional] The function to filter the room objects
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     * @param targetRoom [Optional] the name of the specific room we want to grab
+     */
     public static getAttackRooms(
         room: Room,
-        filterFUnction?: (object: Room) => boolean,
+        targetRoom?: string,
+        filterFunction?: (object: Room) => boolean,
         forceUpdate?: boolean
-    ): Room[] {
+    ): Array<AttackRoomMemory | undefined> {
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -443,7 +493,22 @@ export default class MemoryApi {
             MemoryHelper_Room.updateDependentRooms(room);
         }
 
-        const attackRooms: Room[] = _.map(Memory.rooms[room.name].attackRooms.data, (name: string) => Game.rooms[name]);
+        let attackRooms: Array<AttackRoomMemory | undefined>;
+
+        // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
+        if (!filterFunction) {
+            filterFunction = (badPractice: Room) => true;
+        }
+
+        // TargetRoom parameter provided
+        if (targetRoom) {
+            attackRooms = _.filter(Memory.rooms[room.name].attackRooms.data,
+                (roomMemory: AttackRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
+            );
+        }
+        else {  // No target room provided, just return them all
+            attackRooms = Memory.rooms[room.name].attackRooms.data;
+        }
 
         return attackRooms;
     }

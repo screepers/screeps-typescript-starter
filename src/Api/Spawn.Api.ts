@@ -623,7 +623,10 @@ export default class SpawnApi {
      * generates options for spawning a squad based on the attack room's specifications
      * @param room the room we are spawning the squad in
      */
-    public static generateSquadOptions(room: Room): StringMap {
+    public static generateSquadOptions(room: Room, targetRoom: string): StringMap {
+
+        // Get target room from memory
+        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom)
         const squadOptions: StringMap = {
             squadSize: 0,
             squadUUID: null,
