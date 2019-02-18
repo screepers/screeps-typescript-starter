@@ -301,6 +301,7 @@ export default class SpawnApi {
         creepOptions: CreepOptionsCiv | CreepOptionsMili,
         role: RoleConstant,
         spawn: StructureSpawn,
+        homeRoom: string,
         targetRoom: string
     ): void {
         // Throw error if we don't have enough energy to spawn this creep
@@ -313,7 +314,7 @@ export default class SpawnApi {
         }
 
         const name: string = SpawnHelper.generateCreepName(role, this.getTier(room, role));
-        const creepMemory = SpawnHelper.generateDefaultCreepMemory(role, room, targetRoom, creepOptions);
+        const creepMemory = SpawnHelper.generateDefaultCreepMemory(role, homeRoom, targetRoom, creepOptions);
 
         spawn.spawnCreep(body, name, { memory: creepMemory });
     }
@@ -618,5 +619,19 @@ export default class SpawnApi {
      */
     public static getCreepTargetRoom(room: Room): string {
         return "";
+    }
+
+    /**
+     * get the home room for the creep
+     * @param room the room the creep is spawning in
+     */
+    public static getCreepHomeRoom(room: Room): string {
+
+        // incomplete for now, need to handle special case (only reason this is in a function really)
+        // for colonizers. We just wanna set their home room to their target room basically so they automatically will go there
+        // handle their budniss. Another potential use case of this would be sending creeps to other rooms
+        // the easiest way to do that is just changing their home room in memory, so we could add something to detect
+        // if a creep being born is meant for another room and handle that accordingly here (ez pz)
+        return room.name;
     }
 }

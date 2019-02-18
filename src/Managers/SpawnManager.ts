@@ -10,12 +10,6 @@ export default class SpawnManager {
      */
     public static runSpawnManager(): void {
 
-        // loop over each room
-        // check if we have an open spawn
-        // get next creep to spawn if any
-        // get creep options, memory, and body
-        // spawn the creep if we have the energy
-
         const ownedRooms = _.filter(Game.rooms, (room: Room) => RoomHelper.isOwnedRoom(room));
 
         // Loop over all rooms and run the spawn for each one
@@ -44,23 +38,69 @@ export default class SpawnManager {
         // If we are spawning a creep this tick, continue from here
         if (nextCreepRole) {
 
-            // Get all the information we will need to spawn the next creep
             const energyAvailable: number = room.energyAvailable;
             const roomTier: TierConstant = SpawnApi.getTier(room, nextCreepRole);
             const creepBody: BodyPartConstant[] = SpawnApi.generateCreepBody(roomTier, nextCreepRole);
-            const roomState: RoomStateConstant = room.memory.roomState;
-            const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room);
-            const creepOptions: any = SpawnApi.generateCreepOptions(room, nextCreepRole, roomState);
-            const targetRoom: string = SpawnApi.getCreepTargetRoom(room);
+            const bodyEnergyCost: number = SpawnApi.getEnergyCostOfBody(creepBody);
 
-            // Spawn the creep
-            SpawnApi.spawnNextCreep(
-                room,
-                creepBody,
-                creepOptions,
-                nextCreepRole,
-                openSpawn,
-                targetRoom);
+            // Check if we even have enough energy to even spawn this potential monstrosity
+            if (energyAvailable >= bodyEnergyCost) {
+
+                // Get all the information we will need to spawn the next creep
+                const roomState: RoomStateConstant = room.memory.roomState;
+                const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room);
+                const targetRoom: string = SpawnApi.getCreepTargetRoom(room);
+                const homeRoom: string = SpawnApi.getCreepHomeRoom(room);
+                const creepOptions: any = SpawnApi.generateCreepOptions(room,
+                    nextCreepRole,
+                    roomState,
+                    militarySquadOptions['squadSize'],
+                    militarySquadOptions['squadUUID'],
+                    militarySquadOptions['rallyLocation']
+                );
+
+                // Spawn the creep
+                SpawnApi.spawnNextCreep(
+                    room,
+                    creepBody,
+                    creepOptions,
+                    nextCreepRole,
+                    openSpawn,
+                    homeRoom,
+                    targetRoom
+                );
+            }
         }
     }
 }
+
+// Current todo to finish Spawning ------
+        /*
+            getCreepTargetRoom()
+            We need to come up with a way to figure out what room a remote/military creep
+            needs to go to.
+            My idea for this is to create a function in SpawnApi that does precisely this.
+            Using remote room for example let say we have 2 remote rooms and want to spawn a remote miner:
+            The function will get both remote rooms and add their names to an array
+            We will get every living creep that is a remote miner and loop over them
+            we get the remtoe room that has the least amount of remote miners that consider them a target room
+            we return this room as the creeps target room
+            If they are all the same value, we just select the closeset one potentially
+
+            fill out generateSquadOptions
+            This one is a little simpler as it will just find the attackRoom in the spawning room's memory
+            (this will be the same room found in the previous function btw, so this will have to come second)
+            Then it just scrapes the values from the memory object.. easy enough
+
+            complete getCreepHomeRoom to handle colonizers (it might be literally as easy as calling the getCreepTargetRoom
+            function from that method if its a remote colonizer)
+            When we start handling empire level stuff like inter-room assistance then we can add to it then
+
+            Thats all I can think of, add to this if you think of anything. But I believe once the above cases
+            are handled that spawn is completely functional. We will obviously be tweaking numbers later once we are
+            implementing the code base in game. biggest one i can think of is when we need lorries to spawn. Like we will
+            def have to go back and decide for cases for lorries/more workers/etc to spawn later and we can add it into
+            spawn api on like get limits (so we avoid directly changing the limits from wherever we are working out of)
+            We will probably just have like a getLorryLimit function that it calls to decide all of this stuff, similar to
+            how remoteDefenders are handled since they are also a special case
+        */

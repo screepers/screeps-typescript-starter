@@ -1227,14 +1227,14 @@ export class SpawnHelper {
      */
     public static generateDefaultCreepMemory(
         roleConst: RoleConstant,
-        room: Room,
+        homeRoomNameParam: string,
         targetRoomParam: string,
         creepOptions: CreepOptionsCiv | CreepOptionsMili
     ): CreepMemory {
 
         return {
             role: roleConst,
-            homeRoom: room.name,
+            homeRoom: homeRoomNameParam,
             targetRoom: targetRoomParam,
             workTarget: null,
             options: creepOptions,
