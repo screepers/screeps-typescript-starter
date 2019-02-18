@@ -118,9 +118,9 @@ export class SpawnHelper {
      * @param role The role of the creep being generated
      * @param tier The tier of the creep being generated
      */
-    public static generateCreepName(role: RoleConstant, tier: TierConstant): string {
-        const modifier: string = Game.time.toString().slice(4);
-        const name = role + "_" + tier + "_" + modifier;
+    public static generateCreepName(role: RoleConstant, tier: TierConstant, room: Room): string {
+        const modifier: string = Game.time.toString().slice(-4);
+        const name = role + "_" + tier + "_" + room.name + "_" + modifier;
         return name;
     }
 

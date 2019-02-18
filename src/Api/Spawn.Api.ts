@@ -340,7 +340,7 @@ export default class SpawnApi {
             );
         }
 
-        const name: string = SpawnHelper.generateCreepName(role, this.getTier(room, role));
+        const name: string = SpawnHelper.generateCreepName(role, this.getTier(room, role), room);
         const creepMemory = SpawnHelper.generateDefaultCreepMemory(role, homeRoom, targetRoom, creepOptions);
 
         spawn.spawnCreep(body, name, { memory: creepMemory });
