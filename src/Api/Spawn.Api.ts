@@ -640,7 +640,16 @@ export default class SpawnApi {
             rallyLocation: null
         };
 
-        // use the attack room memory to get the actual values of the options
+        const roomMemory: AttackRoomMemory | undefined = targetRoomMemoryArray[0];
+        const flagMemoryArray: AttackFlagMemory[] = roomMemory!['flags'].data;
+
+        // Find a way to get the correct flag out of this array of flag memory objects
+        // Maybe: get the uuid from each flag object in the room
+        // sum up creeps of the same type with that uuid in memory
+        // go to the first one we find that doesn't meet the limit
+        // the number of each role in a squad will be hard coded into types.d.ts in the flag options
+        // Idk just an idea... might puit this aside for now until we get more of the room/empire flag stuff fleshed out
+        // or just until i have a couple hours to sit down and knock it out
 
         return squadOptions;
     }

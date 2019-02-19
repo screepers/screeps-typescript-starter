@@ -592,6 +592,14 @@ interface ClaimRoomMemory {
 }
 
 /**
+ * memory for an attack flag
+ */
+interface AttackFlagMemory {
+    squadSize: number;
+    squadUUID: number;
+    rallyLocation: RoomPosition;
+}
+/**
  * Tier Definitions
  */
 declare const TIER_1 = 300;
