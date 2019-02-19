@@ -54,7 +54,14 @@ export default class SpawnApi {
      */
     public static getCreepCount(room: Room, creepConst?: RoleConstant): number {
         const filterFunction = creepConst === undefined ? undefined : (c: Creep) => c.memory.role === creepConst;
-        return MemoryApi.getMyCreeps(room, filterFunction).length;
+
+        // Use get active mienrs instead specifically for miners to get them out early before they die
+        if (creepConst === ROLE_MINER) {
+            return this.getActiveMiners(room);
+        }
+        else {  // Otherwise just get the actual count of the creeps
+            return MemoryApi.getMyCreeps(room, filterFunction).length;
+        }
     }
 
     /**
