@@ -33,6 +33,11 @@ export const TIER_6 = 2300;
 export const TIER_7 = 5300;
 export const TIER_8 = 12300;
 
+// Attack Flag Constants
+export const ZEALOT_SOLO = 1;
+export const STALKER_SOLO = 2;
+export const STANDARD_SQUAD = 3;
+
 // Creep Body Layout Constants
 export const GROUPED = "grouped";
 export const COLLATED = "collated";
