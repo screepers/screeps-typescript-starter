@@ -595,10 +595,24 @@ interface ClaimRoomMemory {
  * memory for an attack flag
  */
 interface AttackFlagMemory {
+    flagType: AttackFlagConstant;
     squadSize: number;
     squadUUID: number;
     rallyLocation: RoomPosition;
 }
+
+/**
+ * flag option constant definitions
+ */
+declare const ZEALOT_SOLO = 1;
+declare const STALKER_SOLO = 2;
+declare const STANDARD_SQUAD = 3;
+
+type AttackFlagConstant = ZEALOT_SOLO | STALKER_SOLO | STANDARD_SQUAD;
+
+type ZEALOT_SOLO = 1;
+type STALKER_SOLO = 2;
+type STANDARD_SQUAD = 3;
 /**
  * Tier Definitions
  */
