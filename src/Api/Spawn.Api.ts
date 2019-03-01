@@ -34,7 +34,10 @@ import {
     TIER_5,
     TIER_6,
     TIER_7,
-    TIER_8
+    TIER_8,
+    STANDARD_SQUAD,
+    ZEALOT_SOLO,
+    STALKER_SOLO
 } from "utils/Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
@@ -42,6 +45,8 @@ import RoomApi from "./Room.Api";
 import MemoryApi from "./Memory.Api";
 import MemoryHelper from "Helpers/MemoryHelper";
 import UserException from "utils/UserException";
+import EmpireApi from "./Empire.Api";
+import Empire from "./Empire.Api";
 
 /**
  * The API used by the spawn manager
@@ -247,12 +252,55 @@ export default class SpawnApi {
             medic: 0
         };
 
-        // Check for attack flags and adjust accordingly
+        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
+        const allAttackRoomFlags: AttackFlagMemory[] = _.map(targetRoomMemoryArray, (roomMemory) => {
+            if (roomMemory!['flags'].data.active) { return roomMemory!['flags'].data; }
+        });
+
+        // Loop over active attack room flags and up raise the limits accordingly
+        for (const flagMemory of allAttackRoomFlags) {
+
+            // Loop over each role in the squad and raise its limits
+            this.raiseMilitaryCreepLimits(flagMemory, room);
+        }
+
 
         // Check if we need defenders and adjust accordingly
+        // militaryLimits[ROLE_REMOTE_DEFENDER] = this.getNumOfRemoteDefenders(room);
 
-        // Return the limits
         return militaryLimits;
+    }
+
+    /**
+     * raises the military creep limits based on the flag type
+     * @param flagMemory the memory associated with the attack flag
+     * @param room the room we are raising limits for
+     */
+    public static raiseMilitaryCreepLimits(flagMemory: AttackFlagMemory, room: Room): void {
+
+        const militaryLimits: MilitaryCreepLimits = room.memory.creepLimit['militaryLimits'];
+
+        switch (flagMemory.flagType) {
+            case ZEALOT_SOLO:
+
+                room.memory.creepLimit['militaryLimits']['zealot']++;
+
+                break;
+
+            case STALKER_SOLO:
+
+                room.memory.creepLimit['militaryLimits']['stalker']++;
+
+                break;
+
+            case STANDARD_SQUAD:
+
+                room.memory.creepLimit['militaryLimits']['zealot']++;
+                room.memory.creepLimit['militaryLimits']['stalker']++;
+                room.memory.creepLimit['militaryLimits']['medic']++;
+
+                break;
+        }
     }
 
     /**
@@ -632,24 +680,7 @@ export default class SpawnApi {
      */
     public static generateSquadOptions(room: Room, targetRoom: string, roleConst: RoleConstant): StringMap {
 
-        /*
-            Due to the way I'm handling this function here, and sort of out of neccesity of picking a direction to take the flag system,
-            we are going to have to handle flags sequentially. I make this happen by getting the memory of the squad with the current highest
-            squad size to set as this creeps squad memory.
-
-                We also need to consider how we are going to handle spawning for squads. We need to find a way to make sure that an entire squad is spawned before we
-            start trying to spawn the next one. Otherwise we have to deal with manually checking if a zealot is meant to be in this squad for example and greatly add
-            bloat to our flag memory and add a lot of overhead to change everytime we mess with a squad layout.
-
-                It would be easier just to maybe set 1 attack flag as "active"
-            at a time for upping the military creep limits. And once its requiremnets are fuffilled, its set to complete so it will not spawn any more.
-
-                I would prefer putting down 10 flags if we wanna send 10 squads rather than let 1 attack flag constantly spawn new people. That way we can customize
-            attacks to be exacltly how we want and not have to baby sit our attacks and flags.
-        */
-
         // Set to this for clarity that we aren't expecting any squad options in some cases
-        const notMilitarySquad: StringMap = { military: false };
         const squadOptions: StringMap = {
             squadSize: 0,
             squadUUID: null,
@@ -657,7 +688,7 @@ export default class SpawnApi {
         };
 
         // Don't actually get anything of value if it isn't a military creep. No point
-        if (!this.isMilitaryRole(roleConst)) { return notMilitarySquad };
+        if (!this.isMilitaryRole(roleConst)) { return squadOptions };
 
         // Get an appropirate attack flag for the creep
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom)
@@ -670,6 +701,7 @@ export default class SpawnApi {
         const flagMemoryArray: AttackFlagMemory[] = roomMemory!['flags'].data;
         let selectedFlagMemory: AttackFlagMemory | undefined;
         let currentHighestSquadCount: number = 0;
+        let selectedFlagActiveSquadMembers: number = 0;
 
         // Loop over the flag memory and attach the creep to the first flag that does not have its squad size fully satisfied
         for (const flagMemory of flagMemoryArray) {
@@ -679,16 +711,29 @@ export default class SpawnApi {
             const numActiveSquadMembers: number = this.getNumOfActiveSquadMembers(flagMemory, room);
             const numRequestedSquadMembers: number = flagMemory.squadSize;
 
-            // If we find a flag that doesn't have its squad requirements met,
-            if (numActiveSquadMembers < numRequestedSquadMembers && numActiveSquadMembers > currentHighestSquadCount) {
+            // If we find an active flag that doesn't have its squad requirements met and is currently the flag closest to being met
+            if (numActiveSquadMembers < numRequestedSquadMembers && numActiveSquadMembers > currentHighestSquadCount && flagMemory.active) {
                 selectedFlagMemory = flagMemory;
                 currentHighestSquadCount = numActiveSquadMembers;
+                selectedFlagActiveSquadMembers = numActiveSquadMembers;
             }
         }
 
         // If we didn't find a squad based flag return the default squad options
         if (selectedFlagMemory === undefined) { return squadOptions; }
         else {
+
+            // if this flag has met its requirements, deactivate it
+            if (selectedFlagActiveSquadMembers === selectedFlagMemory.squadSize) {
+
+                // Deactivate either way
+                selectedFlagMemory.active = false;
+
+                // If its a one time use, complete it as well
+                if (EmpireApi.isAttackFlagOneTimeUse(selectedFlagMemory)) {
+                    selectedFlagMemory.complete = true;
+                }
+            }
 
             // Set squad options to the flags memory and return it
             squadOptions.squadSize = selectedFlagMemory.squadSize;

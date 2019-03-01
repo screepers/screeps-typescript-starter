@@ -81,5 +81,11 @@ export default class Empire {
         return "";
     }
 
-
+    /**
+     * get if the flag is considered a one time use flag
+     */
+    public static isAttackFlagOneTimeUse(flagMemory: AttackFlagMemory) {
+        // Currently all flags are one time use, add the flag constant here if its like a tower draining for example
+        return true;
+    }
 };

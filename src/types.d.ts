@@ -519,6 +519,14 @@ interface FlagMemory {
      * if the flag has been removed from the game
      */
     deleted: boolean;
+    /**
+     * if the flag is currently active
+     */
+    active: boolean;
+    /**
+     * if the flag has completed its requirements
+     */
+    complete: boolean;
 }
 
 // Attack Flag Options
@@ -592,12 +600,37 @@ interface ClaimRoomMemory {
 }
 
 /**
+ * Parent flag memory that all flag memory inhereits
+ */
+interface ParentFlagMemory {
+    /**
+     * if the related flag is currently active
+     */
+    active: boolean;
+    /**
+     * if the related flag has completed its requirements
+     */
+    complete: boolean;
+}
+/**
  * memory for an attack flag
  */
-interface AttackFlagMemory {
+interface AttackFlagMemory extends ParentFlagMemory {
+    /**
+     * the type of flag this is
+     */
     flagType: AttackFlagConstant;
+    /**
+     * the number of creeps we are asking for
+     */
     squadSize: number;
+    /**
+     * the unique id for the sqauad
+     */
     squadUUID: number;
+    /**
+     * the location creeps are going to meet
+     */
     rallyLocation: RoomPosition;
 }
 
