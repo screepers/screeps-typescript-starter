@@ -665,7 +665,7 @@ export default class SpawnApi {
         const roomMemory: AttackRoomMemory | undefined = targetRoomMemoryArray[0];
 
         // Drop out early if there are no attack rooms
-        if (roomMemory === undefined) { return notMilitarySquad; }
+        if (roomMemory === undefined) { return squadOptions; }
 
         const flagMemoryArray: AttackFlagMemory[] = roomMemory!['flags'].data;
         let selectedFlagMemory: AttackFlagMemory | undefined;
