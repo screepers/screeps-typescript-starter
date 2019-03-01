@@ -46,7 +46,6 @@ import MemoryApi from "./Memory.Api";
 import MemoryHelper from "Helpers/MemoryHelper";
 import UserException from "utils/UserException";
 import EmpireApi from "./Empire.Api";
-import Empire from "./Empire.Api";
 
 /**
  * The API used by the spawn manager
@@ -277,8 +276,6 @@ export default class SpawnApi {
      * @param room the room we are raising limits for
      */
     public static raiseMilitaryCreepLimits(flagMemory: AttackFlagMemory, room: Room): void {
-
-        const militaryLimits: MilitaryCreepLimits = room.memory.creepLimit['militaryLimits'];
 
         switch (flagMemory.flagType) {
             case ZEALOT_SOLO:
