@@ -321,7 +321,18 @@ export default class RoomApi {
      * @param room the room we want to queue to be created for
      */
     public static createJobQueue(room: Room): void {
-        // this can call all the sub job queues maybe..
+
+        // Call all the sub job queues
+        if (RoomHelper.isOwnedRoom(room)) {
+            this.createJobQueueWorker(room);
+            this.createJobQueueLorry(room);
+            this.createJobQueueHarvester(room);
+            this.createEnergyQueue(room);
+        }
+        else {   // throw error if we do not own this room
+
+        }
+
     }
 
     /**
@@ -332,6 +343,14 @@ export default class RoomApi {
         // possibly a list of objects with 2 propeties, jobName and priority
         // so we have some way thats less fragile than array order to
         // figure out what jobs need to be tackled first.. idk just thinking
+    }
+
+    /**
+     * create a job queue for the room for harvester creeps
+     * @param room the room we want the queue to be created for
+     */
+    public static createJobQueueHarvester(room: Room): void {
+
     }
 
     /**

@@ -630,28 +630,72 @@ export default class SpawnApi {
      * generates options for spawning a squad based on the attack room's specifications
      * @param room the room we are spawning the squad in
      */
-    public static generateSquadOptions(room: Room, targetRoom: string): StringMap {
+    public static generateSquadOptions(room: Room, targetRoom: string, roleConst: RoleConstant): StringMap {
 
-        // Get target room from memory
-        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom)
+        /*
+            Due to the way I'm handling this function here, and sort of out of neccesity of picking a direction to take the flag system,
+            we are going to have to handle flags sequentially. I make this happen by getting the memory of the squad with the current highest
+            squad size to set as this creeps squad memory.
+
+                We also need to consider how we are going to handle spawning for squads. We need to find a way to make sure that an entire squad is spawned before we
+            start trying to spawn the next one. Otherwise we have to deal with manually checking if a zealot is meant to be in this squad for example and greatly add
+            bloat to our flag memory and add a lot of overhead to change everytime we mess with a squad layout.
+
+                It would be easier just to maybe set 1 attack flag as "active"
+            at a time for upping the military creep limits. And once its requiremnets are fuffilled, its set to complete so it will not spawn any more.
+
+                I would prefer putting down 10 flags if we wanna send 10 squads rather than let 1 attack flag constantly spawn new people. That way we can customize
+            attacks to be exacltly how we want and not have to baby sit our attacks and flags.
+        */
+
+        // Set to this for clarity that we aren't expecting any squad options in some cases
+        const notMilitarySquad: StringMap = { military: false };
         const squadOptions: StringMap = {
             squadSize: 0,
             squadUUID: null,
             rallyLocation: null
         };
 
+        // Don't actually get anything of value if it isn't a military creep. No point
+        if (!this.isMilitaryRole(roleConst)) { return notMilitarySquad };
+
+        // Get an appropirate attack flag for the creep
+        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom)
+        // Only going to be one room returned, but had to be an array, so just grab it
         const roomMemory: AttackRoomMemory | undefined = targetRoomMemoryArray[0];
+
+        // Drop out early if there are no attack rooms
+        if (roomMemory === undefined) { return notMilitarySquad; }
+
         const flagMemoryArray: AttackFlagMemory[] = roomMemory!['flags'].data;
+        let selectedFlagMemory: AttackFlagMemory | undefined;
+        let currentHighestSquadCount: number = 0;
 
-        // Find a way to get the correct flag out of this array of flag memory objects
-        // Maybe: get the uuid from each flag object in the room
-        // sum up creeps of the same type with that uuid in memory
-        // go to the first one we find that doesn't meet the limit
-        // the number of each role in a squad will be hard coded into types.d.ts in the flag options
-        // Idk just an idea... might puit this aside for now until we get more of the room/empire flag stuff fleshed out
-        // or just until i have a couple hours to sit down and knock it out
+        // Loop over the flag memory and attach the creep to the first flag that does not have its squad size fully satisfied
+        for (const flagMemory of flagMemoryArray) {
 
-        return squadOptions;
+            // Skip non-squad based attack flags
+            if (flagMemory.squadSize === 0) { continue; }
+            const numActiveSquadMembers: number = this.getNumOfActiveSquadMembers(flagMemory, room);
+            const numRequestedSquadMembers: number = flagMemory.squadSize;
+
+            // If we find a flag that doesn't have its squad requirements met,
+            if (numActiveSquadMembers < numRequestedSquadMembers && numActiveSquadMembers > currentHighestSquadCount) {
+                selectedFlagMemory = flagMemory;
+                currentHighestSquadCount = numActiveSquadMembers;
+            }
+        }
+
+        // If we didn't find a squad based flag return the default squad options
+        if (selectedFlagMemory === undefined) { return squadOptions; }
+        else {
+
+            // Set squad options to the flags memory and return it
+            squadOptions.squadSize = selectedFlagMemory.squadSize;
+            squadOptions.squadUUID = selectedFlagMemory.squadUUID;
+            squadOptions.rallyLocation = selectedFlagMemory.rallyLocation;
+            return squadOptions;
+        }
     }
 
     /**
@@ -674,5 +718,33 @@ export default class SpawnApi {
         // the easiest way to do that is just changing their home room in memory, so we could add something to detect
         // if a creep being born is meant for another room and handle that accordingly here (ez pz)
         return room.name;
+    }
+
+    /**
+     * get if the creep is a military type creep or not
+     * @param roleConst the role of the creep
+     */
+    public static isMilitaryRole(roleConst: RoleConstant): boolean {
+        return (
+            roleConst === ROLE_STALKER ||
+            roleConst === ROLE_ZEALOT ||
+            roleConst === ROLE_MEDIC);
+    }
+
+    /**
+     * get number of active squad members for a given squad
+     * @param flagMemory the attack flag memory
+     * @param room the room they are coming from
+     */
+    public static getNumOfActiveSquadMembers(flagMemory: AttackFlagMemory, room: Room): number {
+
+        // Please improve this if possible lol. Had to get around type guards as we don't actually know what a creeps memory has in it unless we explicitly know the type i think
+        // We're going to run into this everytime we use creep memory so we need to find a nicer way around it if possible but if not casting it as a memory type
+        // Isn't the worst solution in the world
+        const militaryCreeps: Array<Creep | null> = MemoryApi.getMyCreeps(room, (creep) => this.isMilitaryRole(creep.memory.role));
+        return _.filter(militaryCreeps, (creep) => {
+            const creepOptions = creep!.memory.options as CreepOptionsMili;
+            return creepOptions.squadUUID === flagMemory.squadUUID;
+        }).length;
     }
 }
