@@ -300,6 +300,10 @@ interface RoomMemory {
      * Names of all rooms flagged to colonize
      */
     claimRooms: Cache;
+    /**
+     * List of all of the room's GetEnergyJobs
+     */
+    getEnergyJobs: Cache;
 }
 
 interface EmpireMemory {}

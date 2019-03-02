@@ -8,7 +8,8 @@ import {
     FCREEP_CACHE_TTL,
     DEPNDT_CACHE_TTL,
     TOMBSTONE_CACHE_TTL,
-    DROPS_CACHE_TTL
+    DROPS_CACHE_TTL,
+    JOBS_CACHE_TTL
 } from "utils/Constants";
 import { NO_CACHING_MEMORY } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
@@ -70,6 +71,7 @@ export default class MemoryApi {
             minerals: { data: null, cache: null },
             tombstones: { data: null, cache: null },
             droppedResources: { data: null, cache: null },
+            getEnergyJobs: { data: null, cache: null },
             structures: { data: null, cache: null },
             upgradeLink: ""
         };
@@ -331,6 +333,34 @@ export default class MemoryApi {
         return tombstones;
     }
 
+    /**
+     * Gets the GetEnergyJobs of a room
+     * @param room The room to check
+     * @param filterFunction [Optional] Function to filter the jobs by
+     * @param forceUpdate [Optional] Invalidate the Cache by force
+     * @returns Array< GetEnergyJob | null> An array of GetEnergyJobs
+     */
+    public static getGetEnergyJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): Array<GetEnergyJob | null> {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].getEnergyJobs ||
+            Memory.rooms[room.name].getEnergyJobs.cache < Game.time - JOBS_CACHE_TTL
+        ) {
+            // TODO Call the function that updates the jobs in memory here
+        }
+
+        let getEnergyJobs = Memory.rooms[room.name].getEnergyJobs.data;
+        if (filterFunction !== undefined) {
+            getEnergyJobs = _.filter(getEnergyJobs, filterFunction);
+        }
+
+        return getEnergyJobs;
+    }
     /**
      * Returns a list of the dropped resources in a room, updating if necessary
      *

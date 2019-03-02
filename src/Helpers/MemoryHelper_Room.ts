@@ -197,6 +197,17 @@ export default class MemoryHelper_Room {
     }
 
     /**
+     * Update the room's GetEnergyJobs
+     * @param room The room to update the memory of
+     * @param jobList An array of GetEnergyJobs
+     */
+    public static updateGetEnergyJobs(room: Room, jobList: GetEnergyJob[]) {
+        Memory.rooms[room.name].getEnergyJobs = { data: null, cache: null };
+
+        Memory.rooms[room.name].getEnergyJobs.data = jobList;
+        Memory.rooms[room.name].getEnergyJobs.cache = Game.time;
+    }
+    /**
      * update creep limits for domestic creeps
      * @param room room we are updating limits for
      * @param newLimits new limits we are setting
