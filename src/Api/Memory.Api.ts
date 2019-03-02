@@ -590,4 +590,21 @@ export default class MemoryApi {
 
         return attackRooms;
     }
+
+    /**
+     * Adjust creep limits given the amount and creep limit you want adjusted
+     * @param room the room we are adjusting limits for
+     * @param limitType the classification of limit (mili, remote, domestic)
+     * @param roleConst the actual role we are adjusting
+     * @param delta the change we are applying to the limit
+     */
+    public static adjustCreepLimitByDelta(
+        room: Room,
+        limitType: string,
+        role: string,
+        delta: number
+    ): void {
+
+        Memory.rooms[room.name].creepLimit[limitType][role] += delta;
+    }
 }

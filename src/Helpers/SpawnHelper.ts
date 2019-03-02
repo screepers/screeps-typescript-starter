@@ -37,6 +37,7 @@ import {
     TIER_8
 } from "utils/Constants";
 import UserException from "utils/UserException";
+import MemoryApi from "Api/Memory.Api";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -1267,5 +1268,33 @@ export class SpawnHelper {
             options: creepOptions,
             working: false
         };
+    }
+
+    /**
+     * get number of active squad members for a given squad
+     * @param flagMemory the attack flag memory
+     * @param room the room they are coming from
+     */
+    public static getNumOfActiveSquadMembers(flagMemory: AttackFlagMemory, room: Room): number {
+
+        // Please improve this if possible lol. Had to get around type guards as we don't actually know what a creeps memory has in it unless we explicitly know the type i think
+        // We're going to run into this everytime we use creep memory so we need to find a nicer way around it if possible but if not casting it as a memory type
+        // Isn't the worst solution in the world
+        const militaryCreeps: Array<Creep | null> = MemoryApi.getMyCreeps(room, (creep) => this.isMilitaryRole(creep.memory.role));
+        return _.filter(militaryCreeps, (creep) => {
+            const creepOptions = creep!.memory.options as CreepOptionsMili;
+            return creepOptions.squadUUID === flagMemory.squadUUID;
+        }).length;
+    }
+
+    /**
+     * get if the creep is a military type creep or not
+     * @param roleConst the role of the creep
+     */
+    public static isMilitaryRole(roleConst: RoleConstant): boolean {
+        return (
+            roleConst === ROLE_STALKER ||
+            roleConst === ROLE_ZEALOT ||
+            roleConst === ROLE_MEDIC);
     }
 }

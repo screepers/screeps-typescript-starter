@@ -251,6 +251,7 @@ export default class SpawnApi {
             medic: 0
         };
 
+        // Get all active attack flags associated with this room
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
         const allAttackRoomFlags: AttackFlagMemory[] = _.map(targetRoomMemoryArray, (roomMemory) => {
             if (roomMemory!['flags'].data.active) { return roomMemory!['flags'].data; }
@@ -282,21 +283,21 @@ export default class SpawnApi {
         switch (flagMemory.flagType) {
             case ZEALOT_SOLO:
 
-                room.memory.creepLimit['militaryLimits']['zealot']++;
+                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'zealot', 1);
 
                 break;
 
             case STALKER_SOLO:
 
-                room.memory.creepLimit['militaryLimits']['stalker']++;
+                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'stalker', 1);
 
                 break;
 
             case STANDARD_SQUAD:
 
-                room.memory.creepLimit['militaryLimits']['zealot']++;
-                room.memory.creepLimit['militaryLimits']['stalker']++;
-                room.memory.creepLimit['militaryLimits']['medic']++;
+                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'zealot', 1);
+                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'stalker', 1);
+                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'medic', 1);
 
                 break;
         }
@@ -687,7 +688,7 @@ export default class SpawnApi {
         };
 
         // Don't actually get anything of value if it isn't a military creep. No point
-        if (!this.isMilitaryRole(roleConst)) { return squadOptions };
+        if (!SpawnHelper.isMilitaryRole(roleConst)) { return squadOptions };
 
         // Get an appropirate attack flag for the creep
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom)
@@ -707,7 +708,7 @@ export default class SpawnApi {
 
             // Skip non-squad based attack flags
             if (flagMemory.squadSize === 0) { continue; }
-            const numActiveSquadMembers: number = this.getNumOfActiveSquadMembers(flagMemory, room);
+            const numActiveSquadMembers: number = SpawnHelper.getNumOfActiveSquadMembers(flagMemory, room);
             const numRequestedSquadMembers: number = flagMemory.squadSize;
 
             // If we find an active flag that doesn't have its squad requirements met and is currently the flag closest to being met
@@ -769,33 +770,5 @@ export default class SpawnApi {
         }
 
         return room.name;
-    }
-
-    /**
-     * get if the creep is a military type creep or not
-     * @param roleConst the role of the creep
-     */
-    public static isMilitaryRole(roleConst: RoleConstant): boolean {
-        return (
-            roleConst === ROLE_STALKER ||
-            roleConst === ROLE_ZEALOT ||
-            roleConst === ROLE_MEDIC);
-    }
-
-    /**
-     * get number of active squad members for a given squad
-     * @param flagMemory the attack flag memory
-     * @param room the room they are coming from
-     */
-    public static getNumOfActiveSquadMembers(flagMemory: AttackFlagMemory, room: Room): number {
-
-        // Please improve this if possible lol. Had to get around type guards as we don't actually know what a creeps memory has in it unless we explicitly know the type i think
-        // We're going to run into this everytime we use creep memory so we need to find a nicer way around it if possible but if not casting it as a memory type
-        // Isn't the worst solution in the world
-        const militaryCreeps: Array<Creep | null> = MemoryApi.getMyCreeps(room, (creep) => this.isMilitaryRole(creep.memory.role));
-        return _.filter(militaryCreeps, (creep) => {
-            const creepOptions = creep!.memory.options as CreepOptionsMili;
-            return creepOptions.squadUUID === flagMemory.squadUUID;
-        }).length;
     }
 }
