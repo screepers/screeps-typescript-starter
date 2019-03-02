@@ -64,6 +64,8 @@ export default class MemoryApi {
             remoteRooms: { data: null, cache: null },
             roomState: ROOM_STATE_INTRO,
             sources: { data: null, cache: null },
+            minerals: { data: null, cache: null },
+            tombstones: { data: null, cache: null },
             structures: { data: null, cache: null },
             upgradeLink: ""
         };

@@ -257,6 +257,14 @@ interface RoomMemory {
      */
     sources: Cache;
     /**
+     * IDs of all minerals in the room
+     */
+    minerals: Cache;
+    /**
+     * IDs of all tombstones in the room
+     */
+    tombstones: Cache;
+    /**
      * IDs of the link the power upgrader pulls from
      */
     upgradeLink: string;

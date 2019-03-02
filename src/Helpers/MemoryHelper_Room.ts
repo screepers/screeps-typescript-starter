@@ -140,7 +140,12 @@ export default class MemoryHelper_Room {
      * @param room The room to check in
      */
     public static updateMinerals(room: Room): void {
-        // TODO Fill this out
+        Memory.rooms[room.name].minerals = { data: {}, cache: null };
+
+        const minerals = room.find(FIND_MINERALS);
+
+        Memory.rooms[room.name].minerals.data = _.map(minerals, (mineral: Mineral) => mineral.id);
+        Memory.rooms[room.name].minerals.cache = Infinity;
     }
 
     /**
@@ -149,7 +154,12 @@ export default class MemoryHelper_Room {
      * @param room The room to check in
      */
     public static updateTombstones(room: Room): void {
-        // TODO Fill this out
+        Memory.rooms[room.name].tombstones = { data: {}, cache: null };
+        
+        const tombstones = room.find(FIND_TOMBSTONES);
+
+        Memory.rooms[room.name].tombstones.data = _.map(tombstones, (tombstone: Tombstone) => tombstone.id);
+        Memory.rooms[room.name].tombstones.cache = Game.time;
     }
 
     /**
