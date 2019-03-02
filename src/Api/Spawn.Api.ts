@@ -758,15 +758,11 @@ export default class SpawnApi {
      * @param room the room the creep is spawning in
      * @param roleConst the role we are getting room for
      */
-    public static getCreepHomeRoom(room: Room, roleConst: RoleConstant): string {
-        // incomplete for now, need to handle special case (only reason this is in a function really)
-        // for colonizers. We just wanna set their home room to their target room basically so they automatically will go there
-        // handle their budniss. Another potential use case of this would be sending creeps to other rooms
-        // the easiest way to do that is just changing their home room in memory, so we could add something to detect
-        // if a creep being born is meant for another room and handle that accordingly here (ez pz)
+    public static getCreepHomeRoom(room: Room, roleConst: RoleConstant, targetRoom?: string): string {
 
-        if (roleConst === ROLE_COLONIZER) {
-            // find an open claim room and send it there
+        // Colonizers home room is same as their target room
+        if (roleConst === ROLE_COLONIZER && targetRoom) {
+            return targetRoom;
         }
 
         return room.name;

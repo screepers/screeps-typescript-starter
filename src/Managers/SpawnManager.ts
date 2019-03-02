@@ -84,7 +84,7 @@ export default class SpawnManager {
                 const roomState: RoomStateConstant = room.memory.roomState;
                 const targetRoom: string = SpawnApi.getCreepTargetRoom(room, nextCreepRole);
                 const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room, targetRoom, nextCreepRole);
-                const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole);
+                const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole, targetRoom);
                 const creepOptions: any = SpawnApi.generateCreepOptions(
                     room,
                     nextCreepRole,
