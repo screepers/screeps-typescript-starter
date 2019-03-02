@@ -277,6 +277,8 @@ export default class SpawnApi {
      */
     public static raiseMilitaryCreepLimits(flagMemory: AttackFlagMemory, room: Room): void {
 
+        // I think im going to make memory functions that raise the creep limit if you provide the role, limit group, and amount you want to raise/lower it
+        // that way if we restructure creeep limits we do it there instead of in 20 places
         switch (flagMemory.flagType) {
             case ZEALOT_SOLO:
 
@@ -743,22 +745,29 @@ export default class SpawnApi {
     /**
      * get the target room for the creep
      * TODO
-     * @param room the room we are spawning the squad in
+     * @param room the room we are spawning the creep in
+     * @param roleConst the role we are getting room for
      */
-    public static getCreepTargetRoom(room: Room): string {
+    public static getCreepTargetRoom(room: Room, roleConst: RoleConstant): string {
         return "";
     }
 
     /**
      * get the home room for the creep
      * @param room the room the creep is spawning in
+     * @param roleConst the role we are getting room for
      */
-    public static getCreepHomeRoom(room: Room): string {
+    public static getCreepHomeRoom(room: Room, roleConst: RoleConstant): string {
         // incomplete for now, need to handle special case (only reason this is in a function really)
         // for colonizers. We just wanna set their home room to their target room basically so they automatically will go there
         // handle their budniss. Another potential use case of this would be sending creeps to other rooms
         // the easiest way to do that is just changing their home room in memory, so we could add something to detect
         // if a creep being born is meant for another room and handle that accordingly here (ez pz)
+
+        if (roleConst === ROLE_COLONIZER) {
+            // find an open claim room and send it there
+        }
+
         return room.name;
     }
 
