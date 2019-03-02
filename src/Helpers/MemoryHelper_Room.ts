@@ -17,10 +17,10 @@ export default class MemoryHelper_Room {
         // Update structures/construction sites
         this.updateConstructionSites(room);
         this.updateStructures(room);
-        // Update sources, minerals, energy, tombstones
+        // Update sources, minerals, dropped resources, tombstones
         this.updateSources(room);
         this.updateMinerals(room);
-        this.updateDroppedEnergy(room);
+        this.updateDroppedResources(room);
         this.updateTombstones(room);
         // Update Custom Memory Components
         this.updateDependentRooms(room);
@@ -130,7 +130,7 @@ export default class MemoryHelper_Room {
         const sources = room.find(FIND_SOURCES);
 
         Memory.rooms[room.name].sources.data = _.map(sources, (source: Source) => source.id);
-        Memory.rooms[room.name].sources.cache = Infinity;
+        Memory.rooms[room.name].sources.cache = Game.time;
     }
 
     /**
@@ -145,7 +145,7 @@ export default class MemoryHelper_Room {
         const minerals = room.find(FIND_MINERALS);
 
         Memory.rooms[room.name].minerals.data = _.map(minerals, (mineral: Mineral) => mineral.id);
-        Memory.rooms[room.name].minerals.cache = Infinity;
+        Memory.rooms[room.name].minerals.cache = Game.time;
     }
 
     /**
@@ -155,7 +155,7 @@ export default class MemoryHelper_Room {
      */
     public static updateTombstones(room: Room): void {
         Memory.rooms[room.name].tombstones = { data: {}, cache: null };
-        
+
         const tombstones = room.find(FIND_TOMBSTONES);
 
         Memory.rooms[room.name].tombstones.data = _.map(tombstones, (tombstone: Tombstone) => tombstone.id);
@@ -163,12 +163,17 @@ export default class MemoryHelper_Room {
     }
 
     /**
-     * Find all dropped energy in a room
+     * Find all dropped resources in a room
      *
      * @param room The room to check in
      */
-    public static updateDroppedEnergy(room: Room): void {
-        // TODO Fill this out
+    public static updateDroppedResources(room: Room): void {
+        Memory.rooms[room.name].droppedResources = { data: {}, cache: null };
+
+        const droppedResources = room.find(FIND_DROPPED_RESOURCES);
+
+        Memory.rooms[room.name].droppedResources.data = _.map(droppedResources, (resource: Resource) => resource.id);
+        Memory.rooms[room.name].droppedResources.data = Game.time;
     }
 
     /**

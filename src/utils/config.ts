@@ -1,8 +1,8 @@
 /**
  * Disallow the caching of all memory
- * 
- * NOTE: Turning this setting on will massively reduce performance
- *       but will ensure that all memory is as accurate as possible
+ *
+ * Turning this setting on will massively reduce performance
+ * but will ensure that all memory is as accurate as possible
  */
 export const NO_CACHING_MEMORY = false;
 

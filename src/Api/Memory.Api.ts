@@ -6,9 +6,12 @@ import {
     CONSTR_CACHE_TTL,
     HCREEP_CACHE_TTL,
     FCREEP_CACHE_TTL,
-    DEPNDT_CACHE_TTL
+    DEPNDT_CACHE_TTL,
+    TOMBSTONE_CACHE_TTL,
+    DROPS_CACHE_TTL
 } from "utils/Constants";
 import { NO_CACHING_MEMORY } from "utils/config";
+import MemoryHelper from "Helpers/MemoryHelper";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -66,6 +69,7 @@ export default class MemoryApi {
             sources: { data: null, cache: null },
             minerals: { data: null, cache: null },
             tombstones: { data: null, cache: null },
+            droppedResources: { data: null, cache: null },
             structures: { data: null, cache: null },
             upgradeLink: ""
         };
@@ -274,7 +278,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
-    ) {
+    ): Array<ConstructionSite | null> {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -284,8 +288,9 @@ export default class MemoryApi {
             MemoryHelper_Room.updateConstructionSites(room);
         }
 
-        let constructionSites = _.map(Memory.rooms[room.name].constructionSites.data, (id: string) =>
-            Game.getObjectById(id)
+        let constructionSites: Array<ConstructionSite | null> = _.map(
+            Memory.rooms[room.name].constructionSites.data,
+            (id: string) => Game.getObjectById(id)
         );
         if (filterFunction !== undefined) {
             constructionSites = _.filter(constructionSites, filterFunction);
@@ -307,25 +312,56 @@ export default class MemoryApi {
         filterFunction?: (object: Tombstone) => boolean,
         forceUpdate?: boolean
     ): Array<Tombstone | null> {
-        // TODO Fill this out for Room.Api.CreateEnergyQueue
-        return [null];
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].tombstones ||
+            Memory.rooms[room.name].tombstones.cache < Game.time - TOMBSTONE_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateTombstones(room);
+        }
+
+        let tombstones: Array<Tombstone | null> = _.map(Memory.rooms[room.name].tombstones.data, (id: string) =>
+            Game.getObjectById(id)
+        );
+        if (filterFunction !== undefined) {
+            tombstones = _.filter(tombstones, filterFunction);
+        }
+
+        return tombstones;
     }
 
     /**
-     * Returns a list of the energy objects in a room, updating if necessary
+     * Returns a list of the dropped resources in a room, updating if necessary
      *
      * @param room The room we want to look in
-     * @param filterFunction [Optional] The function to filter the energy objects
+     * @param filterFunction [Optional] The function to filter the resource objects
      * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Array<RESOURCE_ENERGY | null> An array of dropped energy, if there are any
+     * @returns Array< Resource | null> An array of dropped resources, if there are any
      */
-    public static getDroppedEnergy(
+    public static getDroppedResources(
         room: Room,
         filterFunction?: (object: RESOURCE_ENERGY) => boolean,
         forceUpdate?: boolean
-    ): Array<RESOURCE_ENERGY | null> {
-        // TODO Fill this out for Room.Api.CreateEnergyQueue
-        return [null];
+    ): Array<Resource | null> {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].droppedResources ||
+            Memory.rooms[room.name].droppedResources.cache < Game.time - DROPS_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateDroppedResources(room);
+        }
+
+        let droppedResources: Array<Resource | null> = _.map(
+            Memory.rooms[room.name].droppedResources.data,
+            (id: string) => Game.getObjectById(id)
+        );
+        if (filterFunction !== undefined) {
+            droppedResources = _.filter(droppedResources, filterFunction);
+        }
+
+        return droppedResources;
     }
 
     /**
@@ -393,7 +429,6 @@ export default class MemoryApi {
         forceUpdate?: boolean,
         targetRoom?: string
     ): Array<RemoteRoomMemory | undefined> {
-
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -413,12 +448,14 @@ export default class MemoryApi {
 
         // TargetRoom parameter provided
         if (targetRoom) {
-            remoteRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+            remoteRooms = _.filter(
+                Memory.rooms[room.name].claimRooms.data,
                 (roomMemory: RemoteRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
-        }
-        else {  // No target room provided, just return them all
-            remoteRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+        } else {
+            // No target room provided, just return them all
+            remoteRooms = _.filter(
+                Memory.rooms[room.name].claimRooms.data,
                 (roomMemory: RemoteRoomMemory) => filterFunction
             );
         }
@@ -439,8 +476,8 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: Room) => boolean,
         forceUpdate?: boolean,
-        targetRoom?: string): Array<ClaimRoomMemory | undefined> {
-
+        targetRoom?: string
+    ): Array<ClaimRoomMemory | undefined> {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -460,12 +497,14 @@ export default class MemoryApi {
 
         // TargetRoom parameter provided
         if (targetRoom) {
-            claimRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+            claimRooms = _.filter(
+                Memory.rooms[room.name].claimRooms.data,
                 (roomMemory: ClaimRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
-        }
-        else {  // No target room provided, just return them all
-            claimRooms = _.filter(Memory.rooms[room.name].claimRooms.data,
+        } else {
+            // No target room provided, just return them all
+            claimRooms = _.filter(
+                Memory.rooms[room.name].claimRooms.data,
                 (roomMemory: ClaimRoomMemory) => filterFunction
             );
         }
@@ -488,7 +527,6 @@ export default class MemoryApi {
         filterFunction?: (object: Room) => boolean,
         forceUpdate?: boolean
     ): Array<AttackRoomMemory | undefined> {
-
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -508,12 +546,14 @@ export default class MemoryApi {
 
         // TargetRoom parameter provided
         if (targetRoom) {
-            attackRooms = _.filter(Memory.rooms[room.name].attackRooms.data,
+            attackRooms = _.filter(
+                Memory.rooms[room.name].attackRooms.data,
                 (roomMemory: AttackRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
-        }
-        else {  // No target room provided, just return them all
-            attackRooms = _.filter(Memory.rooms[room.name].attackRooms.data,
+        } else {
+            // No target room provided, just return them all
+            attackRooms = _.filter(
+                Memory.rooms[room.name].attackRooms.data,
                 (roomMemory: AttackRoomMemory) => filterFunction
             );
         }

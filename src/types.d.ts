@@ -210,7 +210,7 @@ type UHMBROCK = "uhmbrock";
 interface StringMap {
     [key: string]: any;
 }
-//----------------------------------------
+// ----------------------------------------
 
 // custom memory objects ------------
 // main memory modules --------------
@@ -261,6 +261,10 @@ interface RoomMemory {
      */
     minerals: Cache;
     /**
+     * IDs of all dropped resources in a room
+     */
+    droppedResources: Cache;
+    /**
      * IDs of all tombstones in the room
      */
     tombstones: Cache;
@@ -298,8 +302,52 @@ interface RoomMemory {
     claimRooms: Cache;
 }
 
-interface EmpireMemory { }
+interface EmpireMemory {}
 // ----------------------------------
+
+/**
+ * Structures that have a energy, minerals, or store property
+ */
+type ResourceContainingStructure =
+    | STRUCTURE_CONTAINER
+    | STRUCTURE_EXTENSION
+    | STRUCTURE_EXTRACTOR
+    | STRUCTURE_LAB
+    | STRUCTURE_LINK
+    | STRUCTURE_NUKER
+    | STRUCTURE_POWER_SPAWN
+    | STRUCTURE_SPAWN
+    | STRUCTURE_STORAGE
+    | STRUCTURE_TERMINAL
+    | STRUCTURE_TOWER;
+
+/**
+ * Valid types for the GetEnergyJob targetType
+ */
+type GetEnergy_TargetTypes = "source" | "tombstone" | "droppedResource" | ResourceContainingStructure;
+
+/**
+ * JobObject for the GetEnergy job queue
+ */
+interface GetEnergyJob {
+    /**
+     * ID of the target object
+     */
+    targetID: string;
+    /**
+     * The type of the target object
+     */
+    targetType: GetEnergy_TargetTypes;
+    /**
+     * The resources in the object in the format of Structure.Store
+     *
+     * Each object key is one of the RESOURCE_* constants, values are resources amounts. RESOURCE_ENERGY is always defined and equals to 0 when empty, other resources are undefined when empty.
+     */
+    resources: StoreDefinition;
+    /**
+     *
+     */
+}
 
 /**
  * options for civilian creeps
