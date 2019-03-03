@@ -276,6 +276,10 @@ export default class RoomHelper {
         const allClaimRooms: (ClaimRoomMemory | undefined)[] = MemoryApi.getClaimRooms(room)
         let sum: number = 0;
 
+        // No existing claim rooms
+        if (allClaimRooms[0] === undefined) {
+            return 0;
+        }
         for (const claimRoom of allClaimRooms) {
             if (!_.some(Game.rooms, (room) => room.name === claimRoom!.roomName)) {
                 ++sum;

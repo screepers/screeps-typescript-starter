@@ -1217,7 +1217,7 @@ export class SpawnHelper {
                 break;
 
             case TIER_5: // 8 Ranged Attack, 8 Move - Total Cost: 1600
-                body = { ranged_attackry: 8, move: 8 };
+                body = { ranged_attack: 8, move: 8 };
                 break;
 
             case TIER_6 || TIER_7 || TIER_8: // 12 Ranged Attack, 10 Move - Total Cost: 2300
