@@ -607,4 +607,13 @@ export default class MemoryApi {
 
         Memory.rooms[room.name].creepLimit[limitType][role] += delta;
     }
+
+    /**
+     * get the defcon level for the room
+     * @param room the room we are checking defcon for
+     */
+    public static getDefconLevel(room: Room): number {
+        return Memory.rooms[room.name].defcon;
+    }
+
 }

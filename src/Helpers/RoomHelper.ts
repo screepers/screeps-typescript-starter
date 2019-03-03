@@ -135,7 +135,7 @@ export default class RoomHelper {
         return (
             TOWER_POWER_ATTACK -
             (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
-                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+            (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
         );
     }
 
@@ -266,5 +266,22 @@ export default class RoomHelper {
         });
 
         return numRemoteDefenders;
+    }
+
+    /**
+     * get the number of claim rooms that have not yet been claimed
+     * @param room the room we are checking for
+     */
+    public static numCurrentlyUnclaimedClaimRooms(room: Room): number {
+        const allClaimRooms: (ClaimRoomMemory | undefined)[] = MemoryApi.getClaimRooms(room)
+        let sum: number = 0;
+
+        for (const claimRoom of allClaimRooms) {
+            if (!_.some(Game.rooms, (room) => room.name === claimRoom!.roomName)) {
+                ++sum;
+            }
+        }
+
+        return sum;
     }
 }

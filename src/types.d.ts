@@ -90,9 +90,11 @@ declare const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 declare const ROLE_REMOTE_RESERVER = "remoteReserver";
 declare const ROLE_REMOTE_DEFENDER = "remoteDefender";
 declare const ROLE_COLONIZER = "remoteColonizer";
+declare const ROLE_CLAIMER = "claimer";
 declare const ROLE_ZEALOT = "zealot";
 declare const ROLE_STALKER = "stalker";
 declare const ROLE_MEDIC = "medic";
+declare const ROLE_DOMESTIC_DEFENDER = "domesticDefender";
 
 /**
  * role constants
@@ -108,9 +110,11 @@ type RoleConstant =
     | ROLE_REMOTE_RESERVER
     | ROLE_REMOTE_DEFENDER
     | ROLE_COLONIZER
+    | ROLE_CLAIMER
     | ROLE_ZEALOT
     | ROLE_STALKER
-    | ROLE_MEDIC;
+    | ROLE_MEDIC
+    | ROLE_DOMESTIC_DEFENDER;
 
 /**
  * sits on the source and mines energy full-time
@@ -153,17 +157,25 @@ type ROLE_REMOTE_DEFENDER = "remoteDefender"; //
  */
 type ROLE_COLONIZER = "remoteColonizer"; //
 /**
- * Military Creep - To be described
+ * goes into claim room and claims it
  */
-type ROLE_ZEALOT = "zealot";
+type ROLE_CLAIMER = "claimer";  //
 /**
- * Military Creep - To be described
+ * Military Creep - offensive melee
  */
-type ROLE_STALKER = "stalker";
+type ROLE_ZEALOT = "zealot";    //
 /**
- * Military Creep - To be described
+ * Military Creep - offensive ranged
  */
-type ROLE_MEDIC = "medic";
+type ROLE_STALKER = "stalker";  //
+/**
+ * Military Creep - offensive healer
+ */
+type ROLE_MEDIC = "medic";  //
+/**
+ * Military Creep - Defends the home room
+ */
+type ROLE_DOMESTIC_DEFENDER = "domesticDefender";   //
 // --------------------------------------------------------------------
 
 /**
@@ -306,7 +318,7 @@ interface RoomMemory {
     getEnergyJobs: Cache;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
@@ -504,6 +516,10 @@ interface RemoteCreepLimits {
      * limit for remote colonizers
      */
     remoteColonizer: number;
+    /**
+     * limit for claimers
+     */
+    claimer: number;
 }
 
 /**
@@ -550,6 +566,10 @@ interface MilitaryCreepLimits {
      * limit for military medics
      */
     medic: number;
+    /**
+     * limit for domestic defender
+     */
+    domesticDefender: number;
 }
 
 /**
