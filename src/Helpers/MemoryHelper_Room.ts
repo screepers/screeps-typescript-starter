@@ -1,4 +1,5 @@
 import { ALL_STRUCTURE_TYPES } from "utils/Constants";
+import RoomApi from "Api/Room.Api";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -24,6 +25,8 @@ export default class MemoryHelper_Room {
         this.updateTombstones(room);
         // Update Custom Memory Components
         this.updateDependentRooms(room);
+        // Update Job Lists
+        this.updateGetEnergyJobs(room, RoomApi.createGetEnergyJobs(room));
     }
 
     /**

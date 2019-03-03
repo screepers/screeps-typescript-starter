@@ -13,6 +13,7 @@ import {
 } from "utils/Constants";
 import { NO_CACHING_MEMORY } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
+import RoomApi from "./Room.Api";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -63,7 +64,7 @@ export default class MemoryApi {
             constructionSites: { data: null, cache: null },
             creepLimit: {},
             creeps: { data: null, cache: null },
-            defcon: 0,
+            defcon: -1,
             hostiles: { data: null, cache: null },
             remoteRooms: { data: null, cache: null },
             roomState: ROOM_STATE_INTRO,
@@ -93,6 +94,7 @@ export default class MemoryApi {
         this.getHostileCreeps(room, undefined, forceUpdate);
         this.getSources(room, undefined, forceUpdate);
         this.getStructures(room, undefined, forceUpdate);
+        this.getGetEnergyJobs(room, undefined, forceUpdate);
         // this.getCreepLimits(room, undefined, forceUpdate);
         // this.getDefcon(room, undefined, forceUpdate);
         // this.getRoomState(room, undefined, forceUpdate);
@@ -335,6 +337,8 @@ export default class MemoryApi {
 
     /**
      * Gets the GetEnergyJobs of a room
+     *
+     * Performance Note: This will update all types of GetEnergyJobs.
      * @param room The room to check
      * @param filterFunction [Optional] Function to filter the jobs by
      * @param forceUpdate [Optional] Invalidate the Cache by force
@@ -351,7 +355,7 @@ export default class MemoryApi {
             !Memory.rooms[room.name].getEnergyJobs ||
             Memory.rooms[room.name].getEnergyJobs.cache < Game.time - JOBS_CACHE_TTL
         ) {
-            // TODO Call the function that updates the jobs in memory here
+            MemoryHelper_Room.updateGetEnergyJobs(room, RoomApi.createGetEnergyJobs(room));
         }
 
         let getEnergyJobs = Memory.rooms[room.name].getEnergyJobs.data;
@@ -598,13 +602,7 @@ export default class MemoryApi {
      * @param roleConst the actual role we are adjusting
      * @param delta the change we are applying to the limit
      */
-    public static adjustCreepLimitByDelta(
-        room: Room,
-        limitType: string,
-        role: string,
-        delta: number
-    ): void {
-
+    public static adjustCreepLimitByDelta(room: Room, limitType: string, role: string, delta: number): void {
         Memory.rooms[room.name].creepLimit[limitType][role] += delta;
     }
 }
