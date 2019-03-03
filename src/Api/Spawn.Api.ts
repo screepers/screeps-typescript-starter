@@ -782,6 +782,13 @@ export default class SpawnApi {
 
         let roomMemory;
 
+        // Basic plan:
+        // Get the proper room mem for each type
+        // Claim: Find first claim room with the lowest amount of the roleConst's type assigned to it
+        // Remote: Find the first remote room with the lowest amount of the roleConsts type assigned to it
+        // Miltiary: Find the first attack room WITH active flags and in theory there should only be 1 attack flag active at a time
+        // Regardless of what room they are in... so finding just first room to meet criteria will be a fail-safe anyway
+
         switch (roleConst) {
 
             // Colonizing creeps going to their claim rooms
@@ -817,12 +824,9 @@ export default class SpawnApi {
      * @param roleConst the role we are getting room for
      */
     public static getCreepHomeRoom(room: Room, roleConst: RoleConstant, targetRoom?: string): string {
-
-        // Colonizers home room is same as their target room
-        if ((roleConst === ROLE_COLONIZER || roleConst === ROLE_DOMESTIC_DEFENDER) && targetRoom) {
-            return targetRoom;
-        }
-
+        // Okay so this might not even be needed, but I took out colonizer home room setting because
+        // That would actually take them out of the creep count for this room, spawning them in an infinite loop
+        // We will just set their target room as the claim room and it will have the desired effect
         return room.name;
     }
 }
