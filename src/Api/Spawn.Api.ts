@@ -745,11 +745,39 @@ export default class SpawnApi {
 
     /**
      * get the target room for the creep
-     * TODO
      * @param room the room we are spawning the creep in
      * @param roleConst the role we are getting room for
      */
     public static getCreepTargetRoom(room: Room, roleConst: RoleConstant): string {
+
+        let roomMemory;
+
+        switch (roleConst) {
+
+            // Colonizing creeps going to their claim rooms
+            case ROLE_COLONIZER:
+
+                break;
+
+            // Remote creeps going to their remote rooms
+            case
+                ROLE_REMOTE_DEFENDER || ROLE_REMOTE_HARVESTER ||
+                ROLE_REMOTE_MINER || ROLE_REMOTE_RESERVER:
+
+                break;
+
+            // Military creeps going to their attack rooms
+            case
+                ROLE_STALKER || ROLE_MEDIC || ROLE_ZEALOT:
+
+                break;
+
+
+            // Domestic creeps keep their target room as their home room
+            default:
+                return room.name;
+        }
+
         return "";
     }
 
@@ -758,15 +786,11 @@ export default class SpawnApi {
      * @param room the room the creep is spawning in
      * @param roleConst the role we are getting room for
      */
-    public static getCreepHomeRoom(room: Room, roleConst: RoleConstant): string {
-        // incomplete for now, need to handle special case (only reason this is in a function really)
-        // for colonizers. We just wanna set their home room to their target room basically so they automatically will go there
-        // handle their budniss. Another potential use case of this would be sending creeps to other rooms
-        // the easiest way to do that is just changing their home room in memory, so we could add something to detect
-        // if a creep being born is meant for another room and handle that accordingly here (ez pz)
+    public static getCreepHomeRoom(room: Room, roleConst: RoleConstant, targetRoom?: string): string {
 
-        if (roleConst === ROLE_COLONIZER) {
-            // find an open claim room and send it there
+        // Colonizers home room is same as their target room
+        if (roleConst === ROLE_COLONIZER && targetRoom) {
+            return targetRoom;
         }
 
         return room.name;

@@ -84,7 +84,7 @@ export default class SpawnManager {
                 const roomState: RoomStateConstant = room.memory.roomState;
                 const targetRoom: string = SpawnApi.getCreepTargetRoom(room, nextCreepRole);
                 const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room, targetRoom, nextCreepRole);
-                const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole);
+                const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole, targetRoom);
                 const creepOptions: any = SpawnApi.generateCreepOptions(
                     room,
                     nextCreepRole,
@@ -113,8 +113,4 @@ export default class SpawnManager {
             we get the remtoe room that has the least amount of remote miners that consider them a target room
             we return this room as the creeps target room
             If they are all the same value, we just select the closeset one potentially
-
-            complete getCreepHomeRoom to handle colonizers (it might be literally as easy as calling the getCreepTargetRoom
-            function from that method if its a remote colonizer)
-            When we start handling empire level stuff like inter-room assistance then we can add to it then
         */
