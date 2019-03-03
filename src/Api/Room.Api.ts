@@ -1,11 +1,13 @@
 import MemoryApi from "./Memory.Api";
 import RoomHelper from "Helpers/RoomHelper";
-import { ROOM_STATE_INTRO, WALL_LIMIT, ERROR_ERROR } from "utils/constants";
+import { ROOM_STATE_INTRO, WALL_LIMIT, ERROR_ERROR, ROLE_MINER } from "utils/constants";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import MemoryHelper from "Helpers/MemoryHelper";
 import { ErrorMapper } from "utils/ErrorMapper";
 import UtilHelper from "Helpers/UtilHelper";
 import UserException from "utils/UserException";
+import { open } from "fs";
+import { ConsoleCommands } from "Helpers/ConsoleCommands";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -262,6 +264,57 @@ export default class RoomApi {
     }
 
     /**
+     * Genereates a list of GetEnergyJobs for the room
+     *
+     * Performance Note: This updates all forms of energy in the room, so it is less efficient than calling the specific method
+     * @param room The room to create the job list for
+     */
+    public static createGetEnergyJobs(room: Room): GetEnergyJob[] {
+        // Overall Job List
+        let getEnergyJobs: GetEnergyJob[] = [];
+
+        // Generate Source EnergyJobs
+        const sourceJobs = this.createSourceGetEnergyJobs(room);
+
+        if (sourceJobs !== null) {
+            getEnergyJobs = getEnergyJobs.concat(sourceJobs);
+        }
+
+        console.log("Total: " + JSON.stringify(getEnergyJobs));
+        console.log("source: " + JSON.stringify(sourceJobs));
+        // Generate
+
+        // Return getEnergyJobs even if it is empty
+        return getEnergyJobs;
+    }
+
+    /**
+     * Gets a list of GetEnergyJobs for the sources of a room
+     * @param room The room to create the job list for
+     */
+    public static createSourceGetEnergyJobs(room: Room): GetEnergyJob[] | null {
+        // List of all sources that are under optimal work capacity
+        const openSources = this.getOpenSources(room);
+
+        if (openSources.length === 0) {
+            return null;
+        }
+
+        const sourceJobList: GetEnergyJob[] = [];
+
+        _.forEach(openSources, (source: Source) => {
+            // Create the StoreDefinition for the source
+            const sourceResources: StoreDefinition = { energy: source.energy };
+            // Create the GetEnergyJob object for the source
+            const sourceJob: GetEnergyJob = { targetID: source.id, targetType: "source", resources: sourceResources };
+            // Append the GetEnergyJob to the main array
+            sourceJobList.push(sourceJob);
+        });
+
+        return sourceJobList;
+    }
+
+    /**
      * gets the drop container next to the source
      * @param room the room we are checking in
      * @param source the source we are considering
@@ -321,18 +374,15 @@ export default class RoomApi {
      * @param room the room we want to queue to be created for
      */
     public static createJobQueue(room: Room): void {
-
         // Call all the sub job queues
         if (RoomHelper.isOwnedRoom(room)) {
             this.createJobQueueWorker(room);
             this.createJobQueueLorry(room);
             this.createJobQueueHarvester(room);
             this.createEnergyQueue(room);
+        } else {
+            // throw error if we do not own this room
         }
-        else {   // throw error if we do not own this room
-
-        }
-
     }
 
     /**
@@ -349,9 +399,7 @@ export default class RoomApi {
      * create a job queue for the room for harvester creeps
      * @param room the room we want the queue to be created for
      */
-    public static createJobQueueHarvester(room: Room): void {
-
-    }
+    public static createJobQueueHarvester(room: Room): void {}
 
     /**
      * createa a job queue for the room for harvester creeps
