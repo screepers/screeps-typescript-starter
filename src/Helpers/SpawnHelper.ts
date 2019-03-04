@@ -783,8 +783,8 @@ export class SpawnHelper {
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
-            case TIER_4 || TIER_5 || TIER_6 || TIER_7 || TIER_8: // 2 Reserve Carry, 2 Move - Total Cost: 800
-                body = { reserve: 2, move: 2 };
+            case TIER_4 || TIER_5 || TIER_6 || TIER_7 || TIER_8: // 2 Claim, 2 Move - Total Cost: 800
+                body = { claim: 2, move: 2 };
                 break;
         }
 
@@ -898,6 +898,67 @@ export class SpawnHelper {
         }
 
         return creepOptions;
+    }
+
+    /**
+     * Generate body for claimer creep
+     * @param roomState the room state for the room
+     */
+    public static generateClaimerOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
+        let creepOptions: CreepOptionsCiv = this.getDefaultCreepOptionsCiv();
+
+        switch (roomState) {
+            case ROOM_STATE_INTRO ||
+                ROOM_STATE_BEGINNER ||
+                ROOM_STATE_INTER ||
+                ROOM_STATE_ADVANCED ||
+                ROOM_STATE_STIMULATE ||
+                ROOM_STATE_UPGRADER ||
+                ROOM_STATE_SEIGE ||
+                ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+
+                break;
+        }
+
+        return creepOptions;
+    }
+
+
+    /**
+     * Generate options for claimer creep
+     * @param tier the tier of the room
+     */
+    public static generateClaimerBody(tier: TierConstant): BodyPartConstant[] {
+        // Default Values for Claimer
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_2 || TIER_3 || TIER_4 || TIER_5 || TIER_6 || TIER_7 || TIER_8: // 1 Claim, 2 Move, Total Cost: 400
+                body = { claim: 1, move: 2 };
+                break;
+
+        }
+
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
     }
 
     /**
@@ -1156,7 +1217,7 @@ export class SpawnHelper {
                 break;
 
             case TIER_5: // 8 Ranged Attack, 8 Move - Total Cost: 1600
-                body = { carranged_attackry: 8, move: 8 };
+                body = { ranged_attack: 8, move: 8 };
                 break;
 
             case TIER_6 || TIER_7 || TIER_8: // 12 Ranged Attack, 10 Move - Total Cost: 2300
@@ -1181,6 +1242,7 @@ export class SpawnHelper {
         squadUUIDParam: number | null,
         rallyLocationParam: RoomPosition | null
     ): CreepOptionsMili | undefined {
+
         let creepOptions: CreepOptionsMili = this.getDefaultCreepOptionsMili();
 
         switch (roomState) {
@@ -1201,6 +1263,80 @@ export class SpawnHelper {
                     healer: false,
                     attacker: false,
                     defender: false,
+                    flee: false
+                };
+
+                break;
+        }
+
+        return creepOptions;
+    }
+
+    /**
+     * generate body for domestic defender creep
+     * @param tier the tier of the room
+     */
+    public static generateDomesticDefenderBody(tier: TierConstant): BodyPartConstant[] {
+        // Default Values for Stalker
+        let body: CreepBodyDescriptor = { work: 0, move: 0 };
+        const opts: CreepBodyOptions = { mixType: GROUPED };
+
+        switch (tier) {
+            case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
+                body = { attack: 2, move: 2 };
+                break;
+
+            case TIER_2: // 3 Attack, 2 Move - Total Cost: 340
+                body = { attack: 3, move: 2 };
+                break;
+
+            case TIER_3: // 5 Attack, 5 Move - Total Cost: 650
+                body = { attack: 5, move: 5 };
+                break;
+
+            case TIER_4: // 8 Attack, 8 Move - Total Cost: 880
+                body = { attack: 8, move: 8 };
+                break;
+
+            case TIER_5: // 10 Attack, 10 Move - Total Cost: 1300
+                body = { attack: 10, move: 10 };
+                break;
+
+            case TIER_6 || TIER_7 || TIER_8: // 15 Attack, 15 Move - Total Cost: 1950
+                body = { attack: 15, move: 15 };
+                break;
+        }
+
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+
+    /**
+     * generate options for domestic defender creep
+     * @param roomState the room state for the room spawning it
+     */
+    public static generateDomesticDefenderOptions(roomState: RoomStateConstant): CreepOptionsMili | undefined {
+
+        let creepOptions: CreepOptionsMili = this.getDefaultCreepOptionsMili();
+
+        switch (roomState) {
+            case ROOM_STATE_INTRO ||
+                ROOM_STATE_BEGINNER ||
+                ROOM_STATE_INTER ||
+                ROOM_STATE_ADVANCED ||
+                ROOM_STATE_STIMULATE ||
+                ROOM_STATE_UPGRADER ||
+                ROOM_STATE_SEIGE ||
+                ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    squadSize: 0,
+                    squadUUID: null,
+                    rallyLocation: null,
+                    seige: false,
+                    dismantler: false,
+                    healer: false,
+                    attacker: false,
+                    defender: true,
                     flee: false
                 };
 

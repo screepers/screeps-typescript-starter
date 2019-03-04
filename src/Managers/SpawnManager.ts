@@ -100,17 +100,3 @@ export default class SpawnManager {
         }
     }
 }
-
-// Current todo to finish Spawning ------
-/*
-            getCreepTargetRoom()
-            We need to come up with a way to figure out what room a remote/military creep
-            needs to go to.
-            My idea for this is to create a function in SpawnApi that does precisely this.
-            Using remote room for example let say we have 2 remote rooms and want to spawn a remote miner:
-            The function will get both remote rooms and add their names to an array
-            We will get every living creep that is a remote miner and loop over them
-            we get the remtoe room that has the least amount of remote miners that consider them a target room
-            we return this room as the creeps target room
-            If they are all the same value, we just select the closeset one potentially
-        */

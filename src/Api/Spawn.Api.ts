@@ -14,6 +14,8 @@ import {
     ROLE_POWER_UPGRADER,
     ROLE_REMOTE_DEFENDER,
     ROLE_REMOTE_HARVESTER,
+    ROLE_DOMESTIC_DEFENDER,
+    ROLE_CLAIMER,
     ROLE_STALKER,
     ROLE_WORKER,
     ROLE_ZEALOT,
@@ -182,7 +184,8 @@ export default class SpawnApi {
             remoteHarvester: 0,
             remoteReserver: 0,
             remoteColonizer: 0,
-            remoteDefender: 0
+            remoteDefender: 0,
+            claimer: 0
         };
 
         const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
@@ -194,8 +197,9 @@ export default class SpawnApi {
         }
 
         // Gather the rest of the data only if we have a remote room or a claim room
-        const numRemoteDefenders = RoomHelper.numRemoteDefenders(room);
+        const numRemoteDefenders: number = RoomHelper.numRemoteDefenders(room);
         const numRemoteSources: number = RoomHelper.numRemoteSources(room);
+        const numCurrentlyUnclaimedClaimRooms: number = RoomHelper.numCurrentlyUnclaimedClaimRooms(room);
 
         // check what room state we are in
         switch (room.memory.roomState) {
@@ -208,6 +212,7 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
+                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms;
 
                 break;
 
@@ -220,6 +225,7 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
+                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms;
 
                 break;
 
@@ -232,6 +238,7 @@ export default class SpawnApi {
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms;
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
+                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms;
 
                 break;
         }
@@ -248,7 +255,8 @@ export default class SpawnApi {
         const militaryLimits: MilitaryCreepLimits = {
             zealot: 0,
             stalker: 0,
-            medic: 0
+            medic: 0,
+            domesticDefender: 0
         };
 
         // Get all active attack flags associated with this room
@@ -265,8 +273,11 @@ export default class SpawnApi {
         }
 
 
-        // Check if we need defenders and adjust accordingly
-        // militaryLimits[ROLE_REMOTE_DEFENDER] = this.getNumOfRemoteDefenders(room);
+        // Check if we need domestic defenders and adjust accordingly
+        const defcon: number = MemoryApi.getDefconLevel(room);
+        if (defcon >= 2) {
+            this.raiseDomesticDefenderCreepLimits(room, defcon);
+        }
 
         return militaryLimits;
     }
@@ -301,6 +312,17 @@ export default class SpawnApi {
 
                 break;
         }
+    }
+
+    /**
+     * raises the domestic defender limit based on the defcon state of the room
+     * @param room the room we are in
+     * @param defcon the defcon of said room
+     */
+    public static raiseDomesticDefenderCreepLimits(room: Room, defcon: number): void {
+        // For now, just raise by one, later we can decide what certain defcons means for what we want to spawn
+        // just wanted it in a function so we have the foundation for that in place
+        MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', ROLE_DOMESTIC_DEFENDER, 1);
     }
 
     /**
@@ -512,6 +534,8 @@ export default class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterOptions(roomState);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerOptions(roomState);
+            case ROLE_CLAIMER:
+                return SpawnHelper.generateClaimerOptions(roomState);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderOptions(roomState);
             case ROLE_REMOTE_RESERVER:
@@ -522,6 +546,8 @@ export default class SpawnApi {
                 return SpawnHelper.generateMedicOptions(roomState, squadSize, squadUUID, rallyLocation);
             case ROLE_STALKER:
                 return SpawnHelper.generateStalkerOptions(roomState, squadSize, squadUUID, rallyLocation);
+            case ROLE_DOMESTIC_DEFENDER:
+                return SpawnHelper.generateDomesticDefenderOptions(roomState);
             default:
                 throw new UserException(
                     "Creep body failed generating.",
@@ -555,6 +581,8 @@ export default class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterBody(tier);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerBody(tier);
+            case ROLE_CLAIMER:
+                return SpawnHelper.generateClaimerBody(tier);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderBody(tier);
             case ROLE_REMOTE_RESERVER:
@@ -565,6 +593,8 @@ export default class SpawnApi {
                 return SpawnHelper.generateMedicBody(tier);
             case ROLE_STALKER:
                 return SpawnHelper.generateStalkerBody(tier);
+            case ROLE_DOMESTIC_DEFENDER:
+                return SpawnHelper.generateDomesticDefenderBody(tier);
             default:
                 throw new UserException(
                     "Creep body failed generating.",
@@ -752,10 +782,17 @@ export default class SpawnApi {
 
         let roomMemory;
 
+        // Basic plan:
+        // Get the proper room mem for each type
+        // Claim: Find first claim room with the lowest amount of the roleConst's type assigned to it
+        // Remote: Find the first remote room with the lowest amount of the roleConsts type assigned to it
+        // Miltiary: Find the first attack room WITH active flags and in theory there should only be 1 attack flag active at a time
+        // Regardless of what room they are in... so finding just first room to meet criteria will be a fail-safe anyway
+
         switch (roleConst) {
 
             // Colonizing creeps going to their claim rooms
-            case ROLE_COLONIZER:
+            case ROLE_COLONIZER || ROLE_CLAIMER:
 
                 break;
 
@@ -768,7 +805,7 @@ export default class SpawnApi {
 
             // Military creeps going to their attack rooms
             case
-                ROLE_STALKER || ROLE_MEDIC || ROLE_ZEALOT:
+                ROLE_STALKER || ROLE_MEDIC || ROLE_ZEALOT || ROLE_DOMESTIC_DEFENDER:
 
                 break;
 
@@ -787,12 +824,9 @@ export default class SpawnApi {
      * @param roleConst the role we are getting room for
      */
     public static getCreepHomeRoom(room: Room, roleConst: RoleConstant, targetRoom?: string): string {
-
-        // Colonizers home room is same as their target room
-        if (roleConst === ROLE_COLONIZER && targetRoom) {
-            return targetRoom;
-        }
-
+        // Okay so this might not even be needed, but I took out colonizer home room setting because
+        // That would actually take them out of the creep count for this room, spawning them in an infinite loop
+        // We will just set their target room as the claim room and it will have the desired effect
         return room.name;
     }
 }
