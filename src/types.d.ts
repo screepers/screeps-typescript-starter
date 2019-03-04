@@ -274,7 +274,6 @@ interface JobListing {
 type ResourceContainingStructureConstant =
     | STRUCTURE_CONTAINER
     | STRUCTURE_EXTENSION
-    | STRUCTURE_EXTRACTOR // ? Should this be in this list?
     | STRUCTURE_LAB
     | STRUCTURE_LINK
     | STRUCTURE_NUKER
@@ -292,6 +291,7 @@ type GetEnergy_ValidTargets =
     | "extractor"
     | "tombstone"
     | "droppedResource"
+    | STRUCTURE_EXTRACTOR
     | ResourceContainingStructureConstant;
 
 /**
