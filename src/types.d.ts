@@ -159,23 +159,23 @@ type ROLE_COLONIZER = "remoteColonizer"; //
 /**
  * goes into claim room and claims it
  */
-type ROLE_CLAIMER = "claimer";  //
+type ROLE_CLAIMER = "claimer"; //
 /**
  * Military Creep - offensive melee
  */
-type ROLE_ZEALOT = "zealot";    //
+type ROLE_ZEALOT = "zealot"; //
 /**
  * Military Creep - offensive ranged
  */
-type ROLE_STALKER = "stalker";  //
+type ROLE_STALKER = "stalker"; //
 /**
  * Military Creep - offensive healer
  */
-type ROLE_MEDIC = "medic";  //
+type ROLE_MEDIC = "medic"; //
 /**
  * Military Creep - Defends the home room
  */
-type ROLE_DOMESTIC_DEFENDER = "domesticDefender";   //
+type ROLE_DOMESTIC_DEFENDER = "domesticDefender"; //
 // --------------------------------------------------------------------
 
 /**
@@ -341,6 +341,10 @@ interface GetEnergyJob {
      * RESOURCE_ENERGY is always defined and equals to 0 when empty, other resources are undefined when empty.
      */
     resources: StoreDefinition;
+    /**
+     * Whether or not the job has been taken
+     */
+    isTaken: boolean;
 }
 
 /**
@@ -359,6 +363,10 @@ interface WorkPartJob {
      * The action to perform on the target object
      */
     actionType: WorkPart_ValidActions;
+    /**
+     * Whether or not the job has been taken
+     */
+    isTaken: boolean;
 }
 
 /**
@@ -377,6 +385,10 @@ interface ClaimPartJob {
      * The action to perform on the target object
      */
     actionType: ClaimPart_ValidActions;
+    /**
+     * Whether or not the job has been taken
+     */
+    isTaken: boolean;
 }
 
 /**
@@ -395,6 +407,10 @@ interface CarryPartJob {
      * The action to perform on the target object
      */
     actionType: CarryPart_ValidActions;
+    /**
+     * Whether or not the job has been taken
+     */
+    isTaken: boolean;
 }
 
 /**
@@ -542,7 +558,7 @@ interface RoomMemory {
     jobs: JobListing;
 }
 
-interface EmpireMemory { }
+interface EmpireMemory {}
 // ----------------------------------
 
 /**
