@@ -1,5 +1,6 @@
-import { ALL_STRUCTURE_TYPES } from "utils/Constants";
+import { ALL_STRUCTURE_TYPES, JOBS_CACHE_TTL } from "utils/Constants";
 import RoomApi from "Api/Room.Api";
+import RoomHelper from "./RoomHelper";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -26,7 +27,13 @@ export default class MemoryHelper_Room {
         // Update Custom Memory Components
         this.updateDependentRooms(room);
         // Update Job Lists
-        this.updateGetEnergyJobs(room, RoomApi.createGetEnergyJobs(room));
+
+        // ! Working on implementing
+        // ! - Should be able to call any one of the sub-JobListings and have it fill in any missing memory structures
+        this.updateGetEnergy_sourceJobs(room);
+
+        // Calling the below function is equivalent to calling all of the above updateGetEnergy_xxxxxJobs functions
+        // this.updateGetEnergy_allJobs(room);
     }
 
     /**
@@ -200,16 +207,42 @@ export default class MemoryHelper_Room {
     }
 
     /**
-     * Update the room's GetEnergyJobs
+     * Update the room's GetEnergyJobListing
      * @param room The room to update the memory of
-     * @param jobList An array of GetEnergyJobs
+     * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
      */
-    public static updateGetEnergyJobs(room: Room, jobList: GetEnergyJob[]) {
-        Memory.rooms[room.name].getEnergyJobs = { data: null, cache: null };
+    public static updateGetEnergy_allJobs(room: Room) {
+        // Clean out old job listing
+        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs;
+        }
 
-        Memory.rooms[room.name].getEnergyJobs.data = jobList;
-        Memory.rooms[room.name].getEnergyJobs.cache = Game.time;
+        this.updateGetEnergy_sourceJobs(room);
     }
+
+    /**
+     * Update the room's GetEnergyJobListing_sourceJobs
+     * @param room The room to update the memory of
+     */
+    public static updateGetEnergy_sourceJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+        // What to do if the jobs already exist
+        // ! Deletes existing jobs
+        // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?
+        // ? Or should we just set it up so that each time the Job objects are updated they start fresh? (might require mining creep memory for changes to the job status, or accepting inaccuracy)
+        if (Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs;
+        }
+
+        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs = { data: null, cache: null };
+        const sourceJobs = RoomApi.createSourceGetEnergyJobs(room);
+
+        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.data = sourceJobs;
+        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.cache = Game.time;
+    }
+
     /**
      * update creep limits for domestic creeps
      * @param room room we are updating limits for
