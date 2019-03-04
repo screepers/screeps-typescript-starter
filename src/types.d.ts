@@ -175,6 +175,9 @@ interface CreepBodyOptions {
     healLast?: boolean;
 }
 
+/**
+ * UserException Object - A custom error that will color itself in console when thrown.
+ */
 interface UserException {
     title: string;
     body: string;
@@ -241,6 +244,227 @@ interface CreepMemory {
     working: boolean;
 }
 
+/**
+ * Contains all of the sublists of job objects
+ *
+ * This is the object to store in `Memory.rooms[room.name].Jobs`
+ */
+interface JobListing {
+    getEnergyJobs?: GetEnergyJobListing;
+    claimPartJobs?: ClaimPartJobListing;
+    workPartJobs?: WorkPartJobListing;
+    carryPartJobs?: CarryPartJobListing;
+}
+
+/**
+ * Structures that have a energy, minerals, or store property
+ */
+type ResourceContainingStructureConstant =
+    | STRUCTURE_CONTAINER
+    | STRUCTURE_EXTENSION
+    | STRUCTURE_EXTRACTOR // ? Should this be in this list?
+    | STRUCTURE_LAB
+    | STRUCTURE_LINK
+    | STRUCTURE_NUKER
+    | STRUCTURE_POWER_SPAWN
+    | STRUCTURE_SPAWN
+    | STRUCTURE_STORAGE
+    | STRUCTURE_TERMINAL
+    | STRUCTURE_TOWER;
+
+/**
+ * Valid types for the GetEnergyJob targetType
+ */
+type GetEnergy_ValidTargets =
+    | "source"
+    | "extractor"
+    | "tombstone"
+    | "droppedResource"
+    | ResourceContainingStructureConstant;
+
+/**
+ * Valid types for the WorkPartJob targetType
+ */
+type WorkPart_ValidTargets = BuildableStructureConstant | STRUCTURE_CONTROLLER | "constructionSite";
+/**
+ * Valid actions for WorkPartJob actionType
+ */
+type WorkPart_ValidActions = "build" | "repair" | "dismantle" | "upgrade";
+
+/**
+ * Valid types for the ClaimPartJob targetType
+ * ? Probably unnecessary, but provided for flexibility
+ */
+type ClaimPart_ValidTargets = STRUCTURE_CONTROLLER;
+/**
+ * Valid actions for ClaimPartJob actionType
+ */
+type ClaimPart_ValidActions = "claim" | "reserve" | "attack" | "sign";
+
+/**
+ * Valid types for the CarryPartJob targetType
+ */
+type CarryPart_ValidTargets = ResourceContainingStructureConstant | "roomPosition";
+/**
+ * Valid actions for CarryPartJob actionType
+ */
+type CarryPart_ValidActions = "transfer" | "drop";
+
+/**
+ * JobObject for the GetEnergyJobListing
+ */
+interface GetEnergyJob {
+    /**
+     * ID of the target object
+     */
+    targetID: string;
+    /**
+     * The type of the target object
+     */
+    targetType: GetEnergy_ValidTargets;
+    /**
+     * The resources in the object in the format of Structure.Store
+     *
+     * Each object key is one of the RESOURCE_* constants, values are resources amounts.
+     * RESOURCE_ENERGY is always defined and equals to 0 when empty, other resources are undefined when empty.
+     */
+    resources: StoreDefinition;
+}
+
+/**
+ * JobObject for the WorkPartJobListing
+ */
+interface WorkPartJob {
+    /**
+     * ID of the target object
+     */
+    targetID: string;
+    /**
+     * The type of the target object
+     */
+    targetType: WorkPart_ValidTargets;
+    /**
+     * The action to perform on the target object
+     */
+    actionType: WorkPart_ValidActions;
+}
+
+/**
+ * JobObject for the ClaimPartJobListing
+ */
+interface ClaimPartJob {
+    /**
+     * ID of the target object
+     */
+    targetID: string;
+    /**
+     * The type of the target object
+     */
+    targetType: ClaimPart_ValidTargets;
+    /**
+     * The action to perform on the target object
+     */
+    actionType: ClaimPart_ValidActions;
+}
+
+/**
+ * JobObject for the CarryPartJobListing
+ */
+interface CarryPartJob {
+    /**
+     * ID of the target object
+     */
+    targetID: string;
+    /**
+     * The type of the target object
+     */
+    targetType: CarryPart_ValidTargets;
+    /**
+     * The action to perform on the target object
+     */
+    actionType: CarryPart_ValidActions;
+}
+
+/**
+ * Object that stores the seperate lists of GetEnergyJob Objects
+ */
+interface GetEnergyJobListing {
+    /**
+     * Jobs that target sources that are not being mined optimally (RoomAPI.getOpenSources)
+     */
+    sourceJobs?: Cache;
+    /**'
+     * Jobs that target containers with resources
+     */
+    containerJobs?: Cache;
+    /**
+     * Jobs that target links that contain energy (and are not deposit only)
+     */
+    linkJobs?: Cache;
+    /**
+     * Jobs that target structures that store excess resources (Storage, Terminal)
+     */
+    backupStructures?: Cache;
+}
+
+/**
+ * Object that stores the seperate lists of claimPartJob Objects
+ */
+interface ClaimPartJobListing {
+    /**
+     * Jobs to claim controllers
+     */
+    claimJobs?: Cache;
+    /**
+     * Jobs to reserve controllers
+     */
+    reserveJobs?: Cache;
+    /**
+     * Jobs to sign controllers
+     */
+    signJobs?: Cache;
+    /**
+     * Jobs to attack enemy controllers
+     */
+    attackJobs?: Cache;
+}
+
+/**
+ * Object that stores the seperate lists of workPartJob Objects
+ */
+interface WorkPartJobListing {
+    /**
+     * Jobs to repair structures
+     */
+    repairJobs?: Cache;
+    /**
+     * Jobs to build constructionSites
+     */
+    buildJobs?: Cache;
+    /**
+     * Jobs to upgrade controllers
+     */
+    upgradeJobs?: Cache;
+    /**
+     * Jobs to dismantle structures (enemy or friendly)
+     */
+    dismantleJobs?: Cache;
+}
+
+/**
+ * Object that stores the seperate lists of carryPartJob Objects
+ */
+interface CarryPartJobListing {
+    /**
+     * Jobs to fill objects that need resources to function (Extensions, Spawns, Links, Towers)
+     */
+    fillJobs?: Cache;
+    /**
+     * Jobs to store away or sell excess resources (Storage, Terminal, Containers)
+     */
+    storeJobs?: Cache;
+}
+
 interface RoomMemory {
     roomState: RoomStateConstant;
     /**
@@ -303,55 +527,11 @@ interface RoomMemory {
     /**
      * List of all of the room's GetEnergyJobs
      */
-    getEnergyJobs: Cache;
+    jobs: JobListing;
 }
 
 interface EmpireMemory {}
 // ----------------------------------
-
-/**
- * Structures that have a energy, minerals, or store property
- */
-type ResourceContainingStructure =
-    | STRUCTURE_CONTAINER
-    | STRUCTURE_EXTENSION
-    | STRUCTURE_EXTRACTOR
-    | STRUCTURE_LAB
-    | STRUCTURE_LINK
-    | STRUCTURE_NUKER
-    | STRUCTURE_POWER_SPAWN
-    | STRUCTURE_SPAWN
-    | STRUCTURE_STORAGE
-    | STRUCTURE_TERMINAL
-    | STRUCTURE_TOWER;
-
-/**
- * Valid types for the GetEnergyJob targetType
- */
-type GetEnergy_TargetTypes = "source" | "tombstone" | "droppedResource" | ResourceContainingStructure;
-
-/**
- * JobObject for the GetEnergy job queue
- */
-interface GetEnergyJob {
-    /**
-     * ID of the target object
-     */
-    targetID: string;
-    /**
-     * The type of the target object
-     */
-    targetType: GetEnergy_TargetTypes;
-    /**
-     * The resources in the object in the format of Structure.Store
-     *
-     * Each object key is one of the RESOURCE_* constants, values are resources amounts. RESOURCE_ENERGY is always defined and equals to 0 when empty, other resources are undefined when empty.
-     */
-    resources: StoreDefinition;
-    /**
-     *
-     */
-}
 
 /**
  * options for civilian creeps
