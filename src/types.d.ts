@@ -558,7 +558,7 @@ interface RoomMemory {
     jobs: JobListing;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
@@ -803,6 +803,10 @@ interface FlagMemory {
      * if the flag has completed its requirements
      */
     complete: boolean;
+    /**
+     * time the flag was placed
+     */
+    timePlaced: number;
 }
 
 // Attack Flag Options

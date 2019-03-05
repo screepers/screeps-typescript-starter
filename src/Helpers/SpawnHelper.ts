@@ -1433,4 +1433,33 @@ export class SpawnHelper {
             roleConst === ROLE_ZEALOT ||
             roleConst === ROLE_MEDIC);
     }
+
+    /**
+     * gets the ClaimRoomMemory with lowest number creeps of the specified role with it as their target room
+     * @param room the room spawning the creep
+     * @param roleConst the specified role we are checking for
+     */
+    public static getLowestNumRoleAssignedClaimRoom(room: Room, roleConst: RoleConstant): ClaimRoomMemory {
+
+    }
+
+    /**
+     * gets the RemoteRoomMemory with lowest number creeps of the specified role with it as their target room
+     * @param room the room spawning the creep
+     * @param roleConst the specified role we are checking for
+     */
+    public static getLowestNumRoleAssignedRemoteRoom(room: Room, roleConst: RoleConstant): RemoteRoomMemory {
+
+    }
+
+    /**
+     * gets the AttackRoomMemory with active flags
+     * only one attack flag will be active at a time during any given tick
+     * if this is not true because of some error/oversight, it is self correcting since
+     * this will still only choose the first active flag it finds
+     * @param room the room spawning the creep
+     */
+    public static getAttackRoomWithActiveFlag(room: Room): AttackRoomMemory {
+
+    }
 }

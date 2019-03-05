@@ -780,7 +780,7 @@ export default class SpawnApi {
      */
     public static getCreepTargetRoom(room: Room, roleConst: RoleConstant): string {
 
-        let roomMemory;
+        let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory;
 
         // Basic plan:
         // Get the proper room mem for each type
@@ -792,7 +792,11 @@ export default class SpawnApi {
         switch (roleConst) {
 
             // Colonizing creeps going to their claim rooms
-            case ROLE_COLONIZER || ROLE_CLAIMER:
+            case
+                ROLE_COLONIZER || ROLE_CLAIMER:
+
+                roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
+
 
                 break;
 
@@ -801,17 +805,25 @@ export default class SpawnApi {
                 ROLE_REMOTE_DEFENDER || ROLE_REMOTE_HARVESTER ||
                 ROLE_REMOTE_MINER || ROLE_REMOTE_RESERVER:
 
+                roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst);
+
                 break;
 
             // Military creeps going to their attack rooms
             case
-                ROLE_STALKER || ROLE_MEDIC || ROLE_ZEALOT || ROLE_DOMESTIC_DEFENDER:
+                ROLE_STALKER || ROLE_MEDIC ||
+                ROLE_ZEALOT || ROLE_DOMESTIC_DEFENDER:
+
+                roomMemory = SpawnHelper.getAttackRoomWithActiveFlag(room);
 
                 break;
 
 
             // Domestic creeps keep their target room as their home room
-            default:
+            // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)
+            // If an non-existing role then an error will occur here
+            case ROLE_MINER || ROLE_HARVESTER || ROLE_WORKER ||
+                ROLE_LORRY || ROLE_POWER_UPGRADER:
                 return room.name;
         }
 
