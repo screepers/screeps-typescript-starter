@@ -1,4 +1,5 @@
 import UtilHelper from "./UtilHelper";
+import MemoryHelper from "./MemoryHelper"
 import SpawnApi from "Api/Spawn.Api";
 import {
     domesticRolePriority,
@@ -38,6 +39,7 @@ import {
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
+import RoomHelper from "./RoomHelper";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -1435,11 +1437,34 @@ export class SpawnHelper {
     }
 
     /**
+     * Returns the number of miners that are not spawning, and have > 50 ticksToLive
+     * @param room the room we are checking in
+     */
+    public static getActiveMiners(room: Room): number {
+        let miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER);
+        miners = _.filter(miners, (creep: Creep) => {
+            // False if miner is spawning or has less than 50 ticks to live
+            return !creep.spawning && creep.ticksToLive! > 50;
+        });
+        return miners.length;
+    }
+
+    /**
      * gets the ClaimRoomMemory with lowest number creeps of the specified role with it as their target room
+     * Must also be less than the max amount of that role allowed for the room
      * @param room the room spawning the creep
      * @param roleConst the specified role we are checking for
      */
     public static getLowestNumRoleAssignedClaimRoom(room: Room, roleConst: RoleConstant): ClaimRoomMemory {
+        const remoteLimits: RemoteCreepLimits = MemoryApi.getCreepLimits(room)['remoteLimits'];
+        const allClaimRooms: Array<ClaimRoomMemory | undefined> = MemoryApi.getClaimRooms(room);
+
+        // Get all claim rooms in which the specified role does not yet have
+        const unfufilledClaimRooms: Array<ClaimRoomMemory | undefined> = _.filter(
+            allClaimRooms,
+            (claimRoom) => this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom) < this.getLimitPerClaimRoomForRole(roleConst)
+        );
+
 
     }
 
@@ -1461,5 +1486,46 @@ export class SpawnHelper {
      */
     public static getAttackRoomWithActiveFlag(room: Room): AttackRoomMemory {
 
+    }
+
+    /**
+     * get number of creeps of role with target room assigned to a specified room
+     * @param room the room spawning the creep
+     * @param roleConst the role of the creep
+     * @param roomMemory the room memory we are checking
+     */
+    public static getNumCreepAssignedAsTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        roomMemory: ClaimRoomMemory | AttackRoomMemory | RemoteRoomMemory | undefined
+    ): number {
+
+        const allCreepsOfRole: Array<Creep | null> = MemoryApi.getMyCreeps(room, (creep) => creep.memory.role === roleConst);
+        let sum = 0;
+
+        for (const creep of allCreepsOfRole) {
+            if (creep!.memory.targetRoom === roomMemory!.roomName) {
+                ++sum;
+            }
+        }
+
+        return sum;
+    }
+
+    /**
+     * gets the number of each claim room creep that is meant to be assigned to a room
+     * @param roleConst the role we are checking the limit for
+     */
+    public static getLimitPerClaimRoomForRole(roleConst: RoleConstant): number {
+        // For example, 1 claimer per remote room
+        // 1 remote colonizer
+        // if we add other roles in the future, we want the amount thats supposed
+        // to go to each claim room here
+
+        // Also making this for remote rooms but we will also pass the number
+        // of sources in that room as a parameter
+        // also going to change spawn to use this function so we just change it here
+        // and it will fix it everywhere if we change numbers around later
+        return 1;
     }
 }

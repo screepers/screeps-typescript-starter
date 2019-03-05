@@ -53,36 +53,6 @@ import EmpireApi from "./Empire.Api";
  * The API used by the spawn manager
  */
 export default class SpawnApi {
-    /**
-     * Get count of all creeps, or of one if creepConst is specified
-     * @param room the room we are getting the count for
-     * @param creepConst [Optional] Count only one role
-     */
-    public static getCreepCount(room: Room, creepConst?: RoleConstant): number {
-        const filterFunction = creepConst === undefined ? undefined : (c: Creep) => c.memory.role === creepConst;
-
-        // Use get active mienrs instead specifically for miners to get them out early before they die
-        if (creepConst === ROLE_MINER) {
-            return this.getActiveMiners(room);
-        }
-        else {  // Otherwise just get the actual count of the creeps
-            return MemoryApi.getMyCreeps(room, filterFunction).length;
-        }
-    }
-
-    /**
-     * get creep limits
-     * @param room the room we want the limits for
-     */
-    public static getCreepLimits(room: Room): CreepLimits {
-        const creepLimits: CreepLimits = {
-            domesticLimits: Memory.rooms[room.name].creepLimit["domesticLimits"],
-            remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
-            militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
-        };
-
-        return creepLimits;
-    }
 
     /**
      * set domestic creep limits
@@ -365,23 +335,23 @@ export default class SpawnApi {
      */
     public static getNextCreep(room: Room): RoleConstant | null {
         // Get Limits for each creep department
-        const creepLimits: CreepLimits = this.getCreepLimits(room);
+        const creepLimits: CreepLimits = MemoryApi.getCreepLimits(room);
 
         // Check if we need a domestic creep -- Return role if one is found
         for (const role of domesticRolePriority) {
-            if (this.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
+            if (MemoryApi.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
                 return role;
             }
         }
         // Check if we need a military creep -- Return role if one is found
         for (const role of militaryRolePriority) {
-            if (this.getCreepCount(room, role) < creepLimits.militaryLimits[role]) {
+            if (MemoryApi.getCreepCount(room, role) < creepLimits.militaryLimits[role]) {
                 return role;
             }
         }
         // Check if we need a remote creep -- Return role if one is found
         for (const role of remoteRolePriority) {
-            if (this.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
+            if (MemoryApi.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
                 return role;
             }
         }
@@ -392,7 +362,6 @@ export default class SpawnApi {
 
     /**
      * spawn the next creep
-     * TODO Complete this
      * @param room the room we want to spawn them in
      * @param body BodyPartConstant[] the body array of the creep
      * @param creepOptions creep options we want to give to it
@@ -682,19 +651,6 @@ export default class SpawnApi {
         } else {
             return creepBody;
         }
-    }
-
-    /**
-     * Returns the number of miners that are not spawning, and have > 50 ticksToLive
-     * @param room the room we are checking in
-     */
-    private static getActiveMiners(room: Room): number {
-        let miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER);
-        miners = _.filter(miners, (creep: Creep) => {
-            // False if miner is spawning or has less than 50 ticks to live
-            return !creep.spawning && creep.ticksToLive! > 50;
-        });
-        return miners.length;
     }
 
     /**

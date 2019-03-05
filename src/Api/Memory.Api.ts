@@ -14,6 +14,7 @@ import {
 import { NO_CACHING_MEMORY } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
 import RoomApi from "./Room.Api";
+import { SpawnHelper } from "Helpers/SpawnHelper";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -614,4 +615,34 @@ export default class MemoryApi {
         return Memory.rooms[room.name].defcon;
     }
 
+    /**
+     * Get count of all creeps, or of one if creepConst is specified
+     * @param room the room we are getting the count for
+     * @param creepConst [Optional] Count only one role
+     */
+    public static getCreepCount(room: Room, creepConst?: RoleConstant): number {
+        const filterFunction = creepConst === undefined ? undefined : (c: Creep) => c.memory.role === creepConst;
+
+        // Use get active mienrs instead specifically for miners to get them out early before they die
+        if (creepConst === ROLE_MINER) {
+            return SpawnHelper.getActiveMiners(room);
+        }
+        else {  // Otherwise just get the actual count of the creeps
+            return MemoryApi.getMyCreeps(room, filterFunction).length;
+        }
+    }
+
+    /**
+     * get creep limits
+     * @param room the room we want the limits for
+     */
+    public static getCreepLimits(room: Room): CreepLimits {
+        const creepLimits: CreepLimits = {
+            domesticLimits: Memory.rooms[room.name].creepLimit["domesticLimits"],
+            remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
+            militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
+        };
+
+        return creepLimits;
+    }
 }

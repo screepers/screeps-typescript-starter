@@ -818,9 +818,9 @@ type ATTACK_BASIC_SQUAD = "basic_squad"; //
 
 // Memory for remote/attack/claim rooms
 /**
- * Attack room memory structure
+ * parent memory for depedent rooms
  */
-interface AttackRoomMemory {
+interface DepedentRoomParentMemory {
     /**
      * the name of the room for lookup purposes
      */
@@ -829,6 +829,11 @@ interface AttackRoomMemory {
      * reference to the attack flags placed in the room
      */
     flags: Cache;
+}
+/**
+ * Attack room memory structure
+ */
+interface AttackRoomMemory extends DepedentRoomParentMemory {
     /**
      * hostiles in the room
      */
@@ -842,15 +847,7 @@ interface AttackRoomMemory {
 /**
  * Remote room memory structure
  */
-interface RemoteRoomMemory {
-    /**
-     * the name of the room for lookup purposes
-     */
-    roomName: string;
-    /**
-     * reference to the remote flags placed in the room
-     */
-    flags: Cache;
+interface RemoteRoomMemory extends DepedentRoomParentMemory {
     /**
      * sources in the room
      */
@@ -868,15 +865,8 @@ interface RemoteRoomMemory {
 /**
  * Claim room memory structure
  */
-interface ClaimRoomMemory {
-    /**
-     * the name of the room for lookup purposes
-     */
-    roomName: string;
-    /**
-     * reference to the claim flags placed in the room
-     */
-    flags: Cache;
+interface ClaimRoomMemory extends DepedentRoomParentMemory {
+    // Parent memory covers everything currently needed in here
 }
 
 /**
