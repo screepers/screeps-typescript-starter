@@ -1589,6 +1589,6 @@ export class SpawnHelper {
                 break;
         }
 
-        return creepNum;
+        return creepNum * numSources;
     }
 }
