@@ -15,6 +15,7 @@ import { NO_CACHING_MEMORY } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
 import RoomApi from "./Room.Api";
 import { SpawnHelper } from "Helpers/SpawnHelper";
+import RoomHelper from "Helpers/RoomHelper";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -644,5 +645,12 @@ export default class MemoryApi {
         };
 
         return creepLimits;
+    }
+
+    /**
+     * get all owned rooms
+     */
+    public static getOwnedRooms(): Room[] {
+        return _.filter(Game.rooms, (currentRoom) => RoomHelper.isOwnedRoom(currentRoom));
     }
 }

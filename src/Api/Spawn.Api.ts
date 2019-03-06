@@ -712,13 +712,6 @@ export default class SpawnApi {
 
         let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory | undefined;
 
-        // Basic plan:
-        // Get the proper room mem for each type
-        // Claim: Find first claim room with the lowest amount of the roleConst's type assigned to it
-        // Remote: Find the first remote room with the lowest amount of the roleConsts type assigned to it
-        // Miltiary: Find the first attack room WITH active flags and in theory there should only be 1 attack flag active at a time
-        // Regardless of what room they are in... so finding just first room to meet criteria will be a fail-safe anyway
-
         switch (roleConst) {
 
             // Colonizing creeps going to their claim rooms

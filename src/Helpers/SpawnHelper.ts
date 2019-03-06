@@ -1530,15 +1530,7 @@ export class SpawnHelper {
         const allAttackRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
 
         // Return the first active flag we find (should only be 1 flag active at a time across all attack rooms)
-        return _.find(allAttackRooms, (attackRoom) => {
-            const flags: Array<AttackFlagMemory | undefined> = attackRoom!.flags.data;
-            for (const flag of flags) {
-                if (flag!.active) {
-                    return true;
-                }
-            }
-            return false;
-        });
+        return _.find(allAttackRooms, (attackRoom) => _.some(attackRoom!.flags.data, (flag: AttackFlagMemory) => flag.active));
     }
 
     /**

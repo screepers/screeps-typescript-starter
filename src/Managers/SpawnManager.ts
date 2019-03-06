@@ -37,6 +37,7 @@ import {
     TIER_8
 } from "utils/Constants";
 import SpawnApi from "../Api/Spawn.Api";
+import MemoryApi from "../Api/Memory.Api";
 
 // handles spawning for every room
 export default class SpawnManager {
@@ -44,7 +45,7 @@ export default class SpawnManager {
      * run the spawning for the AI for each room
      */
     public static runSpawnManager(): void {
-        const ownedRooms = _.filter(Game.rooms, (room: Room) => RoomHelper.isOwnedRoom(room));
+        const ownedRooms = MemoryApi.getOwnedRooms();
 
         // Loop over all rooms and run the spawn for each one
         for (const room of ownedRooms) {
