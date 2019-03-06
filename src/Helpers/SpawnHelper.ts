@@ -1594,4 +1594,41 @@ export class SpawnHelper {
 
         return creepNum;
     }
+
+    /**
+     * gets the number of lorries for the room based on room state
+     * @param room the room we are doing limits for
+     * @param roomState the room state of the room we are checking limit for
+     */
+    public static getLorryLimitForRoom(room: Room, roomState: RoomStateConstant) {
+        // ! Some ideas for finding lorry limits for a room
+        // ! Turned in to insane ramblings though
+        /*
+            Potentially, we could check that the room state is within a certain value range
+            like advanced, stimulate, seige, maybe? (same values its changed on anyway, so just extra saftey)
+            And we could like check if any empire jobs exist... still not sure the route we're going to take
+            to make sure terminals and labs get filled exactly, but we do know that those will create room jobs
+            for creeps to follow, we could also have it fill another memory structure and we check that and
+            decide how many lorries we need to do this set of jobs, it also has the benifit of slowly going down
+            as the job is more and more complete ie if we spawn 1 lorry per 25k energy we want to move to a terminal,
+            then as the amount of energy needing to be moved remaining goes down, naturally the number of lorries needed
+            will as well.
+
+            I'm having a flash of an idea about empire job queues. Each room can check empire job queues and decide if they
+            need to create any jobs in the room, and this function for example will check how many lorries need to exist in the room
+            etc, etc, etc. We can see what way we wanna go there, we still are a little bit off from that since we need to finish
+            the more pertinant parts of job queues and set up the flag system and make sure the room structures run themselves (thats
+                when we actually start running into it, since terminals will presumably check this emprie job queue and decide if it needs
+                to sell energy, move to another room)
+
+            It would also be interesting to set up a system to supply each other with energy as needed. Like if you're being seiged and in real trouble
+            and you're running dry (lets say they've knocked out a couple of your other rooms too) i could send energy and help keep your
+            last room alive... possibly military support to would be really cool (that would be as simple as detecting and auto placing a flag
+                in your room and the system will handle itself)
+
+            Even more off-topic, but we make sure creep.attack() and tower.attack() is never called on an ally creep (maybe even override the functions)
+            (to ensure extra saftey in the case of abug)
+        */
+        return 0;
+    }
 }

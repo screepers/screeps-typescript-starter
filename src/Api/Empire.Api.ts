@@ -67,7 +67,7 @@ export default class Empire {
      * Automatically come up with a dependent room
      * @param targetRoom the room we want to support
      */
-    private static findDependentRoomAuto(targetRoom: Room): string {
+    public static findDependentRoomAuto(targetRoom: Room): string {
         // This will be called if theres no override in place
         return "";
     }
@@ -76,7 +76,7 @@ export default class Empire {
      * Manually get the dependent room based on flags
      * @param targetRoom the room we want to support
      */
-    private static findDependentRoomManual(targetRoom: Room): string {
+    public static findDependentRoomManual(targetRoom: Room): string {
         // This will be called if an override is requested via flag
         return "";
     }

@@ -67,6 +67,8 @@ export default class SpawnApi {
             lorry: 0
         };
 
+        const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
+
         // check what room state we are in
         switch (room.memory.roomState) {
             // Intro
@@ -103,7 +105,7 @@ export default class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 4;
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = 0;
+                domesticLimits[ROLE_LORRY] = numLorries;
 
                 break;
 
@@ -114,6 +116,7 @@ export default class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_POWER_UPGRADER] = 1;
+                domesticLimits[ROLE_LORRY] = numLorries;
 
                 break;
 
@@ -124,7 +127,7 @@ export default class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 3;
                 domesticLimits[ROLE_POWER_UPGRADER] = 2;
-                domesticLimits[ROLE_LORRY] = 2;
+                domesticLimits[ROLE_LORRY] = numLorries;
 
                 break;
 
@@ -134,7 +137,7 @@ export default class SpawnApi {
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 2;
-                domesticLimits[ROLE_LORRY] = 1;
+                domesticLimits[ROLE_LORRY] = numLorries;
 
                 break;
         }
@@ -648,12 +651,14 @@ export default class SpawnApi {
         };
 
         // Don't actually get anything of value if it isn't a military creep. No point
-        if (!SpawnHelper.isMilitaryRole(roleConst)) { return squadOptions };
+        if (!SpawnHelper.isMilitaryRole(roleConst)) {
+            return squadOptions
+        };
 
         // Get an appropirate attack flag for the creep
-        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom)
+        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom);
         // Only going to be one room returned, but had to be an array, so just grab it
-        const roomMemory: AttackRoomMemory | undefined = targetRoomMemoryArray[0];
+        const roomMemory: AttackRoomMemory | undefined = _.first(targetRoomMemoryArray);
 
         // Drop out early if there are no attack rooms
         if (roomMemory === undefined) { return squadOptions; }
@@ -667,12 +672,20 @@ export default class SpawnApi {
         for (const flagMemory of flagMemoryArray) {
 
             // Skip non-squad based attack flags
-            if (flagMemory.squadSize === 0) { continue; }
+            if (flagMemory.squadSize === 0) {
+                continue;
+            }
+
             const numActiveSquadMembers: number = SpawnHelper.getNumOfActiveSquadMembers(flagMemory, room);
             const numRequestedSquadMembers: number = flagMemory.squadSize;
 
             // If we find an active flag that doesn't have its squad requirements met and is currently the flag closest to being met
-            if (numActiveSquadMembers < numRequestedSquadMembers && numActiveSquadMembers > currentHighestSquadCount && flagMemory.active) {
+            if (
+                numActiveSquadMembers < numRequestedSquadMembers &&
+                numActiveSquadMembers > currentHighestSquadCount &&
+                flagMemory.active
+            ) {
+
                 selectedFlagMemory = flagMemory;
                 currentHighestSquadCount = numActiveSquadMembers;
                 selectedFlagActiveSquadMembers = numActiveSquadMembers;
@@ -680,7 +693,9 @@ export default class SpawnApi {
         }
 
         // If we didn't find a squad based flag return the default squad options
-        if (selectedFlagMemory === undefined) { return squadOptions; }
+        if (selectedFlagMemory === undefined) {
+            return squadOptions;
+        }
         else {
 
             // if this flag has met its requirements, deactivate it
@@ -719,7 +734,6 @@ export default class SpawnApi {
                 ROLE_COLONIZER || ROLE_CLAIMER:
 
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
-
 
                 break;
 
