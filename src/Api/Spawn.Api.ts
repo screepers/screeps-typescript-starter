@@ -178,8 +178,8 @@ export default class SpawnApi {
             // Might change for earlier room states to allow claimers and colonizers, up for debate
             case ROOM_STATE_ADVANCED || ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE:
                 // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_MINER, numRemoteSources);
-                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
+                remoteLimits[ROLE_REMOTE_MINER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_MINER, numRemoteSources);
+                remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
                 remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
