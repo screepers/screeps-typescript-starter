@@ -171,49 +171,23 @@ export default class SpawnApi {
         const numRemoteSources: number = RoomHelper.numRemoteSources(room);
         const numCurrentlyUnclaimedClaimRooms: number = RoomHelper.numCurrentlyUnclaimedClaimRooms(room);
 
+
         // check what room state we are in
         switch (room.memory.roomState) {
-            // Advanced
-            case ROOM_STATE_ADVANCED:
-                // 1 'Squad' per source (harvester and miner) and a reserver
+            // Advanced, Upgrader, and Stimulate are the only allowed states for remote mining and claiming operations currently
+            // Might change for earlier room states to allow claimers and colonizers, up for debate
+            case ROOM_STATE_ADVANCED || ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE:
                 // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
+                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_MINER, 1);
+                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, 1);
+                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
+                remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms;
-
-                break;
-
-            // Upgrader
-            case ROOM_STATE_UPGRADER:
-                // 1 'Squad' per source (harvester and miner) and a reserver
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms;
-
-                break;
-
-            // Stimulate
-            case ROOM_STATE_STIMULATE:
-                // 1 'Squad' per source (harvester and miner) and a reserver
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms;
+                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
 
                 break;
         }
 
-        // Return the limits
         return remoteLimits;
     }
 
@@ -736,7 +710,7 @@ export default class SpawnApi {
      */
     public static getCreepTargetRoom(room: Room, roleConst: RoleConstant): string {
 
-        let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory;
+        let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory | undefined;
 
         // Basic plan:
         // Get the proper room mem for each type

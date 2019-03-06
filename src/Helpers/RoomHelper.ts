@@ -273,7 +273,8 @@ export default class RoomHelper {
      * @param room the room we are checking for
      */
     public static numCurrentlyUnclaimedClaimRooms(room: Room): number {
-        const allClaimRooms: (ClaimRoomMemory | undefined)[] = MemoryApi.getClaimRooms(room)
+        const allClaimRooms: Array<ClaimRoomMemory | undefined> = MemoryApi.getClaimRooms(room);
+        const ownedRooms: Room[] = _.filter(Game.rooms, (currentRoom) => this.isOwnedRoom(room));
         let sum: number = 0;
 
         // No existing claim rooms
@@ -281,7 +282,7 @@ export default class RoomHelper {
             return 0;
         }
         for (const claimRoom of allClaimRooms) {
-            if (!_.some(Game.rooms, (room) => room.name === claimRoom!.roomName)) {
+            if (!_.some(ownedRooms, (ownedRoom) => room.name === claimRoom!.roomName)) {
                 ++sum;
             }
         }

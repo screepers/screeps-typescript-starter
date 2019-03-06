@@ -1455,17 +1455,33 @@ export class SpawnHelper {
      * @param room the room spawning the creep
      * @param roleConst the specified role we are checking for
      */
-    public static getLowestNumRoleAssignedClaimRoom(room: Room, roleConst: RoleConstant): ClaimRoomMemory {
-        const remoteLimits: RemoteCreepLimits = MemoryApi.getCreepLimits(room)['remoteLimits'];
-        const allClaimRooms: Array<ClaimRoomMemory | undefined> = MemoryApi.getClaimRooms(room);
+    public static getLowestNumRoleAssignedClaimRoom(room: Room, roleConst: RoleConstant): ClaimRoomMemory | undefined {
 
+        const allClaimRooms: Array<ClaimRoomMemory | undefined> = MemoryApi.getClaimRooms(room);
         // Get all claim rooms in which the specified role does not yet have
-        const unfufilledClaimRooms: Array<ClaimRoomMemory | undefined> = _.filter(
+        const unfulfilledClaimRooms: Array<ClaimRoomMemory | undefined> = _.filter(
             allClaimRooms,
             (claimRoom) => this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom) < this.getLimitPerClaimRoomForRole(roleConst)
         );
 
+        let nextClaimRoom: ClaimRoomMemory | undefined;
 
+        // Find the unfulfilled with the lowest amount of creeps assigned to it
+        for (const claimRoom of unfulfilledClaimRooms) {
+            if (!nextClaimRoom) {
+                nextClaimRoom = claimRoom;
+                continue;
+            }
+
+            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, nextClaimRoom);
+            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom);
+
+            if (currentCreepsAssigned < lowestCreepsAssigned) {
+                nextClaimRoom = claimRoom;
+            }
+        }
+
+        return nextClaimRoom;
     }
 
     /**
@@ -1473,8 +1489,33 @@ export class SpawnHelper {
      * @param room the room spawning the creep
      * @param roleConst the specified role we are checking for
      */
-    public static getLowestNumRoleAssignedRemoteRoom(room: Room, roleConst: RoleConstant): RemoteRoomMemory {
+    public static getLowestNumRoleAssignedRemoteRoom(room: Room, roleConst: RoleConstant): RemoteRoomMemory | undefined {
 
+        const allRemoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
+        // Get all claim rooms in which the specified role does not yet have
+        const unfulfilledRemoteRooms: Array<RemoteRoomMemory | undefined> = _.filter(
+            allRemoteRooms,
+            (remoteRoom) => this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom) < this.getLimitPerRemoteRoomForRolePerSource(roleConst, remoteRoom!.sources.data)
+        );
+
+        let nextRemoteRoom: RemoteRoomMemory | undefined;
+
+        // Find the unfulfilled with the lowest amount of creeps assigned to it
+        for (const remoteRoom of unfulfilledRemoteRooms) {
+            if (!nextRemoteRoom) {
+                nextRemoteRoom = remoteRoom;
+                continue;
+            }
+
+            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, nextRemoteRoom);
+            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom);
+
+            if (currentCreepsAssigned < lowestCreepsAssigned) {
+                nextRemoteRoom = remoteRoom;
+            }
+        }
+
+        return nextRemoteRoom;
     }
 
     /**
@@ -1484,8 +1525,20 @@ export class SpawnHelper {
      * this will still only choose the first active flag it finds
      * @param room the room spawning the creep
      */
-    public static getAttackRoomWithActiveFlag(room: Room): AttackRoomMemory {
+    public static getAttackRoomWithActiveFlag(room: Room): AttackRoomMemory | undefined {
 
+        const allAttackRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
+
+        // Return the first active flag we find (should only be 1 flag active at a time across all attack rooms)
+        return _.find(allAttackRooms, (attackRoom) => {
+            const flags: Array<AttackFlagMemory | undefined> = attackRoom!.flags.data;
+            for (const flag of flags) {
+                if (flag!.active) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     /**
@@ -1517,15 +1570,33 @@ export class SpawnHelper {
      * @param roleConst the role we are checking the limit for
      */
     public static getLimitPerClaimRoomForRole(roleConst: RoleConstant): number {
-        // For example, 1 claimer per remote room
-        // 1 remote colonizer
-        // if we add other roles in the future, we want the amount thats supposed
-        // to go to each claim room here
 
-        // Also making this for remote rooms but we will also pass the number
-        // of sources in that room as a parameter
-        // also going to change spawn to use this function so we just change it here
-        // and it will fix it everywhere if we change numbers around later
-        return 1;
+        let creepNum: number = 0;
+
+        switch (roleConst) {
+            case ROLE_CLAIMER || ROLE_COLONIZER:
+                creepNum = 1;
+                break;
+        }
+
+        return creepNum;
+    }
+
+    /**
+     * gets the number of each remote room creep that is meant to be assigned to a room
+     * @param roleConst the role we are checking the limit for
+     * @param numSources the number of sources in the remote room
+     */
+    public static getLimitPerRemoteRoomForRolePerSource(roleConst: RoleConstant, numSources: number): number {
+
+        let creepNum: number = 0;
+
+        switch (roleConst) {
+            case ROLE_REMOTE_HARVESTER || ROLE_REMOTE_MINER:
+                creepNum = 1;
+                break;
+        }
+
+        return creepNum;
     }
 }
