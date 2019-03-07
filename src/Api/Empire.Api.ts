@@ -75,9 +75,17 @@ export default class Empire {
 
         // Get all action memory structures
         const allRooms = MemoryApi.getOwnedRooms();
-        const claimRooms: Array<ClaimRoomMemory | undefined> = [];
-        const remoteRooms: Array<ClaimRoomMemory | undefined> = [];
-        const attackRooms: Array<ClaimRoomMemory | undefined> = [];
+        const claimRoomsPreFlattened: Array<Array<ClaimRoomMemory | undefined> | undefined> = _.map(allRooms,
+            room => MemoryApi.getClaimRooms(room));
+        const remoteRoomsPreFlattened: Array<Array<RemoteRoomMemory | undefined> | undefined> = _.map(allRooms,
+            room => MemoryApi.getRemoteRooms(room));;
+        const attackRoomsPreFlattened: Array<Array<AttackRoomMemory | undefined> | undefined> = _.map(allRooms,
+            room => MemoryApi.getAttackRooms(room));;
+
+        const claimRooms: Array<ClaimRoomMemory | undefined>;
+        const remoteRooms: Array<RemoteRoomMemory | undefined>;
+        const attackRooms: Array<AttackRoomMemory | undefined>;
+
 
         // Loop over claim rooms, remote rooms, and attack rooms, and make sure the flag they're referencing actually exists
     }
