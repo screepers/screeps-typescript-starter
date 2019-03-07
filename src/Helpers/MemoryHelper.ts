@@ -48,6 +48,26 @@ export default class MemoryHelper {
     }
 
     /**
+     * Performs the length checks and null checks for all getXXX functions that use IDs to get the objects
+     * @param idArray An array of ids to check
+     */
+    public static getOnlyObjectsFromIDs<T>(idArray: string[]): T[] {
+        if (idArray.length === 0) {
+            return [];
+        }
+
+        const objects: T[] = [];
+        _.forEach(idArray, (id: string) => {
+            const object: T | null = Game.getObjectById(id);
+            if (object !== null) {
+                objects.push(object);
+            }
+        });
+
+        return objects;
+    }
+
+    /**
      * clear the memory structure for the creep
      * @param creep the creep we want to clear the memory of
      */

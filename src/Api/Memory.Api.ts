@@ -142,7 +142,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
-    ): Array<Creep | null> {
+    ): Creep[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -152,9 +152,13 @@ export default class MemoryApi {
             MemoryHelper_Room.updateMyCreeps(room);
         }
 
-        let creeps: Array<Creep | null> = _.map(Memory.rooms[room.name].creeps.data, (id: string) =>
-            Game.getObjectById(id)
-        );
+        const creepIDs: string[] = Memory.rooms[room.name].creeps.data;
+
+        let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
+
+        if (creeps.length === 0) {
+            return null;
+        }
 
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
@@ -176,7 +180,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
-    ): Array<Creep | null> {
+    ): Creep[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -186,9 +190,13 @@ export default class MemoryApi {
             MemoryHelper_Room.updateHostileCreeps(room);
         }
 
-        let creeps: Array<Creep | null> = _.map(Memory.rooms[room.name].hostiles.data, (id: string) =>
-            Game.getObjectById(id)
-        );
+        const creepIDs: string[] = Memory.rooms[room.name].hostiles.data;
+
+        let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
+
+        if (creeps.length === 0) {
+            return null;
+        }
 
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
@@ -210,7 +218,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: Structure) => boolean,
         forceUpdate?: boolean
-    ): Array<Structure | null> {
+    ): Structure[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -220,12 +228,13 @@ export default class MemoryApi {
             MemoryHelper_Room.updateStructures(room);
         }
 
-        let structures: Array<Structure | null> = [];
-        _.forEach(Memory.rooms[room.name].structures.data, (typeArray: string[]) => {
-            _.forEach(typeArray, (id: string) => {
-                structures.push(Game.getObjectById(id));
-            });
-        });
+        const structureIDs: string[] = _.flattenDeep(Memory.rooms[room.name].structures.data);
+
+        let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure>(structureIDs);
+
+        if (structures.length === 0) {
+            return null;
+        }
 
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
@@ -249,7 +258,7 @@ export default class MemoryApi {
         type: StructureConstant,
         filterFunction?: (object: any) => boolean,
         forceUpdate?: boolean
-    ): Array<Structure | null> {
+    ): Structure[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -260,9 +269,13 @@ export default class MemoryApi {
             MemoryHelper_Room.updateStructures(room);
         }
 
-        let structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) =>
-            Game.getObjectById(id)
-        );
+        const structureIDs: string[] = Memory.rooms[room.name].structures.data[type];
+
+        let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure>(structureIDs);
+
+        if (structures.length === 0) {
+            return null;
+        }
 
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
@@ -284,7 +297,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
-    ): Array<ConstructionSite | null> {
+    ): ConstructionSite[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -294,10 +307,16 @@ export default class MemoryApi {
             MemoryHelper_Room.updateConstructionSites(room);
         }
 
-        let constructionSites: Array<ConstructionSite | null> = _.map(
-            Memory.rooms[room.name].constructionSites.data,
-            (id: string) => Game.getObjectById(id)
+        const constructionSiteIDs: string[] = Memory.rooms[room.name].constructionSites.data;
+
+        let constructionSites: ConstructionSite[] = MemoryHelper.getOnlyObjectsFromIDs<ConstructionSite>(
+            constructionSiteIDs
         );
+
+        if (constructionSites.length === 0) {
+            return null;
+        }
+
         if (filterFunction !== undefined) {
             constructionSites = _.filter(constructionSites, filterFunction);
         }
@@ -311,13 +330,13 @@ export default class MemoryApi {
      * @param room The room we want to look in
      * @param filterFunction [Optional] The function to filter the tombstones objects
      * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Array<Tombstone | null> An array of tombstones, if there are any
+     * @returns Tombstone[] | null An array of tombstones, if there are any
      */
     public static getTombstones(
         room: Room,
         filterFunction?: (object: Tombstone) => boolean,
         forceUpdate?: boolean
-    ): Array<Tombstone | null> {
+    ): Tombstone[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -327,9 +346,14 @@ export default class MemoryApi {
             MemoryHelper_Room.updateTombstones(room);
         }
 
-        let tombstones: Array<Tombstone | null> = _.map(Memory.rooms[room.name].tombstones.data, (id: string) =>
-            Game.getObjectById(id)
-        );
+        const tombstoneIDs: string[] = Memory.rooms[room.name].tombstones.data;
+
+        let tombstones = MemoryHelper.getOnlyObjectsFromIDs<Tombstone>(tombstoneIDs);
+
+        if (tombstones.length === 0) {
+            return null;
+        }
+
         if (filterFunction !== undefined) {
             tombstones = _.filter(tombstones, filterFunction);
         }
@@ -337,36 +361,6 @@ export default class MemoryApi {
         return tombstones;
     }
 
-    /**
-     * Gets the GetEnergyJobs of a room
-     *
-     * Performance Note: This will update all types of GetEnergyJobs.
-     * @param room The room to check
-     * @param filterFunction [Optional] Function to filter the jobs by
-     * @param forceUpdate [Optional] Invalidate the Cache by force
-     * @returns Array< GetEnergyJob | null> An array of GetEnergyJobs
-     */
-    public static getGetEnergyJobs(
-        room: Room,
-        filterFunction?: (object: GetEnergyJob) => boolean,
-        forceUpdate?: boolean
-    ): Array<GetEnergyJob | null> {
-        if (
-            NO_CACHING_MEMORY ||
-            forceUpdate ||
-            !Memory.rooms[room.name].getEnergyJobs ||
-            Memory.rooms[room.name].getEnergyJobs.cache < Game.time - JOBS_CACHE_TTL
-        ) {
-            MemoryHelper_Room.updateGetEnergyJobs(room, RoomApi.createGetEnergyJobs(room));
-        }
-
-        let getEnergyJobs = Memory.rooms[room.name].getEnergyJobs.data;
-        if (filterFunction !== undefined) {
-            getEnergyJobs = _.filter(getEnergyJobs, filterFunction);
-        }
-
-        return getEnergyJobs;
-    }
     /**
      * Returns a list of the dropped resources in a room, updating if necessary
      *
@@ -379,7 +373,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: RESOURCE_ENERGY) => boolean,
         forceUpdate?: boolean
-    ): Array<Resource | null> {
+    ): Resource[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -389,10 +383,14 @@ export default class MemoryApi {
             MemoryHelper_Room.updateDroppedResources(room);
         }
 
-        let droppedResources: Array<Resource | null> = _.map(
-            Memory.rooms[room.name].droppedResources.data,
-            (id: string) => Game.getObjectById(id)
-        );
+        const resourceIDs: string[] = Memory.rooms[room.name].droppedResources.data;
+
+        let droppedResources: Resource[] = MemoryHelper.getOnlyObjectsFromIDs<Resource>(resourceIDs);
+
+        if (droppedResources.length === 0) {
+            return null;
+        }
+
         if (filterFunction !== undefined) {
             droppedResources = _.filter(droppedResources, filterFunction);
         }
@@ -411,9 +409,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
-    ): Array<Source | null> {
-        let sources: Array<Source | null>;
-
+    ): Source[] | null {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -423,9 +419,16 @@ export default class MemoryApi {
             MemoryHelper_Room.updateSources(room);
         }
 
-        sources = _.map(Memory.rooms[room.name].sources.data, (id: string) => Game.getObjectById(id));
+        const sourceIDs = Memory.rooms[room.name].sources.data;
+
+        let sources: Source[] = MemoryHelper.getOnlyObjectsFromIDs<Source>(sourceIDs);
+
+        if (sources.length === 0) {
+            return null;
+        }
+
         if (filterFunction !== undefined) {
-            _.filter(sources, filterFunction);
+            sources = _.filter(sources, filterFunction);
         }
 
         return sources;
@@ -442,12 +445,12 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
-    ): Array<Mineral | null> {
+    ): Mineral[] | null {
         //
 
         // TODO Fill this out
 
-        return [null];
+        return null;
     }
 
     /**
@@ -627,8 +630,8 @@ export default class MemoryApi {
         // Use get active mienrs instead specifically for miners to get them out early before they die
         if (creepConst === ROLE_MINER) {
             return SpawnHelper.getActiveMiners(room);
-        }
-        else {  // Otherwise just get the actual count of the creeps
+        } else {
+            // Otherwise just get the actual count of the creeps
             return MemoryApi.getMyCreeps(room, filterFunction).length;
         }
     }
@@ -651,6 +654,6 @@ export default class MemoryApi {
      * get all owned rooms
      */
     public static getOwnedRooms(): Room[] {
-        return _.filter(Game.rooms, (currentRoom) => RoomHelper.isOwnedRoom(currentRoom));
+        return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom));
     }
 }
