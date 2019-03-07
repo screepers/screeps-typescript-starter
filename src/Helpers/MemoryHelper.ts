@@ -6,36 +6,6 @@ import { NO_CACHING_MEMORY } from "utils/config";
 // Accessing Memory Helpers
 export default class MemoryHelper {
     /**
-     * Get structures of a single type in a room, updating if necessary
-     *
-     * [Cached] Memory.rooms[room.name].structures
-     * @param room
-     * @param filterFunction
-     * @param forceUpdate
-     * @returns Structure[] An array of structures of a single type
-     */
-    public static getStructureOfType(
-        room: Room,
-        type: StructureConstant,
-        forceUpdate?: boolean
-    ): Array<Structure | null> {
-        if (
-            NO_CACHING_MEMORY ||
-            forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.data[type] === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL
-        ) {
-            MemoryHelper_Room.updateStructures(room);
-        }
-
-        const structures: Array<Structure | null> = _.map(Memory.rooms[room.name].structures.data[type], (id: string) =>
-            Game.getObjectById(id)
-        );
-        return structures;
-    }
-
-    /**
      * Returns an array of creeps of a role
      * @param role The role to check for
      */
@@ -44,10 +14,6 @@ export default class MemoryHelper {
             return creep.memory.role === role;
         };
         const creepsOfRole = MemoryApi.getMyCreeps(room, filterByRole);
-
-        if(creepsOfRole === null){
-            return [];
-        }
 
         return creepsOfRole;
     }

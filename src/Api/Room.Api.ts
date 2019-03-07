@@ -280,10 +280,6 @@ export default class RoomApi {
             getEnergyJobs = getEnergyJobs.concat(sourceJobs);
         }
 
-        console.log("Total: " + JSON.stringify(getEnergyJobs));
-        console.log("source: " + JSON.stringify(sourceJobs));
-        // Generate
-
         // Return getEnergyJobs even if it is empty
         return getEnergyJobs;
     }
@@ -306,7 +302,12 @@ export default class RoomApi {
             // Create the StoreDefinition for the source
             const sourceResources: StoreDefinition = { energy: source.energy };
             // Create the GetEnergyJob object for the source
-            const sourceJob: GetEnergyJob = { targetID: source.id, targetType: "source", resources: sourceResources };
+            const sourceJob: GetEnergyJob = {
+                targetID: source.id,
+                targetType: "source",
+                resources: sourceResources,
+                isTaken: false
+            };
             // Append the GetEnergyJob to the main array
             sourceJobList.push(sourceJob);
         });
