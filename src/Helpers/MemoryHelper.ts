@@ -39,11 +39,16 @@ export default class MemoryHelper {
      * Returns an array of creeps of a role
      * @param role The role to check for
      */
-    public static getCreepOfRole(room: Room, role: RoleConstant, forceUpdate?: boolean): Array<Creep | null> {
+    public static getCreepOfRole(room: Room, role: RoleConstant, forceUpdate?: boolean): Creep[] {
         const filterByRole = (creep: Creep) => {
             return creep.memory.role === role;
         };
         const creepsOfRole = MemoryApi.getMyCreeps(room, filterByRole);
+
+        if(creepsOfRole === null){
+            return [];
+        }
+
         return creepsOfRole;
     }
 

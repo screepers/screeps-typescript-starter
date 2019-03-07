@@ -74,7 +74,7 @@ export default class MemoryApi {
             minerals: { data: null, cache: null },
             tombstones: { data: null, cache: null },
             droppedResources: { data: null, cache: null },
-            getEnergyJobs: { data: null, cache: null },
+            jobs: {},
             structures: { data: null, cache: null },
             upgradeLink: ""
         };
@@ -96,7 +96,6 @@ export default class MemoryApi {
         this.getHostileCreeps(room, undefined, forceUpdate);
         this.getSources(room, undefined, forceUpdate);
         this.getStructures(room, undefined, forceUpdate);
-        this.getGetEnergyJobs(room, undefined, forceUpdate);
         // this.getCreepLimits(room, undefined, forceUpdate);
         // this.getDefcon(room, undefined, forceUpdate);
         // this.getRoomState(room, undefined, forceUpdate);
@@ -136,13 +135,9 @@ export default class MemoryApi {
      * @param room The room to retrieve from
      * @param filterFunction [Optional] The function to filter all creep objects
      * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Creep[ ] | null -- An array of owned creeps or null if there are none
+     * @returns Creep[ ] -- An array of owned creeps, empty if there are none
      */
-    public static getMyCreeps(
-        room: Room,
-        filterFunction?: (object: Creep) => boolean,
-        forceUpdate?: boolean
-    ): Creep[] | null {
+    public static getMyCreeps(room: Room, filterFunction?: (object: Creep) => boolean, forceUpdate?: boolean): Creep[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -155,10 +150,6 @@ export default class MemoryApi {
         const creepIDs: string[] = Memory.rooms[room.name].creeps.data;
 
         let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
-
-        if (creeps.length === 0) {
-            return null;
-        }
 
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
@@ -174,13 +165,13 @@ export default class MemoryApi {
      * @param room The room to retrieve from
      * @param filterFunction [Optional] The function to filter all creep objects
      * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Creep[ ] | null -- An array of hostile creeps or null if none
+     * @returns Creep[ ]  -- An array of hostile creeps, empty if none
      */
     public static getHostileCreeps(
         room: Room,
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
-    ): Creep[] | null {
+    ): Creep[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -193,10 +184,6 @@ export default class MemoryApi {
         const creepIDs: string[] = Memory.rooms[room.name].hostiles.data;
 
         let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
-
-        if (creeps.length === 0) {
-            return null;
-        }
 
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
@@ -218,7 +205,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: Structure) => boolean,
         forceUpdate?: boolean
-    ): Structure[] | null {
+    ): Structure[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -231,10 +218,6 @@ export default class MemoryApi {
         const structureIDs: string[] = _.flattenDeep(Memory.rooms[room.name].structures.data);
 
         let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure>(structureIDs);
-
-        if (structures.length === 0) {
-            return null;
-        }
 
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
@@ -258,7 +241,7 @@ export default class MemoryApi {
         type: StructureConstant,
         filterFunction?: (object: any) => boolean,
         forceUpdate?: boolean
-    ): Structure[] | null {
+    ): Structure[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -272,10 +255,6 @@ export default class MemoryApi {
         const structureIDs: string[] = Memory.rooms[room.name].structures.data[type];
 
         let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure>(structureIDs);
-
-        if (structures.length === 0) {
-            return null;
-        }
 
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
@@ -297,7 +276,7 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
-    ): ConstructionSite[] | null {
+    ): ConstructionSite[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -313,10 +292,6 @@ export default class MemoryApi {
             constructionSiteIDs
         );
 
-        if (constructionSites.length === 0) {
-            return null;
-        }
-
         if (filterFunction !== undefined) {
             constructionSites = _.filter(constructionSites, filterFunction);
         }
@@ -330,13 +305,13 @@ export default class MemoryApi {
      * @param room The room we want to look in
      * @param filterFunction [Optional] The function to filter the tombstones objects
      * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Tombstone[] | null An array of tombstones, if there are any
+     * @returns Tombstone[]  An array of tombstones, if there are any
      */
     public static getTombstones(
         room: Room,
         filterFunction?: (object: Tombstone) => boolean,
         forceUpdate?: boolean
-    ): Tombstone[] | null {
+    ): Tombstone[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -349,10 +324,6 @@ export default class MemoryApi {
         const tombstoneIDs: string[] = Memory.rooms[room.name].tombstones.data;
 
         let tombstones = MemoryHelper.getOnlyObjectsFromIDs<Tombstone>(tombstoneIDs);
-
-        if (tombstones.length === 0) {
-            return null;
-        }
 
         if (filterFunction !== undefined) {
             tombstones = _.filter(tombstones, filterFunction);
@@ -367,13 +338,13 @@ export default class MemoryApi {
      * @param room The room we want to look in
      * @param filterFunction [Optional] The function to filter the resource objects
      * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Array< Resource | null> An array of dropped resources, if there are any
+     * @returns Resource[]  An array of dropped resources, if there are any
      */
     public static getDroppedResources(
         room: Room,
         filterFunction?: (object: RESOURCE_ENERGY) => boolean,
         forceUpdate?: boolean
-    ): Resource[] | null {
+    ): Resource[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -387,10 +358,6 @@ export default class MemoryApi {
 
         let droppedResources: Resource[] = MemoryHelper.getOnlyObjectsFromIDs<Resource>(resourceIDs);
 
-        if (droppedResources.length === 0) {
-            return null;
-        }
-
         if (filterFunction !== undefined) {
             droppedResources = _.filter(droppedResources, filterFunction);
         }
@@ -403,13 +370,13 @@ export default class MemoryApi {
      * @param room the room we want sources from
      * @param filterFunction [Optional] The function to filter all source objects
      * @param forceUpdate [Optional] Invalidate cache by force
-     * @returns Array<Source | null> An array of sources, if there are any
+     * @returns Source[]  An array of sources, if there are any
      */
     public static getSources(
         room: Room,
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
-    ): Source[] | null {
+    ): Source[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -423,10 +390,6 @@ export default class MemoryApi {
 
         let sources: Source[] = MemoryHelper.getOnlyObjectsFromIDs<Source>(sourceIDs);
 
-        if (sources.length === 0) {
-            return null;
-        }
-
         if (filterFunction !== undefined) {
             sources = _.filter(sources, filterFunction);
         }
@@ -439,18 +402,18 @@ export default class MemoryApi {
      * @param room the room we want minerals from
      * @param filterFunction [Optional] The function to filter all mineral objects
      * @param forceUpdate [Optional] Invalidate cache by force
-     * @returns Array<Mineral | null> An array of minerals, if there are any
+     * @returns Mineral[]  An array of minerals, if there are any
      */
     public static getMinerals(
         room: Room,
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
-    ): Mineral[] | null {
+    ): Mineral[] {
         //
 
         // TODO Fill this out
 
-        return null;
+        return [];
     }
 
     /**
