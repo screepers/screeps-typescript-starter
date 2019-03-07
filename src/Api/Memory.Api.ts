@@ -37,15 +37,7 @@ export default class MemoryApi {
             }
         }
 
-        // dead flags
-        // TODO Complete a method to remove flag effects
-        for (const flagName in Memory.flags) {
-            if (!(flagName in Game.flags)) {
-                // * Call a function to handle removing the effects of a flag removal here
-                // RoomHelper/MemoryHelper.unassignFlag()
-                delete Memory.flags[flagName];
-            }
-        }
+        // Handling flag deletion in EmpireManager since it handles the entire flag system
     }
 
     /**
@@ -615,8 +607,32 @@ export default class MemoryApi {
 
     /**
      * get all owned rooms
+     * @param filterFunction [Optional] a filter function for the rooms
+     * @returns Room[] array of rooms
      */
-    public static getOwnedRooms(): Room[] {
+    public static getOwnedRooms(filterFunction?: (room: Room) => boolean): Room[] {
+
+        if (!filterFunction) {
+            return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom) && filterFunction);
+        }
         return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom));
+    }
+
+    /**
+     * get all flags as an array
+     * @param filterFunction [Optional] a function to filter the flags out
+     * @returns Flag[] an array of all flags
+     */
+    public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
+
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+            return Game.flags[flagIndex];
+        });
+
+        // Apply filter function if it exists, otherwise just return all flags
+        if (filterFunction) {
+            return _.filter(allFlags, filterFunction);
+        }
+        return allFlags;
     }
 }

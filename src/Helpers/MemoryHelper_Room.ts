@@ -84,7 +84,9 @@ export default class MemoryHelper_Room {
     public static updateMyCreeps(room: Room): void {
         Memory.rooms[room.name].creeps = { data: null, cache: null };
 
-        const creeps = room.find(FIND_MY_CREEPS);
+        // Changed this because it wouldn't catch remote squads for example
+        // as they aren't actually in the room all the time (had this problem with my last solo code base)
+        const creeps = _.filter(Game.creeps, (creep) => creep.memory.homeRoom === room.name);
 
         Memory.rooms[room.name].creeps.data = _.map(creeps, (creep: Creep) => creep.id);
         Memory.rooms[room.name].creeps.cache = Game.time;
