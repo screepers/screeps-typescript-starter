@@ -16,18 +16,18 @@ export default class EmpireHelper {
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
 
-
-        // If the dependent room already has this room covered, just append the flag onto it
-        const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(MemoryApi.getRemoteRooms(dependentRoom),
-            (rr: RemoteRoomMemory) => rr.roomName === flag.pos.roomName
-        );
-
         // Create the RemoteFlagMemory object for this flag
         const remoteFlagMemory: RemoteFlagMemory = {
             active: true,
             complete: false,
             flagName: flag.name,
         };
+
+
+        // If the dependent room already has this room covered, just append the flag onto it
+        const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(MemoryApi.getRemoteRooms(dependentRoom),
+            (rr: RemoteRoomMemory) => rr.roomName === flag.pos.roomName
+        );
 
         if (!existingDepedentRemoteRoomMem) {
             existingDepedentRemoteRoomMem!.flags.cache = Game.time;
