@@ -792,10 +792,6 @@ interface FlagMemory {
      */
     processed: boolean;
     /**
-     * if the flag has been removed from the game
-     */
-    deleted: boolean;
-    /**
      * if the flag is currently active
      */
     active: boolean;
@@ -908,15 +904,22 @@ interface AttackFlagMemory extends ParentFlagMemory {
     rallyLocation: RoomPosition;
 }
 
+/**
+ * memory associated with a claim flag inside a claim room memory
+ */
 interface ClaimFlagMemory extends ParentFlagMemory {
     // For now, its covered by parent interface
     // Extra claim room flags at the moment don't do anything like it does for attack rooms
     // its just meant to mark the room (possible to change)
 }
 
+/**
+ * memory associated with a claim flag inside a claim room memory
+ */
 interface RemoteFlagMemory extends ParentFlagMemory {
     // Same deal as above for now
 }
+
 /**
  * flag option constant definitions
  */

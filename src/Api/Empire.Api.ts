@@ -57,6 +57,14 @@ export default class Empire {
                     EmpireHelper.processNewClaimFlag(flag);
                     break;
 
+                // Option flags
+                case COLOR_GREEN:
+
+                    // Dependent Room override flag
+                    if (flag.secondaryColor === COLOR_WHITE) {
+                        EmpireHelper.processNewDependentRoomOverrideFlag(flag);
+                    }
+
                 // Unhandled Flag, print warning to console
                 // Set to processed to prevent the flag from attempting processization every tick
                 default:
@@ -65,6 +73,20 @@ export default class Empire {
                     flag.memory.processed = true;
                     break;
             }
+        }
+    }
+
+    /**
+     * deletes all flags marked as complete
+     */
+    public static deleteCompleteFlags(): void {
+
+        const completeFlags = MemoryApi.getAllFlags((flag: Flag) => flag.memory.complete);
+
+        // Loop over all flags, removing them and their direct memory from the game
+        for (const flag of completeFlags) {
+            delete Memory.flags[flag.name];
+            flag.remove();
         }
     }
 

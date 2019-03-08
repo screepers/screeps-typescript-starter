@@ -13,7 +13,7 @@ class UserException extends Error {
     constructor(title: string, body: string, severity: ErrorConstant, useTitleColor?: string, useBodyColor?: string) {
         super();
         Object.setPrototypeOf(this, UserException.prototype);
-        
+
         this.title = title;
         this.body = body;
         this.severity = severity;

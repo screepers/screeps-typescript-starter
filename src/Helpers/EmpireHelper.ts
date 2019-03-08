@@ -1,3 +1,6 @@
+import MemoryApi from "../Api/Memory.Api";
+import UtilHelper from "./UtilHelper";
+import UserException from "utils/UserException";
 
 export default class EmpireHelper {
 
@@ -26,15 +29,50 @@ export default class EmpireHelper {
     }
 
     /**
+     * commit a depedent room over-ride flag to memory
+     * @param flag the flag we are commiting to memory
+     */
+    public static processNewDependentRoomOverrideFlag(flag: Flag): void {
+
+        // Set all the memory values for the flag
+        Memory.flags[flag.name].active = true;
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+    }
+
+    /**
      * finds the closest colonized room to support a
      * Remote/Attack/Claim room
      * Calls helper functions to decide auto or over-ride
      * @param targetRoom the room we want to support
      */
     public static findDependentRoom(targetRoom: Room): string {
-        // find the closest room, maybe some additional filters to make
-        // sure the room is actually closest not just by distance idk
-        return "";
+
+        // Green & White flags are considered override flags, get those and find the one that was placed most recently
+        const allOverrideFlags = MemoryApi.getAllFlags((flag: Flag) => flag.color === COLOR_GREEN && flag.secondaryColor === COLOR_WHITE);
+        let overrideFlag: Flag | undefined;
+
+        // If we don't have any d-room override flags, we don't need to worry about it and will use auto room detection
+        if (allOverrideFlags.length > 0) {
+            for (const flag of allOverrideFlags) {
+                if (!overrideFlag) {
+                    overrideFlag = flag;
+                }
+                else {
+                    if (flag.memory.timePlaced > overrideFlag.memory.timePlaced) {
+                        overrideFlag = flag;
+                    }
+                }
+            }
+
+            // Set the override flag as complete and call the helper to find the override room
+            Memory.flags[overrideFlag!.name].complete = true;
+            return this.findDependentRoomManual(targetRoom, overrideFlag!);
+        }
+
+        // If no override flag was found, automatically find closest dependent room
+        return this.findDependentRoomAuto(targetRoom);
     }
 
     /**
@@ -42,17 +80,69 @@ export default class EmpireHelper {
      * @param targetRoom the room we want to support
      */
     public static findDependentRoomAuto(targetRoom: Room): string {
-        // This will be called if theres no override in place
-        return "";
+
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        let shortestPathRoom: Room | undefined;
+        const targetRoomPosition: RoomPosition = new RoomPosition(25, 25, targetRoom.name);
+
+        // Loop over owned rooms, finding the shortest path
+        for (const currentRoom of ownedRooms) {
+
+            if (!shortestPathRoom) {
+                shortestPathRoom = currentRoom;
+                continue;
+            }
+
+            const shortestRoomPosition: RoomPosition = new RoomPosition(25, 25, shortestPathRoom.name);
+            const currentRoomPosition: RoomPosition = new RoomPosition(25, 25, currentRoom.name);
+
+            const shortestPathLength: number = targetRoom.findPath(
+                targetRoomPosition,
+                shortestRoomPosition,
+                { ignoreCreeps: true, ignoreDestructibleStructures: true, ignoreRoads: true }
+            ).length;
+
+            const currentPathLength: number = targetRoom.findPath(
+                targetRoomPosition,
+                currentRoomPosition,
+                { ignoreCreeps: true, ignoreDestructibleStructures: true, ignoreRoads: true }
+            ).length;
+
+            // If the path is shorter, its the new canidate room
+            if (currentPathLength < shortestPathLength) {
+                shortestPathRoom = currentRoom;
+            }
+        }
+
+        // Throw exception if no rooms were found
+        if (!shortestPathRoom) {
+            throw new UserException(
+                "Auto-Dependent Room Finder Error",
+                "No room with shortest path found to the target room.",
+                ERROR_WARN
+            );
+        }
+
+        return shortestPathRoom!.name;
     }
 
     /**
      * Manually get the dependent room based on flags
      * @param targetRoom the room we want to support
+     * @param overrideFlag the flag for the selected override flag
      */
-    public static findDependentRoomManual(targetRoom: Room): string {
-        // This will be called if an override is requested via flag
-        return "";
+    public static findDependentRoomManual(targetRoom: Room, overrideFlag: Flag): string {
+
+        // Throw error if we have no vision in the override flag room
+        // (Shouldn't happen, but user error can allow it to occur)
+        if (!Game.flags[overrideFlag.name].room) {
+            throw new UserException(
+                "Manual Dependent Room Finding Error",
+                "We have no vision in the room you attempted to manually set as override dependent room.",
+                ERROR_ERROR
+            );
+        }
+        return Game.flags[overrideFlag.name].room!.name;
     }
 
     /**
