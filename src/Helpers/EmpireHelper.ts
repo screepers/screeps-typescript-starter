@@ -83,7 +83,6 @@ export default class EmpireHelper {
 
         const ownedRooms = MemoryApi.getOwnedRooms();
         let shortestPathRoom: Room | undefined;
-        const targetRoomPosition: RoomPosition = new RoomPosition(25, 25, targetRoom.name);
 
         // Loop over owned rooms, finding the shortest path
         for (const currentRoom of ownedRooms) {
@@ -92,9 +91,6 @@ export default class EmpireHelper {
                 shortestPathRoom = currentRoom;
                 continue;
             }
-
-            const shortestRoomPosition = new RoomPosition(25, 25, shortestPathRoom.name);
-            const currentRoomPosition = new RoomPosition(25, 25, currentRoom.name);
 
             const shortestPath = Game.map.findRoute(shortestPathRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
             const currentPath = Game.map.findRoute(currentRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
@@ -138,9 +134,21 @@ export default class EmpireHelper {
 
     /**
      * get the rally location for the room we are attacking
+     * @param homeRoom the room we are spawning from
+     * @param targetRoom the room we are attacking
      */
-    public static findRallyLocation(targetRoom: Room): RoomPosition | undefined {
-        return undefined;
+    public static findRallyLocation(homeRoom: Room, targetRoom: Room): RoomPosition {
+
+        const fullPath = Game.map.findRoute(homeRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
+
+        // To prevent out of bounds, only allow room paths that have as least 2 elements (should literally never occur unless we
+        // are attacking our own room (??? maybe an active defender strategy, so i won't throw an error for it tbh)
+        if (fullPath.length >= 2) {
+            return new RoomPosition(25, 25, homeRoom.name);
+        }
+
+        // Return the room right BEFORE the room we are attacking. This is the rally room (location is just in middle of room)
+        return new RoomPosition(25, 25, fullPath[fullPath.length - 2]['room']);
     }
 
     /**
