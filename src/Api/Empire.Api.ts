@@ -73,21 +73,20 @@ export default class Empire {
      */
     public static cleanDeadFlags(): void {
 
-        // Get all action memory structures
+        // Get all flag based action memory structures (Remote, Claim, and Attack Room Memory's)
         const allRooms = MemoryApi.getOwnedRooms();
-        const claimRoomsPreFlattened: Array<Array<ClaimRoomMemory | undefined> | undefined> = _.map(allRooms,
-            room => MemoryApi.getClaimRooms(room));
-        const remoteRoomsPreFlattened: Array<Array<RemoteRoomMemory | undefined> | undefined> = _.map(allRooms,
-            room => MemoryApi.getRemoteRooms(room));;
-        const attackRoomsPreFlattened: Array<Array<AttackRoomMemory | undefined> | undefined> = _.map(allRooms,
-            room => MemoryApi.getAttackRooms(room));;
-
-        const claimRooms: Array<ClaimRoomMemory | undefined>;
-        const remoteRooms: Array<RemoteRoomMemory | undefined>;
-        const attackRooms: Array<AttackRoomMemory | undefined>;
+        const claimRooms: Array<ClaimRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+            room => MemoryApi.getClaimRooms(room)));
+        const remoteRooms: Array<RemoteRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+            room => MemoryApi.getRemoteRooms(room)));
+        const attackRooms: Array<AttackRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+            room => MemoryApi.getAttackRooms(room)));
 
 
-        // Loop over claim rooms, remote rooms, and attack rooms, and make sure the flag they're referencing actually exists
+        // Clean the memory of each type of action flag
+        EmpireHelper.cleanDeadClaimRooms(claimRooms);
+        EmpireHelper.cleanDeadRemoteRooms(remoteRooms);
+        EmpireHelper.cleanDeadAttackRooms(attackRooms);
     }
 
     /**

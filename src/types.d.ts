@@ -881,6 +881,10 @@ interface ParentFlagMemory {
      * if the related flag has completed its requirements
      */
     complete: boolean;
+    /**
+     * the name of the flag
+     */
+    flagName: string;
 }
 /**
  * memory for an attack flag
@@ -904,6 +908,15 @@ interface AttackFlagMemory extends ParentFlagMemory {
     rallyLocation: RoomPosition;
 }
 
+interface ClaimFlagMemory extends ParentFlagMemory {
+    // For now, its covered by parent interface
+    // Extra claim room flags at the moment don't do anything like it does for attack rooms
+    // its just meant to mark the room (possible to change)
+}
+
+interface RemoteFlagMemory extends ParentFlagMemory {
+    // Same deal as above for now
+}
 /**
  * flag option constant definitions
  */
