@@ -9,7 +9,8 @@ import {
     DEPNDT_CACHE_TTL,
     TOMBSTONE_CACHE_TTL,
     DROPS_CACHE_TTL,
-    JOBS_CACHE_TTL
+    JOBS_CACHE_TTL,
+    ROLE_MINER
 } from "utils/Constants";
 import { NO_CACHING_MEMORY } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
