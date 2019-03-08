@@ -93,23 +93,14 @@ export default class EmpireHelper {
                 continue;
             }
 
-            const shortestRoomPosition: RoomPosition = new RoomPosition(25, 25, shortestPathRoom.name);
-            const currentRoomPosition: RoomPosition = new RoomPosition(25, 25, currentRoom.name);
+            const shortestRoomPosition = new RoomPosition(25, 25, shortestPathRoom.name);
+            const currentRoomPosition = new RoomPosition(25, 25, currentRoom.name);
 
-            const shortestPathLength: number = targetRoom.findPath(
-                targetRoomPosition,
-                shortestRoomPosition,
-                { ignoreCreeps: true, ignoreDestructibleStructures: true, ignoreRoads: true }
-            ).length;
-
-            const currentPathLength: number = targetRoom.findPath(
-                targetRoomPosition,
-                currentRoomPosition,
-                { ignoreCreeps: true, ignoreDestructibleStructures: true, ignoreRoads: true }
-            ).length;
+            const shortestPath = Game.map.findRoute(shortestPathRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
+            const currentPath = Game.map.findRoute(currentRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
 
             // If the path is shorter, its the new canidate room
-            if (currentPathLength < shortestPathLength) {
+            if (currentPath.length < shortestPath.length) {
                 shortestPathRoom = currentRoom;
             }
         }
@@ -143,6 +134,13 @@ export default class EmpireHelper {
             );
         }
         return Game.flags[overrideFlag.name].room!.name;
+    }
+
+    /**
+     * get the rally location for the room we are attacking
+     */
+    public static findRallyLocation(targetRoom: Room): RoomPosition | undefined {
+        return undefined;
     }
 
     /**
