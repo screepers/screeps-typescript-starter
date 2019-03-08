@@ -1,84 +1,97 @@
+import EmpireHelper from "../Helpers/EmpireHelper";
+import MemoryApi from "./Memory.Api";
 
 export default class Empire {
 
     /**
+     * get new flags that need to be processed
+     * @returns Flag[] an array of flags that need to be processed (empty if none)
+     */
+    public static getUnprocessedFlags(): Flag[] {
+
+        // Create an array of all flags
+        const allFlags: Flag[] = MemoryApi.getAllFlags();
+        const newFlags: Flag[] = [];
+
+        // Create an array of all unprocessed flags
+        for (const flag of allFlags) {
+            if (!flag.memory.processed) {
+                newFlags.push(flag);
+            }
+        }
+
+        // Returns all unprocessed flags, empty array if there are none
+        return newFlags;
+    }
+    /**
      * search for new flags and properly commit them
+     * @param newFlags StringMap of new flags we need to process
      */
-    public static processNewFlags(): void {
-        // just searches for a flag that isn't in memory yet
-        // and calls the helper function for it
-        // ie new remote room flag adds the remote room to proper memory slot, etc
-    }
+    public static processNewFlags(newFlags: Flag[]): void {
 
-    /**
-     * remove a flag and its consequences from memory
-     * @param flag the flag we want to remove
-     */
-    public static removeFlagMemory(flag: Flag): void {
-        // pass it a single flag and it removes it and
-        // its associated memory and stuff
-    }
+        // Don't run the function if theres no new flags
+        if (newFlags.length === 0) {
+            return;
+        }
 
-    /**
-     * commit a remote flag to memory
-     * @param flag the flag we want to commit
-     */
-    public static processNewRemoteFlag(flag: Flag): void {
-        // save the remote room into the proper memory blah blah blah
-    }
+        // Loop over all new flags and call the proper helper
+        for (const flag of newFlags) {
 
-    /**
-     * commit a attack flag to memory
-     * @param flag the flag we want to commit
-     */
-    public static processNewAttackFlag(flag: Flag): void {
-        // save the attack room into the proper memory blah blah blah
-    }
+            switch (flag.color) {
 
-    /**
-     * commit a claim flag to memory
-     * @param flag the flag we want to commit
-     */
-    public static processNewClaimFlag(flag: Flag): void {
-        // save the claim room into the proper memory blah blah blah
+                // Remote Flags
+                case COLOR_YELLOW:
+
+                    EmpireHelper.processNewRemoteFlag(flag);
+                    break;
+
+                // Attack Flags
+                case COLOR_RED:
+
+                    EmpireHelper.processNewAttackFlag(flag);
+                    break;
+
+                // Claim Flags
+                case COLOR_WHITE:
+
+                    EmpireHelper.processNewClaimFlag(flag);
+                    break;
+
+                // Unhandled Flag, print warning to console
+                // Set to processed to prevent the flag from attempting processization every tick
+                default:
+
+                    console.log("Attempted to process flag of an unhandled type.")
+                    flag.memory.processed = true;
+                    break;
+            }
+        }
     }
 
     /**
      * look for dead flags (memory with no associated flag existing) and remove them
      */
     public static cleanDeadFlags(): void {
-        // goes over all flags in memory and makes sure theres still
-        // a flag for it, call remove flag function if we need to
-    }
 
-    /**
-     * finds the closest colonized room to support a
-     * Remote/Attack/Claim room
-     * Calls helper functions to decide auto or over-ride
-     * @param targetRoom the room we want to support
-     */
-    public static findDependentRoom(targetRoom: Room): string {
-        // find the closest room, maybe some additional filters to make
-        // sure the room is actually closest not just by distance idk
-        return "";
-    }
+        // Get all flag based action memory structures (Remote, Claim, and Attack Room Memory)
+        const allRooms = MemoryApi.getOwnedRooms();
+        const claimRooms: Array<ClaimRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+            room => MemoryApi.getClaimRooms(room)));
+        const remoteRooms: Array<RemoteRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+            room => MemoryApi.getRemoteRooms(room)));
+        const attackRooms: Array<AttackRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+            room => MemoryApi.getAttackRooms(room)));
 
-    /**
-     * Automatically come up with a dependent room
-     * @param targetRoom the room we want to support
-     */
-    public static findDependentRoomAuto(targetRoom: Room): string {
-        // This will be called if theres no override in place
-        return "";
-    }
 
-    /**
-     * Manually get the dependent room based on flags
-     * @param targetRoom the room we want to support
-     */
-    public static findDependentRoomManual(targetRoom: Room): string {
-        // This will be called if an override is requested via flag
-        return "";
+        // Clean dead flags from memory structures
+        EmpireHelper.cleanDeadClaimRoomFlags(claimRooms);
+        EmpireHelper.cleanDeadRemoteRoomsFlags(remoteRooms);
+        EmpireHelper.cleanDeadAttackRoomFlags(attackRooms);
+
+        // Clean the memory of each type of dependent room memory structure with no existing flags associated
+        EmpireHelper.cleanDeadClaimRooms(claimRooms);
+        EmpireHelper.cleanDeadRemoteRooms(remoteRooms);
+        EmpireHelper.cleanDeadAttackRooms(attackRooms);
     }
 
     /**
