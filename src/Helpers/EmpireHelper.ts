@@ -78,12 +78,12 @@ export default class EmpireHelper {
         // Loop over claim rooms, remote rooms, and attack rooms, and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const claimRoom of claimRooms) {
-            for (const flag of claimRoom!.flags.data) {
+            for (const flag in claimRoom!.flags.data) {
 
                 // Tell typescript that these are claim flag memory structures
-                const currentFlag: ClaimFlagMemory = flag as ClaimFlagMemory;
+                const currentFlag: ClaimFlagMemory = claimRoom!.flags.data[flag] as ClaimFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    delete claimRoom!.flags.data[currentFlag.flagName];
+                    delete claimRoom!.flags.data[flag];
                 }
             }
         }
@@ -111,12 +111,12 @@ export default class EmpireHelper {
         // Loop over attack rooms, and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const attackRoom of attackRooms) {
-            for (const flag of attackRoom!.flags.data) {
+            for (const flag in attackRoom!.flags.data) {
 
                 // Tell typescript that these are claim flag memory structures
-                const currentFlag: AttackFlagMemory = flag as AttackFlagMemory;
+                const currentFlag: AttackFlagMemory = attackRoom!.flags.data[flag] as AttackFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    delete attackRoom!.flags.data[currentFlag.flagName];
+                    delete attackRoom!.flags.data[flag];;
                 }
             }
         }
@@ -145,12 +145,12 @@ export default class EmpireHelper {
         // Loop over remote rooms and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const remoteRoom of remoteRooms) {
-            for (const flag of remoteRoom!.flags.data) {
+            for (const flag in remoteRoom!.flags.data) {
 
                 // Tell typescript that these are claim flag memory structures
-                const currentFlag: RemoteFlagMemory = flag as RemoteFlagMemory;
+                const currentFlag: RemoteFlagMemory = remoteRoom!.flags.data[flag] as RemoteFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    delete remoteRoom!.flags.data[currentFlag.flagName];
+                    delete remoteRoom!.flags.data[flag];
                 }
             }
         }
