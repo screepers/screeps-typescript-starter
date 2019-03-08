@@ -9,7 +9,45 @@ export default class EmpireHelper {
      * @param flag the flag we want to commit
      */
     public static processNewRemoteFlag(flag: Flag): void {
-        // save the remote room into the proper memory blah blah blah
+
+        const dependentRoom: Room = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
+        Memory.flags[flag.name].active = true;
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+
+
+        // If the dependent room already has this room covered, just append the flag onto it
+        const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(MemoryApi.getRemoteRooms(dependentRoom),
+            (rr: RemoteRoomMemory) => rr.roomName === flag.pos.roomName
+        );
+
+        // Create the RemoteFlagMemory object for this flag
+        const remoteFlagMemory: RemoteFlagMemory = {
+            active: true,
+            complete: false,
+            flagName: flag.name,
+        };
+
+        if (!existingDepedentRemoteRoomMem) {
+            existingDepedentRemoteRoomMem!.flags.cache = Game.time;
+            existingDepedentRemoteRoomMem!.flags.data.push(remoteFlagMemory);
+        }
+
+        // Otherwise, add a brand new memory structure onto it
+        const remoteRoomMemory: RemoteRoomMemory = {
+            sources: { cache: Game.time, data: 1 },
+            hostiles: { cache: Game.time, data: null },
+            structures: { cache: Game.time, data: null },
+            roomName: flag.pos.roomName,
+            flags: { cache: Game.time, data: [remoteFlagMemory] },
+        };
+
+        // ! TODO - move this into memory api into a "addRemoteRoomToMemory" or something
+        // Where you pass it the memory you want and it does exactly this below, just to keep
+        // Memory adding in memory api in case we change how remote rooms are structured for some reason
+        dependentRoom.memory.remoteRooms.cache = Game.time;
+        dependentRoom.memory.remoteRooms.data.push(remoteRoomMemory);
     }
 
     /**
@@ -47,7 +85,7 @@ export default class EmpireHelper {
      * Calls helper functions to decide auto or over-ride
      * @param targetRoom the room we want to support
      */
-    public static findDependentRoom(targetRoom: Room): string {
+    public static findDependentRoom(targetRoom: string): string {
 
         // Green & White flags are considered override flags, get those and find the one that was placed most recently
         const allOverrideFlags = MemoryApi.getAllFlags((flag: Flag) => flag.color === COLOR_GREEN && flag.secondaryColor === COLOR_WHITE);
@@ -68,7 +106,7 @@ export default class EmpireHelper {
 
             // Set the override flag as complete and call the helper to find the override room
             Memory.flags[overrideFlag!.name].complete = true;
-            return this.findDependentRoomManual(targetRoom, overrideFlag!);
+            return this.findDependentRoomManual(overrideFlag!);
         }
 
         // If no override flag was found, automatically find closest dependent room
@@ -79,7 +117,7 @@ export default class EmpireHelper {
      * Automatically come up with a dependent room
      * @param targetRoom the room we want to support
      */
-    public static findDependentRoomAuto(targetRoom: Room): string {
+    public static findDependentRoomAuto(targetRoom: string): string {
 
         const ownedRooms = MemoryApi.getOwnedRooms();
         let shortestPathRoom: Room | undefined;
@@ -92,8 +130,9 @@ export default class EmpireHelper {
                 continue;
             }
 
-            const shortestPath = Game.map.findRoute(shortestPathRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
-            const currentPath = Game.map.findRoute(currentRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
+
+            const shortestPath = Game.map.findRoute(shortestPathRoom.name, targetRoom) as { exit: ExitConstant; room: string; }[];
+            const currentPath = Game.map.findRoute(currentRoom.name, targetRoom) as { exit: ExitConstant; room: string; }[];
 
             // If the path is shorter, its the new canidate room
             if (currentPath.length < shortestPath.length) {
@@ -118,7 +157,7 @@ export default class EmpireHelper {
      * @param targetRoom the room we want to support
      * @param overrideFlag the flag for the selected override flag
      */
-    public static findDependentRoomManual(targetRoom: Room, overrideFlag: Flag): string {
+    public static findDependentRoomManual(overrideFlag: Flag): string {
 
         // Throw error if we have no vision in the override flag room
         // (Shouldn't happen, but user error can allow it to occur)
