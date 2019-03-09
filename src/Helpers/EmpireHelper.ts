@@ -131,8 +131,8 @@ export default class EmpireHelper {
             }
 
 
-            const shortestPath = Game.map.findRoute(shortestPathRoom.name, targetRoom) as { exit: ExitConstant; room: string; }[];
-            const currentPath = Game.map.findRoute(currentRoom.name, targetRoom) as { exit: ExitConstant; room: string; }[];
+            const shortestPath = Game.map.findRoute(shortestPathRoom.name, targetRoom) as Array<{ exit: ExitConstant; room: string; }>;
+            const currentPath = Game.map.findRoute(currentRoom.name, targetRoom) as Array<{ exit: ExitConstant; room: string; }>;
 
             // If the path is shorter, its the new canidate room
             if (currentPath.length < shortestPath.length) {
@@ -178,7 +178,7 @@ export default class EmpireHelper {
      */
     public static findRallyLocation(homeRoom: Room, targetRoom: Room): RoomPosition {
 
-        const fullPath = Game.map.findRoute(homeRoom.name, targetRoom.name) as { exit: ExitConstant; room: string; }[];
+        const fullPath = Game.map.findRoute(homeRoom.name, targetRoom.name) as Array<{ exit: ExitConstant; room: string; }>;
 
         // To prevent out of bounds, only allow room paths that have as least 2 elements (should literally never occur unless we
         // are attacking our own room (??? maybe an active defender strategy, so i won't throw an error for it tbh)
