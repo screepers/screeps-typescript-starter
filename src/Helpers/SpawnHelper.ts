@@ -173,10 +173,13 @@ export class SpawnHelper {
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
+
                     // Options marked with // are overriding the defaults
                     build: false,
                     upgrade: false,
                     repair: false,
+                    harvestSources: true,   //
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
@@ -245,11 +248,14 @@ export class SpawnHelper {
 
         switch (roomState) {
             case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER:
+
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
                     repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
@@ -267,11 +273,14 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_INTER:
+
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
@@ -294,6 +303,8 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: true, //
@@ -316,6 +327,8 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: true, //
@@ -380,11 +393,14 @@ export class SpawnHelper {
 
         switch (roomState) {
             case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER:
+
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
                     fillStorage: false, //
@@ -402,11 +418,14 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_INTER:
+
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
                     fillStorage: false,
@@ -424,11 +443,14 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_ADVANCED:
+
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
                     fillStorage: false,
@@ -446,11 +468,14 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE || ROOM_STATE_SEIGE || ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
                     fillStorage: true, //
@@ -523,10 +548,13 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: true, //
                     fillStorage: true, //
@@ -586,10 +614,13 @@ export class SpawnHelper {
 
         switch (roomState) {
             case ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE || ROOM_STATE_SEIGE || ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     build: false,
                     upgrade: true, //
                     repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
@@ -646,10 +677,13 @@ export class SpawnHelper {
 
         switch (roomState) {
             case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER || ROOM_STATE_INTER:
+
                 creepOptions = {
                     build: true, //
                     upgrade: false,
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
@@ -710,10 +744,13 @@ export class SpawnHelper {
 
         switch (roomState) {
             case ROOM_STATE_INTRO || ROOM_STATE_BEGINNER || ROOM_STATE_INTER:
+
                 creepOptions = {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
                     fillStorage: false,
@@ -731,10 +768,13 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_ADVANCED:
+
                 creepOptions = {
                     build: false,
                     upgrade: false,
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: true, //
@@ -752,10 +792,13 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE || ROOM_STATE_SEIGE || ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     build: false,
                     upgrade: false,
                     repair: true, //
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: true, //
@@ -811,11 +854,14 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 // Remote reservers don't really have options perse, so just leave as defaults
                 creepOptions = {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
@@ -879,10 +925,13 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    harvestSources: true,
+                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: false,
                     fillStorage: false,
@@ -919,10 +968,13 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
                     fillStorage: false,
@@ -1009,6 +1061,7 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     squadSize: 1,
                     squadUUID: null,
@@ -1092,6 +1145,7 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -1112,10 +1166,7 @@ export class SpawnHelper {
 
     /**
      * Generate body for medic creep
-     * @param roomState the room state of the room
-     * @param squadSizeParam the size of the squad associated with the zealot
-     * @param squadUUIDParam the squad id that the zealot is a member of
-     * @param rallyLocationParam the meeting place for the squad
+     * @param tier the tier of the room
      */
     public static generateMedicBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Medic
@@ -1173,6 +1224,7 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -1254,6 +1306,7 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -1327,6 +1380,7 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
+
                 creepOptions = {
                     squadSize: 0,
                     squadUUID: null,
@@ -1354,6 +1408,8 @@ export class SpawnHelper {
             build: false,
             upgrade: false,
             repair: false,
+            harvestSources: false,
+            harvestMinerals: false,
             wallRepair: false,
             fillTower: false,
             fillStorage: false,
