@@ -553,7 +553,7 @@ interface RoomMemory {
     jobs: JobListing;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**
@@ -572,6 +572,14 @@ interface CreepOptionsCiv {
      * if the creep can repair containers/roads, etc
      */
     repair: boolean;
+    /**
+     * if the creep can harvest sources
+     */
+    harvestSources: boolean;
+    /**
+     * if the creep can harvest minerals
+     */
+    harvestMinerals: boolean;
     /**
      * if the creep can repair walls and ramparts
      */
