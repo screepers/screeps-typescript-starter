@@ -110,7 +110,11 @@ export const TOMBSTONE_CACHE_TTL = 50; // Tombstones
 export const DROPS_CACHE_TTL = 50; // Dropped Resources
 export const FCREEP_CACHE_TTL = 20; // Friendly Creep
 export const HCREEP_CACHE_TTL = 1; // Hostile Creep
-export const JOBS_CACHE_TTL = 50; // Jobs
+// Job Constants
+export const SOURCE_JOB_CACHE_TTL = 50; // Source jobs
+export const CONTAINER_JOB_CACHE_TTL = 50; // Container jobs
+export const LINK_JOB_CACHE_TTL = 50; // Link Jobs
+export const BACKUP_JOB_CACHE_TTL = 50; // Backup Jobs
 // ? Should we change DEPNDT to be 3 seperate consts? Attack, Remote, Claim?
 export const DEPNDT_CACHE_TTL = 50; // Dependent Rooms - Attack, Remote, Claim
 

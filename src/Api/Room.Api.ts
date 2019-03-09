@@ -1,13 +1,10 @@
-import MemoryApi from "./Memory.Api";
-import RoomHelper from "Helpers/RoomHelper";
-import { ROOM_STATE_INTRO, WALL_LIMIT, ERROR_ERROR, ROLE_MINER } from "utils/constants";
-import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import MemoryHelper from "Helpers/MemoryHelper";
-import { ErrorMapper } from "utils/ErrorMapper";
-import UtilHelper from "Helpers/UtilHelper";
+import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import RoomHelper from "Helpers/RoomHelper";
+import { CONTAINER_MINIMUM_ENERGY, LINK_MINIMUM_ENERGY } from "utils/config";
+import { ERROR_ERROR, ROLE_MINER, ROOM_STATE_INTRO, WALL_LIMIT } from "utils/constants";
 import UserException from "utils/UserException";
-import { open } from "fs";
-import { ConsoleCommands } from "Helpers/ConsoleCommands";
+import MemoryApi from "./Memory.Api";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -288,12 +285,12 @@ export default class RoomApi {
      * Gets a list of GetEnergyJobs for the sources of a room
      * @param room The room to create the job list for
      */
-    public static createSourceGetEnergyJobs(room: Room): GetEnergyJob[] | null {
+    public static createSourceGetEnergyJobs(room: Room): GetEnergyJob[] {
         // List of all sources that are under optimal work capacity
         const openSources = this.getOpenSources(room);
 
         if (openSources.length === 0) {
-            return null;
+            return [];
         }
 
         const sourceJobList: GetEnergyJob[] = [];
@@ -315,6 +312,104 @@ export default class RoomApi {
         return sourceJobList;
     }
 
+    /**
+     * Gets a list of GetEnergyJobs for the containers of a room
+     * @param room The room to create the job list for
+     */
+    public static createContainerGetEnergyJobs(room: Room): GetEnergyJob[] {
+        // List of all containers with >= CONTAINER_MINIMUM_ENERGY (from config.ts)
+        const containers = MemoryApi.getStructureOfType(
+            room,
+            STRUCTURE_CONTAINER,
+            (container: StructureContainer) => container.store.energy > CONTAINER_MINIMUM_ENERGY
+        );
+
+        if (containers.length === 0) {
+            return [];
+        }
+
+        const containerJobList: GetEnergyJob[] = [];
+
+        _.forEach(containers, (container: StructureContainer) => {
+            const containerJob: GetEnergyJob = {
+                targetID: container.id,
+                targetType: STRUCTURE_CONTAINER,
+                resources: container.store,
+                isTaken: false
+            };
+            // Append to the main array
+            containerJobList.push(containerJob);
+        });
+
+        return containerJobList;
+    }
+
+    /**
+     * Gets a list of GetEnergyJobs for the links of a room
+     * @param room The room to create the job list for
+     */
+    public static createLinkGetEnergyJobs(room: Room): GetEnergyJob[] {
+        // List of all the links in the room with > LINK_MINIMUM_ENERGY (from config.ts)
+        // AND no active cooldown
+        const activeLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link: StructureLink) => {
+            return link.energy > LINK_MINIMUM_ENERGY && link.cooldown === 0;
+        });
+
+        if (activeLinks.length === 0) {
+            return [];
+        }
+
+        const linkJobList: GetEnergyJob[] = [];
+
+        _.forEach(activeLinks, (link: StructureLink) => {
+            // Create the StoreDefinition for the link
+            const linkStore: StoreDefinition = { energy: link.energy };
+
+            const linkJob: GetEnergyJob = {
+                targetID: link.id,
+                targetType: STRUCTURE_LINK,
+                resources: linkStore,
+                isTaken: false
+            };
+
+            linkJobList.push(linkJob);
+        });
+
+        return linkJobList;
+    }
+
+    /**
+     * Gets a list of GetEnergyJobs for the backup structures of a room (terminal, storage)
+     * @param room  The room to create the job list for
+     */
+    public static createBackupStructuresGetEnergyJobs(room: Room): GetEnergyJob[] {
+        const backupJobList: GetEnergyJob[] = [];
+
+        // Create the storage job if active
+        if (room.storage !== undefined) {
+            const storageJob: GetEnergyJob = {
+                targetID: room.storage.id,
+                targetType: STRUCTURE_STORAGE,
+                resources: room.storage.store,
+                isTaken: false
+            };
+
+            backupJobList.push(storageJob);
+        }
+        // Create the terminal job if active
+        if (room.terminal !== undefined) {
+            const terminalJob: GetEnergyJob = {
+                targetID: room.terminal.id,
+                targetType: STRUCTURE_TERMINAL,
+                resources: room.terminal.store,
+                isTaken: false
+            };
+
+            backupJobList.push(terminalJob);
+        }
+
+        return backupJobList;
+    }
     /**
      * gets the drop container next to the source
      * @param room the room we are checking in
