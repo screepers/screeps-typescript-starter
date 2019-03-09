@@ -91,6 +91,7 @@ export default class MemoryApi {
         this.getHostileCreeps(room, undefined, forceUpdate);
         this.getSources(room, undefined, forceUpdate);
         this.getStructures(room, undefined, forceUpdate);
+        this.getAllGetEnergyJobs(room, undefined, forceUpdate);
         // this.getCreepLimits(room, undefined, forceUpdate);
         // this.getDefcon(room, undefined, forceUpdate);
         // this.getRoomState(room, undefined, forceUpdate);
@@ -637,6 +638,26 @@ export default class MemoryApi {
         return allFlags;
     }
 
+    /**
+     * Get all jobs (in a flatted list) of GetEnergyJobs.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the GetEnergyJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    public static getAllGetEnergyJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        const allGetEnergyJobs: GetEnergyJob[] = [];
+
+        _.forEach(this.getSourceJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getContainerJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getLinkJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getBackupStructuresJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+
+        return allGetEnergyJobs;
+    }
     /**
      * Get the list of GetEnergyJobs.sourceJobs
      * @param room The room to get the jobs from
