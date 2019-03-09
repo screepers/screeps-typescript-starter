@@ -612,7 +612,6 @@ export default class MemoryApi {
      * @returns Room[] array of rooms
      */
     public static getOwnedRooms(filterFunction?: (room: Room) => boolean): Room[] {
-
         if (!filterFunction) {
             return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom) && filterFunction);
         }
@@ -625,8 +624,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 

@@ -323,13 +323,36 @@ type CarryPart_ValidTargets = ResourceContainingStructureConstant | "roomPositio
 type CarryPart_ValidActions = "transfer" | "drop";
 
 /**
- * JobObject for the GetEnergyJobListing
+ * Acceptable ValidTargets Lists for BaseJob
  */
-interface GetEnergyJob {
+type Any_ValidTargets =
+    | GetEnergy_ValidTargets
+    | CarryPart_ValidTargets
+    | ClaimPart_ValidTargets
+    | WorkPart_ValidTargets;
+
+/**
+ * Basic Job Interface
+ */
+interface BaseJob {
     /**
      * ID of the target object
      */
     targetID: string;
+    /**
+     * Type of the target object
+     */
+    targetType: Any_ValidTargets;
+    /**
+     * Whether or not the job has been taken
+     */
+    isTaken: boolean;
+}
+/**
+ * JobObject for the GetEnergyJobListing
+ * Overrides targetType to only GetEnergy_ValidTargets
+ */
+interface GetEnergyJob extends BaseJob {
     /**
      * The type of the target object
      */
@@ -341,20 +364,12 @@ interface GetEnergyJob {
      * RESOURCE_ENERGY is always defined and equals to 0 when empty, other resources are undefined when empty.
      */
     resources: StoreDefinition;
-    /**
-     * Whether or not the job has been taken
-     */
-    isTaken: boolean;
 }
 
 /**
  * JobObject for the WorkPartJobListing
  */
-interface WorkPartJob {
-    /**
-     * ID of the target object
-     */
-    targetID: string;
+interface WorkPartJob extends BaseJob {
     /**
      * The type of the target object
      */
@@ -363,20 +378,12 @@ interface WorkPartJob {
      * The action to perform on the target object
      */
     actionType: WorkPart_ValidActions;
-    /**
-     * Whether or not the job has been taken
-     */
-    isTaken: boolean;
 }
 
 /**
  * JobObject for the ClaimPartJobListing
  */
-interface ClaimPartJob {
-    /**
-     * ID of the target object
-     */
-    targetID: string;
+interface ClaimPartJob extends BaseJob {
     /**
      * The type of the target object
      */
@@ -385,20 +392,12 @@ interface ClaimPartJob {
      * The action to perform on the target object
      */
     actionType: ClaimPart_ValidActions;
-    /**
-     * Whether or not the job has been taken
-     */
-    isTaken: boolean;
 }
 
 /**
  * JobObject for the CarryPartJobListing
  */
-interface CarryPartJob {
-    /**
-     * ID of the target object
-     */
-    targetID: string;
+interface CarryPartJob extends BaseJob {
     /**
      * The type of the target object
      */
@@ -407,10 +406,6 @@ interface CarryPartJob {
      * The action to perform on the target object
      */
     actionType: CarryPart_ValidActions;
-    /**
-     * Whether or not the job has been taken
-     */
-    isTaken: boolean;
 }
 
 /**
@@ -558,7 +553,7 @@ interface RoomMemory {
     jobs: JobListing;
 }
 
-interface EmpireMemory { }
+interface EmpireMemory {}
 // ----------------------------------
 
 /**
