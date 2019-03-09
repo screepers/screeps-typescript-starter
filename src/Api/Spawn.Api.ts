@@ -208,18 +208,18 @@ export default class SpawnApi {
             domesticDefender: 0
         };
 
-        // Get all active attack flags associated with this room
+        // Get the active flag associated with this room (should only be one active attack flag, so finding first one is extra saftey)
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
-        const allAttackRoomFlags: AttackFlagMemory[] = _.map(targetRoomMemoryArray, (roomMemory) => {
-            if (roomMemory!['flags'].data.active) { return roomMemory!['flags'].data; }
-        });
-
-        // Loop over active attack room flags and up raise the limits accordingly
-        for (const flagMemory of allAttackRoomFlags) {
-
-            // Loop over each role in the squad and raise its limits
-            this.raiseMilitaryCreepLimits(flagMemory, room);
+        let activeAttackRoomFlag: ParentFlagMemory | undefined;
+        for (const attackRoom of targetRoomMemoryArray) {
+            activeAttackRoomFlag = _.find(attackRoom!['flags'], (flagMem) => flagMem.active);
+            if (activeAttackRoomFlag) {
+                break;
+            }
         }
+
+        // Riase the miltary limits according to the active attack room flag
+        this.raiseMilitaryCreepLimits(activeAttackRoomFlag as AttackFlagMemory, room);
 
 
         // Check if we need domestic defenders and adjust accordingly
@@ -236,11 +236,14 @@ export default class SpawnApi {
      * @param flagMemory the memory associated with the attack flag
      * @param room the room we are raising limits for
      */
-    public static raiseMilitaryCreepLimits(flagMemory: AttackFlagMemory, room: Room): void {
+    public static raiseMilitaryCreepLimits(flagMemory: AttackFlagMemory | undefined, room: Room): void {
 
-        // I think im going to make memory functions that raise the creep limit if you provide the role, limit group, and amount you want to raise/lower it
-        // that way if we restructure creeep limits we do it there instead of in 20 places
-        switch (flagMemory.flagType) {
+        // If flag memory is undefined, don't waste cpu
+        if (!flagMemory) {
+            return;
+        }
+
+        switch (flagMemory!.flagType) {
             case ZEALOT_SOLO:
 
                 MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'zealot', 1);
@@ -665,7 +668,7 @@ export default class SpawnApi {
         // Drop out early if there are no attack rooms
         if (roomMemory === undefined) { return squadOptions; }
 
-        const flagMemoryArray: AttackFlagMemory[] = roomMemory!['flags'].data;
+        const flagMemoryArray: AttackFlagMemory[] = roomMemory!['flags'] as AttackFlagMemory[];
         let selectedFlagMemory: AttackFlagMemory | undefined;
         let currentHighestSquadCount: number = 0;
         let selectedFlagActiveSquadMembers: number = 0;

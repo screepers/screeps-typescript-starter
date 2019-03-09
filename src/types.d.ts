@@ -538,15 +538,15 @@ interface RoomMemory {
     /**
      * Names of all rooms flagged to attack
      */
-    attackRooms: Cache;
+    attackRooms: Array<AttackRoomMemory>;
     /**
      * Names of all rooms flagged to remote harvest
      */
-    remoteRooms: Cache;
+    remoteRooms: Array<RemoteRoomMemory>;
     /**
      * Names of all rooms flagged to colonize
      */
-    claimRooms: Cache;
+    claimRooms: Array<ClaimRoomMemory>;
     /**
      * List of all of the room's GetEnergyJobs
      */
@@ -827,7 +827,7 @@ interface DepedentRoomParentMemory {
     /**
      * reference to the attack flags placed in the room
      */
-    flags: Cache;
+    flags: Array<ParentFlagMemory>;
 }
 /**
  * Attack room memory structure

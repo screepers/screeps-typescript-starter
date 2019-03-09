@@ -240,10 +240,10 @@ export default class RoomHelper {
      * @param room The room to check the remoteRooms of
      */
     public static numRemoteSources(room: Room): number {
-        const remoteRoomNames: string[] = Memory.rooms[room.name].remoteRooms.data;
+        const remoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
         let numSources: number = 0;
-        _.forEach(remoteRoomNames, (name: string) => {
-            const remoteRoom: Room = Game.rooms[name];
+        _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {
+            const remoteRoom: Room = Game.rooms[rr.roomName];
             numSources += RoomHelper.numSources(remoteRoom);
         });
         return numSources;
@@ -254,11 +254,11 @@ export default class RoomHelper {
      * @param room The room to check the dependencies of
      */
     public static numRemoteDefenders(room: Room): number {
-        const remoteRoomNames: string[] = Memory.rooms[room.name].remoteRooms.data;
+        const remoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
         let numRemoteDefenders: number = 0;
 
-        _.forEach(remoteRoomNames, (name: string) => {
-            const remoteRoom: Room = Game.rooms[name];
+        _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {
+            const remoteRoom: Room = Game.rooms[rr.roomName];
             // If there are any hostile creeps, add one to remoteDefenderCount
             if (this.numHostileCreeps(remoteRoom) > 0) {
                 numRemoteDefenders++;

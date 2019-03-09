@@ -56,14 +56,14 @@ export default class MemoryApi {
         // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
         Memory.rooms[room.name] = {
-            attackRooms: { data: null, cache: null },
-            claimRooms: { data: null, cache: null },
+            attackRooms: [],
+            claimRooms: [],
             constructionSites: { data: null, cache: null },
             creepLimit: {},
             creeps: { data: null, cache: null },
             defcon: -1,
             hostiles: { data: null, cache: null },
-            remoteRooms: { data: null, cache: null },
+            remoteRooms: [],
             roomState: ROOM_STATE_INTRO,
             sources: { data: null, cache: null },
             minerals: { data: null, cache: null },
@@ -418,24 +418,13 @@ export default class MemoryApi {
      * Updates all dependencies if the cache is invalid, for efficiency
      * @param room The room to check dependencies of
      * @param filterFunction [Optional] The function to filter the room objects
-     * @param forceUpdate [Optional] Forcibly invalidate the cache
      * @param targetRoom [Optional] the name of the room we want to grab if we already know it
      */
     public static getRemoteRooms(
         room: Room,
         filterFunction?: (object: Room) => boolean,
-        forceUpdate?: boolean,
         targetRoom?: string
     ): Array<RemoteRoomMemory | undefined> {
-        if (
-            NO_CACHING_MEMORY ||
-            forceUpdate ||
-            Memory.rooms[room.name].remoteRooms === undefined ||
-            Memory.rooms[room.name].remoteRooms.cache < Game.time - DEPNDT_CACHE_TTL
-        ) {
-            // ! Not implemented yet - Empty function
-            MemoryHelper_Room.updateDependentRooms(room);
-        }
 
         let remoteRooms: Array<RemoteRoomMemory | undefined>;
 
@@ -447,13 +436,13 @@ export default class MemoryApi {
         // TargetRoom parameter provided
         if (targetRoom) {
             remoteRooms = _.filter(
-                Memory.rooms[room.name].claimRooms.data,
+                Memory.rooms[room.name].remoteRooms,
                 (roomMemory: RemoteRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
         } else {
             // No target room provided, just return them all
             remoteRooms = _.filter(
-                Memory.rooms[room.name].claimRooms.data,
+                Memory.rooms[room.name].remoteRooms,
                 (roomMemory: RemoteRoomMemory) => filterFunction
             );
         }
@@ -467,24 +456,13 @@ export default class MemoryApi {
      * Updates all dependencies if the cache is invalid
      * @param room The room to check the dependencies of
      * @param filterFunction [Optional] THe function to filter the room objects
-     * @param forceUpdate [Optional] Forcibly invalidate the cache
      * @param targetRoom the name of the room we want to grab if we already know it
      */
     public static getClaimRooms(
         room: Room,
         filterFunction?: (object: Room) => boolean,
-        forceUpdate?: boolean,
         targetRoom?: string
     ): Array<ClaimRoomMemory | undefined> {
-        if (
-            NO_CACHING_MEMORY ||
-            forceUpdate ||
-            Memory.rooms[room.name].remoteRooms === undefined ||
-            Memory.rooms[room.name].claimRooms.cache < Game.time - DEPNDT_CACHE_TTL
-        ) {
-            // ! Not implemented yet - Empty function
-            MemoryHelper_Room.updateDependentRooms(room);
-        }
 
         let claimRooms: Array<ClaimRoomMemory | undefined>;
 
@@ -496,13 +474,13 @@ export default class MemoryApi {
         // TargetRoom parameter provided
         if (targetRoom) {
             claimRooms = _.filter(
-                Memory.rooms[room.name].claimRooms.data,
+                Memory.rooms[room.name].claimRooms,
                 (roomMemory: ClaimRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
         } else {
             // No target room provided, just return them all
             claimRooms = _.filter(
-                Memory.rooms[room.name].claimRooms.data,
+                Memory.rooms[room.name].claimRooms,
                 (roomMemory: ClaimRoomMemory) => filterFunction
             );
         }
@@ -516,24 +494,13 @@ export default class MemoryApi {
      * Updates all dependencies if the cache is invalid, for efficiency
      * @param room The room to check dependencies of
      * @param filterFunction [Optional] The function to filter the room objects
-     * @param forceUpdate [Optional] Forcibly invalidate the cache
      * @param targetRoom [Optional] the name of the specific room we want to grab
      */
     public static getAttackRooms(
         room: Room,
         targetRoom?: string,
         filterFunction?: (object: Room) => boolean,
-        forceUpdate?: boolean
     ): Array<AttackRoomMemory | undefined> {
-        if (
-            NO_CACHING_MEMORY ||
-            forceUpdate ||
-            Memory.rooms[room.name].attackRooms === undefined ||
-            Memory.rooms[room.name].attackRooms.cache < Game.time - DEPNDT_CACHE_TTL
-        ) {
-            // ! Not implemented yet - Empty Function
-            MemoryHelper_Room.updateDependentRooms(room);
-        }
 
         let attackRooms: Array<AttackRoomMemory | undefined>;
 
@@ -545,13 +512,13 @@ export default class MemoryApi {
         // TargetRoom parameter provided
         if (targetRoom) {
             attackRooms = _.filter(
-                Memory.rooms[room.name].attackRooms.data,
+                Memory.rooms[room.name].attackRooms,
                 (roomMemory: AttackRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
         } else {
             // No target room provided, just return them all
             attackRooms = _.filter(
-                Memory.rooms[room.name].attackRooms.data,
+                Memory.rooms[room.name].attackRooms,
                 (roomMemory: AttackRoomMemory) => filterFunction
             );
         }

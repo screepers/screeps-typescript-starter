@@ -30,8 +30,7 @@ export default class EmpireHelper {
         );
 
         if (!existingDepedentRemoteRoomMem) {
-            existingDepedentRemoteRoomMem!.flags.cache = Game.time;
-            existingDepedentRemoteRoomMem!.flags.data.push(remoteFlagMemory);
+            existingDepedentRemoteRoomMem!.flags.push(remoteFlagMemory);
         }
 
         // Otherwise, add a brand new memory structure onto it
@@ -40,14 +39,10 @@ export default class EmpireHelper {
             hostiles: { cache: Game.time, data: null },
             structures: { cache: Game.time, data: null },
             roomName: flag.pos.roomName,
-            flags: { cache: Game.time, data: [remoteFlagMemory] },
+            flags: [remoteFlagMemory],
         };
 
-        // ! TODO - move this into memory api into a "addRemoteRoomToMemory" or something
-        // Where you pass it the memory you want and it does exactly this below, just to keep
-        // Memory adding in memory api in case we change how remote rooms are structured for some reason
-        dependentRoom.memory.remoteRooms.cache = Game.time;
-        dependentRoom.memory.remoteRooms.data.push(remoteRoomMemory);
+        dependentRoom.memory.remoteRooms.push(remoteRoomMemory);
     }
 
     /**
@@ -198,7 +193,7 @@ export default class EmpireHelper {
 
         // Loop over attack rooms, and if we find one with no associated flag, remove it
         for (const claimRoom in claimRooms) {
-            if (claimRooms[claimRoom]!.flags.data.length === 0) {
+            if (claimRooms[claimRoom]!.flags.length === 0) {
                 delete claimRooms[claimRoom];
             }
         }
@@ -213,12 +208,12 @@ export default class EmpireHelper {
         // Loop over claim rooms, remote rooms, and attack rooms, and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const claimRoom of claimRooms) {
-            for (const flag in claimRoom!.flags.data) {
+            for (const flag in claimRoom!.flags) {
 
                 // Tell typescript that these are claim flag memory structures
-                const currentFlag: ClaimFlagMemory = claimRoom!.flags.data[flag] as ClaimFlagMemory;
+                const currentFlag: ClaimFlagMemory = claimRoom!.flags[flag] as ClaimFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    delete claimRoom!.flags.data[flag];
+                    delete claimRoom!.flags[flag];
                 }
             }
         }
@@ -232,7 +227,7 @@ export default class EmpireHelper {
 
         // Loop over attack rooms, and if we find one with no associated flag, remove it
         for (const attackRoom in attackRooms) {
-            if (attackRooms[attackRoom]!.flags.data.length === 0) {
+            if (attackRooms[attackRoom]!.flags.length === 0) {
                 delete attackRooms[attackRoom];
             }
         }
@@ -246,12 +241,12 @@ export default class EmpireHelper {
         // Loop over attack rooms, and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const attackRoom of attackRooms) {
-            for (const flag in attackRoom!.flags.data) {
+            for (const flag in attackRoom!.flags) {
 
                 // Tell typescript that these are claim flag memory structures
-                const currentFlag: AttackFlagMemory = attackRoom!.flags.data[flag] as AttackFlagMemory;
+                const currentFlag: AttackFlagMemory = attackRoom!.flags[flag] as AttackFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    delete attackRoom!.flags.data[flag];;
+                    delete attackRoom!.flags[flag];;
                 }
             }
         }
@@ -265,7 +260,7 @@ export default class EmpireHelper {
 
         // Loop over remote rooms, and if we find one with no associated flag, remove it
         for (const remoteRoom in remoteRooms) {
-            if (remoteRooms[remoteRoom]!.flags.data.length === 0) {
+            if (remoteRooms[remoteRoom]!.flags.length === 0) {
                 delete remoteRooms[remoteRoom];
             }
         }
@@ -280,12 +275,12 @@ export default class EmpireHelper {
         // Loop over remote rooms and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const remoteRoom of remoteRooms) {
-            for (const flag in remoteRoom!.flags.data) {
+            for (const flag in remoteRoom!.flags) {
 
                 // Tell typescript that these are claim flag memory structures
-                const currentFlag: RemoteFlagMemory = remoteRoom!.flags.data[flag] as RemoteFlagMemory;
+                const currentFlag: RemoteFlagMemory = remoteRoom!.flags[flag] as RemoteFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    delete remoteRoom!.flags.data[flag];
+                    delete remoteRoom!.flags[flag];
                 }
             }
         }

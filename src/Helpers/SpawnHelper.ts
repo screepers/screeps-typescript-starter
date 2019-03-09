@@ -1611,7 +1611,7 @@ export class SpawnHelper {
 
         // Return the first active flag we find (should only be 1 flag active at a time across all attack rooms)
         return _.find(allAttackRooms, attackRoom =>
-            _.some(attackRoom!.flags.data, (flag: AttackFlagMemory) => flag.active)
+            _.some(attackRoom!.flags, (flag: AttackFlagMemory) => flag.active)
         );
     }
 
