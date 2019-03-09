@@ -97,11 +97,11 @@ export default class Empire {
 
         // Get all flag based action memory structures (Remote, Claim, and Attack Room Memory)
         const allRooms = MemoryApi.getOwnedRooms();
-        const claimRooms: Array<ClaimRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+        const claimRooms: Array<ClaimRoomMemory | undefined> = _.flatten(_.map(allRooms,
             room => MemoryApi.getClaimRooms(room)));
-        const remoteRooms: Array<RemoteRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+        const remoteRooms: Array<RemoteRoomMemory | undefined> = _.flatten(_.map(allRooms,
             room => MemoryApi.getRemoteRooms(room)));
-        const attackRooms: Array<AttackRoomMemory | undefined> = [].concat.apply([], _.map(allRooms,
+        const attackRooms: Array<AttackRoomMemory | undefined> = _.flatten(_.map(allRooms,
             room => MemoryApi.getAttackRooms(room)));
 
 
