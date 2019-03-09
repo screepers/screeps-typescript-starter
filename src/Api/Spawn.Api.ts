@@ -179,7 +179,9 @@ export default class SpawnApi {
         switch (room.memory.roomState) {
             // Advanced, Upgrader, and Stimulate are the only allowed states for remote mining and claiming operations currently
             // Might change for earlier room states to allow claimers and colonizers, up for debate
-            case ROOM_STATE_ADVANCED || ROOM_STATE_UPGRADER || ROOM_STATE_STIMULATE:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_STIMULATE:
                 // Remote Creep Definitions
                 remoteLimits[ROLE_REMOTE_MINER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_MINER, numRemoteSources);
                 remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
@@ -730,26 +732,28 @@ export default class SpawnApi {
         switch (roleConst) {
 
             // Colonizing creeps going to their claim rooms
-            case
-                ROLE_COLONIZER || ROLE_CLAIMER:
+            case ROLE_COLONIZER:
+            case ROLE_CLAIMER:
 
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
 
                 break;
 
             // Remote creeps going to their remote rooms
-            case
-                ROLE_REMOTE_DEFENDER || ROLE_REMOTE_HARVESTER ||
-                ROLE_REMOTE_MINER || ROLE_REMOTE_RESERVER:
+            case ROLE_REMOTE_DEFENDER:
+            case ROLE_REMOTE_HARVESTER:
+            case ROLE_REMOTE_MINER:
+            case ROLE_REMOTE_RESERVER:
 
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst);
 
                 break;
 
             // Military creeps going to their attack rooms
-            case
-                ROLE_STALKER || ROLE_MEDIC ||
-                ROLE_ZEALOT || ROLE_DOMESTIC_DEFENDER:
+            case ROLE_STALKER:
+            case ROLE_MEDIC:
+            case ROLE_ZEALOT:
+            case ROLE_DOMESTIC_DEFENDER:
 
                 roomMemory = SpawnHelper.getAttackRoomWithActiveFlag(room);
 
@@ -759,8 +763,11 @@ export default class SpawnApi {
             // Domestic creeps keep their target room as their home room
             // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)
             // If an non-existing role then an error will occur here
-            case ROLE_MINER || ROLE_HARVESTER || ROLE_WORKER ||
-                ROLE_LORRY || ROLE_POWER_UPGRADER:
+            case ROLE_MINER:
+            case ROLE_HARVESTER:
+            case ROLE_WORKER:
+            case ROLE_LORRY:
+            case ROLE_POWER_UPGRADER:
                 return room.name;
         }
 
