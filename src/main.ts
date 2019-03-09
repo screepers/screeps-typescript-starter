@@ -26,20 +26,17 @@ import UtilHelper from "Helpers/UtilHelper";
 import { ERROR_FATAL, ERROR_ERROR, ERROR_INFO, ERROR_WARN } from "utils/Constants";
 
 export const loop = ErrorMapper.wrapLoop(() => {
-    try {
-        // clean up memory first
-        MemoryManager.runMemoryManager();
 
-        // run the empire and get all relevant info from that into memory
-        EmpireManager.runEmpireManager();
+  // clean up memory first
+  try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
 
-        // run rooms
-        RoomManager.runRoomManager();
+  // run the empire and get all relevant info from that into memory
+  try { EmpireManager.runEmpireManager(); } catch (e) { UtilHelper.printError(e); }
 
-        // run spawning
-        SpawnManager.runSpawnManager();
-    } catch (e) {
-        UtilHelper.printError(e);
-    }
-    // -------- end managers --------
+  // run rooms
+  try { RoomManager.runRoomManager(); } catch (e) { UtilHelper.printError(e); }
+
+  // run spawning
+  try { SpawnManager.runSpawnManager(); } catch (e) { UtilHelper.printError(e); }
+  // -------- end managers --------
 });
