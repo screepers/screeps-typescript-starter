@@ -614,7 +614,7 @@ export default class MemoryApi {
      * @returns Room[] array of rooms
      */
     public static getOwnedRooms(filterFunction?: (room: Room) => boolean): Room[] {
-        if (!filterFunction) {
+        if (filterFunction) {
             return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom) && filterFunction);
         }
         return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom));
