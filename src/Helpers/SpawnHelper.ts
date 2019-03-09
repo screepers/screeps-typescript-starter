@@ -1399,8 +1399,7 @@ export class SpawnHelper {
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
-            case ROOM_STATE_NUKE_INBOU:
-            case
+            case ROOM_STATE_NUKE_INBOUND:
 
                 creepOptions = {
                     squadSize: 0,
