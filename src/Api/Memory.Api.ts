@@ -1,22 +1,24 @@
+import MemoryHelper from "Helpers/MemoryHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import RoomHelper from "Helpers/RoomHelper";
+import { SpawnHelper } from "Helpers/SpawnHelper";
+import { NO_CACHING_MEMORY } from "utils/config";
 import {
+    BACKUP_JOB_CACHE_TTL,
+    CONSTR_CACHE_TTL,
+    CONTAINER_JOB_CACHE_TTL,
+    DEPNDT_CACHE_TTL,
+    DROPS_CACHE_TTL,
+    FCREEP_CACHE_TTL,
+    HCREEP_CACHE_TTL,
+    LINK_JOB_CACHE_TTL,
+    ROLE_MINER,
     ROOM_STATE_INTRO,
     SOURCE_CACHE_TTL,
+    SOURCE_JOB_CACHE_TTL,
     STRUCT_CACHE_TTL,
-    CONSTR_CACHE_TTL,
-    HCREEP_CACHE_TTL,
-    FCREEP_CACHE_TTL,
-    DEPNDT_CACHE_TTL,
-    TOMBSTONE_CACHE_TTL,
-    DROPS_CACHE_TTL,
-    JOBS_CACHE_TTL,
-    ROLE_MINER
+    TOMBSTONE_CACHE_TTL
 } from "utils/Constants";
-import { NO_CACHING_MEMORY } from "utils/config";
-import MemoryHelper from "Helpers/MemoryHelper";
-import RoomApi from "./Room.Api";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import RoomHelper from "Helpers/RoomHelper";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -612,7 +614,7 @@ export default class MemoryApi {
      * @returns Room[] array of rooms
      */
     public static getOwnedRooms(filterFunction?: (room: Room) => boolean): Room[] {
-        if (!filterFunction) {
+        if (filterFunction) {
             return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom) && filterFunction);
         }
         return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom));
@@ -633,5 +635,125 @@ export default class MemoryApi {
             return _.filter(allFlags, filterFunction);
         }
         return allFlags;
+    }
+
+    /**
+     * Get the list of GetEnergyJobs.sourceJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getSourceJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.cache < Game.time - SOURCE_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateGetEnergy_sourceJobs(room);
+        }
+
+        let sourceJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.data;
+
+        if (filterFunction !== undefined) {
+            sourceJobs = _.filter(sourceJobs, filterFunction);
+        }
+
+        return sourceJobs;
+    }
+
+    /**
+     * Get the list of GetEnergyJobs.containerJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getContainerJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs!.cache < Game.time - CONTAINER_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateGetEnergy_containerJobs(room);
+        }
+
+        let containerJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs!.data;
+
+        if (filterFunction !== undefined) {
+            containerJobs = _.filter(containerJobs, filterFunction);
+        }
+
+        return containerJobs;
+    }
+
+    /**
+     * Get the list of GetEnergyJobs.linkJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getLinkJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs!.cache < Game.time - LINK_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateGetEnergy_linkJobs(room);
+        }
+
+        let linkJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.data;
+
+        if (filterFunction !== undefined) {
+            linkJobs = _.filter(linkJobs, filterFunction);
+        }
+
+        return linkJobs;
+    }
+
+    /**
+     * Get the list of GetEnergyJobs.sourceJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getBackupStructuresJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures ||
+            Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures!.cache < Game.time - BACKUP_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateGetEnergy_backupStructuresJobs(room);
+        }
+
+        let backupStructureJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures!.data;
+
+        if (filterFunction !== undefined) {
+            backupStructureJobs = _.filter(backupStructureJobs, filterFunction);
+        }
+
+        return backupStructureJobs;
     }
 }

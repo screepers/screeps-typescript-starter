@@ -1,6 +1,5 @@
-import { ALL_STRUCTURE_TYPES, JOBS_CACHE_TTL } from "utils/Constants";
 import RoomApi from "Api/Room.Api";
-import RoomHelper from "./RoomHelper";
+import { ALL_STRUCTURE_TYPES } from "utils/Constants";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -86,7 +85,7 @@ export default class MemoryHelper_Room {
 
         // Changed this because it wouldn't catch remote squads for example
         // as they aren't actually in the room all the time (had this problem with my last solo code base)
-        const creeps = _.filter(Game.creeps, (creep) => creep.memory.homeRoom === room.name);
+        const creeps = _.filter(Game.creeps, creep => creep.memory.homeRoom === room.name);
 
         Memory.rooms[room.name].creeps.data = _.map(creeps, (creep: Creep) => creep.id);
         Memory.rooms[room.name].creeps.cache = Game.time;
@@ -220,10 +219,14 @@ export default class MemoryHelper_Room {
         }
 
         this.updateGetEnergy_sourceJobs(room);
+        this.updateGetEnergy_containerJobs(room);
+        this.updateGetEnergy_linkJobs(room);
+        this.updateGetEnergy_backupStructuresJobs(room);
     }
 
     /**
      * Update the room's GetEnergyJobListing_sourceJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateGetEnergy_sourceJobs(room: Room) {
@@ -238,11 +241,67 @@ export default class MemoryHelper_Room {
             delete Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs;
         }
 
-        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs = { data: null, cache: null };
-        const sourceJobs = RoomApi.createSourceGetEnergyJobs(room);
+        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs = {
+            data: RoomApi.createSourceGetEnergyJobs(room),
+            cache: Game.time
+        };
+    }
 
-        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.data = sourceJobs;
-        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.cache = Game.time;
+    /**
+     * Update the room's GetEnergyJobListing_containerJobs
+     * @param room The room to update the memory fo
+     */
+    public static updateGetEnergy_containerJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+
+        if (Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs;
+        }
+
+        Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs = {
+            data: RoomApi.createContainerGetEnergyJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's GetEnergyJobListing_linkJobs
+     * @param room The room to update the memory fo
+     */
+    public static updateGetEnergy_linkJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+
+        if (Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs;
+        }
+
+        Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs = {
+            data: RoomApi.createLinkGetEnergyJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's GetEnergyJobListing_containerJobs
+     * @param room The room to update the memory fo
+     */
+    public static updateGetEnergy_backupStructuresJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+
+        if (Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures;
+        }
+
+        Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures = {
+            data: RoomApi.createBackupStructuresGetEnergyJobs(room),
+            cache: Game.time
+        };
     }
 
     /**
