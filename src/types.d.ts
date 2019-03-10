@@ -307,7 +307,7 @@ type WorkPart_ValidActions = "build" | "repair" | "dismantle" | "upgrade";
  * Valid types for the ClaimPartJob targetType
  * ? Probably unnecessary, but provided for flexibility
  */
-type ClaimPart_ValidTargets = STRUCTURE_CONTROLLER;
+type ClaimPart_ValidTargets = STRUCTURE_CONTROLLER | string;
 /**
  * Valid actions for ClaimPartJob actionType
  */

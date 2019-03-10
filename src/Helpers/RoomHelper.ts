@@ -242,9 +242,15 @@ export default class RoomHelper {
     public static numRemoteSources(room: Room): number {
         const remoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
         let numSources: number = 0;
+
         _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {
-            const remoteRoom: Room = Game.rooms[rr.roomName];
-            numSources += RoomHelper.numSources(remoteRoom);
+
+            if (!rr) {
+                return;
+            }
+
+            const sourcesInRoom: number = rr.sources.data;
+            numSources += sourcesInRoom;
         });
         return numSources;
     }
@@ -258,9 +264,15 @@ export default class RoomHelper {
         let numRemoteDefenders: number = 0;
 
         _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {
-            const remoteRoom: Room = Game.rooms[rr.roomName];
+
+            if (!rr) {
+                return;
+            }
+
             // If there are any hostile creeps, add one to remoteDefenderCount
-            if (this.numHostileCreeps(remoteRoom) > 0) {
+            // Get hostile creeps in the remote room
+            const hostileCreeps = rr.hostiles.data;
+            if (hostileCreeps > 0) {
                 numRemoteDefenders++;
             }
         });

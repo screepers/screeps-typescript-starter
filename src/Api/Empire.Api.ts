@@ -1,5 +1,6 @@
 import EmpireHelper from "../Helpers/EmpireHelper";
 import MemoryApi from "./Memory.Api";
+import { } from "utils/Constants";
 
 export default class Empire {
 
@@ -85,9 +86,9 @@ export default class Empire {
 
         // Loop over all flags, removing them and their direct memory from the game
         for (const flag of completeFlags) {
-            delete Memory.flags[flag.name];
             console.log("Removing flag [" + flag.name + "]");
             flag.remove();
+            delete Memory.flags[flag.name];
         }
     }
 
