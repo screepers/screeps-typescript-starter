@@ -24,13 +24,17 @@ export default class EmpireHelper {
         };
 
 
-        // If the dependent room already has this room covered, just append the flag onto it
+        // If the dependent room already has this room covered, set the flag to be deleted and throw a warning
         const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(MemoryApi.getRemoteRooms(dependentRoom),
             (rr: RemoteRoomMemory) => rr.roomName === flag.pos.roomName
         );
 
-        if (!existingDepedentRemoteRoomMem) {
-            existingDepedentRemoteRoomMem!.flags.push(remoteFlagMemory);
+        if (existingDepedentRemoteRoomMem) {
+            Memory.flags[flag.name].complete = true;
+            throw new UserException(
+                "Already working this dependent room!",
+                "The room you placed the remote flag in is already being worked by " + existingDepedentRemoteRoomMem.roomName,
+                ERROR_WARN);
         }
 
         // Otherwise, add a brand new memory structure onto it
