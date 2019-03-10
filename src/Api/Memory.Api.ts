@@ -7,7 +7,6 @@ import {
     BACKUP_JOB_CACHE_TTL,
     CONSTR_CACHE_TTL,
     CONTAINER_JOB_CACHE_TTL,
-    DEPNDT_CACHE_TTL,
     DROPS_CACHE_TTL,
     FCREEP_CACHE_TTL,
     HCREEP_CACHE_TTL,
@@ -17,7 +16,11 @@ import {
     SOURCE_CACHE_TTL,
     SOURCE_JOB_CACHE_TTL,
     STRUCT_CACHE_TTL,
-    TOMBSTONE_CACHE_TTL
+    TOMBSTONE_CACHE_TTL,
+    CLAIM_JOB_CACHE_TTL,
+    RESERVE_JOB_CACHE_TTL,
+    SIGN_JOB_CACHE_TTL,
+    ATTACK_JOB_CACHE_TTL
 } from "utils/Constants";
 
 // the api for the memory class
@@ -425,7 +428,6 @@ export default class MemoryApi {
         filterFunction?: (object: Room) => boolean,
         targetRoom?: string
     ): Array<RemoteRoomMemory | undefined> {
-
         let remoteRooms: Array<RemoteRoomMemory | undefined>;
 
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
@@ -463,7 +465,6 @@ export default class MemoryApi {
         filterFunction?: (object: Room) => boolean,
         targetRoom?: string
     ): Array<ClaimRoomMemory | undefined> {
-
         let claimRooms: Array<ClaimRoomMemory | undefined>;
 
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
@@ -479,10 +480,7 @@ export default class MemoryApi {
             );
         } else {
             // No target room provided, just return them all
-            claimRooms = _.filter(
-                Memory.rooms[room.name].claimRooms,
-                (roomMemory: ClaimRoomMemory) => filterFunction
-            );
+            claimRooms = _.filter(Memory.rooms[room.name].claimRooms, (roomMemory: ClaimRoomMemory) => filterFunction);
         }
 
         return claimRooms;
@@ -499,9 +497,8 @@ export default class MemoryApi {
     public static getAttackRooms(
         room: Room,
         targetRoom?: string,
-        filterFunction?: (object: Room) => boolean,
+        filterFunction?: (object: Room) => boolean
     ): Array<AttackRoomMemory | undefined> {
-
         let attackRooms: Array<AttackRoomMemory | undefined>;
 
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
@@ -594,7 +591,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -743,5 +740,125 @@ export default class MemoryApi {
         }
 
         return backupStructureJobs;
+    }
+
+    /**
+     * Get the list of ClaimPartJobs.claimJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getClaimJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): ClaimPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs!.cache < Game.time - CLAIM_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateClaimPart_claimJobs(room);
+        }
+
+        let claimJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs!.data;
+
+        if (filterFunction !== undefined) {
+            claimJobs = _.filter(claimJobs, filterFunction);
+        }
+
+        return claimJobs;
+    }
+
+    /**
+     * Get the list of ClaimPartJobs.reserveJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getReserveJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): ClaimPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs!.cache < Game.time - RESERVE_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateClaimPart_reserveJobs(room);
+        }
+
+        let claimJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs!.data;
+
+        if (filterFunction !== undefined) {
+            claimJobs = _.filter(claimJobs, filterFunction);
+        }
+
+        return claimJobs;
+    }
+
+    /**
+     * Get the list of ClaimPartJobs.signJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getSignJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): ClaimPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs!.signJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs!.signJobs!.cache < Game.time - SIGN_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateClaimPart_signJobs(room);
+        }
+
+        let signJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.signJobs!.data;
+
+        if (filterFunction !== undefined) {
+            signJobs = _.filter(signJobs, filterFunction);
+        }
+
+        return signJobs;
+    }
+
+    /**
+     * Get the list of ClaimPartJobs.attackJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getAttackJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): ClaimPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs!.cache < Game.time - ATTACK_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateClaimPart_attackJobs(room);
+        }
+
+        let attackJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs!.data;
+
+        if (filterFunction !== undefined) {
+            attackJobs = _.filter(attackJobs, filterFunction);
+        }
+
+        return attackJobs;
     }
 }

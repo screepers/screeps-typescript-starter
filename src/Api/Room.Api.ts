@@ -1,7 +1,6 @@
 import MemoryHelper from "Helpers/MemoryHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import RoomHelper from "Helpers/RoomHelper";
-import { CONTAINER_MINIMUM_ENERGY, LINK_MINIMUM_ENERGY } from "utils/config";
 import { ERROR_ERROR, ROLE_MINER, ROOM_STATE_INTRO, WALL_LIMIT } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "./Memory.Api";

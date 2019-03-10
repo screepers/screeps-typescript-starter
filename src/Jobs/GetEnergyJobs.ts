@@ -2,7 +2,7 @@ import RoomApi from "Api/Room.Api";
 import { LINK_MINIMUM_ENERGY, CONTAINER_MINIMUM_ENERGY } from "utils/config";
 import MemoryApi from "Api/Memory.Api";
 
-export class GetEnergyJobs {
+export default class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the sources of a room
      * @param room The room to create the job list for
