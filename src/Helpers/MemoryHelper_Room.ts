@@ -1,6 +1,6 @@
-import RoomApi from "Api/Room.Api";
+import GetEnergyJobs from "Jobs/GetEnergyJobs";
 import { ALL_STRUCTURE_TYPES } from "utils/Constants";
-import { GetEnergyJobs } from "Jobs/GetEnergyJobs";
+import ClaimPartJobs from "Jobs/ClaimPartJobs";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -301,6 +301,103 @@ export default class MemoryHelper_Room {
 
         Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures = {
             data: GetEnergyJobs.createBackupStructuresJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's ClaimPartJobListing
+     * @param room The room to update the memory of
+     * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
+     */
+    public static updateClaimPart_allJobs(room: Room) {
+        // Clean out old job listing
+        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs;
+        }
+
+        this.updateClaimPart_claimJobs(room);
+        this.updateClaimPart_reserveJobs(room);
+        this.updateClaimPart_signJobs(room);
+        this.updateClaimPart_attackJobs(room);
+    }
+
+    /**
+     * Update the room's ClaimPartJobListing_claimJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    public static updateClaimPart_claimJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs;
+        }
+
+        Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs = {
+            data: ClaimPartJobs.createClaimJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's ClaimPartJobListing_reserveJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    public static updateClaimPart_reserveJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs;
+        }
+
+        Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs = {
+            data: ClaimPartJobs.createReserveJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's ClaimPartJobListing_signJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    public static updateClaimPart_signJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs!.signJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs!.signJobs;
+        }
+
+        Memory.rooms[room.name].jobs.claimPartJobs!.signJobs = {
+            data: ClaimPartJobs.createSignJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's ClaimPartJobListing_attackJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    public static updateClaimPart_attackJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs;
+        }
+
+        Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs = {
+            data: ClaimPartJobs.createAttackJobs(room),
             cache: Game.time
         };
     }
