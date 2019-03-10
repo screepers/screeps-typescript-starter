@@ -87,8 +87,12 @@ export default class EmpireHelper {
 
         // If the dependent room already has this room covered, just push this flag onto the existing structure
         const existingDepedentAttackRoomMem: AttackRoomMemory | undefined = _.find(MemoryApi.getAttackRooms(dependentRoom),
-            (rr: AttackRoomMemory) => rr.roomName === flag.pos.roomName
-        );
+            (rr: AttackRoomMemory) => {
+                if (rr) {
+                    return rr.roomName === flag.pos.roomName;
+                }
+                return false;
+            });
 
         if (existingDepedentAttackRoomMem) {
             existingDepedentAttackRoomMem.flags.push(attackFlagMemory);
@@ -130,8 +134,12 @@ export default class EmpireHelper {
 
         // If the dependent room already has this room covered, set the flag to be deleted and throw a warning
         const existingDepedentClaimRoomMem: ClaimRoomMemory | undefined = _.find(MemoryApi.getClaimRooms(dependentRoom),
-            (rr: ClaimRoomMemory) => rr.roomName === flag.pos.roomName
-        );
+            (rr: ClaimRoomMemory) => {
+                if (rr) {
+                    return rr.roomName === flag.pos.roomName;
+                }
+                return false;
+            });
 
         if (existingDepedentClaimRoomMem) {
             Memory.flags[flag.name].complete = true;
@@ -286,11 +294,29 @@ export default class EmpireHelper {
      */
     public static cleanDeadClaimRooms(claimRooms: Array<ClaimRoomMemory | undefined>): void {
 
-        // Loop over attack rooms, and if we find one with no associated flag, remove it
+        // Loop over claim rooms, and if we find one with no associated flag, remove it
         for (const claimRoom in claimRooms) {
-            if (claimRooms[claimRoom]!.flags.length === 0) {
-                console.log("Removing Claim Room [" + claimRooms[claimRoom]!.roomName + "]");
-                delete claimRooms[claimRoom];
+            if (!claimRooms[claimRoom]) {
+                continue;
+            }
+            const claimRoomName: string = claimRooms[claimRoom]!.roomName;
+
+            if (!claimRooms[claimRoom]!.flags[0]) {
+                console.log("Removing Attack Room [" + claimRooms[claimRoom]!.roomName + "]");
+
+                // Get the dependent room for the attack room we are removing from memory
+                const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),
+                    (room: Room) => {
+                        const rr = room.memory.claimRooms;
+                        return _.some(rr, (innerRR: ClaimRoomMemory) => {
+                            if (innerRR) {
+                                return innerRR.roomName === claimRoomName;
+                            }
+                            return false;
+                        });
+                    });
+
+                delete Memory.rooms[dependentRoom!.name].claimRooms[claimRoom];
             }
         }
     }
@@ -304,7 +330,14 @@ export default class EmpireHelper {
         // Loop over claim rooms, remote rooms, and attack rooms, and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const claimRoom of claimRooms) {
+            if (!claimRoom) {
+                continue;
+            }
+
             for (const flag in claimRoom!.flags) {
+                if (!claimRoom!.flags[flag]) {
+                    continue;
+                }
 
                 // Tell typescript that these are claim flag memory structures
                 const currentFlag: ClaimFlagMemory = claimRoom!.flags[flag] as ClaimFlagMemory;
@@ -322,21 +355,14 @@ export default class EmpireHelper {
      */
     public static cleanDeadAttackRooms(attackRooms: Array<AttackRoomMemory | undefined>): void {
 
-        // Loop over attack rooms, and if we find one with no associated flag, remove it
-        for (const attackRoom in attackRooms) {
-            if (attackRooms[attackRoom]!.flags.length === 0) {
-                console.log("Removing Attack Room [" + attackRooms[attackRoom]!.roomName + "]");
-                delete attackRooms[attackRoom];
-            }
-        }
-
         // Loop over remote rooms, and if we find one with no associated flag, remove it
         for (const attackRoom in attackRooms) {
-
+            if (!attackRooms[attackRoom]) {
+                continue;
+            }
             const attackRoomName: string = attackRooms[attackRoom]!.roomName;
 
             if (!attackRooms[attackRoom]!.flags[0]) {
-
                 console.log("Removing Attack Room [" + attackRooms[attackRoom]!.roomName + "]");
 
                 // Get the dependent room for the attack room we are removing from memory
@@ -344,7 +370,10 @@ export default class EmpireHelper {
                     (room: Room) => {
                         const rr = room.memory.attackRooms;
                         return _.some(rr, (innerRR: AttackRoomMemory) => {
-                            return innerRR.roomName === room.name;
+                            if (innerRR) {
+                                return innerRR.roomName === attackRoomName;
+                            }
+                            return false;
                         });
                     });
 
@@ -361,7 +390,14 @@ export default class EmpireHelper {
         // Loop over attack rooms, and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const attackRoom of attackRooms) {
+            if (!attackRoom) {
+                continue;
+            }
+
             for (const flag in attackRoom!.flags) {
+                if (!attackRoom!.flags[flag]) {
+                    continue;
+                }
 
                 // Tell typescript that these are claim flag memory structures
                 const currentFlag: AttackFlagMemory = attackRoom!.flags[flag] as AttackFlagMemory;
@@ -381,15 +417,12 @@ export default class EmpireHelper {
 
         // Loop over remote rooms, and if we find one with no associated flag, remove it
         for (const remoteRoom in remoteRooms) {
-
             if (!remoteRooms[remoteRoom]) {
                 continue;
             }
-
             const remoteRoomName: string = remoteRooms[remoteRoom]!.roomName;
 
             if (!remoteRooms[remoteRoom]!.flags[0]) {
-
                 console.log("Removing Remote Room [" + remoteRooms[remoteRoom]!.roomName + "]");
 
                 // Get the dependent room for this room
@@ -418,20 +451,17 @@ export default class EmpireHelper {
         // Loop over remote rooms and make sure the flag they're referencing actually exists
         // Delete the memory structure if its not associated with an existing flag
         for (const remoteRoom of remoteRooms) {
-
             if (!remoteRoom) {
                 continue;
             }
 
             for (const flag in remoteRoom!.flags) {
-
                 if (!remoteRoom!.flags[flag]) {
                     continue;
                 }
 
                 // Tell typescript that these are claim flag memory structures
                 const currentFlag: RemoteFlagMemory = remoteRoom!.flags[flag] as RemoteFlagMemory;
-
                 if (!Game.flags[currentFlag.flagName]) {
                     console.log("Removing [" + flag + "] from Remote Room Memory [" + remoteRoom!.roomName + "]");
                     delete remoteRoom!.flags[flag];
