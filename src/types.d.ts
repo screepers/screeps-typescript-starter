@@ -791,10 +791,6 @@ interface FlagMemory {
      */
     processed: boolean;
     /**
-     * if the flag is currently active
-     */
-    active: boolean;
-    /**
      * if the flag has completed its requirements
      */
     complete: boolean;
@@ -802,6 +798,10 @@ interface FlagMemory {
      * time the flag was placed
      */
     timePlaced: number;
+    /**
+     * the type of flag this is
+     */
+    flagType: FlagTypeConstant | undefined;
 }
 
 // Attack Flag Options
@@ -873,22 +873,18 @@ interface ParentFlagMemory {
      */
     active: boolean;
     /**
-     * if the related flag has completed its requirements
-     */
-    complete: boolean;
-    /**
      * the name of the flag
      */
     flagName: string;
+    /**
+     * the type of the flag
+     */
+    flagType: FlagTypeConstant | undefined
 }
 /**
  * memory for an attack flag
  */
 interface AttackFlagMemory extends ParentFlagMemory {
-    /**
-     * the type of flag this is
-     */
-    flagType: AttackFlagConstant;
     /**
      * the number of creeps we are asking for
      */
@@ -900,7 +896,7 @@ interface AttackFlagMemory extends ParentFlagMemory {
     /**
      * the location creeps are going to meet
      */
-    rallyLocation: RoomPosition;
+    rallyLocation: RoomPosition | null;
 }
 
 /**
@@ -920,17 +916,36 @@ interface RemoteFlagMemory extends ParentFlagMemory {
 }
 
 /**
- * flag option constant definitions
+ * flag type constant definitions
  */
 declare const ZEALOT_SOLO = 1;
 declare const STALKER_SOLO = 2;
 declare const STANDARD_SQUAD = 3;
+declare const CLAIM_FLAG = 4;
+declare const REMOTE_FLAG = 5;
+declare const OVERRIDE_D_ROOM_FLAG = 6;
 
-type AttackFlagConstant = ZEALOT_SOLO | STALKER_SOLO | STANDARD_SQUAD;
-
+/**
+ * flag types type definitions
+ */
 type ZEALOT_SOLO = 1;
 type STALKER_SOLO = 2;
 type STANDARD_SQUAD = 3;
+type CLAIM_FLAG = 4;
+type REMOTE_FLAG = 5;
+type OVERRIDE_D_ROOM_FLAG = 6;
+
+/**
+ * type that holds all flag type constants
+ */
+type FlagTypeConstant =
+    ZEALOT_SOLO |
+    STALKER_SOLO |
+    STANDARD_SQUAD |
+    CLAIM_FLAG |
+    REMOTE_FLAG |
+    OVERRIDE_D_ROOM_FLAG;
+
 /**
  * Tier Definitions
  */

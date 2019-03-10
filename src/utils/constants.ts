@@ -39,6 +39,9 @@ export const TIER_8 = 12300;
 export const ZEALOT_SOLO = 1;
 export const STALKER_SOLO = 2;
 export const STANDARD_SQUAD = 3;
+export const CLAIM_FLAG = 4;
+export const REMOTE_FLAG = 5;
+export const OVERRIDE_D_ROOM_FLAG = 6;
 
 // Creep Body Layout Constants
 export const GROUPED = "grouped";
