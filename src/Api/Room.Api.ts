@@ -4,6 +4,7 @@ import RoomHelper from "Helpers/RoomHelper";
 import { ERROR_ERROR, ROLE_MINER, ROOM_STATE_INTRO, WALL_LIMIT } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "./Memory.Api";
+import { REPAIR_THRESHOLD } from "utils/config";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -22,9 +23,11 @@ export default class RoomApi {
      * of action will be taken at the beginning of each tick
      * (note: assumes defcon already being found for simplicity sake)
      *
+     * TODO Change the function so that the MemoryAPI functions are called just before they are needed,
+     * TODO that way we can scrape as much CPU as possible out of it (e.g. only look for nukes before first if statement)
      * @param room the room we are setting state for
      */
-    public static setRoomState(room: Room): void {
+    public static setRoomState(room: Room): RoomStateConstant {
         // get the structures and creeps we need from memory
         const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
         const links: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
@@ -39,15 +42,13 @@ export default class RoomApi {
         // check if we are in nuke inbound room state
         // nuke is coming in and we need to gtfo
         if (incomingNukes.length > 0) {
-            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_NUKE_INBOUND);
-            return;
+            return ROOM_STATE_NUKE_INBOUND;
         }
 
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high
         if (defconLevel >= 3) {
-            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_SEIGE);
-            return;
+            return ROOM_STATE_SEIGE;
         }
 
         // check if we are in upgrader room state
@@ -62,8 +63,7 @@ export default class RoomApi {
             // return;
 
             // otherwise, just upgrader room state
-            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_UPGRADER);
-            return;
+            return ROOM_STATE_UPGRADER;
         }
 
         // check if we are in advanced room state
@@ -75,28 +75,24 @@ export default class RoomApi {
             // return;
 
             // otherwise, just advanced room state
-            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_ADVANCED);
-            return;
+            return ROOM_STATE_ADVANCED;
         }
 
         // check if we are in intermediate room state
         // container mining set up, but no storage
         if (RoomHelper.isContainerMining(room, sources, containers) && storage === undefined) {
-            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_INTER);
-            return;
+            return ROOM_STATE_INTER;
         }
 
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
         if (creeps.length > 3) {
-            MemoryHelper_Room.updateRoomState(room, ROOM_STATE_BEGINNER);
-            return;
+            return ROOM_STATE_BEGINNER;
         }
 
         // check if we are in intro room state
         // 3 or less creeps so we need to (re)start the room
-        MemoryHelper_Room.updateRoomState(room, ROOM_STATE_INTRO);
-        return;
+        return ROOM_STATE_INTRO;
     }
 
     /**
@@ -122,14 +118,13 @@ export default class RoomApi {
      * set the rooms defcon level
      * @param room the room we are setting defcon for
      */
-    public static setDefconLevel(room: Room): void {
+    public static setDefconLevel(room: Room): number {
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
 
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
-            MemoryHelper_Room.updateDefcon(room, 0);
-            return;
+            return 0;
         }
 
         // now define the variables we will need to check the other cases in the event
@@ -140,44 +135,41 @@ export default class RoomApi {
 
         // level 5 -- nuke inbound
         if (room.find(FIND_NUKES) !== undefined) {
-            MemoryHelper_Room.updateDefcon(room, 5);
-            return;
+            return 5;
         }
 
         // level 4 full seige, 50+ boosted parts
         if (boostedHostileBodyParts >= 50) {
-            MemoryHelper_Room.updateDefcon(room, 4);
-            return;
+            return 4;
         }
 
         // level 3 -- 150+ body parts OR any boosted body parts
         if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
-            MemoryHelper_Room.updateDefcon(room, 3);
-            return;
+            return 3;
         }
 
         // level 2 -- 50 - 150 body parts
         if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
-            MemoryHelper_Room.updateDefcon(room, 2);
-            return;
+            return 2;
         }
 
         // level 1 -- less than 50 body parts
-        if (hostileBodyParts > 0) {
-            MemoryHelper_Room.updateDefcon(room, 1);
-            return;
-        }
+        // if (hostileBodyParts > 0) {
+        return 1;
+        // }
     }
 
     /**
      * get repair targets for the room (any structure under 75% hp)
-     * TODO order by priority (fresh ramparts, towers, containers, roads, etc)
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): Array<Structure<StructureConstant> | null> {
-        const REPAIR_THRESHOLD: number = 0.75;
         return MemoryApi.getStructures(room, (s: Structure<StructureConstant>) => {
-            return s.hits < s.hitsMax * REPAIR_THRESHOLD;
+            if (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) {
+                return s.hits < s.hitsMax * REPAIR_THRESHOLD;
+            } else {
+                return s.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+            }
         });
     }
 

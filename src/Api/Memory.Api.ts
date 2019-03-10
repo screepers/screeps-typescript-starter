@@ -20,7 +20,10 @@ import {
     CLAIM_JOB_CACHE_TTL,
     RESERVE_JOB_CACHE_TTL,
     SIGN_JOB_CACHE_TTL,
-    ATTACK_JOB_CACHE_TTL
+    ATTACK_JOB_CACHE_TTL,
+    REPAIR_JOB_CACHE_TTL,
+    BUILD_JOB_CACHE_TTL,
+    UPGRADE_JOB_CACHE_TTL
 } from "utils/Constants";
 
 // the api for the memory class
@@ -95,6 +98,8 @@ export default class MemoryApi {
         this.getSources(room, undefined, forceUpdate);
         this.getStructures(room, undefined, forceUpdate);
         this.getAllGetEnergyJobs(room, undefined, forceUpdate);
+        this.getAllClaimPartJobs(room, undefined, forceUpdate);
+        this.getAllWorkPartJobs(room, undefined, forceUpdate);
         // this.getCreepLimits(room, undefined, forceUpdate);
         // this.getDefcon(room, undefined, forceUpdate);
         // this.getRoomState(room, undefined, forceUpdate);
@@ -743,6 +748,27 @@ export default class MemoryApi {
     }
 
     /**
+     * Get all jobs (in a flatted list) of ClaimPartJobs.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    public static getAllClaimPartJobs(
+        room: Room,
+        filterFunction?: (object: ClaimPartJob) => boolean,
+        forceUpdate?: boolean
+    ): ClaimPartJob[] {
+        const allClaimPartJobs: ClaimPartJob[] = [];
+
+        _.forEach(this.getClaimJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+        _.forEach(this.getReserveJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+        _.forEach(this.getSignJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+        _.forEach(this.getControllerAttackJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+
+        return allClaimPartJobs;
+    }
+
+    /**
      * Get the list of ClaimPartJobs.claimJobs
      * @param room The room to get the jobs from
      * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
@@ -750,7 +776,7 @@ export default class MemoryApi {
      */
     public static getClaimJobs(
         room: Room,
-        filterFunction?: (object: GetEnergyJob) => boolean,
+        filterFunction?: (object: ClaimPartJob) => boolean,
         forceUpdate?: boolean
     ): ClaimPartJob[] {
         if (
@@ -780,7 +806,7 @@ export default class MemoryApi {
      */
     public static getReserveJobs(
         room: Room,
-        filterFunction?: (object: GetEnergyJob) => boolean,
+        filterFunction?: (object: ClaimPartJob) => boolean,
         forceUpdate?: boolean
     ): ClaimPartJob[] {
         if (
@@ -810,7 +836,7 @@ export default class MemoryApi {
      */
     public static getSignJobs(
         room: Room,
-        filterFunction?: (object: GetEnergyJob) => boolean,
+        filterFunction?: (object: ClaimPartJob) => boolean,
         forceUpdate?: boolean
     ): ClaimPartJob[] {
         if (
@@ -838,9 +864,9 @@ export default class MemoryApi {
      * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
      * @param forceUpdate [Optional] Forcibly invalidate the cache
      */
-    public static getAttackJobs(
+    public static getControllerAttackJobs(
         room: Room,
-        filterFunction?: (object: GetEnergyJob) => boolean,
+        filterFunction?: (object: ClaimPartJob) => boolean,
         forceUpdate?: boolean
     ): ClaimPartJob[] {
         if (
@@ -850,7 +876,7 @@ export default class MemoryApi {
             !Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs ||
             Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs!.cache < Game.time - ATTACK_JOB_CACHE_TTL
         ) {
-            MemoryHelper_Room.updateClaimPart_attackJobs(room);
+            MemoryHelper_Room.updateClaimPart_controllerAttackJobs(room);
         }
 
         let attackJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs!.data;
@@ -860,5 +886,115 @@ export default class MemoryApi {
         }
 
         return attackJobs;
+    }
+
+    /**
+     * Get all jobs (in a flatted list) of WorkPartJobs.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    public static getAllWorkPartJobs(
+        room: Room,
+        filterFunction?: (object: WorkPartJob) => boolean,
+        forceUpdate?: boolean
+    ): WorkPartJob[] {
+        const allWorkPartJobs: WorkPartJob[] = [];
+
+        _.forEach(this.getRepairJobs(room, filterFunction, forceUpdate), job => allWorkPartJobs.push(job));
+        _.forEach(this.getBuildJobs(room, filterFunction, forceUpdate), job => allWorkPartJobs.push(job));
+        _.forEach(this.getUpgradeJobs(room, filterFunction, forceUpdate), job => allWorkPartJobs.push(job));
+
+        return allWorkPartJobs;
+    }
+
+    /**
+     * Get the list of WorkPartJobs.repairJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getRepairJobs(
+        room: Room,
+        filterFunction?: (object: WorkPartJob) => boolean,
+        forceUpdate?: boolean
+    ): WorkPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.workPartJobs ||
+            !Memory.rooms[room.name].jobs.workPartJobs!.repairJobs ||
+            Memory.rooms[room.name].jobs.workPartJobs!.repairJobs!.cache < Game.time - REPAIR_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateWorkPart_repairJobs(room);
+        }
+
+        let repairJobs: WorkPartJob[] = Memory.rooms[room.name].jobs.workPartJobs!.repairJobs!.data;
+
+        if (filterFunction !== undefined) {
+            repairJobs = _.filter(repairJobs, filterFunction);
+        }
+
+        return repairJobs;
+    }
+
+    /**
+     * Get the list of WorkPartJobs.buildJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getBuildJobs(
+        room: Room,
+        filterFunction?: (object: WorkPartJob) => boolean,
+        forceUpdate?: boolean
+    ): WorkPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.workPartJobs ||
+            !Memory.rooms[room.name].jobs.workPartJobs!.buildJobs ||
+            Memory.rooms[room.name].jobs.workPartJobs!.buildJobs!.cache < Game.time - BUILD_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateWorkPart_buildJobs(room);
+        }
+
+        let buildJobs: WorkPartJob[] = Memory.rooms[room.name].jobs.workPartJobs!.buildJobs!.data;
+
+        if (filterFunction !== undefined) {
+            buildJobs = _.filter(buildJobs, filterFunction);
+        }
+
+        return buildJobs;
+    }
+
+    /**
+     * Get the list of WorkPartJobs.upgradeJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getUpgradeJobs(
+        room: Room,
+        filterFunction?: (object: WorkPartJob) => boolean,
+        forceUpdate?: boolean
+    ): WorkPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.workPartJobs ||
+            !Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs ||
+            Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs!.cache < Game.time - UPGRADE_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateWorkPart_upgradeJobs(room);
+        }
+
+        let upgradeJobs: WorkPartJob[] = Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs!.data;
+
+        if (filterFunction !== undefined) {
+            upgradeJobs = _.filter(upgradeJobs, filterFunction);
+        }
+
+        return upgradeJobs;
     }
 }

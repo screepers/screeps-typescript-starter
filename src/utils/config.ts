@@ -19,3 +19,8 @@ export const CONTAINER_MINIMUM_ENERGY = 100;
  * Minimum amount of energy a link must have to be used in a GetEnergyJob
  */
 export const LINK_MINIMUM_ENERGY = 1;
+
+/**
+ * Percentage HP to begin repairing structures (besides Ramparts and Walls)
+ */
+export const REPAIR_THRESHOLD = .75;
