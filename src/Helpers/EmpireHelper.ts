@@ -83,6 +83,8 @@ export default class EmpireHelper {
     public static findDependentRoom(targetRoom: string): string {
 
         // Green & White flags are considered override flags, get those and find the one that was placed most recently
+        // ! - Idea for here... going to add a constant to describe each flag type, then we can make an empire api function
+        // that returns the flag type, so this next line could be replaced with (flag: Flag) => this.getFlagType === OVERRIDE_FLAG
         const allOverrideFlags = MemoryApi.getAllFlags((flag: Flag) => flag.color === COLOR_GREEN && flag.secondaryColor === COLOR_WHITE);
         let overrideFlag: Flag | undefined;
 
