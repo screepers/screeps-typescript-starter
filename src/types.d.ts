@@ -307,7 +307,7 @@ type WorkPart_ValidActions = "build" | "repair" | "dismantle" | "upgrade";
  * Valid types for the ClaimPartJob targetType
  * ? Probably unnecessary, but provided for flexibility
  */
-type ClaimPart_ValidTargets = STRUCTURE_CONTROLLER | string;
+type ClaimPart_ValidTargets = STRUCTURE_CONTROLLER | "roomName";
 /**
  * Valid actions for ClaimPartJob actionType
  */
@@ -468,10 +468,6 @@ interface WorkPartJobListing {
      * Jobs to upgrade controllers
      */
     upgradeJobs?: Cache;
-    /**
-     * Jobs to dismantle structures (enemy or friendly)
-     */
-    dismantleJobs?: Cache;
 }
 
 /**

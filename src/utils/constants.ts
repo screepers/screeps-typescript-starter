@@ -123,6 +123,11 @@ export const CLAIM_JOB_CACHE_TTL = 1; // Claim Jobs
 export const RESERVE_JOB_CACHE_TTL = 1; // Reserve Jobs
 export const SIGN_JOB_CACHE_TTL = 50; // Sign Jobs
 export const ATTACK_JOB_CACHE_TTL = 1; // Attack Jobs
+// WorkPartJob Constants
+export const REPAIR_JOB_CACHE_TTL = 10; // Repair jobs
+export const BUILD_JOB_CACHE_TTL = 10; // Build Jobs
+export const UPGRADE_JOB_CACHE_TTL = -1; // Upgrade Jobs
+
 // ? Should we change DEPNDT to be 3 seperate consts? Attack, Remote, Claim?
 export const DEPNDT_CACHE_TTL = 50; // Dependent Rooms - Attack, Remote, Claim
 
