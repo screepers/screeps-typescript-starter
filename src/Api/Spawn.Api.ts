@@ -711,7 +711,7 @@ export default class SpawnApi {
 
                 // If its a one time use, complete it as well
                 if (EmpireApi.isAttackFlagOneTimeUse(selectedFlagMemory)) {
-                    selectedFlagMemory.complete = true;
+                    Game.flags[selectedFlagMemory.flagName].memory.complete = true;
                 }
             }
 

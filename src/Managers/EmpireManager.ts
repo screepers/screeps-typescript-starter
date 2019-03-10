@@ -1,3 +1,5 @@
+import EmpireApi from "../Api/Empire.Api";
+
 // empire-wide manager
 export default class EmpireManager {
 
@@ -6,11 +8,18 @@ export default class EmpireManager {
      */
     public static runEmpireManager(): void {
 
-        // clean all dead flags
-        // clean all dead room memory structures
-        // get unprocessed flags
-        // process these new flags
-        // generate empire job queue and save it to memory
-        //  - this is interroom stuff, alliance help, etc
+        // Delete unused flags and flag memory
+        EmpireApi.deleteCompleteFlags();
+        EmpireApi.cleanDeadFlags();
+
+        // Get unprocessed flags and process them
+        const unprocessedFlags: Flag[] = EmpireApi.getUnprocessedFlags();
+
+        if (unprocessedFlags.length > 0) {
+
+            EmpireApi.processNewFlags(unprocessedFlags);
+        }
+
+        // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
     }
 }
