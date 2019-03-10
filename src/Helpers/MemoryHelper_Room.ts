@@ -1,5 +1,6 @@
 import RoomApi from "Api/Room.Api";
 import { ALL_STRUCTURE_TYPES } from "utils/Constants";
+import { GetEnergyJobs } from "Jobs/GetEnergyJobs";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -242,7 +243,7 @@ export default class MemoryHelper_Room {
         }
 
         Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs = {
-            data: RoomApi.createSourceGetEnergyJobs(room),
+            data: GetEnergyJobs.createSourceJobs(room),
             cache: Game.time
         };
     }
@@ -261,7 +262,7 @@ export default class MemoryHelper_Room {
         }
 
         Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs = {
-            data: RoomApi.createContainerGetEnergyJobs(room),
+            data: GetEnergyJobs.createContainerJobs(room),
             cache: Game.time
         };
     }
@@ -280,7 +281,7 @@ export default class MemoryHelper_Room {
         }
 
         Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs = {
-            data: RoomApi.createLinkGetEnergyJobs(room),
+            data: GetEnergyJobs.createLinkJobs(room),
             cache: Game.time
         };
     }
@@ -299,7 +300,7 @@ export default class MemoryHelper_Room {
         }
 
         Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures = {
-            data: RoomApi.createBackupStructuresGetEnergyJobs(room),
+            data: GetEnergyJobs.createBackupStructuresJobs(room),
             cache: Game.time
         };
     }
