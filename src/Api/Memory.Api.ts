@@ -48,7 +48,7 @@ export default class MemoryApi {
 
         // Remvoe all dead flags from memory
         for (const flag in Memory.flags) {
-            if (!(flag in Game.rooms)) {
+            if (!_.some(Game.flags, (flagLoop: Flag) => flagLoop.name === Memory.flags[flag].flagName)) {
                 delete Memory.flags[flag];
             }
         }

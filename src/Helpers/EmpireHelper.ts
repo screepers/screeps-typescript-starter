@@ -28,6 +28,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
 
         // Create the RemoteFlagMemory object for this flag
         const remoteFlagMemory: RemoteFlagMemory = {
@@ -79,7 +80,8 @@ export default class EmpireHelper {
         Memory.flags[flag.name].complete = false;
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
-        Memory.flags[flag.name].flagType = flagTypeConst
+        Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
 
         // Create the RemoteFlagMemory object for this flag
         const attackFlagMemory: AttackFlagMemory = this.generateAttackFlagOptions(flag, flagTypeConst, dependentRoom.name);
@@ -89,7 +91,7 @@ export default class EmpireHelper {
         const existingDepedentAttackRoomMem: AttackRoomMemory | undefined = _.find(MemoryApi.getAttackRooms(dependentRoom),
             (rr: AttackRoomMemory) => {
                 if (rr) {
-                    return rr.roomName === flag.pos.roomName;
+                    return (rr.roomName === flag.pos.roomName && _.every(rr.flags, (innerRR: AttackFlagMemory) => innerRR.flagName !== flag.name));
                 }
                 return false;
             });
@@ -123,6 +125,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
 
         // Create the ClaimFlagMemory object for this flag
         const claimFlagMemory: ClaimFlagMemory = {
@@ -136,7 +139,7 @@ export default class EmpireHelper {
         const existingDepedentClaimRoomMem: ClaimRoomMemory | undefined = _.find(MemoryApi.getClaimRooms(dependentRoom),
             (rr: ClaimRoomMemory) => {
                 if (rr) {
-                    return rr.roomName === flag.pos.roomName;
+                    return (rr.roomName === flag.pos.roomName && _.every(rr.flags, (innerRR: ClaimFlagMemory) => innerRR.flagName !== flag.name));
                 }
                 return false;
             });
@@ -171,6 +174,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
 
         console.log("Option Flag [" + flag.name + "] processed. Flag Type: [" + flagTypeConst + "]");
     }

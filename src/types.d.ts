@@ -802,6 +802,10 @@ interface FlagMemory {
      * the type of flag this is
      */
     flagType: FlagTypeConstant | undefined;
+    /**
+     * the name of the flag
+     */
+    flagName: string;
 }
 
 // Attack Flag Options
