@@ -27,9 +27,6 @@ import { ERROR_FATAL, ERROR_ERROR, ERROR_INFO, ERROR_WARN } from "utils/Constant
 
 export const loop = ErrorMapper.wrapLoop(() => {
 
-  // clean up memory first
-  try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
-
   // run the empire and get all relevant info from that into memory
   try { EmpireManager.runEmpireManager(); } catch (e) { UtilHelper.printError(e); }
 
@@ -38,5 +35,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
   // run spawning
   try { SpawnManager.runSpawnManager(); } catch (e) { UtilHelper.printError(e); }
+
+  // clean up memory first
+  try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
+
   // -------- end managers --------
 });

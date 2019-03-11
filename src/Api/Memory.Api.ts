@@ -55,6 +55,48 @@ export default class MemoryApi {
     }
 
     /**
+     * Go through the room's depedent room memory and remove null values
+     * @param room the room we are cleaning the memory structure for
+     */
+    public static cleanDependentRoomMemory(room: Room): void {
+
+        // Re-map Remote Room array to remove null values
+        const allRemoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
+        const nonNullRemoteRooms: RemoteRoomMemory[] = [];
+
+        _.forEach(allRemoteRooms, (rr: RemoteRoomMemory) => {
+            if (rr !== null) {
+                nonNullRemoteRooms.push(rr);
+            }
+        });
+        Memory.rooms[room.name].remoteRooms = nonNullRemoteRooms;
+
+
+        // Re-map Remote Room array to remove null values
+        const allClaimRooms: ClaimRoomMemory[] = Memory.rooms[room.name].claimRooms;
+        const nonNullClaimRooms: ClaimRoomMemory[] = [];
+
+        _.forEach(allClaimRooms, (rr: ClaimRoomMemory) => {
+            if (rr !== null) {
+                nonNullClaimRooms.push(rr);
+            }
+        });
+        Memory.rooms[room.name].claimRooms = nonNullClaimRooms;
+
+
+        // Re-map Remote Room array to remove null values
+        const allAttackRooms: AttackRoomMemory[] = Memory.rooms[room.name].attackRooms;
+        const nonNullAttackRooms: AttackRoomMemory[] = [];
+
+        _.forEach(allAttackRooms, (rr: AttackRoomMemory) => {
+            if (rr !== null) {
+                nonNullAttackRooms.push(rr);
+            }
+        });
+        Memory.rooms[room.name].attackRooms = nonNullAttackRooms;
+    }
+
+    /**
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */

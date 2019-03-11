@@ -8,10 +8,6 @@ export default class EmpireManager {
      */
     public static runEmpireManager(): void {
 
-        // Delete unused flags and flag memory
-        EmpireApi.deleteCompleteFlags();
-        EmpireApi.cleanDeadFlags();
-
         // Get unprocessed flags and process them
         const unprocessedFlags: Flag[] = EmpireApi.getUnprocessedFlags();
 
@@ -19,6 +15,10 @@ export default class EmpireManager {
 
             EmpireApi.processNewFlags(unprocessedFlags);
         }
+
+        // Delete unused flags and flag memory
+        EmpireApi.deleteCompleteFlags();
+        EmpireApi.cleanDeadFlags();
 
         // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
     }

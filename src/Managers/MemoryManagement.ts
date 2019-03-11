@@ -14,6 +14,7 @@ export default class MemoryManager {
 
         _.forEach(ownedRooms, (room: Room) => {
             MemoryApi.initRoomMemory(room);
+            MemoryApi.cleanDependentRoomMemory(room);
         });
     }
 }
