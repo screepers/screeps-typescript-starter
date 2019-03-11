@@ -46,7 +46,12 @@ export default class MemoryApi {
             }
         }
 
-        // Handling flag deletion in EmpireManager since it handles the entire flag system
+        // Remvoe all dead flags from memory
+        for (const flag in Memory.flags) {
+            if (!(flag in Game.rooms)) {
+                delete Memory.flags[flag];
+            }
+        }
     }
 
     /**
@@ -596,7 +601,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
             return Game.flags[flagIndex];
         });
 

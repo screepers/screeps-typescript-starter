@@ -212,6 +212,9 @@ export default class SpawnApi {
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
         let activeAttackRoomFlag: ParentFlagMemory | undefined;
         for (const attackRoom of targetRoomMemoryArray) {
+            if (!attackRoom) {
+                continue;
+            }
             activeAttackRoomFlag = _.find(attackRoom!['flags'], (flagMem) => flagMem.active);
             if (activeAttackRoomFlag) {
                 break;

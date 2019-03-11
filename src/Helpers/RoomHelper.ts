@@ -293,8 +293,15 @@ export default class RoomHelper {
         if (allClaimRooms[0] === undefined) {
             return 0;
         }
+
         for (const claimRoom of allClaimRooms) {
-            if (!_.some(ownedRooms, (ownedRoom) => room.name === claimRoom!.roomName)) {
+            if (!_.some(ownedRooms, (ownedRoom) => {
+                if (claimRoom) {
+                    return room.name === claimRoom!.roomName
+                }
+                return false
+            })) {
+
                 ++sum;
             }
         }

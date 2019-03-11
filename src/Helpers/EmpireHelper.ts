@@ -41,7 +41,7 @@ export default class EmpireHelper {
         const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(MemoryApi.getRemoteRooms(dependentRoom),
             (rr: RemoteRoomMemory) => {
                 if (rr) {
-                    return rr.roomName === flag.pos.roomName;
+                    return (rr.roomName === flag.pos.roomName && _.every(rr.flags, (innerRR: RemoteFlagMemory) => innerRR.flagName !== flag.name));
                 }
                 return false;
             });
@@ -280,12 +280,12 @@ export default class EmpireHelper {
 
         // To prevent out of bounds, only allow room paths that have as least 2 elements (should literally never occur unless we
         // are attacking our own room (??? maybe an active defender strategy, so i won't throw an error for it tbh)
-        if (fullPath.length >= 2) {
+        if (fullPath.length <= 2) {
             return new RoomPosition(25, 25, homeRoom);
         }
 
         // Return the room right BEFORE the room we are attacking. This is the rally room (location is just in middle of room)
-        return new RoomPosition(25, 25, fullPath[fullPath.length - 2]['room']);
+        return new RoomPosition(25, 25, fullPath[fullPath.length - 2].room);
     }
 
     /**
@@ -302,7 +302,7 @@ export default class EmpireHelper {
             const claimRoomName: string = claimRooms[claimRoom]!.roomName;
 
             if (!claimRooms[claimRoom]!.flags[0]) {
-                console.log("Removing Attack Room [" + claimRooms[claimRoom]!.roomName + "]");
+                console.log("Removing Claim Room [" + claimRooms[claimRoom]!.roomName + "]");
 
                 // Get the dependent room for the attack room we are removing from memory
                 const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),

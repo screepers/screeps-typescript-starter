@@ -16,7 +16,8 @@ export default class Empire {
 
         // Create an array of all unprocessed flags
         for (const flag of allFlags) {
-            if (!flag.memory.processed) {
+            if (!flag.memory.processed && flag.memory.processed !== undefined) {
+
                 newFlags.push(flag);
             }
         }
