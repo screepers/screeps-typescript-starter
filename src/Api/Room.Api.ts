@@ -1,7 +1,13 @@
 import MemoryHelper from "Helpers/MemoryHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import RoomHelper from "Helpers/RoomHelper";
-import { ERROR_ERROR, ROLE_MINER, ROOM_STATE_INTRO, WALL_LIMIT } from "utils/constants";
+import {
+    ERROR_ERROR,
+    ROLE_MINER,
+    ROOM_STATE_INTRO,
+    WALL_LIMIT,
+    ERROR_WARN
+} from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "./Memory.Api";
 import { REPAIR_THRESHOLD } from "utils/config";
@@ -123,9 +129,8 @@ export default class RoomApi {
      * @param room the room we are defending
      */
     public static runTowers(room: Room): void {
-        const towers = MemoryApi.getStructureOfType(room, STRUCTURE_TOWER);
-        // --------
 
+        const towers = MemoryApi.getStructureOfType(room, STRUCTURE_TOWER);
         // choose the most ideal target and have every tower attack it
         const idealTarget = RoomHelper.chooseTowerTarget(room);
 
