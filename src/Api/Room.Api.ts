@@ -24,71 +24,96 @@ export default class RoomApi {
      * (note: assumes defcon already being found for simplicity sake)
      *
      * TODO Change the function so that the MemoryAPI functions are called just before they are needed,
-     * TODO that way we can scrape as much CPU as possible out of it (e.g. only look for nukes before first if statement)
      * @param room the room we are setting state for
      */
     public static setRoomState(room: Room): RoomStateConstant {
-        // get the structures and creeps we need from memory
-        const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
-        const links: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
-        const terminal: StructureTerminal | undefined = room.terminal;
-        const storage: StructureStorage | undefined = room.storage;
-        const incomingNukes: Nuke[] = room.find(FIND_NUKES);
-        const defconLevel: number = Memory.rooms[room.name].defcon;
-        const sources: Array<Source | null> = MemoryApi.getSources(room);
-        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room);
-        // ---------
+
+        // If theres no controller, throw an error
+        if (!room.controller) {
+            throw new UserException("Can't set room state for room with no controller!",
+                "You attempted to call setRoomState on room [" + room.name + "]. Theres no controller here.",
+                ERROR_WARN);
+        }
+        // ----------
+
 
         // check if we are in nuke inbound room state
-        // nuke is coming in and we need to gtfo
-        if (incomingNukes.length > 0) {
-            return ROOM_STATE_NUKE_INBOUND;
+        // nuke is coming in and we need to gtfo, but they take like 20k ticks, so only check every 1000 or so
+        if (RoomHelper.excecuteEveryTicks(1000)) {
+            const incomingNukes = room.find(FIND_NUKES);
+            if (incomingNukes.length > 0) {
+                return ROOM_STATE_NUKE_INBOUND;
+            }
         }
+        // ----------
+
 
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high
+        const defconLevel: number = MemoryApi.getDefconLevel(room);
         if (defconLevel >= 3) {
             return ROOM_STATE_SEIGE;
         }
+        // ----------
 
-        // check if we are in upgrader room state
-        // container mining and storage set up, and we got links online
-        if (
-            RoomHelper.isContainerMining(room, sources, containers) &&
-            RoomHelper.isUpgraderLink(room, links) &&
-            storage !== undefined
-        ) {
-            // if(stimulate flag is up)
-            // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
-            // return;
+        const terminal: StructureTerminal | undefined = room.terminal;
+        const storage: StructureStorage | undefined = room.storage;
+        const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
+        const sources: Array<Source | null> = MemoryApi.getSources(room);
+        if (room.controller!.level >= 6) {
 
-            // otherwise, just upgrader room state
-            return ROOM_STATE_UPGRADER;
+            // check if we are in upgrader room state
+            // container mining and storage set up, and we got links online
+            if (
+                RoomHelper.isContainerMining(room, sources, containers) &&
+                RoomHelper.isUpgraderLink(room) &&
+                storage !== undefined
+            ) {
+
+                if (RoomHelper.isStimulateFlag(room) && terminal !== undefined) {
+                    return ROOM_STATE_STIMULATE;
+                }
+                // otherwise, just upgrader room state
+                return ROOM_STATE_UPGRADER;
+            }
         }
+        // ----------
 
-        // check if we are in advanced room state
-        // container mining and storage set up
-        // then check if we are flagged for sitmulate state
-        if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
-            // if(stimulate flag is up)
-            // MemoryApi.updateRoomState(room, ROOM_STATE_STIMULATE);
-            // return;
 
-            // otherwise, just advanced room state
-            return ROOM_STATE_ADVANCED;
+        if (room.controller!.level >= 4) {
+            // check if we are in advanced room state
+            // container mining and storage set up
+            // then check if we are flagged for sitmulate state
+            if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
+
+                if (RoomHelper.isStimulateFlag(room) && terminal !== undefined) {
+                    return ROOM_STATE_STIMULATE;
+                }
+                // otherwise, just advanced room state
+                return ROOM_STATE_ADVANCED;
+            }
         }
+        // ----------
 
-        // check if we are in intermediate room state
-        // container mining set up, but no storage
-        if (RoomHelper.isContainerMining(room, sources, containers) && storage === undefined) {
-            return ROOM_STATE_INTER;
+
+        if (room.controller!.level >= 3) {
+            // check if we are in intermediate room state
+            // container mining set up, but no storage
+            if (RoomHelper.isContainerMining(room, sources, containers) && storage === undefined) {
+                return ROOM_STATE_INTER;
+            }
         }
+        // ----------
+
 
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
+        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room);
         if (creeps.length > 3) {
             return ROOM_STATE_BEGINNER;
         }
+        // ----------
+
 
         // check if we are in intro room state
         // 3 or less creeps so we need to (re)start the room
@@ -178,7 +203,7 @@ export default class RoomApi {
      * @param room the room we are getting spawns/extensions to be filled from
      */
     public static getLowSpawnAndExtensions(room: Room): Array<StructureSpawn | StructureExtension> {
-        const extensionsNeedFilled = <Array<StructureSpawn | StructureExtension>> MemoryApi.getStructures(
+        const extensionsNeedFilled = <Array<StructureSpawn | StructureExtension>>MemoryApi.getStructures(
             room,
             (e: any) =>
                 (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION) &&
@@ -196,7 +221,7 @@ export default class RoomApi {
     public static getTowersNeedFilled(room: Room): StructureTower[] {
         const TOWER_THRESHOLD: number = 0.85;
 
-        return <StructureTower[]> MemoryApi.getStructureOfType(room, STRUCTURE_TOWER, (t: StructureTower) => {
+        return <StructureTower[]>MemoryApi.getStructureOfType(room, STRUCTURE_TOWER, (t: StructureTower) => {
             return t.energy < t.energyCapacity * TOWER_THRESHOLD;
         });
     }
@@ -332,7 +357,7 @@ export default class RoomApi {
      * create a job queue for the room for harvester creeps
      * @param room the room we want the queue to be created for
      */
-    public static createJobQueueHarvester(room: Room): void {}
+    public static createJobQueueHarvester(room: Room): void { }
 
     /**
      * createa a job queue for the room for harvester creeps

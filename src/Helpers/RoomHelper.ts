@@ -193,6 +193,23 @@ export default class RoomHelper {
     }
 
     /**
+     * Check and see if an upgrader link exists
+     * @param room the room we are checking for
+     */
+    public static isUpgraderLink(room: Room): boolean {
+        return this.getUpgraderLink(room) !== null;
+    }
+
+    /**
+     * Check if the stimulate flag is present for a room
+     * TODO Complete this
+     * @param room the room we are checking for
+     */
+    public static isStimulateFlag(room: Room): boolean {
+        return false;
+    }
+
+    /**
      * choose an ideal target for the towers to attack
      * TODO actually choose an ideal target not just the first one lol
      * @param room the room we are in
