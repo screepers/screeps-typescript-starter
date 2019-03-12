@@ -150,8 +150,7 @@ export default class RoomHelper {
     }
 
     /**
-     * check if container mining is active in a room
-     * TODO Complete this
+     * check if container mining is active in a room (each source has a container in range)
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
@@ -161,7 +160,19 @@ export default class RoomHelper {
         sources: Array<Source | null>,
         containers: Array<Structure<StructureConstant> | null>
     ): boolean {
-        return false;
+
+        // Loop over sources and make sure theres at least one container in range to it
+        let numMiningContainers: number = 0;
+
+        _.forEach(sources, (source: Source) => {
+            if (_.some(containers, (container: StructureContainer) =>
+                source.pos.inRangeTo(container.pos, 1)
+            )) {
+                numMiningContainers++;
+            }
+        });
+
+        return numMiningContainers == sources.length;
     }
 
     /**
@@ -206,6 +217,8 @@ export default class RoomHelper {
      * @param room the room we are checking for
      */
     public static isStimulateFlag(room: Room): boolean {
+        // Add processing for stimulate flag, must be in a room we own to be processed
+        // Go through flag memory and check if theres a stimulate flag for this room
         return false;
     }
 
