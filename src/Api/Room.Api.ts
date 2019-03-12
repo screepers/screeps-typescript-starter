@@ -324,60 +324,6 @@ export default class RoomApi {
     }
 
     /**
-     * calls helper functions to create the full job queue for the room
-     * @param room the room we want to queue to be created for
-     */
-    public static createJobQueue(room: Room): void {
-        // Call all the sub job queues
-        if (RoomHelper.isOwnedRoom(room)) {
-            this.createJobQueueWorker(room);
-            this.createJobQueueLorry(room);
-            this.createJobQueueHarvester(room);
-            this.createEnergyQueue(room);
-        } else {
-            throw new UserException(
-                "UnOwned Room",
-                "We do not own room [" + room.name + "], but createJobQueue was called on it.",
-                ERROR_WARN);
-        }
-    }
-
-    /**
-     * create a job queue for the room for worker creeps
-     * @param room the room we want the queue to be created for
-     */
-    public static createJobQueueWorker(room: Room): void {
-        // possibly a list of objects with 2 propeties, jobName and priority
-        // so we have some way thats less fragile than array order to
-        // figure out what jobs need to be tackled first.. idk just thinking
-    }
-
-    /**
-     * create a job queue for the room for harvester creeps
-     * @param room the room we want the queue to be created for
-     */
-    public static createJobQueueHarvester(room: Room): void { }
-
-    /**
-     * createa a job queue for the room for harvester creeps
-     * @param room the room we want the queue to be created for
-     */
-    public static createJobQueueLorry(room: Room): void {
-        //
-    }
-
-    /**
-     * create a list of ways to get energy from the room
-     * @param room the room we want the queue to be created for
-     */
-    public static createEnergyQueue(room: Room): void {
-        // we can access this list from memory for simplicity sake
-        // and creeps can decide which to pull from based on their creep options
-        // in memory... for example in room state advanced we cut off workers from containers
-        // but keep it open for harvesters.. creep options will make this simple i hope
-    }
-
-    /**
      * run links for the room
      * @param room the room we want to run links for
      */
