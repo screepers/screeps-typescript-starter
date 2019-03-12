@@ -23,7 +23,9 @@ import {
     ATTACK_JOB_CACHE_TTL,
     REPAIR_JOB_CACHE_TTL,
     BUILD_JOB_CACHE_TTL,
-    UPGRADE_JOB_CACHE_TTL
+    UPGRADE_JOB_CACHE_TTL,
+    STORE_JOB_CACHE_TTL,
+    FILL_JOB_CACHE_TTL
 } from "utils/Constants";
 
 // the api for the memory class
@@ -59,7 +61,6 @@ export default class MemoryApi {
      * @param room the room we are cleaning the memory structure for
      */
     public static cleanDependentRoomMemory(room: Room): void {
-
         // Re-map Remote Room array to remove null values
         const allRemoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
         const nonNullRemoteRooms: RemoteRoomMemory[] = [];
@@ -71,7 +72,6 @@ export default class MemoryApi {
         });
         Memory.rooms[room.name].remoteRooms = nonNullRemoteRooms;
 
-
         // Re-map Remote Room array to remove null values
         const allClaimRooms: ClaimRoomMemory[] = Memory.rooms[room.name].claimRooms;
         const nonNullClaimRooms: ClaimRoomMemory[] = [];
@@ -82,7 +82,6 @@ export default class MemoryApi {
             }
         });
         Memory.rooms[room.name].claimRooms = nonNullClaimRooms;
-
 
         // Re-map Remote Room array to remove null values
         const allAttackRooms: AttackRoomMemory[] = Memory.rooms[room.name].attackRooms;
@@ -643,7 +642,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -1043,5 +1042,84 @@ export default class MemoryApi {
         }
 
         return upgradeJobs;
+    }
+
+    /**
+     * Get all jobs (in a flatted list) of CarryPartJob.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the CarryPartJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    public static getAllCarryPartJobs(
+        room: Room,
+        filterFunction?: (object: CarryPartJob) => boolean,
+        forceUpdate?: boolean
+    ): CarryPartJob[] {
+        const allCarryPartJobs: CarryPartJob[] = [];
+
+        _.forEach(this.getStoreJobs(room, filterFunction, forceUpdate), job => allCarryPartJobs.push(job));
+        _.forEach(this.getFillJobs(room, filterFunction, forceUpdate), job => allCarryPartJobs.push(job));
+
+        return allCarryPartJobs;
+    }
+
+    /**
+     * Get the list of CarryPartJobs.fillJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the CarryPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getFillJobs(
+        room: Room,
+        filterFunction?: (object: CarryPartJob) => boolean,
+        forceUpdate?: boolean
+    ): CarryPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.carryPartJobs ||
+            !Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs ||
+            Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs!.cache < Game.time - FILL_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateCarryPart_fillJobs(room);
+        }
+
+        let fillJobs: CarryPartJob[] = Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs!.data;
+
+        if (filterFunction !== undefined) {
+            fillJobs = _.filter(fillJobs, filterFunction);
+        }
+
+        return fillJobs;
+    }
+
+    /**
+     * Get the list of CarryPartJobs.storeJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the CarryPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getStoreJobs(
+        room: Room,
+        filterFunction?: (object: CarryPartJob) => boolean,
+        forceUpdate?: boolean
+    ): CarryPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.carryPartJobs ||
+            !Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs ||
+            Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs!.cache < Game.time - STORE_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateCarryPart_storeJobs(room);
+        }
+
+        let storeJobs: CarryPartJob[] = Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs!.data;
+
+        if (filterFunction !== undefined) {
+            storeJobs = _.filter(storeJobs, filterFunction);
+        }
+
+        return storeJobs;
     }
 }

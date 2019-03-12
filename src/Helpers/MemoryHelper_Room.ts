@@ -3,6 +3,7 @@ import { ALL_STRUCTURE_TYPES } from "utils/Constants";
 import ClaimPartJobs from "Jobs/ClaimPartJobs";
 import RoomApi from "Api/Room.Api";
 import WorkPartJobs from "Jobs/WorkPartJobs";
+import CarryPartJobs from "Jobs/CarryPartJobs";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -474,6 +475,58 @@ export default class MemoryHelper_Room {
 
         Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs = {
             data: WorkPartJobs.createUpgradeJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's WorkPartJobListing
+     * @param room The room to update the memory of
+     */
+    public static updateCarryPart_allJobs(room: Room) {
+        // Clean out old job listing
+        if (Memory.rooms[room.name].jobs.carryPartJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.carryPartJobs;
+        }
+
+        this.updateCarryPart_fillJobs(room);
+        this.updateCarryPart_storeJobs(room);
+    }
+
+    /**
+     * Update the room's CarryPartJobListing_fillJobs
+     * @param room  The room to update the memory of
+     */
+    public static updateCarryPart_fillJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.carryPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs;
+        }
+
+        Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs = {
+            data: CarryPartJobs.createFillJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's CarryPartJobListing_fillJobs
+     * @param room  The room to update the memory of
+     */
+    public static updateCarryPart_storeJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.carryPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs;
+        }
+
+        Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs = {
+            data: CarryPartJobs.createStoreJobs(room),
             cache: Game.time
         };
     }

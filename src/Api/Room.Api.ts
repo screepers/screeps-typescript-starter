@@ -163,7 +163,7 @@ export default class RoomApi {
      * get repair targets for the room (any structure under 75% hp)
      * @param room the room we are checking for repair targets
      */
-    public static getRepairTargets(room: Room): Array<Structure<StructureConstant> | null> {
+    public static getRepairTargets(room: Room): Array<Structure<StructureConstant>> {
         return MemoryApi.getStructures(room, (s: Structure<StructureConstant>) => {
             if (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) {
                 return s.hits < s.hitsMax * REPAIR_THRESHOLD;
@@ -177,8 +177,8 @@ export default class RoomApi {
      * get spawn/extensions that need to be filled for the room
      * @param room the room we are getting spawns/extensions to be filled from
      */
-    public static getExtensionsNeedFilled(room: Room): Array<Structure<StructureConstant> | null> {
-        const extensionsNeedFilled: Array<Structure<StructureConstant> | null> = MemoryApi.getStructures(
+    public static getLowSpawnAndExtensions(room: Room): Array<StructureSpawn | StructureExtension> {
+        const extensionsNeedFilled = <Array<StructureSpawn | StructureExtension>> MemoryApi.getStructures(
             room,
             (e: any) =>
                 (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION) &&
@@ -193,10 +193,10 @@ export default class RoomApi {
      * TODO order by ascending
      * @param room the room we are getting towers that need to be filled from
      */
-    public static getTowersNeedFilled(room: Room): Array<Structure<StructureConstant> | null> {
+    public static getTowersNeedFilled(room: Room): StructureTower[] {
         const TOWER_THRESHOLD: number = 0.85;
 
-        return MemoryApi.getStructureOfType(room, STRUCTURE_TOWER, (t: StructureTower) => {
+        return <StructureTower[]> MemoryApi.getStructureOfType(room, STRUCTURE_TOWER, (t: StructureTower) => {
             return t.energy < t.energyCapacity * TOWER_THRESHOLD;
         });
     }
@@ -206,15 +206,11 @@ export default class RoomApi {
      * TODO limit by something, not sure yet.. room state possibly... controller level? open to input
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
-    public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant> | null> | null {
+    public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant>> {
         // returns all walls and ramparts under the current wall/rampart limit
         const hpLimit: number = this.getWallHpLimit(room);
-        const walls: Array<Structure | null> = MemoryApi.getStructureOfType(
-            room,
-            STRUCTURE_WALL,
-            (s: StructureWall) => s.hits < hpLimit
-        );
-        const ramparts: Array<Structure | null> = MemoryApi.getStructureOfType(
+        const walls = MemoryApi.getStructureOfType(room, STRUCTURE_WALL, (s: StructureWall) => s.hits < hpLimit);
+        const ramparts = MemoryApi.getStructureOfType(
             room,
             STRUCTURE_RAMPART,
             (s: StructureRampart) => s.hits < hpLimit
