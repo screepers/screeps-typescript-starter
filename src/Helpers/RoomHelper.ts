@@ -1,7 +1,10 @@
 import Normalize from "Helpers/Normalize";
 import MemoryApi from "Api/Memory.Api";
 import MemoryHelper_Room from "./MemoryHelper_Room";
-import { WALL_LIMIT } from "utils/Constants";
+import {
+    WALL_LIMIT,
+    ERROR_WARN,
+} from "utils/Constants";
 import UtilHelper from "./UtilHelper";
 import UserException from "utils/UserException";
 
@@ -67,12 +70,11 @@ export default class RoomHelper {
 
     /**
      * check if a room is close enough to send a creep to
-     * ? What are we doing with this? Checking if room is within roomdistance * 50 tiles - CreepTTL?
-     * TODO Complete this
      * @param room the room we want to check
      */
-    public static inTravelRange(room: Room): boolean {
-        return false;
+    public static inTravelRange(homeRoom: string, targetRoom: string): boolean {
+        const routeArray: Array<{ exit: ExitConstant; room: string; }> = Game.map.findRoute(homeRoom, targetRoom) as Array<{ exit: ExitConstant; room: string; }>;
+        return routeArray.length < 20;
     }
 
     /**
@@ -149,6 +151,7 @@ export default class RoomHelper {
 
     /**
      * check if container mining is active in a room
+     * TODO Complete this
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
@@ -162,14 +165,31 @@ export default class RoomHelper {
     }
 
     /**
-     * check if container mining is active in a room
+     * check if the link is an upgrader link
      * TODO Complete this
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
      */
-    public static isUpgraderLink(room: Room, links: Array<Structure<StructureConstant> | null>): boolean {
-        return false;
+    public static getUpgraderLink(room: Room): Structure<StructureConstant> | null {
+
+        const links: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
+        const controller: StructureController | undefined = room.controller;
+
+        // Break early if we don't have 3 links yet
+        if (links.length < 3) {
+            return null;
+        }
+
+        // Make sure theres a controller in the room
+        if (!controller) {
+            throw new UserException("Tried to getUpgraderLink of a room with no controller",
+                "Get Upgrader Link was called for room [" + room.name + "]" + ", but theres no controller in this room.",
+                ERROR_WARN);
+        }
+
+        // Find the closest link to the controller, this is our upgrader link
+        return controller!.pos.findClosestByRange(links);
     }
 
     /**
