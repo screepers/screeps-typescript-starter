@@ -22,8 +22,6 @@ export default class RoomApi {
      * Essentially backbone of the room, decides what flow
      * of action will be taken at the beginning of each tick
      * (note: assumes defcon already being found for simplicity sake)
-     *
-     * TODO Change the function so that the MemoryAPI functions are called just before they are needed,
      * @param room the room we are setting state for
      */
     public static setRoomState(room: Room): RoomStateConstant {
@@ -144,8 +142,8 @@ export default class RoomApi {
      * @param room the room we are setting defcon for
      */
     public static setDefconLevel(room: Room): number {
-        const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
 
+        const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
@@ -179,9 +177,7 @@ export default class RoomApi {
         }
 
         // level 1 -- less than 50 body parts
-        // if (hostileBodyParts > 0) {
         return 1;
-        // }
     }
 
     /**
@@ -277,8 +273,8 @@ export default class RoomApi {
      * @param room the room we are checking in
      * @param source the source we are considering
      */
-    public static getMiningContainer(room: Room, source: Source): Structure<StructureConstant> | null {
-        const containers: any = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
+    public static getMiningContainer(room: Room, source: Source): Structure<StructureConstant> | undefined {
+        const containers: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
 
         return _.find(
             containers,
@@ -339,7 +335,10 @@ export default class RoomApi {
             this.createJobQueueHarvester(room);
             this.createEnergyQueue(room);
         } else {
-            // throw error if we do not own this room
+            throw new UserException(
+                "UnOwned Room",
+                "We do not own room [" + room.name + "], but createJobQueue was called on it.",
+                ERROR_WARN);
         }
     }
 
