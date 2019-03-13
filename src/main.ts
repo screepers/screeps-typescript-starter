@@ -22,6 +22,8 @@ import SpawnManager from "Managers/SpawnManager";
 import { ErrorMapper } from "utils/ErrorMapper";
 // @ts-ignore
 import UtilHelper from "Helpers/UtilHelper";
+// @ts-ignore
+import RoomVisualManager from "Managers/RoomVisuals/RoomVisualManager";
 
 import { ERROR_FATAL, ERROR_ERROR, ERROR_INFO, ERROR_WARN } from "utils/Constants";
 
@@ -36,8 +38,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
   // run spawning
   try { SpawnManager.runSpawnManager(); } catch (e) { UtilHelper.printError(e); }
 
-  // clean up memory first
+  // clean up memory
   try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
+
+  // Display room visuals
+  try { RoomVisualManager.runRoomVisualManager(); } catch (e) { UtilHelper.printError(e); }
 
   // -------- end managers --------
 });
