@@ -1,0 +1,41 @@
+Simple general info for the empire and running the code:
+
+------- Common terminal commands ---------
+Compile and upload code to screeps:
+    rollup -c --environment DEST:main       // compile and upload once
+    rollup -cw --environment DEST:main      // watch the code to compile and reupload on save
+
+
+-------- Flag Types ---------
+Remote Flag:
+    Yellow + any
+
+Claim Flag:
+    White + any
+
+Attack Flags:
+    Red + Red = Standard Squad
+        (1 zealot, 1 medic, 1 stalker)
+
+    Red + Blue = Zealot Solo
+        (1 zealot)
+
+    Red + Brown = Stalker Solo
+        (1 stalker)
+
+Option Flags:
+    Green + White = Override Depedent Room
+        (place this in the room you want to be the host room, applies to next dependent room flag)
+
+    Green + Yellow = Stimulate Flag
+        (place this in the room you want to be stimulated, must have a terminal)
+
+
+-------- Common Bugs --------
+    If Memory gets wiped out, you can do these console commands to reset it
+        Memory.rooms = {}
+        Memory.flags = {}
+        Memory.creeps = {}
+
+
+-------- Console Commands --------
