@@ -41,8 +41,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
   // clean up memory
   try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
 
-  // Display room visuals
-  try { RoomVisualManager.runRoomVisualManager(); } catch (e) { UtilHelper.printError(e); }
+  // Display room visuals if we have a fat enough bucket
+  if (Game.cpu['bucket'] > 2000) {
+    try { RoomVisualManager.runRoomVisualManager(); } catch (e) { UtilHelper.printError(e); }
+  }
+
 
   // -------- end managers --------
 });
