@@ -4,6 +4,7 @@ import MemoryHelper_Room from "./MemoryHelper_Room";
 import {
     WALL_LIMIT,
     ERROR_WARN,
+    STIMULATE_FLAG
 } from "utils/Constants";
 import UtilHelper from "./UtilHelper";
 import UserException from "utils/UserException";
@@ -184,6 +185,14 @@ export default class RoomHelper {
      */
     public static getUpgraderLink(room: Room): Structure<StructureConstant> | null {
 
+        // Throw warning if we do not own this room
+        if (!this.isOwnedRoom(room)) {
+            throw new UserException(
+                "Stimulate flag check on non-owned room",
+                "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]",
+                ERROR_WARN);
+        }
+
         const links: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
         const controller: StructureController | undefined = room.controller;
 
@@ -208,6 +217,15 @@ export default class RoomHelper {
      * @param room the room we are checking for
      */
     public static isUpgraderLink(room: Room): boolean {
+
+        // Throw warning if we do not own this room
+        if (!this.isOwnedRoom(room)) {
+            throw new UserException(
+                "Stimulate flag check on non-owned room",
+                "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]",
+                ERROR_WARN);
+        }
+
         return this.getUpgraderLink(room) !== null;
     }
 
@@ -216,10 +234,24 @@ export default class RoomHelper {
      * TODO Complete this
      * @param room the room we are checking for
      */
-    public static isStimulateFlag(room: Room): boolean {
-        // Add processing for stimulate flag, must be in a room we own to be processed
-        // Go through flag memory and check if theres a stimulate flag for this room
-        return false;
+    public static isStimulateRoom(room: Room): boolean {
+
+        // Throw warning if we do not own this room
+        if (!this.isOwnedRoom(room)) {
+            throw new UserException(
+                "Stimulate flag check on non-owned room",
+                "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]",
+                ERROR_WARN);
+        }
+
+        const terminal: StructureTerminal | undefined = room.terminal;
+        // Check if we have a stimulate flag with the same room name as this flag
+        return _.some(Memory.flags, (flag: FlagMemory) => {
+            if (flag.flagType === STIMULATE_FLAG) {
+                return (Game.flags[flag.flagName].pos.roomName === room.name) && (terminal !== undefined);
+            }
+            return false;
+        });
     }
 
     /**

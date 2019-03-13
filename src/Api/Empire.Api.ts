@@ -65,6 +65,9 @@ export default class Empire {
                     if (flag.secondaryColor === COLOR_WHITE) {
                         EmpireHelper.processNewDependentRoomOverrideFlag(flag);
                     }
+                    else if (flag.secondaryColor == COLOR_YELLOW) {
+                        EmpireHelper.processNewStimulateFlag(flag);
+                    }
 
                 // Unhandled Flag, print warning to console
                 // Set to processed to prevent the flag from attempting processization every tick

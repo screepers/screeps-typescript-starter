@@ -60,7 +60,6 @@ export default class RoomApi {
         }
         // ----------
 
-        const terminal: StructureTerminal | undefined = room.terminal;
         const storage: StructureStorage | undefined = room.storage;
         const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
         const sources: Array<Source | null> = MemoryApi.getSources(room);
@@ -74,7 +73,7 @@ export default class RoomApi {
                 storage !== undefined
             ) {
 
-                if (RoomHelper.isStimulateFlag(room) && terminal !== undefined) {
+                if (RoomHelper.isStimulateRoom(room)) {
                     return ROOM_STATE_STIMULATE;
                 }
                 // otherwise, just upgrader room state
@@ -90,7 +89,7 @@ export default class RoomApi {
             // then check if we are flagged for sitmulate state
             if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
 
-                if (RoomHelper.isStimulateFlag(room) && terminal !== undefined) {
+                if (RoomHelper.isStimulateRoom(room)) {
                     return ROOM_STATE_STIMULATE;
                 }
                 // otherwise, just advanced room state

@@ -928,6 +928,7 @@ declare const STANDARD_SQUAD = 3;
 declare const CLAIM_FLAG = 4;
 declare const REMOTE_FLAG = 5;
 declare const OVERRIDE_D_ROOM_FLAG = 6;
+declare const STIMULATE_FLAG = 7;
 
 /**
  * flag types type definitions
@@ -938,6 +939,7 @@ type STANDARD_SQUAD = 3;
 type CLAIM_FLAG = 4;
 type REMOTE_FLAG = 5;
 type OVERRIDE_D_ROOM_FLAG = 6;
+type STIMULATE_FLAG = 7;
 
 /**
  * type that holds all flag type constants
@@ -948,7 +950,8 @@ type FlagTypeConstant =
     STANDARD_SQUAD |
     CLAIM_FLAG |
     REMOTE_FLAG |
-    OVERRIDE_D_ROOM_FLAG;
+    OVERRIDE_D_ROOM_FLAG |
+    STIMULATE_FLAG;
 
 /**
  * Tier Definitions

@@ -9,7 +9,8 @@ import {
     CLAIM_FLAG,
     REMOTE_FLAG,
     OVERRIDE_D_ROOM_FLAG,
-    ERROR_WARN
+    ERROR_WARN,
+    STIMULATE_FLAG
 } from "utils/Constants";
 import { ConsoleCommands } from "./ConsoleCommands";
 
@@ -177,6 +178,21 @@ export default class EmpireHelper {
         Memory.flags[flag.name].flagName = flag.name;
 
         console.log("Option Flag [" + flag.name + "] processed. Flag Type: [" + flagTypeConst + "]");
+    }
+
+    /**
+     * commit a stimulate flag to an owned room
+     * @param flag the flag we are commiting to memory
+     */
+    public static processNewStimulateFlag(flag: Flag): void {
+
+        // Set all the memory values for the flag
+        const flagTypeConst: FlagTypeConstant | undefined = this.getFlagType(flag);
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+        Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
     }
 
     /**
@@ -519,6 +535,9 @@ export default class EmpireHelper {
                 case COLOR_WHITE:
                     flagType = OVERRIDE_D_ROOM_FLAG;
                     break;
+
+                case COLOR_YELLOW:
+                    flagType = STIMULATE_FLAG;
             }
         }
 
