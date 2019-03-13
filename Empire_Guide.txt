@@ -5,6 +5,39 @@ Compile and upload code to screeps:
     rollup -c --environment DEST:main       // compile and upload once
     rollup -cw --environment DEST:main      // watch the code to compile and reupload on save
 
+Git Command Line Cheat Sheet:
+    git status
+        shows information about your current state in git (branch, commits, files staged, etc)
+    
+    git add {filepath}
+        stage a single file
+    git add -u
+        stage all unstaged files that you previous staged
+    git add .
+        stage all unstaged files
+        
+    git commit -m "commit message here"
+        commit with a message
+    git commit
+        commit and opens up vi in terminal with info about your commit, write message and do :wq to save commit
+    
+    git push
+        i mean yeah... lol
+    git push -f
+        force replace the origin branch with your local branch
+        
+    git rebase {branch name}
+        rebase a branch into your current HEAD (puts all your commits after the last commit on the branch you're bringing in)
+    git pull
+        git fetch and git merge mixed into one command
+    
+    git checkout {branch name}
+        checkout a new branch off your current local HEAD
+    git checkout {old branch name} -b {new branch name}
+        checkout a new branch off the old branch (ie git checkout origin/master -b coolnewfeature)
+    git branch
+        show all local branches with a * by the one your HEAD is pointing to
+        
 
 -------- Flag Types ---------
 Remote Flag:
