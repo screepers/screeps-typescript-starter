@@ -1476,6 +1476,7 @@ export class SpawnHelper {
             homeRoom: homeRoomNameParam,
             targetRoom: targetRoomParam,
             workTarget: null,
+            job: undefined,
             options: creepOptions,
             working: false
         };

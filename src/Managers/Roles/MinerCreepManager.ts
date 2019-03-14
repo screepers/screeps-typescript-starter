@@ -1,4 +1,12 @@
 import CreepRoleManagerParent from "./CreepRoleManagerParent";
+import RoomApi from "../../Api/Room.Api";
+import MemoryApi from "../../Api/Memory.Api";
+import CreepDomesticApi from "Api/CreepDomestic.Api";
+import CreepApi from "Api/Creep.Api";
+import CreepDomestic from "Api/CreepDomestic.Api";
+import {
+    ERROR_WARN
+} from "utils/constants";
 
 // Manager for the miner creep role
 export default class MinerCreepManager extends CreepRoleManagerParent {
@@ -8,12 +16,32 @@ export default class MinerCreepManager extends CreepRoleManagerParent {
      * @param creep the creep we are running
      */
     public static runCreepRole(creep: Creep): void {
-        // if the creep is not working, get an open source job
-        // move to container on that source
-        // mine that source and set working to true
-        // if the creep is working, do nothing
-        // if no source job found, do nothing (possible to happen if miner spawns early
-        // before the previous miner has actually died)
-    }
 
+        const working: boolean = creep.memory.working;
+        const room: Room = Game.rooms[creep.memory.homeRoom];
+        let targetID: string | null;
+        let job: BaseJob | undefined = creep.memory.job;
+
+        // If the creep is already working, mine the source they are already targeting
+        if (working) {
+            if (CreepDomesticApi.isOnMiningContainerOrSource(creep, job as GetEnergyJob)) {
+                CreepApi.doWork(creep, job);
+                return;
+            }
+            CreepDomesticApi.moveToMiningContainerOrSource(creep, job as GetEnergyJob);
+        }
+        // ---------- End of working state
+
+        // Creep is not yet working, find an open source job for it
+        const sourceJob: GetEnergyJob | undefined = _.find(MemoryApi.getAllGetEnergyJobs(room,
+            (job: GetEnergyJob) => !job.isTaken && job.targetType === "source"
+        ));
+
+        if (sourceJob) {
+            CreepDomesticApi.moveToMiningContainerOrSource(creep, job as GetEnergyJob);
+            creep.memory.job = sourceJob;
+            creep.memory.working = true;
+        }
+        // ------- End of not working state
+    }
 }

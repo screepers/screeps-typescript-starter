@@ -247,6 +247,10 @@ interface CreepMemory {
      */
     workTarget: any;
     /**
+     * the job the creep is working
+     */
+    job: BaseJob | undefined;
+    /**
      * the creep's options given to it at birth (can be adjusted thorugh lifetime)
      */
     options: CreepOptionsCiv | CreepOptionsMili;
