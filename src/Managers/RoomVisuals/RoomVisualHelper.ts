@@ -13,7 +13,6 @@ import {
 } from "utils/constants";
 
 const textColor = '#bab8ba';
-const shadowColor = '636466';
 const textSize = .8;
 const charHeight = textSize * 1.1;
 
