@@ -97,36 +97,43 @@ export default class RoomVisualApi {
         lines.push("");
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
 
-        // Add creeps to the lines array
-        if (creepLimits.domesticLimits.miner > 0) {
-            lines.push("Miners:     " + roles[ROLE_MINER] + " / " + creepLimits.domesticLimits.miner);
+        if (creepLimits['domesticLimits']) {
+
+            // Add creeps to the lines array
+            if (creepLimits.domesticLimits.miner > 0) {
+                lines.push("Miners:     " + roles[ROLE_MINER] + " / " + creepLimits.domesticLimits.miner);
+            }
+            if (creepLimits.domesticLimits.harvester > 0) {
+                lines.push("Harvesters:     " + roles[ROLE_HARVESTER] + " / " + creepLimits.domesticLimits.harvester);
+            }
+            if (creepLimits.domesticLimits.worker > 0) {
+                lines.push("Workers:     " + roles[ROLE_WORKER] + " / " + creepLimits.domesticLimits.worker);
+            }
+            if (creepLimits.domesticLimits.lorry > 0) {
+                lines.push("Lorries:    " + roles[ROLE_LORRY] + " / " + creepLimits.domesticLimits.lorry);
+            }
+            if (creepLimits.domesticLimits.powerUpgrader > 0) {
+                lines.push("Power Upgraders:    " + roles[ROLE_POWER_UPGRADER] + " / " + creepLimits.domesticLimits.powerUpgrader);
+            }
         }
-        if (creepLimits.domesticLimits.harvester > 0) {
-            lines.push("Harvesters:     " + roles[ROLE_HARVESTER] + " / " + creepLimits.domesticLimits.harvester);
-        }
-        if (creepLimits.domesticLimits.worker > 0) {
-            lines.push("Workers:     " + roles[ROLE_WORKER] + " / " + creepLimits.domesticLimits.worker);
-        }
-        if (creepLimits.domesticLimits.lorry > 0) {
-            lines.push("Lorries:    " + roles[ROLE_LORRY] + " / " + creepLimits.domesticLimits.lorry);
-        }
-        if (creepLimits.domesticLimits.powerUpgrader > 0) {
-            lines.push("Power Upgraders:    " + roles[ROLE_POWER_UPGRADER] + " / " + creepLimits.domesticLimits.powerUpgrader);
-        }
-        if (creepLimits.remoteLimits.remoteMiner > 0) {
-            lines.push("Remote Miners:      " + roles[ROLE_REMOTE_MINER] + " / " + creepLimits.remoteLimits.remoteMiner);
-        }
-        if (creepLimits.remoteLimits.remoteHarvester > 0) {
-            lines.push("Remote Harvesters:    " + roles[ROLE_REMOTE_HARVESTER] + " / " + creepLimits.remoteLimits.remoteHarvester);
-        }
-        if (creepLimits.remoteLimits.remoteReserver > 0) {
-            lines.push("Remote Reservers:    " + roles[ROLE_REMOTE_RESERVER] + " / " + creepLimits.remoteLimits.remoteReserver);
-        }
-        if (creepLimits.remoteLimits.remoteColonizer > 0) {
-            lines.push("Remote Colonizers:    " + roles[ROLE_COLONIZER] + " / " + creepLimits.remoteLimits.remoteColonizer);
-        }
-        if (creepLimits.remoteLimits.claimer > 0) {
-            lines.push("Claimers:       " + roles[ROLE_CLAIMER] + " / " + creepLimits.remoteLimits.claimer);
+
+        if (creepLimits['remoteLimits']) {
+
+            if (creepLimits.remoteLimits.remoteMiner > 0) {
+                lines.push("Remote Miners:      " + roles[ROLE_REMOTE_MINER] + " / " + creepLimits.remoteLimits.remoteMiner);
+            }
+            if (creepLimits.remoteLimits.remoteHarvester > 0) {
+                lines.push("Remote Harvesters:    " + roles[ROLE_REMOTE_HARVESTER] + " / " + creepLimits.remoteLimits.remoteHarvester);
+            }
+            if (creepLimits.remoteLimits.remoteReserver > 0) {
+                lines.push("Remote Reservers:    " + roles[ROLE_REMOTE_RESERVER] + " / " + creepLimits.remoteLimits.remoteReserver);
+            }
+            if (creepLimits.remoteLimits.remoteColonizer > 0) {
+                lines.push("Remote Colonizers:    " + roles[ROLE_COLONIZER] + " / " + creepLimits.remoteLimits.remoteColonizer);
+            }
+            if (creepLimits.remoteLimits.claimer > 0) {
+                lines.push("Claimers:       " + roles[ROLE_CLAIMER] + " / " + creepLimits.remoteLimits.claimer);
+            }
         }
 
         lines.push("");

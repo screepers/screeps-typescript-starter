@@ -128,4 +128,11 @@ export default class Empire {
         // Currently all flags are one time use, add the flag constant here if its like a tower draining for example
         return true;
     }
+
+    /**
+     * if there are no active attack flags for a specific room, active one
+     */
+    public static activateAttackFlags(room: Room): void {
+
+    }
 };
