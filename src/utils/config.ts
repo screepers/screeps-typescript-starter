@@ -24,3 +24,8 @@ export const LINK_MINIMUM_ENERGY = 1;
  * Percentage HP to begin repairing structures (besides Ramparts and Walls)
  */
 export const REPAIR_THRESHOLD = .75;
+
+/**
+ * toggle for the room visual overlay
+ */
+export const ROOM_OVERLAY_ON = true;

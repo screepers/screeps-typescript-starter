@@ -5,6 +5,12 @@ import RoomVisualApi from "./RoomVisual.Api";
 export default class RoomVisualManager {
 
     /**
+     * FUTURE PLANS FOR THIS MANAGER
+     *
+     * Create progreess bars for all the percentages
+     * Place more ideas here --
+     */
+    /**
      * run the manager for each room
      */
     public static runRoomVisualManager(): void {
@@ -22,12 +28,28 @@ export default class RoomVisualManager {
      */
     public static runSingleRoomVisualManager(room: Room): void {
 
-        let endLeftLine: number = 0;
+        let endLeftLine: number = 1;
+        let endRightLine: number = 1;
+        const LEFT_START_X = 1;
+        const RIGHT_START_X = 48;
 
+        // Left Side -----
         // Display the Empire box in the top left
-        endLeftLine = RoomVisualApi.createEmpireInfoVisual(room, 1, 1);
-        endLeftLine = RoomVisualApi.createCreepCountVisual(room, 1, endLeftLine);
-        endLeftLine = RoomVisualApi.createRoomInfoVisual(room, 1, endLeftLine);
+        endLeftLine = RoomVisualApi.createEmpireInfoVisual(room, LEFT_START_X, endLeftLine);
+        // Display the Creep Info box in middle left
+        endLeftLine = RoomVisualApi.createCreepCountVisual(room, LEFT_START_X, endLeftLine);
+        // Display the Room Info box in the bottom left
+        endLeftLine = RoomVisualApi.createRoomInfoVisual(room, LEFT_START_X, endLeftLine);
+        // ------
 
+        // Right Side -----
+        // Display Remote Flag box on the top right
+        endRightLine = RoomVisualApi.createRemoteFlagVisual(room, RIGHT_START_X, endRightLine);
+        // Display Claim Flag Box on the upper middle right
+        endRightLine = RoomVisualApi.createClaimFlagVisual(room, RIGHT_START_X, endRightLine);
+        // Display Attack Flag Box on the lower middle right
+        endRightLine = RoomVisualApi.createAttackFlagVisual(room, RIGHT_START_X, endRightLine);
+        // Display Option Flag box on the bottom right
+        endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
     }
 }

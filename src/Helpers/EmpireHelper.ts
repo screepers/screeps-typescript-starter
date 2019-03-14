@@ -78,6 +78,7 @@ export default class EmpireHelper {
         // Get the host room and set the flags memory
         const dependentRoom: Room = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
         const flagTypeConst = this.getFlagType(flag);
+        const roomName = flag.pos.roomName;
         Memory.flags[flag.name].complete = false;
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
@@ -92,13 +93,15 @@ export default class EmpireHelper {
         const existingDepedentAttackRoomMem: AttackRoomMemory | undefined = _.find(MemoryApi.getAttackRooms(dependentRoom),
             (rr: AttackRoomMemory) => {
                 if (rr) {
-                    return (rr.roomName === flag.pos.roomName && _.every(rr.flags, (innerRR: AttackFlagMemory) => innerRR.flagName !== flag.name));
+                    return rr.roomName === roomName;
                 }
                 return false;
             });
 
         if (existingDepedentAttackRoomMem) {
+            console.log("Attack Flag [" + flag.name + "] processed. Added to existing Host Room: [" + existingDepedentAttackRoomMem.roomName + "]");
             existingDepedentAttackRoomMem.flags.push(attackFlagMemory);
+            return;
         }
 
         // Otherwise, add a brand new memory structure onto it

@@ -65,7 +65,7 @@ export default class Empire {
                     if (flag.secondaryColor === COLOR_WHITE) {
                         EmpireHelper.processNewDependentRoomOverrideFlag(flag);
                     }
-                    else if (flag.secondaryColor == COLOR_YELLOW) {
+                    else if (flag.secondaryColor === COLOR_YELLOW) {
                         EmpireHelper.processNewStimulateFlag(flag);
                     }
 

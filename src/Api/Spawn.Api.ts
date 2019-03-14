@@ -215,7 +215,12 @@ export default class SpawnApi {
             if (!attackRoom) {
                 continue;
             }
-            activeAttackRoomFlag = _.find(attackRoom!['flags'], (flagMem) => flagMem.active);
+            activeAttackRoomFlag = _.find(attackRoom!['flags'], (flagMem) => {
+                if (!flagMem) {
+                    return false;
+                }
+                return flagMem.active
+            });
             if (activeAttackRoomFlag) {
                 break;
             }

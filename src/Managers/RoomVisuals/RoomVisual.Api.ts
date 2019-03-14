@@ -1,6 +1,5 @@
 import RoomVisualHelper from "./RoomVisualHelper";
 import MemoryApi from "Api/Memory.Api";
-import RoomHelper from "Helpers/RoomHelper";
 import {
     ROLE_MINER,
     ROLE_CLAIMER,
@@ -11,8 +10,11 @@ import {
     ROLE_REMOTE_MINER,
     ROLE_REMOTE_RESERVER,
     ROLE_WORKER,
-    ROLE_POWER_UPGRADER
+    ROLE_POWER_UPGRADER,
+    OVERRIDE_D_ROOM_FLAG,
+    STIMULATE_FLAG
 } from "utils/constants";
+import RoomHelper from "Helpers/RoomHelper";
 
 // Api for room visuals
 export default class RoomVisualApi {
@@ -50,9 +52,9 @@ export default class RoomVisualApi {
         lines.push("LVL:    " + Game.gcl['level']);
         lines.push("");
         lines.push("Viewing:  [ " + room.name + " ]");
-        lines.push("Total Rooms:    " + ownedRooms.length);
-        lines.push("Total Creeps:   " + totalCreeps);
-        RoomVisualHelper.multiLineText(lines, x, y, room.name);
+        lines.push("Empire Rooms:    " + ownedRooms.length);
+        lines.push("Empire Creeps:   " + totalCreeps);
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 
         // Draw a box around the text
         new RoomVisual(room.name)
@@ -93,6 +95,7 @@ export default class RoomVisualApi {
         lines.push("");
         lines.push("Creep Info")
         lines.push("");
+        lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
 
         // Add creeps to the lines array
         if (creepLimits.domesticLimits.miner > 0) {
@@ -127,7 +130,7 @@ export default class RoomVisualApi {
         }
 
         lines.push("");
-        RoomVisualHelper.multiLineText(lines, x, y, room.name);
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 
         // Draw a box around the text
         new RoomVisual(room.name)
@@ -149,7 +152,7 @@ export default class RoomVisualApi {
     public static createRoomInfoVisual(room: Room, x: number, y: number): number {
 
         // Get the info we need
-        const roomState = room.memory.roomState;
+        const roomState: string = RoomVisualHelper.convertRoomStateToString(room.memory.roomState);
         const level: number = room.controller!.level;
         const controllerProgress: number = room.controller!.progress;
         const controllerTotal: number = room.controller!.progressTotal;
@@ -165,7 +168,7 @@ export default class RoomVisualApi {
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
         lines.push("");
-        RoomVisualHelper.multiLineText(lines, x, y, room.name);
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 
         // Draw a box around the text
         new RoomVisual(room.name)
@@ -173,6 +176,191 @@ export default class RoomVisualApi {
             .line(x - 1, y - 1, x + 10, y - 1)                  // top line
             .line(x - 1, y - 1, x - 1, y + lines.length - 1)   // left line
             .line(x + 10, y - 1, x + 10, y + lines.length - 1);  // right line
+
+        // Return where the next box should start
+        return y + lines.length;
+    }
+
+    /**
+     * draws the information for remote flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    public static createRemoteFlagVisual(room: Room, x: number, y: number): number {
+
+        const dependentRemoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
+
+        // Draw the text
+        const lines: string[] = [];
+        lines.push("");
+        lines.push("Remote Rooms ")
+        lines.push("");
+        for (const dr of dependentRemoteRooms) {
+            if (!dr) {
+                continue;
+            }
+
+            lines.push("Room:   [ " + dr!.roomName + " ] ");
+            lines.push("Flag:   [ " + dr!.flags[0].flagName + " ] ");
+            lines.push("");
+        }
+
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Remote Rooms ");
+            lines.push("");
+        }
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
+
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+
+        // Return where the next box should start
+        return y + lines.length;
+    }
+
+    /**
+     * draws the information for claim flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    public static createClaimFlagVisual(room: Room, x: number, y: number): number {
+
+        const dependentRemoteRooms: Array<ClaimRoomMemory | undefined> = MemoryApi.getClaimRooms(room);
+
+        // Draw the text
+        const lines: string[] = [];
+        lines.push("");
+        lines.push("Claim Rooms ")
+        lines.push("");
+        for (const dr of dependentRemoteRooms) {
+            if (!dr) {
+                continue;
+            }
+
+            lines.push("Room:   [ " + dr!.roomName + " ] ");
+            lines.push("Flag:   [ " + dr!.flags[0].flagName + " ] ");
+            lines.push("");
+        }
+
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Claim Rooms ");
+            lines.push("");
+        }
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
+
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+
+        // Return where the next box should start
+        return y + lines.length;
+    }
+
+    /**
+     * draws the information for attack flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    public static createAttackFlagVisual(room: Room, x: number, y: number): number {
+
+        const dependentRemoteRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
+        // Draw the text
+        const lines: string[] = [];
+        lines.push("");
+        lines.push("Attack Rooms ")
+        lines.push("");
+        for (const dr of dependentRemoteRooms) {
+            if (!dr) {
+                continue;
+            }
+
+            lines.push("Room:   [ " + dr!.roomName + " ] ");
+            for (const flag of dr!.flags) {
+                if (!flag) {
+                    continue;
+                }
+                lines.push("Flag:   [ " + flag.flagName + " ] ");
+                lines.push("Type:   [ " + RoomVisualHelper.convertFlagTypeToString(flag.flagType) + " ]");
+            }
+            lines.push("");
+        }
+
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Attack Rooms ");
+            lines.push("");
+        }
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
+
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+
+        // Return where the next box should start
+        return y + lines.length;
+    }
+
+    /**
+     * draws the information for option flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    public static createOptionFlagVisual(room: Room, x: number, y: number): number {
+
+        const optionFlags = _.filter(Memory.flags, (flag: FlagMemory) =>
+            flag.flagType ===
+            (OVERRIDE_D_ROOM_FLAG || STIMULATE_FLAG) &&
+            (Game.flags[flag.flagName].pos.roomName === room.name)
+        );
+
+        // Draw the text
+        const lines: string[] = [];
+        lines.push("");
+        lines.push("Option Flags ")
+        lines.push("");
+        for (const of of optionFlags) {
+            if (!of) {
+                continue;
+            }
+
+            lines.push("Flag:   [ " + of.flagName + " ] ");
+            lines.push("Type:   [ " + of.flagType + " ] ");
+            lines.push("");
+        }
+
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Option Flags ");
+            lines.push("");
+        }
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
+
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
 
         // Return where the next box should start
         return y + lines.length;
