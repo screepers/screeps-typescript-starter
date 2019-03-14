@@ -13,6 +13,7 @@ import {
 } from "utils/constants";
 
 const textColor = '#bab8ba';
+const shadowColor = '636466';
 const textSize = .8;
 const charHeight = textSize * 1.1;
 
@@ -20,7 +21,7 @@ const charHeight = textSize * 1.1;
 export default class RoomVisualManager {
 
     /**
-     *
+     * display m
      * @param lines the array of text we want to display
      * @param x the x value we are starting it at
      * @param y the y value we are starting it at

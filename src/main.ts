@@ -42,7 +42,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
 
   // Display room visuals if we have a fat enough bucket and config option allows it
-  if (Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
+  if ((Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) || true) {
     try { RoomVisualManager.runRoomVisualManager(); } catch (e) { UtilHelper.printError(e); }
   }
 
