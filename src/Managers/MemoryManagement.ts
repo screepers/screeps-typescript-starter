@@ -7,6 +7,7 @@ export default class MemoryManager {
      * run the memory for the AI
      */
     public static runMemoryManager(): void {
+        this.initMainMemory();
 
         MemoryApi.garbageCollection();
 
@@ -16,5 +17,22 @@ export default class MemoryManager {
             MemoryApi.initRoomMemory(room);
             MemoryApi.cleanDependentRoomMemory(room);
         });
+    }
+
+    /**
+     * Ensures the initial Memory object is defined properly
+     */
+    public static initMainMemory() {
+        if (!Memory.rooms) {
+            Memory.rooms = {};
+        }
+
+        if (!Memory.flags) {
+            Memory.flags = {};
+        }
+
+        if (!Memory.creeps) {
+            Memory.creeps = {};
+        }
     }
 }
