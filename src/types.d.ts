@@ -24,8 +24,8 @@ type ERROR_WARN = 1;
  */
 type ERROR_INFO = 0;
 
-// room state constants
 
+// room state constants
 declare const ROOM_STATE_INTRO = 0;
 declare const ROOM_STATE_BEGINNER = 1;
 declare const ROOM_STATE_INTER = 2;
