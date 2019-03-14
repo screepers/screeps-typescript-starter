@@ -134,5 +134,30 @@ export default class Empire {
      */
     public static activateAttackFlags(room: Room): void {
 
+        const attackRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
+        const attackRoomWithNoActiveFlag: AttackRoomMemory | undefined = _.find(attackRooms, (attackRoom: AttackRoomMemory) => {
+            if (attackRoom) {
+                return !_.some(attackRoom!.flags, (flag: AttackFlagMemory) => flag.active);
+            }
+            return false;
+        });
+
+        // Break early if there are none
+        if (!attackRoomWithNoActiveFlag) {
+            return;
+        }
+
+        // Break early if no attack flags on this room (possible to happen from an error with cleaning)
+        if (!attackRoomWithNoActiveFlag!.flags) {
+            return;
+        }
+
+        // Activate the first one we see, possible to change later for another standard
+        for (const arf in attackRoomWithNoActiveFlag!.flags) {
+            if (attackRoomWithNoActiveFlag!.flags[arf]) {
+                attackRoomWithNoActiveFlag!.flags[arf]!.active = true;
+                break;
+            }
+        }
     }
 };
