@@ -17,6 +17,7 @@ export default class CarryPartJobs {
 
         _.forEach(lowSpawnsAndExtensions, (structure: StructureSpawn | StructureExtension) => {
             const fillJob: CarryPartJob = {
+                jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
                 actionType: "transfer",
@@ -27,6 +28,7 @@ export default class CarryPartJobs {
         });
         _.forEach(lowTowers, (structure: StructureTower) => {
             const fillJob: CarryPartJob = {
+                jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
                 actionType: "transfer",
@@ -47,21 +49,27 @@ export default class CarryPartJobs {
         const storeJobs = [];
 
         if (room.storage !== undefined) {
-            storeJobs.push(<CarryPartJob>{
+            const storageJob: CarryPartJob = {
+                jobType: "carryPartJob",
                 targetID: room.storage.id,
                 targetType: STRUCTURE_STORAGE,
                 actionType: "transfer",
                 isTaken: false
-            });
+            };
+
+            storeJobs.push(storageJob);
         }
 
         if (room.terminal !== undefined) {
-            storeJobs.push(<CarryPartJob>{
+            const terminalJob: CarryPartJob = {
+                jobType: "carryPartJob",
                 targetID: room.terminal.id,
                 targetType: STRUCTURE_TERMINAL,
                 actionType: "transfer",
                 isTaken: false
-            });
+            };
+
+            storeJobs.push(terminalJob);
         }
 
         return storeJobs;

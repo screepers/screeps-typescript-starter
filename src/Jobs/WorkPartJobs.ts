@@ -17,6 +17,7 @@ export default class WorkPartJobs {
 
         _.forEach(repairTargets, (structure: Structure) => {
             const repairJob: WorkPartJob = {
+                jobType: "workPartJob",
                 targetID: structure.id,
                 targetType: <BuildableStructureConstant>structure.structureType,
                 actionType: "repair",
@@ -44,6 +45,7 @@ export default class WorkPartJobs {
 
         _.forEach(constructionSites, (cs: ConstructionSite) => {
             const buildJob: WorkPartJob = {
+                jobType: "workPartJob",
                 targetID: cs.id,
                 targetType: "constructionSite",
                 actionType: "build",
@@ -68,6 +70,7 @@ export default class WorkPartJobs {
 
         if (room.controller !== undefined) {
             const controllerJob: WorkPartJob = {
+                jobType: "workPartJob",
                 targetID: room.controller.id,
                 targetType: "controller",
                 actionType: "upgrade",

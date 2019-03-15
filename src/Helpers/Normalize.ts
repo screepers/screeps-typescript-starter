@@ -1,6 +1,20 @@
 import UtilHelper from "./UtilHelper";
 
 export default class Normalize {
+
+    /**
+     * Returns a mockup of a room object for a given roomname
+     * @param roomName 
+     */
+    public static getMockRoomObject(roomName: string){
+        const mockRoom: Room = new Room(roomName);
+        mockRoom.name = roomName;
+        mockRoom.visual.roomName = roomName;
+        mockRoom.memory = Memory.rooms[roomName];
+        mockRoom.energyAvailable = -1; // Unknown Value
+        mockRoom.energyCapacityAvailable = -1; // Unknown Value
+    }
+
     /**
      * Normalizes to a Room Name
      * @param room The name of a room as a string, or the Room object

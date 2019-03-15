@@ -15,6 +15,7 @@ export default class ClaimPartJobs {
 
         _.forEach(roomNames, (name: string) => {
             const claimJob: ClaimPartJob = {
+                jobType: "claimPartJob",
                 targetID: name,
                 targetType: "roomName",
                 actionType: "claim",
@@ -43,6 +44,7 @@ export default class ClaimPartJobs {
 
         _.forEach(roomNames, (name: string) => {
             const reserveJob: ClaimPartJob = {
+                jobType: "claimPartJob",
                 targetID: name,
                 targetType: "roomName",
                 actionType: "reserve",
@@ -71,6 +73,7 @@ export default class ClaimPartJobs {
 
         _.forEach(controllers, (controller: StructureController) => {
             const signJob: ClaimPartJob = {
+                jobType: "claimPartJob",
                 targetID: controller.id,
                 targetType: "controller",
                 actionType: "sign",
@@ -99,6 +102,7 @@ export default class ClaimPartJobs {
 
         _.forEach(roomNames, (name: string) => {
             const attackJob: ClaimPartJob = {
+                jobType: "claimPartJob",
                 targetID: name,
                 targetType: "roomName",
                 actionType: "attack",

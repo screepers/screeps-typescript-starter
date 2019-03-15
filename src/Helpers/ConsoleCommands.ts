@@ -67,18 +67,22 @@ export class ConsoleCommands {
      * kill all creeps
      * @param room [optional] the room we want to kill all creeps in (default all rooms)
      */
-    public static killAllCreeps = function (room?: Room): void {
+    public static killAllCreeps = function (room?: Room, role?: RoleConstant): void {
 
         // if no room specified, kill all creeps
         if (!room) {
             _.forEach(Game.creeps, (creep) => {
-                creep.suicide();
+                if(!role || creep.memory.role === role){
+                    creep.suicide();
+                }
             });
         }
         else {
             _.forEach(Game.creeps, (creep) => {
                 if (creep.room.name === room.name) {
-                    creep.suicide();
+                    if( !role || creep.memory.role === role){
+                        creep.suicide();
+                    }
                 }
             });
         }

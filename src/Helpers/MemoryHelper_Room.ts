@@ -30,11 +30,10 @@ export default class MemoryHelper_Room {
         // Update Custom Memory Components
         this.updateDependentRooms(room);
         // Update Job Lists
-
-        // ! Working on implementing
-        // ! - Should be able to call any one of the sub-JobListings and have it fill in any missing memory structures
-        this.updateGetEnergy_sourceJobs(room);
-
+        this.updateGetEnergy_allJobs(room);
+        this.updateCarryPart_allJobs(room);
+        this.updateWorkPart_allJobs(room);
+        this.updateClaimPart_allJobs(room);
         // Calling the below function is equivalent to calling all of the above updateGetEnergy_xxxxxJobs functions
         // this.updateGetEnergy_allJobs(room);
     }

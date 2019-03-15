@@ -344,9 +344,17 @@ type Any_ValidTargets =
     | WorkPart_ValidTargets;
 
 /**
+ * Valid jobType for BaseJob
+ */
+type Valid_JobTypes = "getEnergyJob" | "claimPartJob" | "carryPartJob" | "workPartJob";
+/**
  * Basic Job Interface
  */
 interface BaseJob {
+    /**
+     * Type of the job object
+     */
+    jobType: Valid_JobTypes;
     /**
      * ID of the target object
      */

@@ -22,6 +22,7 @@ export default class GetEnergyJobs {
             const sourceResources: StoreDefinition = { energy: source.energy };
             // Create the GetEnergyJob object for the source
             const sourceJob: GetEnergyJob = {
+                jobType: "getEnergyJob",
                 targetID: source.id,
                 targetType: "source",
                 resources: sourceResources,
@@ -54,6 +55,7 @@ export default class GetEnergyJobs {
 
         _.forEach(containers, (container: StructureContainer) => {
             const containerJob: GetEnergyJob = {
+                jobType: "getEnergyJob",
                 targetID: container.id,
                 targetType: STRUCTURE_CONTAINER,
                 resources: container.store,
@@ -88,6 +90,7 @@ export default class GetEnergyJobs {
             const linkStore: StoreDefinition = { energy: link.energy };
 
             const linkJob: GetEnergyJob = {
+                jobType: "getEnergyJob",
                 targetID: link.id,
                 targetType: STRUCTURE_LINK,
                 resources: linkStore,
@@ -110,6 +113,7 @@ export default class GetEnergyJobs {
         // Create the storage job if active
         if (room.storage !== undefined) {
             const storageJob: GetEnergyJob = {
+                jobType: "getEnergyJob",
                 targetID: room.storage.id,
                 targetType: STRUCTURE_STORAGE,
                 resources: room.storage.store,
@@ -121,6 +125,7 @@ export default class GetEnergyJobs {
         // Create the terminal job if active
         if (room.terminal !== undefined) {
             const terminalJob: GetEnergyJob = {
+                jobType: "getEnergyJob",
                 targetID: room.terminal.id,
                 targetType: STRUCTURE_TERMINAL,
                 resources: room.terminal.store,
