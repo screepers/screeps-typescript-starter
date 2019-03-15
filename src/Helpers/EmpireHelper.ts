@@ -24,6 +24,7 @@ export default class EmpireHelper {
         // Get the host room and set the flags memory
         const dependentRoom: Room = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
         const flagTypeConst: FlagTypeConstant | undefined = this.getFlagType(flag);
+        const roomName: string = flag.pos.roomName;
         Memory.flags[flag.name].complete = false;
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
@@ -42,7 +43,7 @@ export default class EmpireHelper {
         const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(MemoryApi.getRemoteRooms(dependentRoom),
             (rr: RemoteRoomMemory) => {
                 if (rr) {
-                    return (rr.roomName === flag.pos.roomName && _.every(rr.flags, (innerRR: RemoteFlagMemory) => innerRR.flagName !== flag.name));
+                    return rr.roomName === roomName;
                 }
                 return false;
             });
@@ -76,8 +77,8 @@ export default class EmpireHelper {
 
         // Get the host room and set the flags memory
         const dependentRoom: Room = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
-        const flagTypeConst = this.getFlagType(flag);
-        const roomName = flag.pos.roomName;
+        const flagTypeConst: FlagTypeConstant | undefined = this.getFlagType(flag);
+        const roomName: string = flag.pos.roomName;
         Memory.flags[flag.name].complete = false;
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
@@ -124,6 +125,7 @@ export default class EmpireHelper {
         // Get the host room and set the flags memory
         const dependentRoom: Room = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
         const flagTypeConst: FlagTypeConstant | undefined = this.getFlagType(flag);
+        const roomName: string = flag.pos.roomName;
         Memory.flags[flag.name].complete = false;
         Memory.flags[flag.name].processed = true;
         Memory.flags[flag.name].timePlaced = Game.time;
@@ -142,7 +144,7 @@ export default class EmpireHelper {
         const existingDepedentClaimRoomMem: ClaimRoomMemory | undefined = _.find(MemoryApi.getClaimRooms(dependentRoom),
             (rr: ClaimRoomMemory) => {
                 if (rr) {
-                    return (rr.roomName === flag.pos.roomName && _.every(rr.flags, (innerRR: ClaimFlagMemory) => innerRR.flagName !== flag.name));
+                    return rr.roomName === roomName;
                 }
                 return false;
             });
@@ -521,12 +523,10 @@ export default class EmpireHelper {
                     flagType = STANDARD_SQUAD;
             }
         }
-
         // Claim Flags
         else if (flag.color === COLOR_WHITE) {
             flagType = CLAIM_FLAG;
         }
-
         // Option Flags
         else if (flag.color === COLOR_GREEN) {
 
@@ -542,7 +542,6 @@ export default class EmpireHelper {
                     flagType = STIMULATE_FLAG;
             }
         }
-
         // Remote Flags
         else if (flag.color === COLOR_YELLOW) {
             flagType = REMOTE_FLAG;
