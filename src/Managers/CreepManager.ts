@@ -31,6 +31,7 @@ import {
     ROLE_STALKER,
     ROLE_WORKER,
     ROLE_ZEALOT,
+    ERROR_ERROR,
 } from "utils/Constants";
 
 // Call the creep manager for each role

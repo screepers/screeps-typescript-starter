@@ -3,7 +3,7 @@ import MemoryApi from "../../Api/Memory.Api";
 import CreepDomesticApi from "Api/CreepDomestic.Api";
 import CreepApi from "Api/Creep.Api";
 import CreepDomestic from "Api/CreepDomestic.Api";
-import { ERROR_WARN } from "utils/constants";
+import { ERROR_WARN, ERROR_ERROR } from "utils/constants";
 import GetEnergyJobs from "Jobs/GetEnergyJobs";
 import UserException from "utils/UserException";
 
@@ -53,7 +53,7 @@ export default class MinerCreepManager {
      */
     public static runGetEnergyJob(creep: Creep, job: GetEnergyJob): void {
         if (CreepDomesticApi.isOnMiningContainerOrSource(creep, job as GetEnergyJob)) {
-            CreepApi.doWork(creep, job);
+            CreepApi.doWork_GetEnergyJob(creep, job);
             return;
         }
         CreepDomesticApi.moveToMiningContainerOrSource(creep, job as GetEnergyJob);
