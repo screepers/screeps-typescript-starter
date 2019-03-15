@@ -173,7 +173,7 @@ export default class RoomHelper {
             }
         });
 
-        return numMiningContainers == sources.length;
+        return numMiningContainers === sources.length;
     }
 
     /**

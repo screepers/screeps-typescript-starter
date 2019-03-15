@@ -264,7 +264,10 @@ export default class RoomApi {
             let totalWorkParts = 0;
             // Count the number of work parts targeting the source
             _.remove(miners, (miner: Creep) => {
-                if (miner.memory.workTarget === source.id) {
+                if (!miner.memory.job) {
+                    return false;
+                }
+                if (miner.memory.job!.targetID === source.id) {
                     const workPartCount = miner.getActiveBodyparts(WORK);
                     totalWorkParts += workPartCount;
                     return true;

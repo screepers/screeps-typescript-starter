@@ -173,7 +173,6 @@ export default class MemoryApi {
             options: creepOptions,
             role: creepRole,
             targetRoom: creepTargetRoom || "",
-            workTarget: "",
             job: undefined,
             working: false
         };

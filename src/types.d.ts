@@ -179,6 +179,18 @@ type ROLE_DOMESTIC_DEFENDER = "domesticDefender"; //
 // --------------------------------------------------------------------
 
 /**
+ * global console functions
+ */
+declare namespace NodeJS {
+    interface Global {
+        removeConstructionSites(roomName: string, structureType?: string): void;
+        removeFlags(substr: string): void;
+        displayRoomStatus(roomName: string): void;
+        killAllCreeps(room?: Room): void;
+        sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void
+    }
+}
+/**
  * Creep Body Options Object
  */
 interface CreepBodyOptions {
@@ -242,10 +254,6 @@ interface CreepMemory {
      * the room where operations are performed
      */
     targetRoom: string;
-    /**
-     * the creep's target at the moment (storage, construction site, etc)
-     */
-    workTarget: any;
     /**
      * the job the creep is working
      */

@@ -25,14 +25,18 @@ export default class CreepHelper {
             throw new UserException("Source null in getMiningContainer", "room: " + room.name, ERROR_WARN);
         }
 
+        // Get containers and find the closest one to the source
         const containers: StructureContainer[] = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER) as StructureContainer[];
         const closestContainer = source.pos.findClosestByRange(containers);
-
         if (!closestContainer) {
             return undefined;
         }
         else {
-            return closestContainer;
+            // If we have a container, but its not next to the source, its not the correct container
+            if (source.pos.isNearTo(closestContainer)) {
+                return closestContainer;
+            }
+            return undefined;
         }
     }
 }

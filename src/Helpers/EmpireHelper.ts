@@ -12,7 +12,6 @@ import {
     ERROR_WARN,
     STIMULATE_FLAG
 } from "utils/Constants";
-import { ConsoleCommands } from "./ConsoleCommands";
 
 export default class EmpireHelper {
 
