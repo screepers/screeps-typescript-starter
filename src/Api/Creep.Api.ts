@@ -21,27 +21,110 @@ export default class CreepApi {
     }
 
     /**
+     * Do work on the target provided by carryPartJob
+     */
+    public static doWork_CarryPartJob(creep: Creep, job: CarryPartJob) {
+        let target = null;
+
+        // If it is a roomPosition skip the nullcheck
+        if (job.targetType !== "roomPosition" && job.actionType !== "drop") {
+            target = Game.getObjectById(job.targetID);
+            this.nullCheck_target(creep, target);
+        }
+
+        let returnCode: number;
+
+        if (job.actionType === "transfer") {
+            returnCode = creep.transfer(target! as Structure, RESOURCE_ENERGY);
+        } else {
+            // job.actionType === "drop"
+            returnCode = creep.drop(RESOURCE_ENERGY);
+        }
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                break;
+            case ERR_NOT_IN_RANGE:
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Do work on the target provided by workPartJob
+     */
+    public static doWork_WorkPartJob(creep: Creep, job: WorkPartJob) {
+        const target = Game.getObjectById(job.targetID);
+
+        this.nullCheck_target(creep, target);
+
+        let returnCode: number;
+
+        if (job.targetType === STRUCTURE_CONTROLLER) {
+            returnCode = creep.upgradeController(target as StructureController);
+        } else if (job.targetType === "constructionSite") {
+            returnCode = creep.build(target as ConstructionSite);
+        } else {
+            returnCode = creep.repair(target as Structure);
+        }
+
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                break;
+            case ERR_NOT_IN_RANGE:
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
      * Do work on the target provided by a getEnergyJob
      */
     public static doWork_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
         const target = Game.getObjectById(job.targetID);
 
-        if (target === null) {
-            throw new UserException(
-                "Invalid Job Target",
-                "Invalid Job Target for creep: " + creep.name + "\n The error occurred in: doWork_GetEnergyJob()",
-                ERROR_ERROR
-            );
-        }
+        this.nullCheck_target(creep, target);
+
+        let returnCode: number;
 
         if (job.targetType === "source" || job.targetType === "extractor") {
-            creep.harvest(target as Source | Mineral);
+            returnCode = creep.harvest(target as Source | Mineral);
         } else if (job.targetType === "droppedResource") {
-            creep.pickup(target as Resource);
+            returnCode = creep.pickup(target as Resource);
         } else {
-            creep.withdraw(target as Structure, RESOURCE_ENERGY);
+            returnCode = creep.withdraw(target as Structure, RESOURCE_ENERGY);
         }
 
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                break;
+            case ERR_NOT_IN_RANGE:
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Checks if the target is null and throws the appropriate error
+     */
+    public static nullCheck_target(creep: Creep, target: object | null) {
+        if (target === null) {
+            throw new UserException(
+                "Invalid Job Target",
+                "Invalid Job Target for creep: " + creep.name + "\n The error occurred in: " + this.caller,
+                ERROR_ERROR
+            );
+        }
     }
 }

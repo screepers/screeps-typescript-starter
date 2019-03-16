@@ -58,10 +58,9 @@ export class SpawnHelper {
             if (bodyObject[part] <= 0) {
                 valid = false;
             }
-            // if (!(part in BODYPARTS_ALL)) {
-            // * Technically invalid for testing atm - Need to fix
-            //     valid = false;
-            // }
+            if (!(part in BODYPARTS_ALL)) {
+                valid = false;
+            }
         }
         return valid;
     }
@@ -172,14 +171,12 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
-
                     // Options marked with // are overriding the defaults
                     build: false,
                     upgrade: false,
                     repair: false,
-                    harvestSources: true,   //
+                    harvestSources: true, //
                     harvestMinerals: false,
                     wallRepair: false,
                     fillTower: false,
@@ -250,7 +247,6 @@ export class SpawnHelper {
         switch (roomState) {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
-
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
@@ -275,7 +271,6 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_INTER:
-
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
@@ -327,7 +322,6 @@ export class SpawnHelper {
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: false,
@@ -400,7 +394,6 @@ export class SpawnHelper {
         switch (roomState) {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
-
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
@@ -425,7 +418,6 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_INTER:
-
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
@@ -450,7 +442,6 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_ADVANCED:
-
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
@@ -478,7 +469,6 @@ export class SpawnHelper {
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     build: true, //
@@ -558,7 +548,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     build: false,
                     upgrade: false,
@@ -627,7 +616,6 @@ export class SpawnHelper {
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     build: false,
                     upgrade: true, //
@@ -692,7 +680,6 @@ export class SpawnHelper {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
             case ROOM_STATE_INTER:
-
                 creepOptions = {
                     build: true, //
                     upgrade: false,
@@ -761,7 +748,6 @@ export class SpawnHelper {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
             case ROOM_STATE_INTER:
-
                 creepOptions = {
                     build: true, //
                     upgrade: true, //
@@ -785,7 +771,6 @@ export class SpawnHelper {
                 break;
 
             case ROOM_STATE_ADVANCED:
-
                 creepOptions = {
                     build: false,
                     upgrade: false,
@@ -812,7 +797,6 @@ export class SpawnHelper {
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     build: false,
                     upgrade: false,
@@ -874,7 +858,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 // Remote reservers don't really have options perse, so just leave as defaults
                 creepOptions = {
                     build: false,
@@ -945,7 +928,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     build: true, //
                     upgrade: true, //
@@ -988,7 +970,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     build: false,
                     upgrade: false,
@@ -1081,7 +1062,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     squadSize: 1,
                     squadUUID: null,
@@ -1165,7 +1145,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -1244,7 +1223,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -1326,7 +1304,6 @@ export class SpawnHelper {
                 ROOM_STATE_UPGRADER ||
                 ROOM_STATE_SEIGE ||
                 ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -1400,7 +1377,6 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-
                 creepOptions = {
                     squadSize: 0,
                     squadUUID: null,
@@ -1610,9 +1586,7 @@ export class SpawnHelper {
         const allAttackRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
 
         // Return the first active flag we find (should only be 1 flag active at a time across all attack rooms)
-        return _.find(allAttackRooms, attackRoom =>
-            _.some(attackRoom!.flags, (flag: AttackFlagMemory) => flag.active)
-        );
+        return _.find(allAttackRooms, attackRoom => _.some(attackRoom!.flags, (flag: AttackFlagMemory) => flag.active));
     }
 
     /**

@@ -53,7 +53,6 @@ import EmpireApi from "./Empire.Api";
  * The API used by the spawn manager
  */
 export default class SpawnApi {
-
     /**
      * set domestic creep limits
      * @param room the room we want limits for
@@ -174,7 +173,6 @@ export default class SpawnApi {
         const numRemoteSources: number = RoomHelper.numRemoteSources(room);
         const numCurrentlyUnclaimedClaimRooms: number = RoomHelper.numCurrentlyUnclaimedClaimRooms(room);
 
-
         // check what room state we are in
         switch (room.memory.roomState) {
             // Advanced, Upgrader, and Stimulate are the only allowed states for remote mining and claiming operations currently
@@ -183,12 +181,20 @@ export default class SpawnApi {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
                 // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_MINER, numRemoteSources);
-                remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
-                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
+                remoteLimits[ROLE_REMOTE_MINER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(
+                    ROLE_REMOTE_MINER,
+                    numRemoteSources
+                );
+                remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(
+                    ROLE_REMOTE_HARVESTER,
+                    numRemoteSources
+                );
+                remoteLimits[ROLE_REMOTE_RESERVER] =
+                    numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                remoteLimits[ROLE_CLAIMER] = numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
+                remoteLimits[ROLE_CLAIMER] =
+                    numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
 
                 break;
         }
@@ -215,11 +221,11 @@ export default class SpawnApi {
             if (!attackRoom) {
                 continue;
             }
-            activeAttackRoomFlag = _.find(attackRoom!['flags'], (flagMem) => {
+            activeAttackRoomFlag = _.find(attackRoom!["flags"], flagMem => {
                 if (!flagMem) {
                     return false;
                 }
-                return flagMem.active
+                return flagMem.active;
             });
             if (activeAttackRoomFlag) {
                 break;
@@ -228,7 +234,6 @@ export default class SpawnApi {
 
         // Riase the miltary limits according to the active attack room flag
         this.raiseMilitaryCreepLimits(activeAttackRoomFlag as AttackFlagMemory, room);
-
 
         // Check if we need domestic defenders and adjust accordingly
         const defcon: number = MemoryApi.getDefconLevel(room);
@@ -245,7 +250,6 @@ export default class SpawnApi {
      * @param room the room we are raising limits for
      */
     public static raiseMilitaryCreepLimits(flagMemory: AttackFlagMemory | undefined, room: Room): void {
-
         // If flag memory is undefined, don't waste cpu
         if (!flagMemory) {
             return;
@@ -253,22 +257,19 @@ export default class SpawnApi {
 
         switch (flagMemory!.flagType) {
             case ZEALOT_SOLO:
-
-                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'zealot', 1);
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
 
                 break;
 
             case STALKER_SOLO:
-
-                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'stalker', 1);
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
 
                 break;
 
             case STANDARD_SQUAD:
-
-                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'zealot', 1);
-                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'stalker', 1);
-                MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', 'medic', 1);
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "medic", 1);
 
                 break;
         }
@@ -282,7 +283,7 @@ export default class SpawnApi {
     public static raiseDomesticDefenderCreepLimits(room: Room, defcon: number): void {
         // For now, just raise by one, later we can decide what certain defcons means for what we want to spawn
         // just wanted it in a function so we have the foundation for that in place
-        MemoryApi.adjustCreepLimitByDelta(room, 'militaryLimits', ROLE_DOMESTIC_DEFENDER, 1);
+        MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 1);
     }
 
     /**
@@ -655,7 +656,6 @@ export default class SpawnApi {
      * @param room the room we are spawning the squad in
      */
     public static generateSquadOptions(room: Room, targetRoom: string, roleConst: RoleConstant): StringMap {
-
         // Set to this for clarity that we aren't expecting any squad options in some cases
         const squadOptions: StringMap = {
             squadSize: 0,
@@ -665,8 +665,8 @@ export default class SpawnApi {
 
         // Don't actually get anything of value if it isn't a military creep. No point
         if (!SpawnHelper.isMilitaryRole(roleConst)) {
-            return squadOptions
-        };
+            return squadOptions;
+        }
 
         // Get an appropirate attack flag for the creep
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom);
@@ -674,16 +674,17 @@ export default class SpawnApi {
         const roomMemory: AttackRoomMemory | undefined = _.first(targetRoomMemoryArray);
 
         // Drop out early if there are no attack rooms
-        if (roomMemory === undefined) { return squadOptions; }
+        if (roomMemory === undefined) {
+            return squadOptions;
+        }
 
-        const flagMemoryArray: AttackFlagMemory[] = roomMemory!['flags'] as AttackFlagMemory[];
+        const flagMemoryArray: AttackFlagMemory[] = roomMemory!["flags"] as AttackFlagMemory[];
         let selectedFlagMemory: AttackFlagMemory | undefined;
         let currentHighestSquadCount: number = 0;
         let selectedFlagActiveSquadMembers: number = 0;
 
         // Loop over the flag memory and attach the creep to the first flag that does not have its squad size fully satisfied
         for (const flagMemory of flagMemoryArray) {
-
             // Skip non-squad based attack flags
             if (flagMemory.squadSize === 0) {
                 continue;
@@ -698,7 +699,6 @@ export default class SpawnApi {
                 numActiveSquadMembers > currentHighestSquadCount &&
                 flagMemory.active
             ) {
-
                 selectedFlagMemory = flagMemory;
                 currentHighestSquadCount = numActiveSquadMembers;
                 selectedFlagActiveSquadMembers = numActiveSquadMembers;
@@ -708,12 +708,9 @@ export default class SpawnApi {
         // If we didn't find a squad based flag return the default squad options
         if (selectedFlagMemory === undefined) {
             return squadOptions;
-        }
-        else {
-
+        } else {
             // if this flag has met its requirements, deactivate it
             if (selectedFlagActiveSquadMembers === selectedFlagMemory.squadSize) {
-
                 // Deactivate either way
                 selectedFlagMemory.active = false;
 
@@ -737,15 +734,12 @@ export default class SpawnApi {
      * @param roleConst the role we are getting room for
      */
     public static getCreepTargetRoom(room: Room, roleConst: RoleConstant): string {
-
         let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory | undefined;
 
         switch (roleConst) {
-
             // Colonizing creeps going to their claim rooms
             case ROLE_COLONIZER:
             case ROLE_CLAIMER:
-
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
 
                 break;
@@ -755,7 +749,6 @@ export default class SpawnApi {
             case ROLE_REMOTE_HARVESTER:
             case ROLE_REMOTE_MINER:
             case ROLE_REMOTE_RESERVER:
-
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst);
 
                 break;
@@ -765,11 +758,9 @@ export default class SpawnApi {
             case ROLE_MEDIC:
             case ROLE_ZEALOT:
             case ROLE_DOMESTIC_DEFENDER:
-
                 roomMemory = SpawnHelper.getAttackRoomWithActiveFlag(room);
 
                 break;
-
 
             // Domestic creeps keep their target room as their home room
             // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)

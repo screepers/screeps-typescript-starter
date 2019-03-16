@@ -24,7 +24,6 @@ type ERROR_WARN = 1;
  */
 type ERROR_INFO = 0;
 
-
 // room state constants
 declare const ROOM_STATE_INTRO = 0;
 declare const ROOM_STATE_BEGINNER = 1;
@@ -187,7 +186,7 @@ declare namespace NodeJS {
         removeFlags(substr: string): void;
         displayRoomStatus(roomName: string): void;
         killAllCreeps(room?: Room): void;
-        sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void
+        sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void;
     }
 }
 /**
@@ -300,7 +299,6 @@ type ResourceContainingStructureConstant =
  */
 type GetEnergy_ValidTargets =
     | "source"
-    | "extractor"
     | "tombstone"
     | "droppedResource"
     | STRUCTURE_EXTRACTOR
@@ -313,7 +311,7 @@ type WorkPart_ValidTargets = BuildableStructureConstant | STRUCTURE_CONTROLLER |
 /**
  * Valid actions for WorkPartJob actionType
  */
-type WorkPart_ValidActions = "build" | "repair" | "dismantle" | "upgrade";
+type WorkPart_ValidActions = "build" | "repair" | "upgrade";
 
 /**
  * Valid types for the ClaimPartJob targetType
@@ -569,7 +567,7 @@ interface RoomMemory {
     jobs: JobListing;
 }
 
-interface EmpireMemory { }
+interface EmpireMemory {}
 // ----------------------------------
 
 /**
@@ -903,7 +901,7 @@ interface ParentFlagMemory {
     /**
      * the type of the flag
      */
-    flagType: FlagTypeConstant | undefined
+    flagType: FlagTypeConstant | undefined;
 }
 /**
  * memory for an attack flag
@@ -965,13 +963,13 @@ type STIMULATE_FLAG = 7;
  * type that holds all flag type constants
  */
 type FlagTypeConstant =
-    ZEALOT_SOLO |
-    STALKER_SOLO |
-    STANDARD_SQUAD |
-    CLAIM_FLAG |
-    REMOTE_FLAG |
-    OVERRIDE_D_ROOM_FLAG |
-    STIMULATE_FLAG;
+    | ZEALOT_SOLO
+    | STALKER_SOLO
+    | STANDARD_SQUAD
+    | CLAIM_FLAG
+    | REMOTE_FLAG
+    | OVERRIDE_D_ROOM_FLAG
+    | STIMULATE_FLAG;
 
 /**
  * Tier Definitions
