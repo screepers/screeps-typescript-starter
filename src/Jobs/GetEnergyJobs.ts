@@ -2,6 +2,7 @@ import RoomApi from "Api/Room.Api";
 import { LINK_MINIMUM_ENERGY, CONTAINER_MINIMUM_ENERGY } from "utils/config";
 import MemoryApi from "Api/Memory.Api";
 
+// TODO Create jobs for tombstones and dropped resources if wanted
 export default class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the sources of a room
@@ -25,6 +26,7 @@ export default class GetEnergyJobs {
                 jobType: "getEnergyJob",
                 targetID: source.id,
                 targetType: "source",
+                actionType: "harvest",
                 resources: sourceResources,
                 isTaken: false
             };
@@ -58,6 +60,7 @@ export default class GetEnergyJobs {
                 jobType: "getEnergyJob",
                 targetID: container.id,
                 targetType: STRUCTURE_CONTAINER,
+                actionType: "withdraw",
                 resources: container.store,
                 isTaken: false
             };
@@ -93,6 +96,7 @@ export default class GetEnergyJobs {
                 jobType: "getEnergyJob",
                 targetID: link.id,
                 targetType: STRUCTURE_LINK,
+                actionType: "withdraw",
                 resources: linkStore,
                 isTaken: false
             };
@@ -116,6 +120,7 @@ export default class GetEnergyJobs {
                 jobType: "getEnergyJob",
                 targetID: room.storage.id,
                 targetType: STRUCTURE_STORAGE,
+                actionType: "withdraw",
                 resources: room.storage.store,
                 isTaken: false
             };
@@ -128,6 +133,7 @@ export default class GetEnergyJobs {
                 jobType: "getEnergyJob",
                 targetID: room.terminal.id,
                 targetType: STRUCTURE_TERMINAL,
+                actionType: "withdraw",
                 resources: room.terminal.store,
                 isTaken: false
             };

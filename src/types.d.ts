@@ -303,6 +303,10 @@ type GetEnergy_ValidTargets =
     | "droppedResource"
     | STRUCTURE_EXTRACTOR
     | ResourceContainingStructureConstant;
+/**
+ * Valid actions for GetEnergyJob actionType
+ */
+type GetEnergy_ValidActions = "withdraw" | "harvest" | "pickup";
 
 /**
  * Valid types for the WorkPartJob targetType
@@ -340,6 +344,14 @@ type Any_ValidTargets =
     | CarryPart_ValidTargets
     | ClaimPart_ValidTargets
     | WorkPart_ValidTargets;
+/**
+ * Acceptable ValidAction Lists for BaseJob
+ */
+type Any_ValidActions =
+    | GetEnergy_ValidActions
+    | CarryPart_ValidActions
+    | ClaimPart_ValidActions
+    | WorkPart_ValidActions;
 
 /**
  * Valid jobType for BaseJob
@@ -353,6 +365,10 @@ interface BaseJob {
      * Type of the job object
      */
     jobType: Valid_JobTypes;
+    /**
+     * Valid actions to perform on the job object
+     */
+    actionType: Any_ValidActions;
     /**
      * ID of the target object
      */
@@ -375,6 +391,10 @@ interface GetEnergyJob extends BaseJob {
      * The type of the target object
      */
     targetType: GetEnergy_ValidTargets;
+    /**
+     * The action to perform on the target object
+     */
+    actionType: GetEnergy_ValidActions;
     /**
      * The resources in the object in the format of Structure.Store
      *

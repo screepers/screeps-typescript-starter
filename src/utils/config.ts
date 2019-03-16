@@ -29,3 +29,8 @@ export const REPAIR_THRESHOLD = .75;
  * toggle for the room visual overlay
  */
 export const ROOM_OVERLAY_ON = true;
+
+/**
+ * The text to sign controllers with
+ */
+export const CONTROLLER_SIGNING_TEXT = "get signed on boy";

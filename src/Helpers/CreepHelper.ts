@@ -3,6 +3,7 @@ import {
 } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
+import { CONTROLLER_SIGNING_TEXT } from "utils/config";
 
 // helper function for creeps
 export default class CreepHelper {
@@ -38,5 +39,14 @@ export default class CreepHelper {
             }
             return undefined;
         }
+    }
+
+    /**
+     * Get the text to sign a controller with
+     */
+    public static getSigningText(): string {
+        // TODO Implement some kind of options interface that allows for customizing signing text
+        // * for now we just use a constant from config to sign
+        return CONTROLLER_SIGNING_TEXT;
     }
 }
