@@ -5,20 +5,30 @@ import CreepHelper from "Helpers/CreepHelper";
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
     /**
-     * do work on the target provided
+     * Call the proper doWork function based on job.jobType
      * @param job the job the creep should do, undefined if no job yet
      */
-    public static doWork(creep: Creep, job: BaseJob | undefined) {
-        // If job is undefined, throw error off the bat
-        if (!job) {
-            throw new UserException(
-                "Job Undefined",
-                "creep " + creep.name + " can't do work on an undefined job, room [ " + creep.memory.homeRoom + " ] ",
-                ERROR_WARN
-            );
+    public static doWork(creep: Creep, job: BaseJob) {
+        switch (job.jobType) {
+            case "getEnergyJob":
+                this.doWork_GetEnergyJob(creep, job as GetEnergyJob);
+                break;
+            case "carryPartJob":
+                this.doWork_CarryPartJob(creep, job as CarryPartJob);
+                break;
+            case "claimPartJob":
+                this.doWork_ClaimPartJob(creep, job as ClaimPartJob);
+                break;
+            case "workPartJob":
+                this.doWork_WorkPartJob(creep, job as WorkPartJob);
+                break;
+            default:
+                throw new UserException(
+                    "Bad job.jobType in CreepApi.doWork",
+                    "The jobtype of the job passed to CreepApi.doWork was invalid.",
+                    ERROR_FATAL
+                );
         }
-
-        // decide what the target is, and call the appropriate helper function perform the proper action
     }
 
     /**
