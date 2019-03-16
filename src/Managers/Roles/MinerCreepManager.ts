@@ -6,9 +6,43 @@ import CreepDomestic from "Api/CreepDomestic.Api";
 import { ERROR_WARN, ERROR_ERROR } from "utils/constants";
 import GetEnergyJobs from "Jobs/GetEnergyJobs";
 import UserException from "utils/UserException";
+import CreepManager from "Managers/CreepManager";
 
 // Manager for the miner creep role
 export default class MinerCreepManager {
+    /**
+     * Run the miner creep
+     * @param creep The creep to run
+     */
+    public static runDomesticMiner(creep: Creep): void {
+        // * The following is the general flow of the runMethod
+        //
+        // X Check if creep has a job
+        //     X If not, get a new job (always source job for miners)
+        //         X If no job still, return/idle for the tick
+        //     X If we have a job
+        //         X Check if creep is 'working' (meaning it is AT the target, and ready to perform the action on it)
+        //             X If it is working
+        //                 X doWork on the target
+        //             X If it is not working
+        //                 X travelTo the target
+        const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
+
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewSourceJob(creep, homeRoom);
+
+            if (creep.memory.job === undefined) {
+                return;
+            }
+        }
+
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+        }
+
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+
     /**
      * run the miner creep
      * @param creep the creep we are running

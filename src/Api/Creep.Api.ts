@@ -6,7 +6,6 @@ import CreepHelper from "Helpers/CreepHelper";
 export default class CreepApi {
     /**
      * Call the proper doWork function based on job.jobType
-     * @param job the job the creep should do, undefined if no job yet
      */
     public static doWork(creep: Creep, job: BaseJob) {
         switch (job.jobType) {
@@ -26,6 +25,32 @@ export default class CreepApi {
                 throw new UserException(
                     "Bad job.jobType in CreepApi.doWork",
                     "The jobtype of the job passed to CreepApi.doWork was invalid.",
+                    ERROR_FATAL
+                );
+        }
+    }
+
+    /**
+     * Call the proper travelTo function based on job.jobType
+     */
+    public static travelTo(creep: Creep, job: BaseJob) {
+        switch (job.jobType) {
+            case "getEnergyJob":
+                this.travelTo_GetEnergyJob(creep, job as GetEnergyJob);
+                break;
+            case "carryPartJob":
+                this.travelTo_CarryPartJob(creep, job as CarryPartJob);
+                break;
+            case "claimPartJob":
+                this.travelTo_ClaimPartJob(creep, job as ClaimPartJob);
+                break;
+            case "workPartJob":
+                this.travelTo_WorkPartJob(creep, job as WorkPartJob);
+                break;
+            default:
+                throw new UserException(
+                    "Bad job.jobType in CreepApi.travelTo",
+                    "The jobtype of the job passed to CreepApi.travelTo was invalid",
                     ERROR_FATAL
                 );
         }
@@ -171,6 +196,17 @@ export default class CreepApi {
         }
     }
 
+    /**
+     * Travel to the target provided by a getEnergyJob
+     */
+    public static travelTo_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
+        const target = Game.getObjectById(job.targetID);
+
+        this.nullCheck_target(creep, target);
+
+        if (job.actionType === "harvest") {
+        }
+    }
     /**
      * Checks if the target is null and throws the appropriate error
      */
