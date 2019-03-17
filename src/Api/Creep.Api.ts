@@ -328,7 +328,7 @@ export default class CreepApi {
         if (target === null) {
             throw new UserException(
                 "Null Job Target",
-                "Null Job Target for creep: " + creep.name + "\n The error occurred in: " + this.caller,
+                "Null Job Target for creep: " + creep.name + "\n The error occurred in: ",
                 ERROR_ERROR
             );
         }

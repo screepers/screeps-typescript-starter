@@ -69,10 +69,10 @@ export default class CreepHelper {
             throw new UserException(
                 "Error in targetIsCurrentDestination",
                 "Creep [" +
-                    creep.name +
-                    "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
-                    JSON.stringify(target) +
-                    "]",
+                creep.name +
+                "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
+                JSON.stringify(target) +
+                "]",
                 ERROR_ERROR
             );
         }
@@ -96,6 +96,7 @@ export default class CreepHelper {
      * Gets creep.memory.supplementary.moveTargetID, or falls back to creep.memory.job.
      */
     public static getMoveTarget(creep: Creep, job: BaseJob): RoomObject | null {
+
         // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
         if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
             return Game.getObjectById(creep.memory.supplementary.moveTargetID);

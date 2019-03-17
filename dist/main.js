@@ -8517,7 +8517,7 @@ class CreepApi {
      */
     static nullCheck_target(creep, target) {
         if (target === null) {
-            throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\n The error occurred in: " + this.caller, ERROR_ERROR$2);
+            throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\n The error occurred in: ", ERROR_ERROR$2);
         }
     }
     /**
