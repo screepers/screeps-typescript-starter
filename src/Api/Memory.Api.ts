@@ -266,7 +266,14 @@ export default class MemoryApi {
             MemoryHelper_Room.updateStructures(room);
         }
 
-        const structureIDs: string[] = _.flattenDeep(Memory.rooms[room.name].structures.data);
+        const structureIDs: string[] = [];
+        // Flatten the object into an array of IDs
+        for (const type in Memory.rooms[room.name].structures.data) {
+            const IDs = Memory.rooms[room.name].structures.data[type];
+            if (IDs.length) {
+                structureIDs.push(IDs);
+            }
+        }
 
         let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure>(structureIDs);
 

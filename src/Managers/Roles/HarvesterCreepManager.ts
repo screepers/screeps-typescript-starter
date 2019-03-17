@@ -44,9 +44,8 @@ export default class HarvesterCreepManager {
         if (creep.carry.energy === 0) {
             return this.newGetEnergyJob(creep, room);
         } else {
-            // TODO fill this out
-            // Creep energy is > 0
-            return undefined;
+            // Creep energy > 0
+            return this.newCarryPartJob(creep, room);
         }
     }
 
@@ -88,12 +87,35 @@ export default class HarvesterCreepManager {
     }
 
     /**
+     * Get a CarryPartJob for the harvester
+     */
+    public static newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
+        const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken);
+
+        if (fillJobs.length > 0) {
+            return fillJobs[0];
+        }
+
+        const storeJobs = MemoryApi.getStoreJobs(room, (bsJob: CarryPartJob) => !bsJob.isTaken);
+
+        if (storeJobs.length > 0) {
+            return storeJobs[0];
+        }
+
+        return undefined;
+    }
+
+    /**
      * Handles setup for a new job
      */
     public static handleNewJob(creep: Creep): void {
         if (creep.memory.job!.jobType === "getEnergyJob") {
             // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
             return;
+        }
+        else if (creep.memory.job!.jobType === "carryPartJob") {
+            // TODO Mark the job we chose as taken 
+            return; 
         }
     }
 }

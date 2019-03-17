@@ -53,6 +53,7 @@ class MemoryHelper {
         }
     }
 }
+//# sourceMappingURL=MemoryHelper.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO = 0;
@@ -180,6 +181,7 @@ const FILL_JOB_CACHE_TTL = 10; // Fill Jobs
 const STORE_JOB_CACHE_TTL = 50; // Store Jobs
 const ERROR_ERROR$1 = 2; // Regular error - Creep/Room ruining
 const ERROR_WARN$1 = 1; // Small error - Something went wrong, but doesn't ruin anything
+//# sourceMappingURL=constants.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO$1 = 0;
@@ -238,6 +240,7 @@ const DEFAULT_MOVE_OPTS$1 = {
     swampCost: 5,
     visualizePathStyle: {} // Empty object for now, just uses default visualization
 };
+//# sourceMappingURL=constants.js.map
 
 /**
  * Custom error class
@@ -254,6 +257,7 @@ class UserException extends Error {
         this.bodyColor = useBodyColor !== undefined ? useBodyColor : "#ff1113";
     }
 }
+//# sourceMappingURL=UserException.js.map
 
 // helper functions for rooms
 class RoomHelper {
@@ -572,6 +576,7 @@ class RoomHelper {
         return sum;
     }
 }
+//# sourceMappingURL=RoomHelper.js.map
 
 /**
  * Disallow the caching of all memory
@@ -599,6 +604,7 @@ const ROOM_OVERLAY_ON = true;
  * The text to sign controllers with
  */
 const CONTROLLER_SIGNING_TEXT = "get signed on boy";
+//# sourceMappingURL=config.js.map
 
 // an api used for functions related to the room
 class RoomApi {
@@ -885,6 +891,7 @@ class RoomApi {
         // i have no idea yet lol
     }
 }
+//# sourceMappingURL=Room.Api.js.map
 
 // TODO Create jobs for tombstones and dropped resources if wanted
 class GetEnergyJobs {
@@ -1029,6 +1036,7 @@ class GetEnergyJobs {
         return dropJobList;
     }
 }
+//# sourceMappingURL=GetEnergyJobs.js.map
 
 class ClaimPartJobs {
     /**
@@ -1124,6 +1132,7 @@ class ClaimPartJobs {
         return attackJobs;
     }
 }
+//# sourceMappingURL=ClaimPartJobs.js.map
 
 class WorkPartJobs {
     /**
@@ -1191,6 +1200,7 @@ class WorkPartJobs {
         return upgradeJobs;
     }
 }
+//# sourceMappingURL=WorkPartJobs.js.map
 
 class CarryPartJobs {
     /**
@@ -1255,6 +1265,7 @@ class CarryPartJobs {
         return storeJobs;
     }
 }
+//# sourceMappingURL=CarryPartJobs.js.map
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -1762,6 +1773,7 @@ class MemoryHelper_Room {
         Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
     }
 }
+//# sourceMappingURL=MemoryHelper_Room.js.map
 
 /**
  * The API used by the spawn manager
@@ -2367,6 +2379,7 @@ class SpawnApi {
         return room.name;
     }
 }
+//# sourceMappingURL=Spawn.Api.js.map
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -3762,6 +3775,7 @@ class SpawnHelper {
         return 0;
     }
 }
+//# sourceMappingURL=SpawnHelper.js.map
 
 // the api for the memory class
 class MemoryApi {
@@ -3951,7 +3965,14 @@ class MemoryApi {
             Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL) {
             MemoryHelper_Room.updateStructures(room);
         }
-        const structureIDs = _.flattenDeep(Memory.rooms[room.name].structures.data);
+        const structureIDs = [];
+        // Flatten the object into an array of IDs
+        for (const type in Memory.rooms[room.name].structures.data) {
+            const IDs = Memory.rooms[room.name].structures.data[type];
+            if (IDs.length) {
+                structureIDs.push(IDs);
+            }
+        }
         let structures = MemoryHelper.getOnlyObjectsFromIDs(structureIDs);
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
@@ -4541,6 +4562,7 @@ class MemoryApi {
         return storeJobs;
     }
 }
+//# sourceMappingURL=Memory.Api.js.map
 
 class EmpireHelper {
     /**
@@ -5018,6 +5040,7 @@ class EmpireHelper {
         return attackFlagMemory;
     }
 }
+//# sourceMappingURL=EmpireHelper.js.map
 
 class Empire {
     /**
@@ -5144,6 +5167,7 @@ class Empire {
         }
     }
 }
+//# sourceMappingURL=Empire.Api.js.map
 
 // empire-wide manager
 class EmpireManager {
@@ -5165,6 +5189,7 @@ class EmpireManager {
         // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
     }
 }
+//# sourceMappingURL=EmpireManager.js.map
 
 // @ts-ignore
 // manager for the memory of the empire
@@ -5196,6 +5221,7 @@ class MemoryManager {
         }
     }
 }
+//# sourceMappingURL=MemoryManagement.js.map
 
 // room-wide manager
 class RoomManager {
@@ -5236,6 +5262,7 @@ class RoomManager {
         }
     }
 }
+//# sourceMappingURL=RoomManager.js.map
 
 // handles spawning for every room
 class SpawnManager {
@@ -5284,6 +5311,7 @@ class SpawnManager {
         }
     }
 }
+//# sourceMappingURL=SpawnManager.js.map
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
@@ -7618,6 +7646,7 @@ class ErrorMapper {
 }
 // Cache previously mapped traces to improve performance
 ErrorMapper.cache = {};
+//# sourceMappingURL=ErrorMapper.js.map
 
 class UtilHelper {
     /**
@@ -7635,6 +7664,7 @@ class UtilHelper {
         }
     }
 }
+//# sourceMappingURL=UtilHelper.js.map
 
 const textColor = '#bab8ba';
 const textSize = .8;
@@ -7717,6 +7747,7 @@ class RoomVisualManager {
         }
     }
 }
+//# sourceMappingURL=RoomVisualHelper.js.map
 
 // Api for room visuals
 class RoomVisualApi {
@@ -8024,6 +8055,7 @@ class RoomVisualApi {
         return y + lines.length;
     }
 }
+//# sourceMappingURL=RoomVisual.Api.js.map
 
 // Manager for room visuals
 class RoomVisualManager$1 {
@@ -8068,6 +8100,7 @@ class RoomVisualManager$1 {
         endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
     }
 }
+//# sourceMappingURL=RoomVisualManager.js.map
 
 class Normalize {
     /**
@@ -8132,6 +8165,7 @@ class Normalize {
         return obj;
     }
 }
+//# sourceMappingURL=Normalize.js.map
 
 // helper function for creeps
 class CreepHelper {
@@ -8175,7 +8209,7 @@ class CreepHelper {
      * @target The target object or roomposition to move to
      * @range [Optional] The range to stop at from the target
      */
-    static targetIsCurrentDestination(creep, target, range = 0) {
+    static isTargetCurrentDestination(creep, target, range = 0) {
         if (creep.memory._move === undefined) {
             return false;
         }
@@ -8200,7 +8234,20 @@ class CreepHelper {
         // Return true if distance from currentDestination to targetPosition is within the allowed range (default is 0, exact match)
         return distanceApart <= range;
     }
+    /**
+     * Gets creep.memory.supplementary.moveTargetID, or falls back to creep.memory.job.
+     */
+    static getMoveTarget(creep, job) {
+        // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
+        if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
+            return Game.getObjectById(creep.memory.supplementary.moveTargetID);
+        }
+        else {
+            return Game.getObjectById(job.targetID);
+        }
+    }
 }
+//# sourceMappingURL=CreepHelper.js.map
 
 // Api for all types of creeps (more general stuff here)
 class CreepApi {
@@ -8252,18 +8299,21 @@ class CreepApi {
     static doWork_ClaimPartJob(creep, job) {
         const target = Game.getObjectById(job.targetID);
         this.nullCheck_target(creep, target);
+        let deleteOnSuccess = true;
         let returnCode;
         if (job.actionType === "claim" && target instanceof StructureController) {
             returnCode = creep.claimController(target);
         }
         else if (job.actionType === "reserve" && target instanceof StructureController) {
             returnCode = creep.reserveController(target);
+            deleteOnSuccess = false;
         }
         else if (job.actionType === "sign" && target instanceof StructureController) {
             returnCode = creep.signController(target, CreepHelper.getSigningText());
         }
         else if (job.actionType === "attack" && target instanceof StructureController) {
             returnCode = creep.attackController(target);
+            deleteOnSuccess = false;
         }
         else {
             throw this.badTarget_Error(creep, job);
@@ -8271,6 +8321,10 @@ class CreepApi {
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
         switch (returnCode) {
             case OK:
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
                 break;
             case ERR_NOT_IN_RANGE:
                 creep.memory.working = false;
@@ -8286,22 +8340,11 @@ class CreepApi {
      */
     static doWork_CarryPartJob(creep, job) {
         let target;
-        if (job.targetType === "roomPosition") {
-            // TODO Change this to parse a string to create a RoomPosition object
-            // * Should be something like "25,25,W12S49" that corresponds to x, y, roomName
-            // ! Temporary, not used for anything atm, but target needs to be of type RoomPosition.
-            target = new RoomPosition(25, 25, creep.memory.homeRoom);
-        }
-        else {
-            target = Game.getObjectById(job.targetID);
-            this.nullCheck_target(creep, target);
-        }
+        target = Game.getObjectById(job.targetID);
+        this.nullCheck_target(creep, target);
         let returnCode;
         if (job.actionType === "transfer" && (target instanceof Structure || target instanceof Creep)) {
             returnCode = creep.transfer(target, RESOURCE_ENERGY);
-        }
-        else if (job.actionType === "drop" && target instanceof RoomPosition) {
-            returnCode = creep.drop(RESOURCE_ENERGY);
         }
         else {
             throw this.badTarget_Error(creep, job);
@@ -8309,6 +8352,9 @@ class CreepApi {
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
         switch (returnCode) {
             case OK:
+                // If successful, delete the job from creep memory
+                delete creep.memory.job;
+                creep.memory.working = false;
                 break;
             case ERR_NOT_IN_RANGE:
                 creep.memory.working = false;
@@ -8341,6 +8387,9 @@ class CreepApi {
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
         switch (returnCode) {
             case OK:
+                // If successful, delete the job from creep memory
+                delete creep.memory.job;
+                creep.memory.working = false;
                 break;
             case ERR_NOT_IN_RANGE:
                 creep.memory.working = false;
@@ -8373,6 +8422,13 @@ class CreepApi {
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
         switch (returnCode) {
             case OK:
+                // If successful and not harvesting, delete the job from creep memory
+                // * If we run into not being able to stop harvesting minerals, my best solution is to seperate
+                // * the above "instanceof Source | Mineral" into two different if statements, and use a boolean to decide to delete when successful.
+                if (job.actionType !== "harvest") {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
                 break;
             case ERR_NOT_IN_RANGE:
                 creep.memory.working = false;
@@ -8387,14 +8443,7 @@ class CreepApi {
      * Travel to the target provided by GetEnergyJob in creep.memory.job
      */
     static travelTo_GetEnergyJob(creep, job) {
-        let moveTarget;
-        // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
-        if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
-            moveTarget = Game.getObjectById(creep.memory.supplementary.moveTargetID);
-        }
-        else {
-            moveTarget = Game.getObjectById(job.targetID);
-        }
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
         this.nullCheck_target(creep, moveTarget);
         // Move options target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
@@ -8408,10 +8457,6 @@ class CreepApi {
         else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
             moveOpts.range = 1;
         }
-        else {
-            // Assumes that if we specify a different target, we want to be on top of it.
-            moveOpts.range = 0;
-        }
         if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
             creep.memory.working = true;
             return; // If we are in range to the target, then we do not need to move again, and next tick we will begin work
@@ -8422,18 +8467,61 @@ class CreepApi {
      * Travel to the target provided by CarryPartJob in creep.memory.job
      */
     static travelTo_CarryPartJob(creep, job) {
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
+        this.nullCheck_target(creep, moveTarget);
+        // Move options for target
+        const moveOpts = DEFAULT_MOVE_OPTS$1;
+        if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
+            moveOpts.range = 1;
+        } // else range = 0;
+        if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
+            creep.memory.working = true;
+            return;
+        }
+        creep.moveTo(moveTarget, moveOpts);
         return;
     }
     /**
      * Travel to the target provided by ClaimPartJob in creep.memory.job
      */
     static travelTo_ClaimPartJob(creep, job) {
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
+        this.nullCheck_target(creep, moveTarget);
+        // Move options for target
+        const moveOpts = DEFAULT_MOVE_OPTS$1;
+        // All actiontypes that affect controller have range of 1
+        if (moveTarget instanceof StructureController) {
+            moveOpts.range = 1;
+        }
+        if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
+            creep.memory.working = true;
+            return;
+        }
+        creep.moveTo(moveTarget, moveOpts);
         return;
     }
     /**
      * Travel to the target provided by WorkPartJob in creep.memory.job
      */
     static travelTo_WorkPartJob(creep, job) {
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
+        this.nullCheck_target(creep, moveTarget);
+        // Move options for target
+        const moveOpts = DEFAULT_MOVE_OPTS$1;
+        if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
+            moveOpts.range = 1;
+        }
+        else if (job.actionType === "repair" && moveTarget instanceof Structure) {
+            moveOpts.range = 1;
+        }
+        else if (job.actionType === "upgrade" && moveTarget instanceof StructureController) {
+            moveOpts.range = 3;
+        }
+        if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
+            creep.memory.working = true;
+            return;
+        }
+        creep.moveTo(moveTarget, moveOpts);
         return;
     }
     /**
@@ -8457,6 +8545,7 @@ class CreepApi {
             JSON.stringify(job), ERROR_ERROR);
     }
 }
+//# sourceMappingURL=Creep.Api.js.map
 
 // Manager for the miner creep role
 class MinerCreepManager {
@@ -8465,6 +8554,9 @@ class MinerCreepManager {
      * @param creep The creep to run
      */
     static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // Don't do anything until you've spawned
+        }
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         if (creep.memory.job === undefined) {
             creep.memory.job = this.getNewSourceJob(creep, homeRoom);
@@ -8513,6 +8605,7 @@ class MinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
+//# sourceMappingURL=MinerCreepManager.js.map
 
 // Manager for the miner creep role
 class HarvesterCreepManager {
@@ -8521,15 +8614,9 @@ class HarvesterCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
-        // * General flow of the runMethod
-        // Check if creep has a job
-        //      If not, get a new job
-        //          If no job still, idle for the tick
-        //          If job now, handle new job tasks
-        //      If we have job (or just got one)
-        //          Check if creep is 'working'
-        //              If it is working, call doWork
-        //              If it is not working, call travelTo
+        if (creep.spawning) {
+            return; // don't do anything until spawned
+        }
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         if (creep.memory.job === undefined) {
             creep.memory.job = this.getNewJob(creep, homeRoom);
@@ -8553,9 +8640,8 @@ class HarvesterCreepManager {
             return this.newGetEnergyJob(creep, room);
         }
         else {
-            // TODO fill this out
-            // Creep energy is > 0
-            return undefined;
+            // Creep energy > 0
+            return this.newCarryPartJob(creep, room);
         }
     }
     /**
@@ -8580,6 +8666,20 @@ class HarvesterCreepManager {
         return undefined;
     }
     /**
+     * Get a CarryPartJob for the harvester
+     */
+    static newCarryPartJob(creep, room) {
+        const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken);
+        if (fillJobs.length > 0) {
+            return fillJobs[0];
+        }
+        const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
+        if (storeJobs.length > 0) {
+            return storeJobs[0];
+        }
+        return undefined;
+    }
+    /**
      * Handles setup for a new job
      */
     static handleNewJob(creep) {
@@ -8587,8 +8687,13 @@ class HarvesterCreepManager {
             // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
             return;
         }
+        else if (creep.memory.job.jobType === "carryPartJob") {
+            // TODO Mark the job we chose as taken 
+            return;
+        }
     }
 }
+//# sourceMappingURL=HarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class WorkerCreepManager {
@@ -8599,6 +8704,7 @@ class WorkerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=WorkerCreepManager.js.map
 
 // Manager for the miner creep role
 class LorryCreepManager {
@@ -8609,6 +8715,7 @@ class LorryCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=LorryCreepManager.js.map
 
 // Manager for the miner creep role
 class PowerUpgraderCreepManager {
@@ -8619,6 +8726,7 @@ class PowerUpgraderCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=PowerUpgraderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteMinerCreepManager {
@@ -8629,6 +8737,7 @@ class RemoteMinerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteMinerCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteHarvesterCreepManager {
@@ -8639,6 +8748,7 @@ class RemoteHarvesterCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteHarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteColonizerCreepManager {
@@ -8649,6 +8759,7 @@ class RemoteColonizerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteColonizerCreepManager.js.map
 
 // Manager for the miner creep role
 class ClaimerCreepManager {
@@ -8659,6 +8770,7 @@ class ClaimerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=ClaimerCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteDefenderCreepManager {
@@ -8669,6 +8781,7 @@ class RemoteDefenderCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteDefenderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteReserverCreepManager {
@@ -8679,6 +8792,7 @@ class RemoteReserverCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteReserverCreepManager.js.map
 
 // Manager for the miner creep role
 class ZealotCreepManager {
@@ -8689,6 +8803,7 @@ class ZealotCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=ZealotCreepManager.js.map
 
 // Manager for the miner creep role
 class MedicCreepManager {
@@ -8699,6 +8814,7 @@ class MedicCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=MedicCreepManager.js.map
 
 // Manager for the miner creep role
 class StalkerCreepManager {
@@ -8709,6 +8825,7 @@ class StalkerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=StalkerCreepManager.js.map
 
 // Manager for the miner creep role
 class DomesticDefenderCreepManager {
@@ -8719,6 +8836,7 @@ class DomesticDefenderCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=DomesticDefenderCreepManager.js.map
 
 // Call the creep manager for each role
 class CreepManager {
@@ -8788,6 +8906,7 @@ class CreepManager {
         }
     }
 }
+//# sourceMappingURL=CreepManager.js.map
 
 class ConsoleCommands {
     static init() {
@@ -8881,6 +9000,7 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
     // check if we have enough energy to send the resource
     // send the resources
 };
+//# sourceMappingURL=ConsoleCommands.js.map
 
 /*
   Kung Fu Klan's Screeps Code
@@ -8939,6 +9059,7 @@ const loop = ErrorMapper.wrapLoop(() => {
     }
     // -------- end managers --------
 });
+//# sourceMappingURL=main.js.map
 
 exports.loop = loop;
 //# sourceMappingURL=main.js.map
