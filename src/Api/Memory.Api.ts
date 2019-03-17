@@ -25,7 +25,8 @@ import {
     BUILD_JOB_CACHE_TTL,
     UPGRADE_JOB_CACHE_TTL,
     STORE_JOB_CACHE_TTL,
-    FILL_JOB_CACHE_TTL
+    FILL_JOB_CACHE_TTL,
+    PICKUP_JOB_CACHE_TTL
 } from "utils/Constants";
 
 // the api for the memory class
@@ -642,7 +643,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -791,6 +792,36 @@ export default class MemoryApi {
         }
 
         return backupStructureJobs;
+    }
+
+    /**
+     * Get the list of GetEnergyJobs.pickupJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getPickupJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs!.cache < Game.time - PICKUP_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateGetEnergy_pickupJobs(room);
+        }
+
+        let pickupJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs!.data;
+
+        if (filterFunction !== undefined) {
+            pickupJobs = _.filter(pickupJobs, filterFunction);
+        }
+
+        return pickupJobs;
     }
 
     /**

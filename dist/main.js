@@ -165,6 +165,7 @@ const SOURCE_JOB_CACHE_TTL = 50; // Source jobs
 const CONTAINER_JOB_CACHE_TTL = 50; // Container jobs
 const LINK_JOB_CACHE_TTL = 50; // Link Jobs
 const BACKUP_JOB_CACHE_TTL = 50; // Backup Jobs
+const PICKUP_JOB_CACHE_TTL = 50; // Pickup Jobs
 // ClaimPartJob Constants
 const CLAIM_JOB_CACHE_TTL = 1; // Claim Jobs
 const RESERVE_JOB_CACHE_TTL = 1; // Reserve Jobs
@@ -1001,6 +1002,32 @@ class GetEnergyJobs {
         }
         return backupJobList;
     }
+    /**
+     * Gets a list of GetEnergyJobs for the dropped resources of a room
+     * @param room The room to create the job for
+     */
+    static createPickupJobs(room) {
+        // All dropped energy in the room
+        const drops = MemoryApi.getDroppedResources(room);
+        if (drops.length === 0) {
+            return [];
+        }
+        const dropJobList = [];
+        _.forEach(drops, (drop) => {
+            const dropStore = { energy: 0 };
+            dropStore[drop.resourceType] = drop.amount;
+            const dropJob = {
+                jobType: "getEnergyJob",
+                targetID: drop.id,
+                targetType: "droppedResource",
+                resources: dropStore,
+                actionType: "pickup",
+                isTaken: false
+            };
+            dropJobList.push(dropJob);
+        });
+        return dropJobList;
+    }
 }
 
 class ClaimPartJobs {
@@ -1386,7 +1413,7 @@ class MemoryHelper_Room {
         Memory.rooms[room.name].droppedResources = { data: {}, cache: null };
         const droppedResources = room.find(FIND_DROPPED_RESOURCES);
         Memory.rooms[room.name].droppedResources.data = _.map(droppedResources, (resource) => resource.id);
-        Memory.rooms[room.name].droppedResources.data = Game.time;
+        Memory.rooms[room.name].droppedResources.cache = Game.time;
     }
     /**
      * update the room state
@@ -1420,6 +1447,7 @@ class MemoryHelper_Room {
         this.updateGetEnergy_containerJobs(room);
         this.updateGetEnergy_linkJobs(room);
         this.updateGetEnergy_backupStructuresJobs(room);
+        this.updateGetEnergy_pickupJobs(room);
     }
     /**
      * Update the room's GetEnergyJobListing_sourceJobs
@@ -1487,6 +1515,22 @@ class MemoryHelper_Room {
         }
         Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures = {
             data: GetEnergyJobs.createBackupStructuresJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's GetEnergyJobListing_containerJobs
+     * @param room The room to update the memory fo
+     */
+    static updateGetEnergy_pickupJobs(room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+        if (Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs;
+        }
+        Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs = {
+            data: GetEnergyJobs.createPickupJobs(room),
             cache: Game.time
         };
     }
@@ -4266,6 +4310,25 @@ class MemoryApi {
             backupStructureJobs = _.filter(backupStructureJobs, filterFunction);
         }
         return backupStructureJobs;
+    }
+    /**
+     * Get the list of GetEnergyJobs.pickupJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getPickupJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs.cache < Game.time - PICKUP_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateGetEnergy_pickupJobs(room);
+        }
+        let pickupJobs = Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs.data;
+        if (filterFunction !== undefined) {
+            pickupJobs = _.filter(pickupJobs, filterFunction);
+        }
+        return pickupJobs;
     }
     /**
      * Get all jobs (in a flatted list) of ClaimPartJobs.xxx
@@ -8402,17 +8465,6 @@ class MinerCreepManager {
      * @param creep The creep to run
      */
     static runCreepRole(creep) {
-        // * The following is the general flow of the runMethod
-        //
-        // X Check if creep has a job
-        //     X If not, get a new job (always source job for miners)
-        //         X If no job still, return/idle for the tick
-        //     X If we have a job
-        //         X Check if creep is 'working' (meaning it is AT the target, and ready to perform the action on it)
-        //             X If it is working
-        //                 X doWork on the target
-        //             X If it is not working
-        //                 X travelTo the target
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         if (creep.memory.job === undefined) {
             creep.memory.job = this.getNewSourceJob(creep, homeRoom);
@@ -8424,6 +8476,7 @@ class MinerCreepManager {
         }
         if (creep.memory.working === true) {
             CreepApi.doWork(creep, creep.memory.job);
+            return;
         }
         CreepApi.travelTo(creep, creep.memory.job);
     }
@@ -8432,7 +8485,13 @@ class MinerCreepManager {
      */
     static getNewSourceJob(creep, room) {
         // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-        return _.find(MemoryApi.getAllGetEnergyJobs(room, (sJob) => !sJob.isTaken && sJob.targetType === "source"));
+        const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
+        if (sourceJobs.length > 0) {
+            return sourceJobs[0];
+        }
+        else {
+            return undefined;
+        }
     }
     /**
      * Handle initalizing a new job
@@ -8462,6 +8521,72 @@ class HarvesterCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        // * General flow of the runMethod
+        // Check if creep has a job
+        //      If not, get a new job
+        //          If no job still, idle for the tick
+        //          If job now, handle new job tasks
+        //      If we have job (or just got one)
+        //          Check if creep is 'working'
+        //              If it is working, call doWork
+        //              If it is not working, call travelTo
+        const homeRoom = Game.rooms[creep.memory.homeRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewJob(creep, homeRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            this.handleNewJob(creep);
+        }
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Decides which kind of job to get and calls the appropriate function
+     */
+    static getNewJob(creep, room) {
+        // if creep is empty, get a GetEnergyJob
+        if (creep.carry.energy === 0) {
+            return this.newGetEnergyJob(creep, room);
+        }
+        else {
+            // TODO fill this out
+            // Creep energy is > 0
+            return undefined;
+        }
+    }
+    /**
+     * Get a GetEnergyJob for the harvester
+     */
+    static newGetEnergyJob(creep, room) {
+        // All container jobs with enough energy to fill creep.carry, and not taken
+        const containerJobs = MemoryApi.getContainerJobs(room, (cJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity);
+        if (containerJobs.length > 0) {
+            return containerJobs[0];
+        }
+        // All dropped resources with enough energy to fill creep.carry, and not taken
+        const dropJobs = MemoryApi.getPickupJobs(room, (dJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity);
+        if (dropJobs.length > 0) {
+            return dropJobs[0];
+        }
+        // All backupStructures with enough energy to fill creep.carry, and not taken
+        const backupStructures = MemoryApi.getBackupStructuresJobs(room, (job) => !job.isTaken && job.resources.energy >= creep.carryCapacity);
+        if (backupStructures.length > 0) {
+            return backupStructures[0];
+        }
+        return undefined;
+    }
+    /**
+     * Handles setup for a new job
+     */
+    static handleNewJob(creep) {
+        if (creep.memory.job.jobType === "getEnergyJob") {
+            // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
+            return;
+        }
     }
 }
 

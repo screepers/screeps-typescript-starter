@@ -16,17 +16,11 @@ export default class MinerCreepManager {
      * @param creep The creep to run
      */
     public static runCreepRole(creep: Creep): void {
-        // * The following is the general flow of the runMethod
-        //
-        // X Check if creep has a job
-        //     X If not, get a new job (always source job for miners)
-        //         X If no job still, return/idle for the tick
-        //     X If we have a job
-        //         X Check if creep is 'working' (meaning it is AT the target, and ready to perform the action on it)
-        //             X If it is working
-        //                 X doWork on the target
-        //             X If it is not working
-        //                 X travelTo the target
+
+        if(creep.spawning){
+            return; // Don't do anything until you've spawned
+        }
+
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
 
         if (creep.memory.job === undefined) {
@@ -42,6 +36,7 @@ export default class MinerCreepManager {
 
         if (creep.memory.working === true) {
             CreepApi.doWork(creep, creep.memory.job);
+            return;
         }
 
         CreepApi.travelTo(creep, creep.memory.job);
@@ -52,9 +47,13 @@ export default class MinerCreepManager {
      */
     public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
         // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-        return _.find(
-            MemoryApi.getAllGetEnergyJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken && sJob.targetType === "source")
-        );
+        const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
+
+        if (sourceJobs.length > 0) {
+            return sourceJobs[0];
+        } else {
+            return undefined;
+        }
     }
 
     /**

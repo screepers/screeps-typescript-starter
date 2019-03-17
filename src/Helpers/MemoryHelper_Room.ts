@@ -187,7 +187,7 @@ export default class MemoryHelper_Room {
         const droppedResources = room.find(FIND_DROPPED_RESOURCES);
 
         Memory.rooms[room.name].droppedResources.data = _.map(droppedResources, (resource: Resource) => resource.id);
-        Memory.rooms[room.name].droppedResources.data = Game.time;
+        Memory.rooms[room.name].droppedResources.cache = Game.time;
     }
 
     /**
@@ -225,6 +225,7 @@ export default class MemoryHelper_Room {
         this.updateGetEnergy_containerJobs(room);
         this.updateGetEnergy_linkJobs(room);
         this.updateGetEnergy_backupStructuresJobs(room);
+        this.updateGetEnergy_pickupJobs(room);
     }
 
     /**
@@ -303,6 +304,25 @@ export default class MemoryHelper_Room {
 
         Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures = {
             data: GetEnergyJobs.createBackupStructuresJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     * Update the room's GetEnergyJobListing_containerJobs
+     * @param room The room to update the memory fo
+     */
+    public static updateGetEnergy_pickupJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+
+        if (Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs;
+        }
+
+        Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs = {
+            data: GetEnergyJobs.createPickupJobs(room),
             cache: Game.time
         };
     }

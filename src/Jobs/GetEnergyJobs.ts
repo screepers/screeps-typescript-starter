@@ -143,4 +143,37 @@ export default class GetEnergyJobs {
 
         return backupJobList;
     }
+
+    /**
+     * Gets a list of GetEnergyJobs for the dropped resources of a room
+     * @param room The room to create the job for
+     */
+    public static createPickupJobs(room: Room): GetEnergyJob[] {
+        // All dropped energy in the room
+        const drops = MemoryApi.getDroppedResources(room);
+
+        if (drops.length === 0) {
+            return [];
+        }
+
+        const dropJobList: GetEnergyJob[] = [];
+
+        _.forEach(drops, (drop: Resource) => {
+            const dropStore: StoreDefinition = { energy: 0 };
+            dropStore[drop.resourceType] = drop.amount;
+
+            const dropJob: GetEnergyJob = {
+                jobType: "getEnergyJob",
+                targetID: drop.id,
+                targetType: "droppedResource",
+                resources: dropStore,
+                actionType: "pickup",
+                isTaken: false
+            };
+
+            dropJobList.push(dropJob);
+        });
+
+        return dropJobList;
+    }
 }

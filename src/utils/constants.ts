@@ -119,6 +119,7 @@ export const SOURCE_JOB_CACHE_TTL = 50; // Source jobs
 export const CONTAINER_JOB_CACHE_TTL = 50; // Container jobs
 export const LINK_JOB_CACHE_TTL = 50; // Link Jobs
 export const BACKUP_JOB_CACHE_TTL = 50; // Backup Jobs
+export const PICKUP_JOB_CACHE_TTL = 50; // Pickup Jobs
 // ClaimPartJob Constants
 export const CLAIM_JOB_CACHE_TTL = 1; // Claim Jobs
 export const RESERVE_JOB_CACHE_TTL = 1; // Reserve Jobs
