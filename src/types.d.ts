@@ -265,6 +265,19 @@ interface CreepMemory {
      * tracks if the creep is currently working
      */
     working: boolean;
+    /**
+     * Additional memory options that vary from role to role
+     */
+    supplementary?: StringMap;
+    /**
+     * The memory used by screeps to store movePaths
+     */
+    _move?: {
+        dest: { x: number; y: number; roomName: string };
+        time: number;
+        path: number;
+        room: string;
+    };
 }
 
 /**
@@ -466,6 +479,14 @@ interface GetEnergyJobListing {
      * Jobs that target structures that store excess resources (Storage, Terminal)
      */
     backupStructures?: Cache;
+    /**
+     * Jobs that target resources on the ground
+     */
+    pickupJobs?: Cache;
+    /**
+     * Jobs that target tombstones
+     */
+    tombstoneJobs?: Cache;
 }
 
 /**

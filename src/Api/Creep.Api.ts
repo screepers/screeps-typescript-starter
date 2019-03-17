@@ -1,6 +1,8 @@
 import UtilHelper from "Helpers/UtilHelper";
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
+import Normalize from "Helpers/Normalize";
+import { DEFAULT_MOVE_OPTS } from "utils/constants";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -83,6 +85,7 @@ export default class CreepApi {
             case OK:
                 break;
             case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
                 break;
@@ -122,6 +125,7 @@ export default class CreepApi {
             case OK:
                 break;
             case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
                 break;
@@ -155,6 +159,7 @@ export default class CreepApi {
             case OK:
                 break;
             case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
                 break;
@@ -188,6 +193,7 @@ export default class CreepApi {
             case OK:
                 break;
             case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
                 break;
@@ -197,16 +203,64 @@ export default class CreepApi {
     }
 
     /**
-     * Travel to the target provided by a getEnergyJob
+     * Travel to the target provided by GetEnergyJob in creep.memory.job
      */
     public static travelTo_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
-        const target = Game.getObjectById(job.targetID);
+        let moveTarget: RoomObject | null;
 
-        this.nullCheck_target(creep, target);
-
-        if (job.actionType === "harvest") {
+        // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
+        if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
+            moveTarget = Game.getObjectById(creep.memory.supplementary.moveTargetID);
+        } else {
+            moveTarget = Game.getObjectById(job.targetID);
         }
+
+        this.nullCheck_target(creep, moveTarget);
+
+        // Move options target
+        const moveOpts: MoveToOpts = DEFAULT_MOVE_OPTS;
+
+        // In this case all actions are complete with a range of 1, but keeping for structure
+        if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
+            moveOpts.range = 1;
+        } else if (job.actionType === "withdraw" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
+            moveOpts.range = 1;
+        } else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
+            moveOpts.range = 1;
+        } else {
+            // Assumes that if we specify a different target, we want to be on top of it.
+            moveOpts.range = 0;
+        }
+
+        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range) {
+            creep.memory.working = true;
+            return; // If we are in range to the target, then we do not need to move again, and next tick we will begin work
+        }
+
+        creep.moveTo(moveTarget!, moveOpts);
     }
+
+    /**
+     * Travel to the target provided by CarryPartJob in creep.memory.job
+     */
+    public static travelTo_CarryPartJob(creep: Creep, job: CarryPartJob) {
+        return;
+    }
+
+    /**
+     * Travel to the target provided by ClaimPartJob in creep.memory.job
+     */
+    public static travelTo_ClaimPartJob(creep: Creep, job: ClaimPartJob) {
+        return;
+    }
+
+    /**
+     * Travel to the target provided by WorkPartJob in creep.memory.job
+     */
+    public static travelTo_WorkPartJob(creep: Creep, job: WorkPartJob) {
+        return;
+    }
+
     /**
      * Checks if the target is null and throws the appropriate error
      */

@@ -2,16 +2,57 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-// empire-wide manager
-class EmpireManager {
+// Accessing Memory Helpers
+class MemoryHelper {
     /**
-     * run the empire for the AI
+     * Returns an array of creeps of a role
+     * @param role The role to check for
      */
-    static runEmpireManager() {
-        console.log("running empire");
+    static getCreepOfRole(room, role, forceUpdate) {
+        const filterByRole = (creep) => {
+            return creep.memory.role === role;
+        };
+        const creepsOfRole = MemoryApi.getMyCreeps(room, filterByRole);
+        return creepsOfRole;
+    }
+    /**
+     * Performs the length checks and null checks for all getXXX functions that use IDs to get the objects
+     * @param idArray An array of ids to check
+     */
+    static getOnlyObjectsFromIDs(idArray) {
+        if (idArray.length === 0) {
+            return [];
+        }
+        const objects = [];
+        _.forEach(idArray, (id) => {
+            const object = Game.getObjectById(id);
+            if (object !== null) {
+                objects.push(object);
+            }
+        });
+        return objects;
+    }
+    /**
+     * clear the memory structure for the creep
+     * @param creep the creep we want to clear the memory of
+     */
+    static clearCreepMemory(creep) {
+        // check if the memory object exists and delete it
+        if (Memory.creeps[creep.name]) {
+            delete creep.memory;
+        }
+    }
+    /**
+     * clear the memory for a room
+     * @param room the room we want to clear the memory for
+     */
+    static clearRoomMemory(room) {
+        // check if the memory structures exists and delete it
+        if (Memory.rooms[room.name]) {
+            delete room.memory;
+        }
     }
 }
-//# sourceMappingURL=EmpireManager.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO = 0;
@@ -21,6 +62,7 @@ const ROOM_STATE_ADVANCED = 3;
 const ROOM_STATE_UPGRADER = 4;
 const ROOM_STATE_SEIGE = 5;
 const ROOM_STATE_STIMULATE = 6;
+const ROOM_STATE_NUKE_INBOUND = 7;
 // Role Constants
 const ROLE_MINER = "miner";
 const ROLE_HARVESTER = "harvester";
@@ -31,10 +73,12 @@ const ROLE_REMOTE_MINER = "remoteMiner";
 const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 const ROLE_REMOTE_RESERVER = "remoteReserver";
 const ROLE_REMOTE_DEFENDER = "remoteDefender";
+const ROLE_CLAIMER$1 = "claimer";
 const ROLE_COLONIZER = "remoteColonizer";
 const ROLE_ZEALOT = "zealot";
 const ROLE_STALKER = "stalker";
 const ROLE_MEDIC = "medic";
+const ROLE_DOMESTIC_DEFENDER = "domesticDefender";
 // Tier Constants
 const TIER_1 = 300;
 const TIER_2 = 550;
@@ -44,6 +88,14 @@ const TIER_5 = 1800;
 const TIER_6 = 2300;
 const TIER_7 = 5300;
 const TIER_8 = 12300;
+// Attack Flag Constants
+const ZEALOT_SOLO = 1;
+const STALKER_SOLO = 2;
+const STANDARD_SQUAD = 3;
+const CLAIM_FLAG = 4;
+const REMOTE_FLAG = 5;
+const OVERRIDE_D_ROOM_FLAG = 6;
+const STIMULATE_FLAG = 7;
 // Creep Body Layout Constants
 const GROUPED = "grouped";
 const COLLATED = "collated";
@@ -104,564 +156,87 @@ const WALL_LIMIT = [
 const STRUCT_CACHE_TTL = 50; // Structures
 const SOURCE_CACHE_TTL = -1; // Sources
 const CONSTR_CACHE_TTL = 50; // Construction Sites
+const TOMBSTONE_CACHE_TTL = 50; // Tombstones
+const DROPS_CACHE_TTL = 50; // Dropped Resources
 const FCREEP_CACHE_TTL = 20; // Friendly Creep
 const HCREEP_CACHE_TTL = 1; // Hostile Creep
-// ? Should we change DEPNDT to be 3 seperate consts? Attack, Remote, Claim?
-const DEPNDT_CACHE_TTL = 50; // Dependent Rooms - Attack, Remote, Claim
-//# sourceMappingURL=Constants.js.map
-
-/**
- * Contains all functions for initializing and updating room memory
- */
-class MemoryHelper_Room {
-    /**
-     * Calls all the helper functions (that don't need additional input) to update room.memory.
-     * NOTE: This will update the entire memory tree, so use this function sparingly
-     * TODO Make sure this updates every aspect of room memory - currently does not
-     * @param room The room to update the memory of
-     */
-    static updateRoomMemory(room) {
-        // Update All Creeps
-        this.updateHostileCreeps(room);
-        this.updateMyCreeps(room);
-        // Update structures/construction sites
-        this.updateConstructionSites(room);
-        this.updateStructures(room);
-        // Update sources, minerals, energy, tombstones
-        this.updateSources(room);
-        this.updateMinerals(room);
-        this.updateDroppedEnergy(room);
-        this.updateTombstones(room);
-        // Update Custom Memory Components
-        this.updateDependentRooms(room);
-    }
-    /**
-     * Update room memory for all dependent room types
-     * TODO Implement this function - Decide how we plan to do it
-     * @param room The room to update the dependencies of
-     */
-    static updateDependentRooms(room) {
-        // Cycle through all flags and check for any claim rooms or remote rooms
-        // ? Should we check for the closest main room?
-        // ? I have an idea of a system where we plant a remoteFlag/claimFlag
-        // ? and then we place a different colored flag in the room that we want
-        // ? to assign that remote/claim room to. Once the program detects the assignment flag
-        // ? and the room it assigns to, it removes the assignment flag and could optionally remove
-        // ? the remoteFlag as well (but I think it would be more clear to leave the flag in the room)
-    }
-    /**
-     * Find all hostile creeps in room
-     * TODO Check for boosted creeps
-     * [Cached] Room.memory.hostiles
-     * @param room The Room to update
-     */
-    static updateHostileCreeps(room) {
-        Memory.rooms[room.name].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
-        const enemies = room.find(FIND_HOSTILE_CREEPS);
-        // Sort creeps into categories
-        _.forEach(enemies, (enemy) => {
-            // * Check for boosted creeps and put them at the front of the if else stack
-            if (enemy.getActiveBodyparts(HEAL) > 0) {
-                Memory.rooms[room.name].hostiles.data.heal.push(enemy.id);
-            }
-            else if (enemy.getActiveBodyparts(RANGED_ATTACK) > 0) {
-                Memory.rooms[room.name].hostiles.data.ranged.push(enemy.id);
-            }
-            else if (enemy.getActiveBodyparts(ATTACK) > 0) {
-                Memory.rooms[room.name].hostiles.data.melee.push(enemy.id);
-            }
-        });
-        Memory.rooms[room.name].hostiles.cache = Game.time;
-    }
-    /**
-     * Find all owned creeps in room
-     * ? Should we filter these by role into memory? E.g. creeps.data.miners
-     * [Cached] Room.memory.creeps
-     * @param room The Room we are checking in
-     */
-    static updateMyCreeps(room) {
-        Memory.rooms[room.name].creeps = { data: null, cache: null };
-        const creeps = room.find(FIND_MY_CREEPS);
-        Memory.rooms[room.name].creeps.data = _.map(creeps, (creep) => creep.id);
-        Memory.rooms[room.name].creeps.cache = Game.time;
-    }
-    /**
-     * Find all construction sites in room
-     *
-     * [Cached] Room.memory.constructionSites
-     * @param room The Room we are checking in
-     */
-    static updateConstructionSites(room) {
-        Memory.rooms[room.name].constructionSites = { data: null, cache: null };
-        const constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);
-        Memory.rooms[room.name].constructionSites.data = _.map(constructionSites, (c) => c.id);
-        Memory.rooms[room.name].constructionSites.cache = Game.time;
-    }
-    /**
-     * Find all structures in room
-     *
-     * [Cached] Room.memory.structures
-     * @param room The Room we are checking in
-     */
-    static updateStructures(room) {
-        Memory.rooms[room.name].structures = { data: {}, cache: null };
-        const allStructures = room.find(FIND_STRUCTURES);
-        const sortedStructureIDs = {};
-        // For each structureType, remove the structures from allStructures and map them to ids in the memory object.
-        _.forEach(ALL_STRUCTURE_TYPES, (type) => {
-            sortedStructureIDs[type] = _.map(_.remove(allStructures, (struct) => struct.structureType === type), (struct) => struct.id);
-        });
-        Memory.rooms[room.name].structures.data = sortedStructureIDs;
-        Memory.rooms[room.name].structures.cache = Game.time;
-    }
-    /**
-     * Find all sources in room
-     *
-     * [Cached] Room.memory.sources
-     * @param room The room to check in
-     */
-    static updateSources(room) {
-        Memory.rooms[room.name].sources = { data: {}, cache: null };
-        const sources = room.find(FIND_SOURCES);
-        Memory.rooms[room.name].sources.data = _.map(sources, (source) => source.id);
-        Memory.rooms[room.name].sources.cache = Infinity;
-    }
-    /**
-     * Find all sources in room
-     *
-     * [Cached] Room.memory.sources
-     * @param room The room to check in
-     */
-    static updateMinerals(room) {
-        // TODO Fill this out
-    }
-    /**
-     * Finds all tombstones in room
-     *
-     * @param room The room to check in
-     */
-    static updateTombstones(room) {
-        // TODO Fill this out
-    }
-    /**
-     * Find all dropped energy in a room
-     *
-     * @param room The room to check in
-     */
-    static updateDroppedEnergy(room) {
-        // TODO Fill this out
-    }
-    /**
-     * update the room state
-     * @param room the room we are updating
-     * @param stateConst the state we are applying to the room
-     */
-    static updateRoomState(room, stateConst) {
-        Memory.rooms[room.name].roomState = stateConst;
-        return;
-    }
-    /**
-     * update the room defcon
-     * @param room the room we are updating
-     * @param stateConst the defcon we are applying to the room
-     */
-    static updateDefcon(room, defconLevel) {
-        Memory.rooms[room.name].defcon = defconLevel;
-        return;
-    }
-    /**
-     * update creep limits for domestic creeps
-     * @param room room we are updating limits for
-     * @param newLimits new limits we are setting
-     */
-    static updateDomesticLimits(room, newLimits) {
-        // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit["domesticLimits"] = newLimits;
-    }
-    /**
-     * update creep limits for remote creeps
-     * @param room room we are updating limits for
-     * @param newLimits new limits we are setting
-     */
-    static updateRemoteLimits(room, newLimits) {
-        // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit["remoteLimits"] = newLimits;
-    }
-    /**
-     * update creep limits for military creeps
-     * @param room room we are updating limits for
-     * @param newLimits new limits we are setting
-     */
-    static updateMilitaryLimits(room, newLimits) {
-        // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
-    }
-}
-
-/**
- * Settings to customize code performance
- */
-//# sourceMappingURL=config.js.map
-
-// the api for the memory class
-class MemoryApi {
-    /**
-     * Remove all memory objects that are dead
-     */
-    static garbageCollection() {
-        // Remove all dead creeps from memory
-        for (const name in Memory.creeps) {
-            if (!(name in Game.creeps)) {
-                delete Memory.creeps[name];
-            }
-        }
-        // Remove all dead rooms from memory
-        for (const roomName in Memory.rooms) {
-            if (!(roomName in Game.rooms)) {
-                delete Memory.rooms[roomName];
-            }
-        }
-        // dead flags
-        // TODO Complete a method to remove flag effects
-        for (const flagName in Memory.flags) {
-            if (!(flagName in Game.flags)) {
-                // * Call a function to handle removing the effects of a flag removal here
-                // RoomHelper/MemoryHelper.unassignFlag()
-                delete Memory.flags[flagName];
-            }
-        }
-    }
-    /**
-     * Initialize the Memory object for a new room, and perform all one-time updates
-     * @param room The room to initialize the memory of.
-     */
-    static initRoomMemory(room) {
-        // Abort if Memory already exists
-        if (Memory.rooms[room.name]) {
-            return;
-        }
-        // Initialize Memory - Typescript requires it be done this way
-        //                    unless we define a constructor for RoomMemory.
-        Memory.rooms[room.name] = {
-            attackRooms: { data: null, cache: null },
-            claimRooms: { data: null, cache: null },
-            constructionSites: { data: null, cache: null },
-            creepLimit: {},
-            creeps: { data: null, cache: null },
-            defcon: 0,
-            hostiles: { data: null, cache: null },
-            remoteRooms: { data: null, cache: null },
-            roomState: ROOM_STATE_INTRO,
-            sources: { data: null, cache: null },
-            structures: { data: null, cache: null },
-            upgradeLink: ""
-        };
-        this.getRoomMemory(room, true);
-    }
-    /**
-     * Validates Room Memory and calls update function as needed
-     * for the entire room memory.
-     *
-     * [Cached] Memory.rooms[room.name]
-     * @param room The name of the room to get memory for
-     * @param forceUpdate [Optional] Force all room memory to update
-     */
-    static getRoomMemory(room, forceUpdate) {
-        this.getConstructionSites(room, undefined, forceUpdate);
-        this.getMyCreeps(room, undefined, forceUpdate);
-        this.getHostileCreeps(room, undefined, forceUpdate);
-        this.getSources(room, undefined, forceUpdate);
-        this.getStructures(room, undefined, forceUpdate);
-        // this.getCreepLimits(room, undefined, forceUpdate);
-        // this.getDefcon(room, undefined, forceUpdate);
-        // this.getRoomState(room, undefined, forceUpdate);
-    }
-    /**
-     * Initializes the memory of a newly spawned creep
-     * @param creep the creep we want to initialize memory for
-     */
-    static initCreepMemory(creep, creepRole, creepHomeRoom, creepOptions, creepTargetRoom) {
-        // abort if memory already exists
-        if (Memory.creeps[creep.name]) {
-            return;
-        }
-        // Initialize Memory
-        Memory.creeps[creep.name] = {
-            homeRoom: creepHomeRoom,
-            options: creepOptions,
-            role: creepRole,
-            targetRoom: creepTargetRoom || "",
-            workTarget: "",
-            working: false
-        };
-    }
-    /**
-     * Gets the owned creeps in a room, updating memory if necessary.
-     *
-     * [Cached] Memory.rooms[room.name].creeps
-     * @param room The room to retrieve from
-     * @param filterFunction [Optional] The function to filter all creep objects
-     * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Creep[ ] | null -- An array of owned creeps or null if there are none
-     */
-    static getMyCreeps(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            !Memory.rooms[room.name].creeps ||
-            Memory.rooms[room.name].creeps.cache < Game.time - FCREEP_CACHE_TTL) {
-            MemoryHelper_Room.updateMyCreeps(room);
-        }
-        let creeps = _.map(Memory.rooms[room.name].creeps.data, (id) => Game.getObjectById(id));
-        if (filterFunction !== undefined) {
-            creeps = _.filter(creeps, filterFunction);
-        }
-        return creeps;
-    }
-    /**
-     * Get all hostile creeps in a room, updating if necessary
-     *
-     * [Cached] Memory.rooms[room.name].hostiles
-     * @param room The room to retrieve from
-     * @param filterFunction [Optional] The function to filter all creep objects
-     * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Creep[ ] | null -- An array of hostile creeps or null if none
-     */
-    static getHostileCreeps(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            !Memory.rooms[room.name].hostiles ||
-            Memory.rooms[room.name].creeps.cache < Game.time - HCREEP_CACHE_TTL) {
-            MemoryHelper_Room.updateHostileCreeps(room);
-        }
-        let creeps = _.map(Memory.rooms[room.name].hostiles.data, (id) => Game.getObjectById(id));
-        if (filterFunction !== undefined) {
-            creeps = _.filter(creeps, filterFunction);
-        }
-        return creeps;
-    }
-    /**
-     * Get structures in a room, updating if necessary
-     *
-     * [Cached] Memory.rooms[room.name].structures
-     * @param room The room to retrieve from
-     * @param filterFunction [Optional] The function to filter all structure objects
-     * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Array<Structure> -- An array of structures
-     */
-    static getStructures(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL) {
-            MemoryHelper_Room.updateStructures(room);
-        }
-        let structures = [];
-        _.forEach(Memory.rooms[room.name].structures.data, (typeArray) => {
-            _.forEach(typeArray, (id) => {
-                structures.push(Game.getObjectById(id));
-            });
-        });
-        if (filterFunction !== undefined) {
-            structures = _.filter(structures, filterFunction);
-        }
-        return structures;
-    }
-    /**
-     * Get structures of a single type in a room, updating if necessary
-     *
-     * [Cached] Memory.rooms[room.name].structures
-     * @param room The room to check in
-     * @param type The type of structure to retrieve
-     * @param filterFunction [Optional] A function to filter by
-     * @param forceUpdate [Optional] Force structures memory to be updated
-     * @returns Structure[] An array of structures of a single type
-     */
-    static getStructureOfType(room, type, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.data[type] === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL) {
-            MemoryHelper_Room.updateStructures(room);
-        }
-        let structures = _.map(Memory.rooms[room.name].structures.data[type], (id) => Game.getObjectById(id));
-        if (filterFunction !== undefined) {
-            structures = _.filter(structures, filterFunction);
-        }
-        return structures;
-    }
-    /**
-     * Get all construction sites in a room, updating if necessary
-     *
-     * [Cached] Memory.rooms[room.name].constructionSites
-     * @param room The room to retrieve from
-     * @param filterFunction [Optional] The function to filter all structure objects
-     * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Array<ConstructionSite> -- An array of ConstructionSites
-     */
-    static getConstructionSites(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            !Memory.rooms[room.name].constructionSites ||
-            Memory.rooms[room.name].constructionSites.cache < Game.time - CONSTR_CACHE_TTL) {
-            MemoryHelper_Room.updateConstructionSites(room);
-        }
-        let constructionSites = _.map(Memory.rooms[room.name].constructionSites.data, (id) => Game.getObjectById(id));
-        if (filterFunction !== undefined) {
-            constructionSites = _.filter(constructionSites, filterFunction);
-        }
-        return constructionSites;
-    }
-    /**
-     * Returns a list of tombstones in the room, updating if necessary
-     *
-     * @param room The room we want to look in
-     * @param filterFunction [Optional] The function to filter the tombstones objects
-     * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Array<Tombstone | null> An array of tombstones, if there are any
-     */
-    static getTombstones(room, filterFunction, forceUpdate) {
-        // TODO Fill this out for Room.Api.CreateEnergyQueue
-        return [null];
-    }
-    /**
-     * Returns a list of the energy objects in a room, updating if necessary
-     *
-     * @param room The room we want to look in
-     * @param filterFunction [Optional] The function to filter the energy objects
-     * @param forceUpdate [Optional] Invalidate Cache by force
-     * @returns Array<RESOURCE_ENERGY | null> An array of dropped energy, if there are any
-     */
-    static getDroppedEnergy(room, filterFunction, forceUpdate) {
-        // TODO Fill this out for Room.Api.CreateEnergyQueue
-        return [null];
-    }
-    /**
-     * get sources in the room
-     * @param room the room we want sources from
-     * @param filterFunction [Optional] The function to filter all source objects
-     * @param forceUpdate [Optional] Invalidate cache by force
-     * @returns Array<Source | null> An array of sources, if there are any
-     */
-    static getSources(room, filterFunction, forceUpdate) {
-        let sources;
-        if (forceUpdate ||
-            Memory.rooms[room.name].sources === undefined ||
-            Memory.rooms[room.name].sources.cache < Game.time - SOURCE_CACHE_TTL) {
-            MemoryHelper_Room.updateSources(room);
-        }
-        sources = _.map(Memory.rooms[room.name].sources.data, (id) => Game.getObjectById(id));
-        if (filterFunction !== undefined) {
-            _.filter(sources, filterFunction);
-        }
-        return sources;
-    }
-    /**
-     * get minerals in the room
-     * @param room the room we want minerals from
-     * @param filterFunction [Optional] The function to filter all mineral objects
-     * @param forceUpdate [Optional] Invalidate cache by force
-     * @returns Array<Mineral | null> An array of minerals, if there are any
-     */
-    static getMinerals(room, filterFunction, forceUpdate) {
-        //
-        // TODO Fill this out
-        return [null];
-    }
-    /**
-     * Get the remoteRoom objects
-     *
-     * Updates all dependencies if the cache is invalid, for efficiency
-     * @param room The room to check dependencies of
-     * @param filterFunction [Optional] The function to filter the room objects
-     * @param forceUpdate [Optional] Forcibly invalidate the cache
-     */
-    static getRemoteRooms(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].remoteRooms === undefined ||
-            Memory.rooms[room.name].remoteRooms.cache < Game.time - DEPNDT_CACHE_TTL) {
-            // ! Not implemented yet - Empty function
-            MemoryHelper_Room.updateDependentRooms(room);
-        }
-        const remoteRooms = _.map(Memory.rooms[room.name].remoteRooms.data, (name) => Game.rooms[name]);
-        return remoteRooms;
-    }
-    /**
-     * Get the claimRoom objects
-     *
-     * Updates all dependencies if the cache is invalid
-     * @param room The room to check the dependencies of
-     * @param filterFunction [Optional] THe function to filter the room objects
-     * @param forceUpdate [Optional] Forcibly invalidate the cache
-     */
-    static getClaimRooms(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].remoteRooms === undefined ||
-            Memory.rooms[room.name].claimRooms.cache < Game.time - DEPNDT_CACHE_TTL) {
-            // ! Not implemented yet - Empty function
-            MemoryHelper_Room.updateDependentRooms(room);
-        }
-        const claimRooms = _.map(Memory.rooms[room.name].claimRooms.data, (name) => Game.rooms[name]);
-        return claimRooms;
-    }
-    static getAttackRooms(room, filterFUnction, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].attackRooms === undefined ||
-            Memory.rooms[room.name].attackRooms.cache < Game.time - DEPNDT_CACHE_TTL) {
-            // ! Not implemented yet - Empty Function
-            MemoryHelper_Room.updateDependentRooms(room);
-        }
-        const attackRooms = _.map(Memory.rooms[room.name].attackRooms.data, (name) => Game.rooms[name]);
-        return attackRooms;
-    }
-}
-//# sourceMappingURL=Memory.Api.js.map
-
-// @ts-ignore
-// manager for the memory of the empire
-class MemoryManager {
-    /**
-     * run the memory for the AI
-     */
-    static runMemoryManager() {
-        MemoryApi.garbageCollection();
-        // Should we check for owned rooms here so we don't run memory on rooms we are just passing through?
-        // Example code provided
-        /*
-            const ownedRooms = _.filter(Game.rooms, (room: Room) => RoomHelper.isOwnedRoom(room));
-
-            _.forEach(ownedRooms, (room: Room) => {
-                MemoryApi.initRoomMemory(room);
-            });
-        */
-        _.forEach(Game.rooms, (room) => {
-            MemoryApi.initRoomMemory(room);
-        });
-    }
-}
-//# sourceMappingURL=MemoryManagement.js.map
-
-// room-wide manager
-class RoomManager {
-    /**
-     * run the spawning for the AI
-     */
-    static runRoomManager() {
-        console.log("running rooms");
-    }
-}
-//# sourceMappingURL=RoomManager.js.map
+// GetEnergyJob Constants
+const SOURCE_JOB_CACHE_TTL = 50; // Source jobs
+const CONTAINER_JOB_CACHE_TTL = 50; // Container jobs
+const LINK_JOB_CACHE_TTL = 50; // Link Jobs
+const BACKUP_JOB_CACHE_TTL = 50; // Backup Jobs
+// ClaimPartJob Constants
+const CLAIM_JOB_CACHE_TTL = 1; // Claim Jobs
+const RESERVE_JOB_CACHE_TTL = 1; // Reserve Jobs
+const SIGN_JOB_CACHE_TTL = 50; // Sign Jobs
+const ATTACK_JOB_CACHE_TTL = 1; // Attack Jobs
+// WorkPartJob Constants
+const REPAIR_JOB_CACHE_TTL = 10; // Repair jobs
+const BUILD_JOB_CACHE_TTL = 10; // Build Jobs
+const UPGRADE_JOB_CACHE_TTL = -1; // Upgrade Jobs
+// CarryPartJob Constants
+const FILL_JOB_CACHE_TTL = 10; // Fill Jobs
+const STORE_JOB_CACHE_TTL = 50; // Store Jobs
+const ERROR_ERROR$1 = 2; // Regular error - Creep/Room ruining
+const ERROR_WARN$1 = 1; // Small error - Something went wrong, but doesn't ruin anything
 
 // Room State Constants
-// Cache Tick Limits
-const STRUCT_CACHE_TTL$1 = 50; // Structures
+const ROOM_STATE_INTRO$1 = 0;
+const ROOM_STATE_BEGINNER$1 = 1;
+const ROOM_STATE_INTER$1 = 2;
+const ROOM_STATE_ADVANCED$1 = 3;
+const ROOM_STATE_UPGRADER$1 = 4;
+const ROOM_STATE_SEIGE$1 = 5;
+const ROOM_STATE_STIMULATE$1 = 6;
+const ROOM_STATE_NUKE_INBOUND$1 = 7;
+// Role Constants
+const ROLE_MINER$1 = "miner";
+const ROLE_HARVESTER$1 = "harvester";
+const ROLE_WORKER$1 = "worker";
+const ROLE_POWER_UPGRADER$1 = "powerUpgrader";
+const ROLE_LORRY$1 = "lorry";
+const ROLE_REMOTE_MINER$1 = "remoteMiner";
+const ROLE_REMOTE_HARVESTER$1 = "remoteHarvester";
+const ROLE_REMOTE_RESERVER$1 = "remoteReserver";
+const ROLE_CLAIMER$2 = "claimer";
+const ROLE_COLONIZER$1 = "remoteColonizer";
+// Attack Flag Constants
+const ZEALOT_SOLO$1 = 1;
+const STALKER_SOLO$1 = 2;
+const STANDARD_SQUAD$1 = 3;
+const OVERRIDE_D_ROOM_FLAG$1 = 6;
+// The Wall/Rampart HP Limit for each Controller level
+const WALL_LIMIT$1 = [
+    0,
+    25000,
+    50000,
+    100000,
+    250000,
+    500000,
+    1000000,
+    1500000,
+    5000000 // RCL 8
+];
 // Error Severity Constants
-const ERROR_FATAL$1 = 3; // Very severe error - Game ruining
+const ERROR_FATAL$2 = 3; // Very severe error - Game ruining
 const ERROR_ERROR$2 = 2; // Regular error - Creep/Room ruining
 const ERROR_WARN$2 = 1; // Small error - Something went wrong, but doesn't ruin anything
 const ERROR_INFO$1 = 0; // Non-error - Used to log when something happens (e.g. memory is updated)
 // Color Constants
 const COLORS$1 = {};
-COLORS$1[ERROR_FATAL$1] = "#FF0000";
+COLORS$1[ERROR_FATAL$2] = "#FF0000";
 COLORS$1[ERROR_ERROR$2] = "#E300FF";
 COLORS$1[ERROR_WARN$2] = "#F0FF00";
 COLORS$1[ERROR_INFO$1] = "#0045FF";
-//# sourceMappingURL=Constants.js.map
+// Our default moveOpts object. Assign this to a new object and then adjust the values for the situation
+const DEFAULT_MOVE_OPTS$1 = {
+    heuristicWeight: 1.5,
+    range: 0,
+    ignoreCreeps: false,
+    reusePath: 10,
+    swampCost: 5,
+    visualizePathStyle: {} // Empty object for now, just uses default visualization
+};
 
 /**
  * Custom error class
@@ -678,7 +253,6 @@ class UserException extends Error {
         this.bodyColor = useBodyColor !== undefined ? useBodyColor : "#ff1113";
     }
 }
-//# sourceMappingURL=UserException.js.map
 
 // helper functions for rooms
 class RoomHelper {
@@ -738,12 +312,11 @@ class RoomHelper {
     }
     /**
      * check if a room is close enough to send a creep to
-     * ? What are we doing with this? Checking if room is within roomdistance * 50 tiles - CreepTTL?
-     * TODO Complete this
      * @param room the room we want to check
      */
-    static inTravelRange(room) {
-        return false;
+    static inTravelRange(homeRoom, targetRoom) {
+        const routeArray = Game.map.findRoute(homeRoom, targetRoom);
+        return routeArray.length < 20;
     }
     /**
      * check if the object exists within a room
@@ -810,23 +383,75 @@ class RoomHelper {
         return Game.time % ticks === 0;
     }
     /**
-     * check if container mining is active in a room
+     * check if container mining is active in a room (each source has a container in range)
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
      */
     static isContainerMining(room, sources, containers) {
-        return false;
+        // Loop over sources and make sure theres at least one container in range to it
+        let numMiningContainers = 0;
+        _.forEach(sources, (source) => {
+            if (_.some(containers, (container) => source.pos.inRangeTo(container.pos, 1))) {
+                numMiningContainers++;
+            }
+        });
+        return numMiningContainers === sources.length;
     }
     /**
-     * check if container mining is active in a room
+     * check if the link is an upgrader link
      * TODO Complete this
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
      */
-    static isUpgraderLink(room, links) {
-        return false;
+    static getUpgraderLink(room) {
+        // Throw warning if we do not own this room
+        if (!this.isOwnedRoom(room)) {
+            throw new UserException("Stimulate flag check on non-owned room", "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]", ERROR_WARN$1);
+        }
+        const links = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
+        const controller = room.controller;
+        // Break early if we don't have 3 links yet
+        if (links.length < 3) {
+            return null;
+        }
+        // Make sure theres a controller in the room
+        if (!controller) {
+            throw new UserException("Tried to getUpgraderLink of a room with no controller", "Get Upgrader Link was called for room [" + room.name + "]" + ", but theres no controller in this room.", ERROR_WARN$1);
+        }
+        // Find the closest link to the controller, this is our upgrader link
+        return controller.pos.findClosestByRange(links);
+    }
+    /**
+     * Check and see if an upgrader link exists
+     * @param room the room we are checking for
+     */
+    static isUpgraderLink(room) {
+        // Throw warning if we do not own this room
+        if (!this.isOwnedRoom(room)) {
+            throw new UserException("Stimulate flag check on non-owned room", "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]", ERROR_WARN$1);
+        }
+        return this.getUpgraderLink(room) !== null;
+    }
+    /**
+     * Check if the stimulate flag is present for a room
+     * TODO Complete this
+     * @param room the room we are checking for
+     */
+    static isStimulateRoom(room) {
+        // Throw warning if we do not own this room
+        if (!this.isOwnedRoom(room)) {
+            throw new UserException("Stimulate flag check on non-owned room", "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]", ERROR_WARN$1);
+        }
+        const terminal = room.terminal;
+        // Check if we have a stimulate flag with the same room name as this flag
+        return _.some(Memory.flags, (flag) => {
+            if (flag.flagType === STIMULATE_FLAG) {
+                return (Game.flags[flag.flagName].pos.roomName === room.name) && (terminal !== undefined);
+            }
+            return false;
+        });
     }
     /**
      * choose an ideal target for the towers to attack
@@ -890,11 +515,14 @@ class RoomHelper {
      * @param room The room to check the remoteRooms of
      */
     static numRemoteSources(room) {
-        const remoteRoomNames = Memory.rooms[room.name].remoteRooms.data;
+        const remoteRooms = Memory.rooms[room.name].remoteRooms;
         let numSources = 0;
-        _.forEach(remoteRoomNames, (name) => {
-            const remoteRoom = Game.rooms[name];
-            numSources += RoomHelper.numSources(remoteRoom);
+        _.forEach(remoteRooms, (rr) => {
+            if (!rr) {
+                return;
+            }
+            const sourcesInRoom = rr.sources.data;
+            numSources += sourcesInRoom;
         });
         return numSources;
     }
@@ -903,1101 +531,1198 @@ class RoomHelper {
      * @param room The room to check the dependencies of
      */
     static numRemoteDefenders(room) {
-        const remoteRoomNames = Memory.rooms[room.name].remoteRooms.data;
+        const remoteRooms = Memory.rooms[room.name].remoteRooms;
         let numRemoteDefenders = 0;
-        _.forEach(remoteRoomNames, (name) => {
-            const remoteRoom = Game.rooms[name];
+        _.forEach(remoteRooms, (rr) => {
+            if (!rr) {
+                return;
+            }
             // If there are any hostile creeps, add one to remoteDefenderCount
-            if (this.numHostileCreeps(remoteRoom) > 0) {
+            // Get hostile creeps in the remote room
+            const hostileCreeps = rr.hostiles.data;
+            if (hostileCreeps > 0) {
                 numRemoteDefenders++;
             }
         });
         return numRemoteDefenders;
     }
+    /**
+     * get the number of claim rooms that have not yet been claimed
+     * @param room the room we are checking for
+     */
+    static numCurrentlyUnclaimedClaimRooms(room) {
+        const allClaimRooms = MemoryApi.getClaimRooms(room);
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        let sum = 0;
+        // No existing claim rooms
+        if (allClaimRooms[0] === undefined) {
+            return 0;
+        }
+        for (const claimRoom of allClaimRooms) {
+            if (!_.some(ownedRooms, (ownedRoom) => {
+                if (claimRoom) {
+                    return room.name === claimRoom.roomName;
+                }
+                return false;
+            })) {
+                ++sum;
+            }
+        }
+        return sum;
+    }
 }
-//# sourceMappingURL=RoomHelper.js.map
 
 /**
- * Functions to help keep Spawn.Api clean go here
+ * Disallow the caching of all memory
+ *
+ * Turning this setting on will massively reduce performance
+ * but will ensure that all memory is as accurate as possible
  */
-class SpawnHelper {
+/**
+ * Minimum amount of energy a container must have to be used in a GetEnergyJob
+ */
+const CONTAINER_MINIMUM_ENERGY = 100;
+/**
+ * Minimum amount of energy a link must have to be used in a GetEnergyJob
+ */
+const LINK_MINIMUM_ENERGY = 1;
+/**
+ * Percentage HP to begin repairing structures (besides Ramparts and Walls)
+ */
+const REPAIR_THRESHOLD = .75;
+/**
+ * toggle for the room visual overlay
+ */
+const ROOM_OVERLAY_ON = true;
+/**
+ * The text to sign controllers with
+ */
+const CONTROLLER_SIGNING_TEXT = "get signed on boy";
+
+// an api used for functions related to the room
+class RoomApi {
     /**
-     * Returns a boolean indicating if the object is a valid creepBody descriptor
-     * @param bodyObject The description of the creep body to verify
+     * check if there are hostile creeps in the room
+     * @param room the room we are checking
      */
-    static verifyDescriptor(bodyObject) {
-        const partNames = Object.keys(bodyObject);
-        let valid = true;
-        // Check that no body parts have a definition of 0 or negative
-        for (const part in partNames) {
-            if (bodyObject[part] <= 0) {
-                valid = false;
+    static isHostilesInRoom(room) {
+        const hostilesInRoom = MemoryApi.getHostileCreeps(room);
+        return hostilesInRoom.length > 0;
+    }
+    /**
+     * set the room's state
+     * Essentially backbone of the room, decides what flow
+     * of action will be taken at the beginning of each tick
+     * (note: assumes defcon already being found for simplicity sake)
+     * @param room the room we are setting state for
+     */
+    static setRoomState(room) {
+        // If theres no controller, throw an error
+        if (!room.controller) {
+            throw new UserException("Can't set room state for room with no controller!", "You attempted to call setRoomState on room [" + room.name + "]. Theres no controller here.", ERROR_WARN$2);
+        }
+        // ----------
+        // check if we are in nuke inbound room state
+        // nuke is coming in and we need to gtfo, but they take like 20k ticks, so only check every 1000 or so
+        if (RoomHelper.excecuteEveryTicks(1000)) {
+            const incomingNukes = room.find(FIND_NUKES);
+            if (incomingNukes.length > 0) {
+                return ROOM_STATE_NUKE_INBOUND$1;
             }
-            // if (!(part in BODYPARTS_ALL)) {
-            // * Technically invalid for testing atm - Need to fix
-            //     valid = false;
-            // }
         }
-        return valid;
+        // ----------
+        // check if we are siege room state
+        // defcon is level 3+ and hostiles activity in the room is high
+        const defconLevel = MemoryApi.getDefconLevel(room);
+        if (defconLevel >= 3) {
+            return ROOM_STATE_SEIGE$1;
+        }
+        // ----------
+        const storage = room.storage;
+        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
+        const sources = MemoryApi.getSources(room);
+        if (room.controller.level >= 6) {
+            // check if we are in upgrader room state
+            // container mining and storage set up, and we got links online
+            if (RoomHelper.isContainerMining(room, sources, containers) &&
+                RoomHelper.isUpgraderLink(room) &&
+                storage !== undefined) {
+                if (RoomHelper.isStimulateRoom(room)) {
+                    return ROOM_STATE_STIMULATE$1;
+                }
+                // otherwise, just upgrader room state
+                return ROOM_STATE_UPGRADER$1;
+            }
+        }
+        // ----------
+        if (room.controller.level >= 4) {
+            // check if we are in advanced room state
+            // container mining and storage set up
+            // then check if we are flagged for sitmulate state
+            if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
+                if (RoomHelper.isStimulateRoom(room)) {
+                    return ROOM_STATE_STIMULATE$1;
+                }
+                // otherwise, just advanced room state
+                return ROOM_STATE_ADVANCED$1;
+            }
+        }
+        // ----------
+        if (room.controller.level >= 3) {
+            // check if we are in intermediate room state
+            // container mining set up, but no storage
+            if (RoomHelper.isContainerMining(room, sources, containers) && storage === undefined) {
+                return ROOM_STATE_INTER$1;
+            }
+        }
+        // ----------
+        // check if we are in beginner room state
+        // no containers set up at sources so we are just running a bare knuckle room
+        const creeps = MemoryApi.getMyCreeps(room);
+        if (creeps.length > 3) {
+            return ROOM_STATE_BEGINNER$1;
+        }
+        // ----------
+        // check if we are in intro room state
+        // 3 or less creeps so we need to (re)start the room
+        return ROOM_STATE_INTRO$1;
     }
     /**
-     * Helper function - Returns an array containing @numParts of @part
-     * @part The part to create
-     * @numParts The number of parts to create
+     * run the towers in the room
+     * @param room the room we are defending
      */
-    static generateParts(part, numParts) {
-        const returnArray = [];
-        for (let i = 0; i < numParts; i++) {
-            returnArray.push(part);
-        }
-        return returnArray;
-    }
-    /**
-     * Groups the body parts -- e.g. WORK, WORK, CARRY, CARRY, MOVE, MOVE
-     * @param descriptor A StringMap of creepbody limits -- { MOVE: 3, CARRY: 2, ... }
-     */
-    static getBody_Grouped(descriptor) {
-        const creepBody = [];
-        _.forEach(Object.keys(descriptor), (part) => {
-            // Having ! after property removes 'null' and 'undefined'
-            for (let i = 0; i < descriptor[part]; i++) {
-                creepBody.push(part);
+    static runTowers(room) {
+        const towers = MemoryApi.getStructureOfType(room, STRUCTURE_TOWER);
+        // choose the most ideal target and have every tower attack it
+        const idealTarget = RoomHelper.chooseTowerTarget(room);
+        // have each tower attack this target
+        towers.forEach((t) => {
+            if (t !== null) {
+                t.attack(idealTarget);
             }
         });
-        return creepBody;
     }
     /**
-     * Collates the body parts -- e.g. WORK, CARRY, MOVE, WORK, CARRY, ...
-     * @param descriptor A StringMap of creepbody limits -- { MOVE: 3, CARRY: 2, ... }
+     * set the rooms defcon level
+     * @param room the room we are setting defcon for
      */
-    static getBody_Collated(descriptor) {
-        const returnParts = [];
-        const numParts = _.sum(_.values(descriptor));
-        const partNames = Object.keys(descriptor);
-        let i = 0;
-        while (i < numParts) {
-            for (let j = 0; j < partNames.length; j++) {
-                const currPart = partNames[j];
-                if (descriptor[currPart] >= 1) {
-                    returnParts.push(currPart);
-                    descriptor[currPart]--;
-                    i++;
-                }
+    static setDefconLevel(room) {
+        const hostileCreeps = MemoryApi.getHostileCreeps(room);
+        // check level 0 first to reduce cpu drain as it will be the most common scenario
+        // level 0 -- no danger
+        if (hostileCreeps.length === 0) {
+            return 0;
+        }
+        // now define the variables we will need to check the other cases in the event
+        // we are not dealing with a level 0 defcon scenario
+        const hostileBodyParts = _.sum(hostileCreeps, (c) => c.body.length);
+        const boostedHostileBodyParts = _.filter(_.flatten(_.map(hostileCreeps, "body")), (p) => !!p.boost)
+            .length;
+        // level 5 -- nuke inbound
+        if (room.find(FIND_NUKES) !== undefined) {
+            return 5;
+        }
+        // level 4 full seige, 50+ boosted parts
+        if (boostedHostileBodyParts >= 50) {
+            return 4;
+        }
+        // level 3 -- 150+ body parts OR any boosted body parts
+        if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
+            return 3;
+        }
+        // level 2 -- 50 - 150 body parts
+        if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
+            return 2;
+        }
+        // level 1 -- less than 50 body parts
+        return 1;
+    }
+    /**
+     * get repair targets for the room (any structure under 75% hp)
+     * @param room the room we are checking for repair targets
+     */
+    static getRepairTargets(room) {
+        return MemoryApi.getStructures(room, (s) => {
+            if (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) {
+                return s.hits < s.hitsMax * REPAIR_THRESHOLD;
             }
+            else {
+                return s.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+            }
+        });
+    }
+    /**
+     * get spawn/extensions that need to be filled for the room
+     * @param room the room we are getting spawns/extensions to be filled from
+     */
+    static getLowSpawnAndExtensions(room) {
+        const extensionsNeedFilled = MemoryApi.getStructures(room, (e) => (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION) &&
+            e.energy < e.energyCapacity);
+        return extensionsNeedFilled;
+    }
+    /**
+     * get towers that need to be filled for the room
+     * TODO order by ascending
+     * @param room the room we are getting towers that need to be filled from
+     */
+    static getTowersNeedFilled(room) {
+        const TOWER_THRESHOLD = 0.85;
+        return MemoryApi.getStructureOfType(room, STRUCTURE_TOWER, (t) => {
+            return t.energy < t.energyCapacity * TOWER_THRESHOLD;
+        });
+    }
+    /**
+     * get ramparts, or ramparts and walls that need to be repaired
+     * TODO limit by something, not sure yet.. room state possibly... controller level? open to input
+     * @param room the room we are getting ramparts/walls that need to be repaired from
+     */
+    static getWallRepairTargets(room) {
+        // returns all walls and ramparts under the current wall/rampart limit
+        const hpLimit = this.getWallHpLimit(room);
+        const walls = MemoryApi.getStructureOfType(room, STRUCTURE_WALL, (s) => s.hits < hpLimit);
+        const ramparts = MemoryApi.getStructureOfType(room, STRUCTURE_RAMPART, (s) => s.hits < hpLimit);
+        return walls.concat(ramparts);
+    }
+    /**
+     * get a list of open sources in the room (not saturated)
+     * @param room the room we are checking
+     */
+    static getOpenSources(room) {
+        const sources = MemoryApi.getSources(room);
+        // ? this assumes that we are only using this for domestic rooms
+        // ? if we use it on domestic rooms then I'll need to distinguish between ROLE_REMOTE_MINER
+        const miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER$1);
+        const lowSources = _.filter(sources, (source) => {
+            let totalWorkParts = 0;
+            // Count the number of work parts targeting the source
+            _.remove(miners, (miner) => {
+                if (!miner.memory.job) {
+                    return false;
+                }
+                if (miner.memory.job.targetID === source.id) {
+                    const workPartCount = miner.getActiveBodyparts(WORK);
+                    totalWorkParts += workPartCount;
+                    return true;
+                }
+                return false;
+            });
+            // filter out sources where the totalWorkParts < workPartsNeeded ( energyCap / ticksToReset / energyPerPart )
+            return totalWorkParts < source.energyCapacity / 300 / 2;
+        });
+        return lowSources;
+    }
+    /**
+     * gets the drop container next to the source
+     * @param room the room we are checking in
+     * @param source the source we are considering
+     */
+    static getMiningContainer(room, source) {
+        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
+        return _.find(containers, (c) => Math.abs(c.pos.x - source.pos.x) <= 1 && Math.abs(c.pos.y - source.pos.y) <= 1);
+    }
+    /**
+     * checks if a structure or creep store is full
+     * @param target the structure or creep we are checking
+     */
+    static isFull(target) {
+        if (target instanceof Creep) {
+            return _.sum(target.carry) === target.carryCapacity;
         }
-        return returnParts;
-    }
-    /**
-     * Generates a creep name in the format role_tier_uniqueID
-     * @param role The role of the creep being generated
-     * @param tier The tier of the creep being generated
-     */
-    static generateCreepName(role, tier, room) {
-        const modifier = Game.time.toString().slice(-4);
-        const name = role + "_" + tier + "_" + room.name + "_" + modifier;
-        return name;
-    }
-    // Domestic ----
-    /**
-     * Generate body for miner creep
-     * @param tier The tier of the room
-     */
-    static generateMinerBody(tier) {
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_1: // 2 Work, 2 Move - Total Cost: 300
-                body = { work: 2, move: 2 };
-                opts.mixType = COLLATED; // Just as an example of how we could change opts by tier as well
-                break;
-            case TIER_2: // 5 Work, 1 Move - Total Cost: 550
-                body = { work: 5, move: 1 };
-                break;
-            case TIER_3: // 5 Work, 2 Move - Total Cost: 600
-                body = { work: 5, move: 2 };
-                break;
+        else if (target.hasOwnProperty("store")) {
+            return _.sum(target.store) === target.storeCapacity;
         }
-        // Generate the creep body based on the body array and options
-        return SpawnApi.getCreepBody(body, opts);
+        // if not one of these two, there was an error
+        throw new UserException("Invalid Target", "isFull called on target with no capacity for storage.", ERROR_ERROR$2);
     }
     /**
-     * Generate options for miner creep
-     * @param roomState the room state of the room
+     * get the current hp limit for walls/ramparts
+     * @param room the current room
      */
-    static generateMinerOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: true,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
+    static getWallHpLimit(room) {
+        // only do so if the room has a controller otherwise we have an exception
+        if (room.controller !== undefined) {
+            // % of way to next level
+            const controllerProgress = room.controller.progress / room.controller.progressTotal;
+            // difference between this levels max and last levels max
+            const wallLevelHpDiff = RoomHelper.getWallLevelDifference(room.controller.level);
+            // Minimum hp chunk to increase limit
+            const chunkSize = 10000;
+            // The adjusted hp difference for controller progress and chunking
+            const numOfChunks = Math.floor((wallLevelHpDiff * controllerProgress) / chunkSize);
+            return WALL_LIMIT$1[room.controller.level] + chunkSize * numOfChunks;
         }
-        return creepOptions;
-    }
-    /**
-     * Generate body for Harvester creep
-     * @param tier the tier of the room
-     */
-    static generateHarvesterBody(tier) {
-        // Default Values for harvester
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
-                body = { work: 1, carry: 2, move: 2 };
-                break;
-            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
-                body = { work: 2, carry: 5, move: 3 };
-                break;
-            case TIER_3: // 2 Work, 6 Carry, 6 Move - Total Cost: 800
-                body = { work: 2, carry: 6, move: 6 };
-                break;
-            case TIER_4: // 2 Work, 11 Carry, 11 Move - Total Cost: 1300
-                body = { work: 2, carry: 11, move: 11 };
-                break;
-            case TIER_5: // 2 Work, 16 Carry, 16 Move - Total Cost: 1800
-                body = { work: 2, carry: 16, move: 16 };
-                break;
-            case TIER_6: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
-                body = { work: 2, carry: 20, move: 20 };
-                break;
+        else {
+            throw new UserException("Undefined Controller", "Error getting wall limit for room with undefined controller.", ERROR_ERROR$2);
         }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
     }
     /**
-     * Generate options for harvester creep
-     * @param roomState the room state of the room
+     * run links for the room
+     * @param room the room we want to run links for
      */
-    static generateHarvesterOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: true,
-                    upgrade: true,
-                    repair: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-            case ROOM_STATE_INTER:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: true,
-                    upgrade: true,
-                    repair: true,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-            case ROOM_STATE_ADVANCED:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: true,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: true,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: true //
-                };
-                break;
-            case ROOM_STATE_UPGRADER:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
-                    repair: true,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: true,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: true,
-                    getFromContainer: false,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: true //
-                };
-                break;
-        }
-        return creepOptions;
+    static runLinks(room) {
+        // we find a way to get an upgrader link (closest one to controller)
+        // and make sure the other links keep this one full
+        // possibly also if all links energy together is below the
+        // carry cap of upgrader we could have workers fill it for them
+        // we might want to let workers help with spawning IF NEEDED in
+        // seige/military situation but im just rambling now
     }
     /**
-     * Generate body for worker creep
-     * @param tier the tier of the room
+     * run terminal for the room
+     * @param room the room we want to run terminal for
      */
-    static generateWorkerBody(tier) {
-        // Default Values for Worker
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
-                body = { work: 1, carry: 2, move: 2 };
-                break;
-            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
-                body = { work: 2, carry: 5, move: 3 };
-                break;
-            case TIER_3: // 4 Work, 4 Carry, 4 Move - Total Cost: 800
-                body = { work: 4, carry: 4, move: 4 };
-                break;
-            case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
-                body = { work: 7, carry: 6, move: 6 };
-                break;
-            case TIER_5: // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
-                body = { work: 10, carry: 8, move: 8 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
+    static runTerminal(room) {
+        // here we can do market stuff, send resources from room to room
+        // to each other, and make sure we have the ideal ratio of minerals
+        // we decide that we want
     }
     /**
-     * Generate options for worker creep
-     * @param roomState the room state of the room
+     * run labs for the room
+     * @param room the room we want to run labs for
      */
-    static generateWorkerOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: true,
-                    upgrade: true,
-                    repair: true,
-                    wallRepair: true,
-                    fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-            case ROOM_STATE_INTER:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: true,
-                    upgrade: true,
-                    repair: true,
-                    wallRepair: true,
-                    fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-            case ROOM_STATE_ADVANCED:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: true,
-                    upgrade: true,
-                    repair: true,
-                    wallRepair: true,
-                    fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: true,
-                    getFromContainer: false,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: true //
-                };
-                break;
-            case ROOM_STATE_UPGRADER:
-                creepOptions = {
-                    // Options marked with // are overriding the defaults
-                    build: true,
-                    upgrade: true,
-                    repair: true,
-                    wallRepair: true,
-                    fillTower: true,
-                    fillStorage: true,
-                    fillContainer: false,
-                    fillLink: true,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: true,
-                    getFromContainer: false,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: true //
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for lorry creep
-     * @param tier the tier of the room
-     */
-    static generateLorryBody(tier) {
-        // Default Values for Lorry
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        // There are currently no plans to use lorry before terminal becomes available
-        switch (tier) {
-            case TIER_1: // 3 Carry, 3 Move - Total Cost: 300
-                body = { carry: 3, move: 3 };
-                break;
-            case TIER_2: // 6 Carry, 5 Move - Total Cost: 550
-                body = { carry: 6, move: 5 };
-                break;
-            case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
-                body = { carry: 8, move: 8 };
-                break;
-            case TIER_4: // 10 Carry, 10 Move - Total Cost: 1000
-                body = { carry: 10, move: 10 };
-                break;
-            case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
-                body = { carry: 20, move: 20 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for lorry creep
-     * @param roomState the room state of the room
-     */
-    static generateLorryOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    wallRepair: false,
-                    fillTower: true,
-                    fillStorage: true,
-                    fillContainer: true,
-                    fillLink: true,
-                    fillTerminal: true,
-                    fillLab: true,
-                    getFromStorage: true,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: true //
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for power upgrader creep
-     * @param tier the tier of the room
-     */
-    static generatePowerUpgraderBody(tier) {
-        // Default Values for Power Upgrader
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        // There are currently no plans to use power upgraders before links become available
-        // Need to experiment with work parts here and find out whats keeps up with the links
-        // Without over draining the storage, but still puts up numbers
-        switch (tier) {
-            case TIER_6: // 15 Work, 1 Carry, 1 Move - Total Cost: 2300
-                body = { work: 18, carry: 8, move: 4 };
-                break;
-            case TIER_7: // 1 Work, 8 Carry, 4 Move - Total Cost: 2800
-                body = { work: 22, carry: 8, move: 4 };
-                break;
-            case TIER_8: // 1 Work, 8 Carry, 4 Move - Total Cost: 2100
-                body = { work: 15, carry: 8, move: 4 }; // RCL 8 you can only do 15 per tick
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for power upgrader creep
-     * @param roomState the room state of the room
-     */
-    static generatePowerUpgraderOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_UPGRADER:
-                creepOptions = {
-                    build: false,
-                    upgrade: true,
-                    repair: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: true,
-                    getFromTerminal: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    // ------------
-    // Remote -----
-    // No need to start building these guys until tier 4, but allow them at tier 3 in case our strategy changes
-    /**
-     * Generate body for remote miner creep
-     * @param tier the tier of the room
-     */
-    static generateRemoteMinerBody(tier) {
-        // Default Values for Remote Miner
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        // Cap the remote miner at 6 work parts (6 so they finish mining early and can build/repair their container)
-        switch (tier) {
-            case TIER_3: // 6 Work, 1 Carry, 3 Move - Total Cost: 800
-                body = { work: 6, carry: 1, move: 3 };
-                break;
-            case TIER_4: // 6 Work, 1 Carry, 4 Move - Total Cost: 850
-                body = { work: 6, carry: 1, move: 4 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for remote miner creep
-     * @param roomState the room state of the room
-     */
-    static generateRemoteMinerOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    build: true,
-                    upgrade: false,
-                    repair: true,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: true,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for remote harvester creep
-     * @param tier the tier of the room
-     */
-    static generateRemoteHarvesterBody(tier) {
-        // Default Values for Remote Harvester
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
-                body = { carry: 8, move: 8 };
-                break;
-            case TIER_4: // 10 Carry, 10 Move- Total Cost: 1000
-                body = { carry: 10, move: 10 };
-                break;
-            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1600
-                body = { carry: 16, move: 16 };
-                break;
-            case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
-                body = { carry: 20, move: 20 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for remote harvester creep
-     * @param roomState the room state of the room
-     */
-    static generateRemoteHarvesterOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    build: true,
-                    upgrade: true,
-                    repair: true,
-                    wallRepair: true,
-                    fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-            case ROOM_STATE_ADVANCED:
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: true,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: true,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-            case ROOM_STATE_UPGRADER:
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: true,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: true,
-                    fillContainer: false,
-                    fillLink: true,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for remote reserver creep
-     * @param tier the tier of the room
-     */
-    static generateRemoteReserverBody(tier) {
-        // Default Values for Remote Reserver
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_4: // 2 Reserve Carry, 2 Move - Total Cost: 800
-                body = { reserve: 2, move: 2 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for remote reserver creep
-     * @param roomState the room state of the room
-     */
-    static generateRemoteReserverOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                // Remote reservers don't really have options perse, so just leave as defaults
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for remote colonizer creep
-     * @param tier the tier of the room
-     */
-    static generateRemoteColonizerBody(tier) {
-        // Default Values for Remote Colonizer
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_4: // 7 Work, 5 Carry, 5 Move - Total Cost: 1300
-                body = { work: 7, carry: 5, move: 6 };
-                break;
-            case TIER_5: // 9 Work, 8 Carry, 10 Move - Total Cost: 1800
-                body = { work: 9, carry: 8, move: 10 };
-                break;
-            case TIER_6: // 12 Work, 10 Carry, 10 Move - Total Cost: 2300
-                body = { work: 12, carry: 10, move: 12 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for remote colonizer creep
-     * @param tier the tier of the room
-     */
-    static generateRemoteColonizerOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsCiv();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    build: true,
-                    upgrade: true,
-                    repair: true,
-                    wallRepair: true,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: true,
-                    getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for remote defender creep
-     * @param tier the tier of the room
-     */
-    static generateRemoteDefenderBody(tier) {
-        // Default Values for Remote Defender
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_3: // 5 Attack, 5 Move - Total Cost: 550
-                body = { attack: 5, move: 5 };
-                break;
-            case TIER_4: //  6 Ranged Attack, 6 Move, - Total Cost: 1200
-                body = { ranged_attack: 6, move: 6 };
-                break;
-            case TIER_5: // 8 Ranged Attack, 7 Move, 1 Heal - Total Cost: 1800
-                body = { ranged_attack: 8, move: 7, heal: 1 };
-                break;
-            case TIER_6: // 8 Ranged Attack, 10 Move, 2 Heal
-                body = { ranged_attack: 8, move: 10, heal: 2 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for remote defender creep
-     * @param tier the tier of the room
-     */
-    static generateRemoteDefenderOptions(roomState) {
-        let creepOptions = this.getDefaultCreepOptionsMili();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    squadSize: 1,
-                    squadUUID: null,
-                    rallyLocation: null,
-                    seige: false,
-                    dismantler: false,
-                    healer: true,
-                    attacker: false,
-                    defender: true,
-                    flee: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    // ----------
-    // Military -----
-    /**
-     * Generate body for zealot creep
-     * @param tier the tier of the room
-     */
-    static generateZealotBody(tier) {
-        // Default Values for Zealot
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
-                body = { attack: 2, move: 2 };
-                break;
-            case TIER_2: // 3 Attack, 3 Move  - Total Cost: 390
-                body = { attack: 3, move: 3 };
-                break;
-            case TIER_3: // 5 Attack, 5 Move - Total Cost: 650
-                body = { attack: 5, move: 5 };
-                break;
-            case TIER_4: // 10 Attack, 10 Move - Total Cost: 1300
-                body = { attack: 2, move: 2 };
-                break;
-            case TIER_5: // 15 Attack, 12 Move - Total Cost: 1800
-                body = { attack: 15, move: 12 };
-                break;
-            case TIER_6: // 20 Attack, 14 Move - Total Cost: 2300
-                body = { attack: 20, move: 14 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for zealot creep
-     * @param roomState the room state of the room
-     * @param squadSizeParam the size of the squad associated with the zealot
-     * @param squadUUIDParam the squad id that the zealot is a member of
-     * @param rallyLocationParam the meeting place for the squad
-     */
-    static generateZealotOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
-        let creepOptions = this.getDefaultCreepOptionsMili();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    squadSize: squadSizeParam,
-                    squadUUID: squadUUIDParam,
-                    rallyLocation: rallyLocationParam,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
-                    attacker: true,
-                    defender: false,
-                    flee: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for medic creep
-     * @param roomState the room state of the room
-     * @param squadSizeParam the size of the squad associated with the zealot
-     * @param squadUUIDParam the squad id that the zealot is a member of
-     * @param rallyLocationParam the meeting place for the squad
-     */
-    static generateMedicBody(tier) {
-        // Default Values for Medic
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_1: // 1 Heal, 1 Move - Total Cost: 300
-                body = { heal: 1, move: 1 };
-                break;
-            case TIER_2: // 2 Heal, 1 Move - Total Cost: 550
-                body = { heal: 2, move: 1 };
-                break;
-            case TIER_3: // 2 Heal, 2 Move - Total Cost: 600
-                body = { heal: 2, move: 2 };
-                break;
-            case TIER_4: // 4 Heal, 4 Move - Total Cost: 1200
-                body = { heal: 4, move: 4 };
-                break;
-            case TIER_5: // 6 Heal, 6 Move - Total Cost: 1800
-                body = { heal: 6, move: 6 };
-                break;
-            case TIER_6: // 8 Heal, 6 Move - Total Cost: 2300
-                body = { heal: 8, move: 6 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for medic creep
-     * @param tier the tier of the room
-     */
-    static generateMedicOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
-        let creepOptions = this.getDefaultCreepOptionsMili();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    squadSize: squadSizeParam,
-                    squadUUID: squadUUIDParam,
-                    rallyLocation: rallyLocationParam,
-                    seige: false,
-                    dismantler: false,
-                    healer: true,
-                    attacker: false,
-                    defender: false,
-                    flee: true
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    /**
-     * Generate body for stalker creep
-     * @param tier the tier of the room
-     */
-    static generateStalkerBody(tier) {
-        // Default Values for Stalker
-        let body = { work: 0, move: 0 };
-        const opts = { mixType: GROUPED };
-        switch (tier) {
-            case TIER_1: // 1 Ranged Attack, 2 Move - Total Cost: 200
-                body = { ranged_attack: 1, move: 1 };
-                break;
-            case TIER_2: // 3 Ranged Attack, 2 Move - Total Cost: 550
-                body = { ranged_attack: 3, move: 2 };
-                break;
-            case TIER_3: // 4 Ranged Attack, 4 Move - Total Cost: 800
-                body = { ranged_attack: 4, move: 4 };
-                break;
-            case TIER_4: // 6 Ranged Attack, 6 Move - Total Cost: 1200
-                body = { ranged_attack: 6, move: 6 };
-                break;
-            case TIER_5: // 8 Ranged Attack, 8 Move - Total Cost: 1600
-                body = { carranged_attackry: 8, move: 8 };
-                break;
-            case TIER_6: // 12 Ranged Attack, 10 Move - Total Cost: 2300
-                body = { ranged_attack: 12, move: 10 };
-                break;
-        }
-        // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
-    }
-    /**
-     * Generate options for stalker creep
-     * @param roomState the room state of the room
-     * @param squadSizeParam the size of the squad associated with the zealot
-     * @param squadUUIDParam the squad id that the zealot is a member of
-     * @param rallyLocationParam the meeting place for the squad
-     */
-    static generateStalkerOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
-        let creepOptions = this.getDefaultCreepOptionsMili();
-        switch (roomState) {
-            case ROOM_STATE_BEGINNER:
-                creepOptions = {
-                    squadSize: squadSizeParam,
-                    squadUUID: squadUUIDParam,
-                    rallyLocation: rallyLocationParam,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
-                    attacker: false,
-                    defender: false,
-                    flee: false
-                };
-                break;
-        }
-        return creepOptions;
-    }
-    // --------------
-    /**
-     * returns a set of creep options with all default values
-     */
-    static getDefaultCreepOptionsCiv() {
-        return {
-            build: false,
-            upgrade: false,
-            repair: false,
-            wallRepair: false,
-            fillTower: false,
-            fillStorage: false,
-            fillContainer: false,
-            fillLink: false,
-            fillTerminal: false,
-            fillLab: false,
-            getFromStorage: false,
-            getFromContainer: false,
-            getDroppedEnergy: false,
-            getFromLink: false,
-            getFromTerminal: false
-        };
-    }
-    /**
-     * returns set of mili creep options with all default values
-     */
-    static getDefaultCreepOptionsMili() {
-        return {
-            squadSize: 0,
-            squadUUID: null,
-            rallyLocation: null,
-            seige: false,
-            dismantler: false,
-            healer: false,
-            attacker: false,
-            defender: false,
-            flee: false
-        };
-    }
-    /**
-     * generates a creep memory to give to a creep being spawned
-     */
-    static generateDefaultCreepMemory(roleConst, homeRoomNameParam, targetRoomParam, creepOptions) {
-        return {
-            role: roleConst,
-            homeRoom: homeRoomNameParam,
-            targetRoom: targetRoomParam,
-            workTarget: null,
-            options: creepOptions,
-            working: false
-        };
+    static runLabs(room) {
+        // i have no idea yet lol
     }
 }
-//# sourceMappingURL=SpawnHelper.js.map
 
-// Accessing Memory Helpers
-class MemoryHelper {
+// TODO Create jobs for tombstones and dropped resources if wanted
+class GetEnergyJobs {
     /**
-     * Get structures of a single type in a room, updating if necessary
-     *
-     * [Cached] Memory.rooms[room.name].structures
-     * @param room
-     * @param filterFunction
-     * @param forceUpdate
-     * @returns Structure[] An array of structures of a single type
+     * Gets a list of GetEnergyJobs for the sources of a room
+     * @param room The room to create the job list for
      */
-    static getStructureOfType(room, type, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.data[type] === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL$1) {
-            MemoryHelper_Room.updateStructures(room);
+    static createSourceJobs(room) {
+        // List of all sources that are under optimal work capacity
+        const openSources = RoomApi.getOpenSources(room);
+        if (openSources.length === 0) {
+            return [];
         }
-        const structures = _.map(Memory.rooms[room.name].structures.data[type], (id) => Game.getObjectById(id));
-        return structures;
+        const sourceJobList = [];
+        _.forEach(openSources, (source) => {
+            // Create the StoreDefinition for the source
+            const sourceResources = { energy: source.energy };
+            // Create the GetEnergyJob object for the source
+            const sourceJob = {
+                jobType: "getEnergyJob",
+                targetID: source.id,
+                targetType: "source",
+                actionType: "harvest",
+                resources: sourceResources,
+                isTaken: false
+            };
+            // Append the GetEnergyJob to the main array
+            sourceJobList.push(sourceJob);
+        });
+        return sourceJobList;
     }
     /**
-     * Returns an array of creeps of a role
-     * @param role The role to check for
+     * Gets a list of GetEnergyJobs for the containers of a room
+     * @param room The room to create the job list for
      */
-    static getCreepOfRole(room, role, forceUpdate) {
-        const filterByRole = (creep) => {
-            return creep.memory.role === role;
-        };
-        const creepsOfRole = MemoryApi.getMyCreeps(room, filterByRole);
-        return creepsOfRole;
+    static createContainerJobs(room) {
+        // List of all containers with >= CONTAINER_MINIMUM_ENERGY (from config.ts)
+        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER, (container) => container.store.energy > CONTAINER_MINIMUM_ENERGY);
+        if (containers.length === 0) {
+            return [];
+        }
+        const containerJobList = [];
+        _.forEach(containers, (container) => {
+            const containerJob = {
+                jobType: "getEnergyJob",
+                targetID: container.id,
+                targetType: STRUCTURE_CONTAINER,
+                actionType: "withdraw",
+                resources: container.store,
+                isTaken: false
+            };
+            // Append to the main array
+            containerJobList.push(containerJob);
+        });
+        return containerJobList;
     }
     /**
-     * clear the memory structure for the creep
-     * @param creep the creep we want to clear the memory of
+     * Gets a list of GetEnergyJobs for the links of a room
+     * @param room The room to create the job list for
      */
-    static clearCreepMemory(creep) {
-        // check if the memory object exists and delete it
-        if (Memory.creeps[creep.name]) {
-            delete creep.memory;
+    static createLinkJobs(room) {
+        // List of all the links in the room with > LINK_MINIMUM_ENERGY (from config.ts)
+        // AND no active cooldown
+        const activeLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link) => {
+            return link.energy > LINK_MINIMUM_ENERGY && link.cooldown === 0;
+        });
+        if (activeLinks.length === 0) {
+            return [];
         }
+        const linkJobList = [];
+        _.forEach(activeLinks, (link) => {
+            // Create the StoreDefinition for the link
+            const linkStore = { energy: link.energy };
+            const linkJob = {
+                jobType: "getEnergyJob",
+                targetID: link.id,
+                targetType: STRUCTURE_LINK,
+                actionType: "withdraw",
+                resources: linkStore,
+                isTaken: false
+            };
+            linkJobList.push(linkJob);
+        });
+        return linkJobList;
     }
     /**
-     * clear the memory for a room
-     * @param room the room we want to clear the memory for
+     * Gets a list of GetEnergyJobs for the backup structures of a room (terminal, storage)
+     * @param room  The room to create the job list for
      */
-    static clearRoomMemory(room) {
-        // check if the memory structures exists and delete it
-        if (Memory.rooms[room.name]) {
-            delete room.memory;
+    static createBackupStructuresJobs(room) {
+        const backupJobList = [];
+        // Create the storage job if active
+        if (room.storage !== undefined) {
+            const storageJob = {
+                jobType: "getEnergyJob",
+                targetID: room.storage.id,
+                targetType: STRUCTURE_STORAGE,
+                actionType: "withdraw",
+                resources: room.storage.store,
+                isTaken: false
+            };
+            backupJobList.push(storageJob);
         }
+        // Create the terminal job if active
+        if (room.terminal !== undefined) {
+            const terminalJob = {
+                jobType: "getEnergyJob",
+                targetID: room.terminal.id,
+                targetType: STRUCTURE_TERMINAL,
+                actionType: "withdraw",
+                resources: room.terminal.store,
+                isTaken: false
+            };
+            backupJobList.push(terminalJob);
+        }
+        return backupJobList;
     }
 }
-//# sourceMappingURL=MemoryHelper.js.map
+
+class ClaimPartJobs {
+    /**
+     * Gets a list of ClaimJobs for the Room
+     * @param room The room to get the jobs for
+     */
+    static createClaimJobs(room) {
+        // TODO Get a list of rooms to be claimed somehow
+        const roomNames = [];
+        if (roomNames.length === 0) {
+            return [];
+        }
+        const claimJobs = [];
+        _.forEach(roomNames, (name) => {
+            const claimJob = {
+                jobType: "claimPartJob",
+                targetID: name,
+                targetType: "roomName",
+                actionType: "claim",
+                isTaken: false
+            };
+            claimJobs.push(claimJob);
+        });
+        return claimJobs;
+    }
+    /**
+     * Gets a list of ReserveJobs for the room
+     * @param room The room to get the jobs for
+     */
+    static createReserveJobs(room) {
+        // TODO Get a list of rooms to be reserved
+        const roomNames = [];
+        if (roomNames.length === 0) {
+            return [];
+        }
+        const reserveJobs = [];
+        _.forEach(roomNames, (name) => {
+            const reserveJob = {
+                jobType: "claimPartJob",
+                targetID: name,
+                targetType: "roomName",
+                actionType: "reserve",
+                isTaken: false
+            };
+            reserveJobs.push(reserveJob);
+        });
+        return reserveJobs;
+    }
+    /**
+     * Gets a list of SignJobs for the room (signing the controller)
+     * @param room The room to get the jobs for
+     */
+    static createSignJobs(room) {
+        // TODO Get a list of controllers to be signed
+        const controllers = [];
+        if (controllers.length === 0) {
+            return [];
+        }
+        const signJobs = [];
+        _.forEach(controllers, (controller) => {
+            const signJob = {
+                jobType: "claimPartJob",
+                targetID: controller.id,
+                targetType: "controller",
+                actionType: "sign",
+                isTaken: false
+            };
+            signJobs.push(signJob);
+        });
+        return signJobs;
+    }
+    /**
+     * Gets a list of AttackJobs for the room (attacking enemy controller)
+     * @param room The room to get the jobs for
+     */
+    static createAttackJobs(room) {
+        // TODO Get a list of rooms to attack
+        const roomNames = [];
+        if (roomNames.length === 0) {
+            return [];
+        }
+        const attackJobs = [];
+        _.forEach(roomNames, (name) => {
+            const attackJob = {
+                jobType: "claimPartJob",
+                targetID: name,
+                targetType: "roomName",
+                actionType: "attack",
+                isTaken: false
+            };
+            attackJobs.push(attackJob);
+        });
+        return attackJobs;
+    }
+}
+
+class WorkPartJobs {
+    /**
+     * Gets a list of repairJobs for the room
+     * @param room The room to get jobs for
+     */
+    static createRepairJobs(room) {
+        const repairTargets = RoomApi.getRepairTargets(room);
+        if (repairTargets.length === 0) {
+            return [];
+        }
+        const repairJobs = [];
+        _.forEach(repairTargets, (structure) => {
+            const repairJob = {
+                jobType: "workPartJob",
+                targetID: structure.id,
+                targetType: structure.structureType,
+                actionType: "repair",
+                isTaken: false
+            };
+            repairJobs.push(repairJob);
+        });
+        return repairJobs;
+    }
+    /**
+     * Gets a list of buildJobs for the room
+     * @param room The room to get jobs for
+     */
+    static createBuildJobs(room) {
+        const constructionSites = MemoryApi.getConstructionSites(room);
+        if (constructionSites.length === 0) {
+            return [];
+        }
+        const buildJobs = [];
+        _.forEach(constructionSites, (cs) => {
+            const buildJob = {
+                jobType: "workPartJob",
+                targetID: cs.id,
+                targetType: "constructionSite",
+                actionType: "build",
+                isTaken: false
+            };
+            buildJobs.push(buildJob);
+        });
+        return buildJobs;
+    }
+    /**
+     * Gets a list of upgradeJobs for the room
+     * @param room The room to get jobs for
+     */
+    static createUpgradeJobs(room) {
+        // Just returning a single upgrade controller job for now
+        // ? Should we generate multiple jobs based on how many we expect to be upgrading/ how many power upgraders there are?
+        const upgradeJobs = [];
+        if (room.controller !== undefined) {
+            const controllerJob = {
+                jobType: "workPartJob",
+                targetID: room.controller.id,
+                targetType: "controller",
+                actionType: "upgrade",
+                isTaken: false
+            };
+            upgradeJobs.push(controllerJob);
+        }
+        return upgradeJobs;
+    }
+}
+
+class CarryPartJobs {
+    /**
+     * Gets a list of fill jobs for the room
+     * @param room The room to get the jobs for
+     */
+    static createFillJobs(room) {
+        const lowSpawnsAndExtensions = RoomApi.getLowSpawnAndExtensions(room);
+        const lowTowers = RoomApi.getTowersNeedFilled(room);
+        if (lowSpawnsAndExtensions.length === 0 && lowTowers.length === 0) {
+            return [];
+        }
+        const fillJobs = [];
+        _.forEach(lowSpawnsAndExtensions, (structure) => {
+            const fillJob = {
+                jobType: "carryPartJob",
+                targetID: structure.id,
+                targetType: structure.structureType,
+                actionType: "transfer",
+                isTaken: false
+            };
+            fillJobs.push(fillJob);
+        });
+        _.forEach(lowTowers, (structure) => {
+            const fillJob = {
+                jobType: "carryPartJob",
+                targetID: structure.id,
+                targetType: structure.structureType,
+                actionType: "transfer",
+                isTaken: false
+            };
+            fillJobs.push(fillJob);
+        });
+        return fillJobs;
+    }
+    /**
+     * Gets a list of store jobs for the room
+     * @param room The room to get the jobs for
+     */
+    static createStoreJobs(room) {
+        const storeJobs = [];
+        if (room.storage !== undefined) {
+            const storageJob = {
+                jobType: "carryPartJob",
+                targetID: room.storage.id,
+                targetType: STRUCTURE_STORAGE,
+                actionType: "transfer",
+                isTaken: false
+            };
+            storeJobs.push(storageJob);
+        }
+        if (room.terminal !== undefined) {
+            const terminalJob = {
+                jobType: "carryPartJob",
+                targetID: room.terminal.id,
+                targetType: STRUCTURE_TERMINAL,
+                actionType: "transfer",
+                isTaken: false
+            };
+            storeJobs.push(terminalJob);
+        }
+        return storeJobs;
+    }
+}
+
+/**
+ * Contains all functions for initializing and updating room memory
+ */
+class MemoryHelper_Room {
+    /**
+     * Calls all the helper functions (that don't need additional input) to update room.memory.
+     * NOTE: This will update the entire memory tree, so use this function sparingly
+     * TODO Make sure this updates every aspect of room memory - currently does not
+     * @param room The room to update the memory of
+     */
+    static updateRoomMemory(room) {
+        // Update All Creeps
+        this.updateHostileCreeps(room);
+        this.updateMyCreeps(room);
+        // Update structures/construction sites
+        this.updateConstructionSites(room);
+        this.updateStructures(room);
+        // Update sources, minerals, dropped resources, tombstones
+        this.updateSources(room);
+        this.updateMinerals(room);
+        this.updateDroppedResources(room);
+        this.updateTombstones(room);
+        // Update Custom Memory Components
+        this.updateDependentRooms(room);
+        // Update Job Lists
+        this.updateGetEnergy_allJobs(room);
+        this.updateCarryPart_allJobs(room);
+        this.updateWorkPart_allJobs(room);
+        this.updateClaimPart_allJobs(room);
+        // Calling the below function is equivalent to calling all of the above updateGetEnergy_xxxxxJobs functions
+        // this.updateGetEnergy_allJobs(room);
+    }
+    /**
+     * Update room memory for all dependent room types
+     * TODO Implement this function - Decide how we plan to do it
+     * @param room The room to update the dependencies of
+     */
+    static updateDependentRooms(room) {
+        // Cycle through all flags and check for any claim rooms or remote rooms
+        // ? Should we check for the closest main room?
+        // ? I have an idea of a system where we plant a remoteFlag/claimFlag
+        // ? and then we place a different colored flag in the room that we want
+        // ? to assign that remote/claim room to. Once the program detects the assignment flag
+        // ? and the room it assigns to, it removes the assignment flag and could optionally remove
+        // ? the remoteFlag as well (but I think it would be more clear to leave the flag in the room)
+    }
+    /**
+     * Find all hostile creeps in room
+     * TODO Check for boosted creeps
+     * [Cached] Room.memory.hostiles
+     * @param room The Room to update
+     */
+    static updateHostileCreeps(room) {
+        Memory.rooms[room.name].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
+        const enemies = room.find(FIND_HOSTILE_CREEPS);
+        // Sort creeps into categories
+        _.forEach(enemies, (enemy) => {
+            // * Check for boosted creeps and put them at the front of the if else stack
+            if (enemy.getActiveBodyparts(HEAL) > 0) {
+                Memory.rooms[room.name].hostiles.data.heal.push(enemy.id);
+            }
+            else if (enemy.getActiveBodyparts(RANGED_ATTACK) > 0) {
+                Memory.rooms[room.name].hostiles.data.ranged.push(enemy.id);
+            }
+            else if (enemy.getActiveBodyparts(ATTACK) > 0) {
+                Memory.rooms[room.name].hostiles.data.melee.push(enemy.id);
+            }
+        });
+        Memory.rooms[room.name].hostiles.cache = Game.time;
+    }
+    /**
+     * Find all owned creeps in room
+     * ? Should we filter these by role into memory? E.g. creeps.data.miners
+     * [Cached] Room.memory.creeps
+     * @param room The Room we are checking in
+     */
+    static updateMyCreeps(room) {
+        Memory.rooms[room.name].creeps = { data: null, cache: null };
+        // Changed this because it wouldn't catch remote squads for example
+        // as they aren't actually in the room all the time (had this problem with my last solo code base)
+        const creeps = _.filter(Game.creeps, creep => creep.memory.homeRoom === room.name);
+        Memory.rooms[room.name].creeps.data = _.map(creeps, (creep) => creep.id);
+        Memory.rooms[room.name].creeps.cache = Game.time;
+    }
+    /**
+     * Find all construction sites in room
+     *
+     * [Cached] Room.memory.constructionSites
+     * @param room The Room we are checking in
+     */
+    static updateConstructionSites(room) {
+        Memory.rooms[room.name].constructionSites = { data: null, cache: null };
+        const constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);
+        Memory.rooms[room.name].constructionSites.data = _.map(constructionSites, (c) => c.id);
+        Memory.rooms[room.name].constructionSites.cache = Game.time;
+    }
+    /**
+     * Find all structures in room
+     *
+     * [Cached] Room.memory.structures
+     * @param room The Room we are checking in
+     */
+    static updateStructures(room) {
+        Memory.rooms[room.name].structures = { data: {}, cache: null };
+        const allStructures = room.find(FIND_STRUCTURES);
+        const sortedStructureIDs = {};
+        // For each structureType, remove the structures from allStructures and map them to ids in the memory object.
+        _.forEach(ALL_STRUCTURE_TYPES, (type) => {
+            sortedStructureIDs[type] = _.map(_.remove(allStructures, (struct) => struct.structureType === type), (struct) => struct.id);
+        });
+        Memory.rooms[room.name].structures.data = sortedStructureIDs;
+        Memory.rooms[room.name].structures.cache = Game.time;
+    }
+    /**
+     * Find all sources in room
+     *
+     * [Cached] Room.memory.sources
+     * @param room The room to check in
+     */
+    static updateSources(room) {
+        Memory.rooms[room.name].sources = { data: {}, cache: null };
+        const sources = room.find(FIND_SOURCES);
+        Memory.rooms[room.name].sources.data = _.map(sources, (source) => source.id);
+        Memory.rooms[room.name].sources.cache = Game.time;
+    }
+    /**
+     * Find all sources in room
+     *
+     * [Cached] Room.memory.sources
+     * @param room The room to check in
+     */
+    static updateMinerals(room) {
+        Memory.rooms[room.name].minerals = { data: {}, cache: null };
+        const minerals = room.find(FIND_MINERALS);
+        Memory.rooms[room.name].minerals.data = _.map(minerals, (mineral) => mineral.id);
+        Memory.rooms[room.name].minerals.cache = Game.time;
+    }
+    /**
+     * Finds all tombstones in room
+     *
+     * @param room The room to check in
+     */
+    static updateTombstones(room) {
+        Memory.rooms[room.name].tombstones = { data: {}, cache: null };
+        const tombstones = room.find(FIND_TOMBSTONES);
+        Memory.rooms[room.name].tombstones.data = _.map(tombstones, (tombstone) => tombstone.id);
+        Memory.rooms[room.name].tombstones.cache = Game.time;
+    }
+    /**
+     * Find all dropped resources in a room
+     *
+     * @param room The room to check in
+     */
+    static updateDroppedResources(room) {
+        Memory.rooms[room.name].droppedResources = { data: {}, cache: null };
+        const droppedResources = room.find(FIND_DROPPED_RESOURCES);
+        Memory.rooms[room.name].droppedResources.data = _.map(droppedResources, (resource) => resource.id);
+        Memory.rooms[room.name].droppedResources.data = Game.time;
+    }
+    /**
+     * update the room state
+     * @param room the room we are updating
+     * @param stateConst the state we are applying to the room
+     */
+    static updateRoomState(room) {
+        Memory.rooms[room.name].roomState = RoomApi.setRoomState(room);
+        return;
+    }
+    /**
+     * update the room defcon
+     * @param room the room we are updating
+     * @param stateConst the defcon we are applying to the room
+     */
+    static updateDefcon(room) {
+        Memory.rooms[room.name].defcon = RoomApi.setDefconLevel(room);
+        return;
+    }
+    /**
+     * Update the room's GetEnergyJobListing
+     * @param room The room to update the memory of
+     * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
+     */
+    static updateGetEnergy_allJobs(room) {
+        // Clean out old job listing
+        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs;
+        }
+        this.updateGetEnergy_sourceJobs(room);
+        this.updateGetEnergy_containerJobs(room);
+        this.updateGetEnergy_linkJobs(room);
+        this.updateGetEnergy_backupStructuresJobs(room);
+    }
+    /**
+     * Update the room's GetEnergyJobListing_sourceJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateGetEnergy_sourceJobs(room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+        // What to do if the jobs already exist
+        // ! Deletes existing jobs
+        // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?
+        // ? Or should we just set it up so that each time the Job objects are updated they start fresh? (might require mining creep memory for changes to the job status, or accepting inaccuracy)
+        if (Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs;
+        }
+        Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs = {
+            data: GetEnergyJobs.createSourceJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's GetEnergyJobListing_containerJobs
+     * @param room The room to update the memory fo
+     */
+    static updateGetEnergy_containerJobs(room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+        if (Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs;
+        }
+        Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs = {
+            data: GetEnergyJobs.createContainerJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's GetEnergyJobListing_linkJobs
+     * @param room The room to update the memory fo
+     */
+    static updateGetEnergy_linkJobs(room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+        if (Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs;
+        }
+        Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs = {
+            data: GetEnergyJobs.createLinkJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's GetEnergyJobListing_containerJobs
+     * @param room The room to update the memory fo
+     */
+    static updateGetEnergy_backupStructuresJobs(room) {
+        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        }
+        if (Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures;
+        }
+        Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures = {
+            data: GetEnergyJobs.createBackupStructuresJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's ClaimPartJobListing
+     * @param room The room to update the memory of
+     * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
+     */
+    static updateClaimPart_allJobs(room) {
+        // Clean out old job listing
+        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.getEnergyJobs;
+        }
+        this.updateClaimPart_claimJobs(room);
+        this.updateClaimPart_reserveJobs(room);
+        this.updateClaimPart_signJobs(room);
+        this.updateClaimPart_controllerAttackJobs(room);
+    }
+    /**
+     * Update the room's ClaimPartJobListing_claimJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateClaimPart_claimJobs(room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs.claimJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs.claimJobs;
+        }
+        Memory.rooms[room.name].jobs.claimPartJobs.claimJobs = {
+            data: ClaimPartJobs.createClaimJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's ClaimPartJobListing_reserveJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateClaimPart_reserveJobs(room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs;
+        }
+        Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs = {
+            data: ClaimPartJobs.createReserveJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's ClaimPartJobListing_signJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateClaimPart_signJobs(room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs.signJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs.signJobs;
+        }
+        Memory.rooms[room.name].jobs.claimPartJobs.signJobs = {
+            data: ClaimPartJobs.createSignJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's ClaimPartJobListing_attackJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateClaimPart_controllerAttackJobs(room) {
+        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.claimPartJobs.attackJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.claimPartJobs.attackJobs;
+        }
+        Memory.rooms[room.name].jobs.claimPartJobs.attackJobs = {
+            data: ClaimPartJobs.createAttackJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's WorkPartJobListing
+     * @param room The room to update the memory of
+     */
+    static updateWorkPart_allJobs(room) {
+        // Clean out old job listing
+        if (Memory.rooms[room.name].jobs.workPartJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.workPartJobs;
+        }
+        this.updateWorkPart_repairJobs(room);
+        this.updateWorkPart_buildJobs(room);
+        this.updateWorkPart_upgradeJobs(room);
+    }
+    /**
+     * Update the room's WorkPartJobListing_repairJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateWorkPart_repairJobs(room) {
+        if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.workPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.workPartJobs.repairJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.workPartJobs.repairJobs;
+        }
+        Memory.rooms[room.name].jobs.workPartJobs.repairJobs = {
+            data: WorkPartJobs.createRepairJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's WorkPartJobListing_buildJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateWorkPart_buildJobs(room) {
+        if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.workPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.workPartJobs.buildJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.workPartJobs.buildJobs;
+        }
+        Memory.rooms[room.name].jobs.workPartJobs.buildJobs = {
+            data: WorkPartJobs.createBuildJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's WorkPartJobListing_upgradeJobs
+     * TODO Change this function to restore old job memory, rather than delete it and refresh it
+     * @param room The room to update the memory of
+     */
+    static updateWorkPart_upgradeJobs(room) {
+        if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.workPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs;
+        }
+        Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs = {
+            data: WorkPartJobs.createUpgradeJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's WorkPartJobListing
+     * @param room The room to update the memory of
+     */
+    static updateCarryPart_allJobs(room) {
+        // Clean out old job listing
+        if (Memory.rooms[room.name].jobs.carryPartJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.carryPartJobs;
+        }
+        this.updateCarryPart_fillJobs(room);
+        this.updateCarryPart_storeJobs(room);
+    }
+    /**
+     * Update the room's CarryPartJobListing_fillJobs
+     * @param room  The room to update the memory of
+     */
+    static updateCarryPart_fillJobs(room) {
+        if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.carryPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.carryPartJobs.fillJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.carryPartJobs.fillJobs;
+        }
+        Memory.rooms[room.name].jobs.carryPartJobs.fillJobs = {
+            data: CarryPartJobs.createFillJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * Update the room's CarryPartJobListing_fillJobs
+     * @param room  The room to update the memory of
+     */
+    static updateCarryPart_storeJobs(room) {
+        if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
+            Memory.rooms[room.name].jobs.carryPartJobs = {};
+        }
+        // What to do if the jobs already exist
+        if (Memory.rooms[room.name].jobs.carryPartJobs.storeJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs.carryPartJobs.storeJobs;
+        }
+        Memory.rooms[room.name].jobs.carryPartJobs.storeJobs = {
+            data: CarryPartJobs.createStoreJobs(room),
+            cache: Game.time
+        };
+    }
+    /**
+     * update creep limits for domestic creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    static updateDomesticLimits(room, newLimits) {
+        // * Optionally apply a filter or otherwise check the limits before assigning them
+        Memory.rooms[room.name].creepLimit["domesticLimits"] = newLimits;
+    }
+    /**
+     * update creep limits for remote creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    static updateRemoteLimits(room, newLimits) {
+        // * Optionally apply a filter or otherwise check the limits before assigning them
+        Memory.rooms[room.name].creepLimit["remoteLimits"] = newLimits;
+    }
+    /**
+     * update creep limits for military creeps
+     * @param room room we are updating limits for
+     * @param newLimits new limits we are setting
+     */
+    static updateMilitaryLimits(room, newLimits) {
+        // * Optionally apply a filter or otherwise check the limits before assigning them
+        Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
+    }
+}
 
 /**
  * The API used by the spawn manager
  */
 class SpawnApi {
-    /**
-     * Get count of all creeps, or of one if creepConst is specified
-     * @param room the room we are getting the count for
-     * @param creepConst [Optional] Count only one role
-     */
-    static getCreepCount(room, creepConst) {
-        const filterFunction = creepConst === undefined ? undefined : (c) => c.memory.role === creepConst;
-        return MemoryApi.getMyCreeps(room, filterFunction).length;
-    }
-    /**
-     * get creep limits
-     * @param room the room we want the limits for
-     */
-    static getCreepLimits(room) {
-        const creepLimits = {
-            domesticLimits: Memory.rooms[room.name].creepLimit["domesticLimits"],
-            remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
-            militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
-        };
-        return creepLimits;
-    }
     /**
      * set domestic creep limits
      * @param room the room we want limits for
@@ -2010,6 +1735,7 @@ class SpawnApi {
             powerUpgrader: 0,
             lorry: 0
         };
+        const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
         // check what room state we are in
         switch (room.memory.roomState) {
             // Intro
@@ -2040,7 +1766,7 @@ class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 4;
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = 0;
+                domesticLimits[ROLE_LORRY] = numLorries;
                 break;
             // Upgrader
             case ROOM_STATE_UPGRADER:
@@ -2049,6 +1775,7 @@ class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_POWER_UPGRADER] = 1;
+                domesticLimits[ROLE_LORRY] = numLorries;
                 break;
             // Stimulate
             case ROOM_STATE_STIMULATE:
@@ -2057,7 +1784,7 @@ class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 3;
                 domesticLimits[ROLE_POWER_UPGRADER] = 2;
-                domesticLimits[ROLE_LORRY] = 2;
+                domesticLimits[ROLE_LORRY] = numLorries;
                 break;
             // Seige
             case ROOM_STATE_SEIGE:
@@ -2065,7 +1792,7 @@ class SpawnApi {
                 domesticLimits[ROLE_MINER] = 2;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 2;
-                domesticLimits[ROLE_LORRY] = 1;
+                domesticLimits[ROLE_LORRY] = numLorries;
                 break;
         }
         // Return the limits
@@ -2082,7 +1809,8 @@ class SpawnApi {
             remoteHarvester: 0,
             remoteReserver: 0,
             remoteColonizer: 0,
-            remoteDefender: 0
+            remoteDefender: 0,
+            claimer: 0
         };
         const numRemoteRooms = RoomHelper.numRemoteRooms(room);
         const numClaimRooms = RoomHelper.numClaimRooms(room);
@@ -2093,40 +1821,25 @@ class SpawnApi {
         // Gather the rest of the data only if we have a remote room or a claim room
         const numRemoteDefenders = RoomHelper.numRemoteDefenders(room);
         const numRemoteSources = RoomHelper.numRemoteSources(room);
+        const numCurrentlyUnclaimedClaimRooms = RoomHelper.numCurrentlyUnclaimedClaimRooms(room);
         // check what room state we are in
         switch (room.memory.roomState) {
-            // Advanced
+            // Advanced, Upgrader, and Stimulate are the only allowed states for remote mining and claiming operations currently
+            // Might change for earlier room states to allow claimers and colonizers, up for debate
             case ROOM_STATE_ADVANCED:
-                // 1 'Squad' per source (harvester and miner) and a reserver
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                break;
-            // Upgrader
             case ROOM_STATE_UPGRADER:
-                // 1 'Squad' per source (harvester and miner) and a reserver
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
-                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                break;
-            // Stimulate
             case ROOM_STATE_STIMULATE:
-                // 1 'Squad' per source (harvester and miner) and a reserver
                 // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_HARVESTER] = numRemoteSources;
-                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms;
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms;
+                remoteLimits[ROLE_REMOTE_MINER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_MINER, numRemoteSources);
+                remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
+                remoteLimits[ROLE_REMOTE_RESERVER] =
+                    numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
+                remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER$1);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
+                remoteLimits[ROLE_CLAIMER$1] =
+                    numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER$1);
                 break;
         }
-        // Return the limits
         return remoteLimits;
     }
     /**
@@ -2137,12 +1850,68 @@ class SpawnApi {
         const militaryLimits = {
             zealot: 0,
             stalker: 0,
-            medic: 0
+            medic: 0,
+            domesticDefender: 0
         };
-        // Check for attack flags and adjust accordingly
-        // Check if we need defenders and adjust accordingly
-        // Return the limits
+        // Get the active flag associated with this room (should only be one active attack flag, so finding first one is extra saftey)
+        const targetRoomMemoryArray = MemoryApi.getAttackRooms(room);
+        let activeAttackRoomFlag;
+        for (const attackRoom of targetRoomMemoryArray) {
+            if (!attackRoom) {
+                continue;
+            }
+            activeAttackRoomFlag = _.find(attackRoom["flags"], flagMem => {
+                if (!flagMem) {
+                    return false;
+                }
+                return flagMem.active;
+            });
+            if (activeAttackRoomFlag) {
+                break;
+            }
+        }
+        // Riase the miltary limits according to the active attack room flag
+        this.raiseMilitaryCreepLimits(activeAttackRoomFlag, room);
+        // Check if we need domestic defenders and adjust accordingly
+        const defcon = MemoryApi.getDefconLevel(room);
+        if (defcon >= 2) {
+            this.raiseDomesticDefenderCreepLimits(room, defcon);
+        }
         return militaryLimits;
+    }
+    /**
+     * raises the military creep limits based on the flag type
+     * @param flagMemory the memory associated with the attack flag
+     * @param room the room we are raising limits for
+     */
+    static raiseMilitaryCreepLimits(flagMemory, room) {
+        // If flag memory is undefined, don't waste cpu
+        if (!flagMemory) {
+            return;
+        }
+        switch (flagMemory.flagType) {
+            case ZEALOT_SOLO:
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
+                break;
+            case STALKER_SOLO:
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
+                break;
+            case STANDARD_SQUAD:
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
+                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "medic", 1);
+                break;
+        }
+    }
+    /**
+     * raises the domestic defender limit based on the defcon state of the room
+     * @param room the room we are in
+     * @param defcon the defcon of said room
+     */
+    static raiseDomesticDefenderCreepLimits(room, defcon) {
+        // For now, just raise by one, later we can decide what certain defcons means for what we want to spawn
+        // just wanted it in a function so we have the foundation for that in place
+        MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 1);
     }
     /**
      * set creep limits for the room
@@ -2174,22 +1943,22 @@ class SpawnApi {
      */
     static getNextCreep(room) {
         // Get Limits for each creep department
-        const creepLimits = this.getCreepLimits(room);
+        const creepLimits = MemoryApi.getCreepLimits(room);
         // Check if we need a domestic creep -- Return role if one is found
         for (const role of domesticRolePriority) {
-            if (this.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
+            if (MemoryApi.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
                 return role;
             }
         }
         // Check if we need a military creep -- Return role if one is found
         for (const role of militaryRolePriority) {
-            if (this.getCreepCount(room, role) < creepLimits.militaryLimits[role]) {
+            if (MemoryApi.getCreepCount(room, role) < creepLimits.militaryLimits[role]) {
                 return role;
             }
         }
         // Check if we need a remote creep -- Return role if one is found
         for (const role of remoteRolePriority) {
-            if (this.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
+            if (MemoryApi.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
                 return role;
             }
         }
@@ -2198,7 +1967,6 @@ class SpawnApi {
     }
     /**
      * spawn the next creep
-     * TODO Complete this
      * @param room the room we want to spawn them in
      * @param body BodyPartConstant[] the body array of the creep
      * @param creepOptions creep options we want to give to it
@@ -2305,6 +2073,8 @@ class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterOptions(roomState);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerOptions(roomState);
+            case ROLE_CLAIMER$1:
+                return SpawnHelper.generateClaimerOptions(roomState);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderOptions(roomState);
             case ROLE_REMOTE_RESERVER:
@@ -2315,6 +2085,8 @@ class SpawnApi {
                 return SpawnHelper.generateMedicOptions(roomState, squadSize, squadUUID, rallyLocation);
             case ROLE_STALKER:
                 return SpawnHelper.generateStalkerOptions(roomState, squadSize, squadUUID, rallyLocation);
+            case ROLE_DOMESTIC_DEFENDER:
+                return SpawnHelper.generateDomesticDefenderOptions(roomState);
             default:
                 throw new UserException("Creep body failed generating.", 'The role "' + role + '" was invalid for generating the creep body.', ERROR_ERROR);
         }
@@ -2343,6 +2115,8 @@ class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterBody(tier);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerBody(tier);
+            case ROLE_CLAIMER$1:
+                return SpawnHelper.generateClaimerBody(tier);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderBody(tier);
             case ROLE_REMOTE_RESERVER:
@@ -2353,6 +2127,8 @@ class SpawnApi {
                 return SpawnHelper.generateMedicBody(tier);
             case ROLE_STALKER:
                 return SpawnHelper.generateStalkerBody(tier);
+            case ROLE_DOMESTIC_DEFENDER:
+                return SpawnHelper.generateDomesticDefenderBody(tier);
             default:
                 throw new UserException("Creep body failed generating.", 'The role "' + role + '" was invalid for generating the creep body.', ERROR_ERROR);
         }
@@ -2426,6 +2202,1366 @@ class SpawnApi {
         }
     }
     /**
+     * generates a UUID for a squad
+     */
+    static generateSquadUUID(seed) {
+        return Math.random() * 10000000;
+    }
+    /**
+     * generates options for spawning a squad based on the attack room's specifications
+     * @param room the room we are spawning the squad in
+     */
+    static generateSquadOptions(room, targetRoom, roleConst) {
+        // Set to this for clarity that we aren't expecting any squad options in some cases
+        const squadOptions = {
+            squadSize: 0,
+            squadUUID: null,
+            rallyLocation: null
+        };
+        // Don't actually get anything of value if it isn't a military creep. No point
+        if (!SpawnHelper.isMilitaryRole(roleConst)) {
+            return squadOptions;
+        }
+        // Get an appropirate attack flag for the creep
+        const targetRoomMemoryArray = MemoryApi.getAttackRooms(room, targetRoom);
+        // Only going to be one room returned, but had to be an array, so just grab it
+        const roomMemory = _.first(targetRoomMemoryArray);
+        // Drop out early if there are no attack rooms
+        if (roomMemory === undefined) {
+            return squadOptions;
+        }
+        const flagMemoryArray = roomMemory["flags"];
+        let selectedFlagMemory;
+        let currentHighestSquadCount = 0;
+        let selectedFlagActiveSquadMembers = 0;
+        // Loop over the flag memory and attach the creep to the first flag that does not have its squad size fully satisfied
+        for (const flagMemory of flagMemoryArray) {
+            // Skip non-squad based attack flags
+            if (flagMemory.squadSize === 0) {
+                continue;
+            }
+            const numActiveSquadMembers = SpawnHelper.getNumOfActiveSquadMembers(flagMemory, room);
+            const numRequestedSquadMembers = flagMemory.squadSize;
+            // If we find an active flag that doesn't have its squad requirements met and is currently the flag closest to being met
+            if (numActiveSquadMembers < numRequestedSquadMembers &&
+                numActiveSquadMembers > currentHighestSquadCount &&
+                flagMemory.active) {
+                selectedFlagMemory = flagMemory;
+                currentHighestSquadCount = numActiveSquadMembers;
+                selectedFlagActiveSquadMembers = numActiveSquadMembers;
+            }
+        }
+        // If we didn't find a squad based flag return the default squad options
+        if (selectedFlagMemory === undefined) {
+            return squadOptions;
+        }
+        else {
+            // if this flag has met its requirements, deactivate it
+            if (selectedFlagActiveSquadMembers === selectedFlagMemory.squadSize) {
+                // Deactivate either way
+                selectedFlagMemory.active = false;
+                // If its a one time use, complete it as well
+                if (Empire.isAttackFlagOneTimeUse(selectedFlagMemory)) {
+                    Game.flags[selectedFlagMemory.flagName].memory.complete = true;
+                }
+            }
+            // Set squad options to the flags memory and return it
+            squadOptions.squadSize = selectedFlagMemory.squadSize;
+            squadOptions.squadUUID = selectedFlagMemory.squadUUID;
+            squadOptions.rallyLocation = selectedFlagMemory.rallyLocation;
+            return squadOptions;
+        }
+    }
+    /**
+     * get the target room for the creep
+     * @param room the room we are spawning the creep in
+     * @param roleConst the role we are getting room for
+     */
+    static getCreepTargetRoom(room, roleConst) {
+        let roomMemory;
+        switch (roleConst) {
+            // Colonizing creeps going to their claim rooms
+            case ROLE_COLONIZER:
+            case ROLE_CLAIMER$1:
+                roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
+                break;
+            // Remote creeps going to their remote rooms
+            case ROLE_REMOTE_DEFENDER:
+            case ROLE_REMOTE_HARVESTER:
+            case ROLE_REMOTE_MINER:
+            case ROLE_REMOTE_RESERVER:
+                roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst);
+                break;
+            // Military creeps going to their attack rooms
+            case ROLE_STALKER:
+            case ROLE_MEDIC:
+            case ROLE_ZEALOT:
+            case ROLE_DOMESTIC_DEFENDER:
+                roomMemory = SpawnHelper.getAttackRoomWithActiveFlag(room);
+                break;
+            // Domestic creeps keep their target room as their home room
+            // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)
+            // If an non-existing role then an error will occur here
+            case ROLE_MINER:
+            case ROLE_HARVESTER:
+            case ROLE_WORKER:
+            case ROLE_LORRY:
+            case ROLE_POWER_UPGRADER:
+                return room.name;
+        }
+        return "";
+    }
+    /**
+     * get the home room for the creep
+     * @param room the room the creep is spawning in
+     * @param roleConst the role we are getting room for
+     */
+    static getCreepHomeRoom(room, roleConst, targetRoom) {
+        // Okay so this might not even be needed, but I took out colonizer home room setting because
+        // That would actually take them out of the creep count for this room, spawning them in an infinite loop
+        // We will just set their target room as the claim room and it will have the desired effect
+        return room.name;
+    }
+}
+
+/**
+ * Functions to help keep Spawn.Api clean go here
+ */
+class SpawnHelper {
+    /**
+     * Returns a boolean indicating if the object is a valid creepBody descriptor
+     * @param bodyObject The description of the creep body to verify
+     */
+    static verifyDescriptor(bodyObject) {
+        const partNames = Object.keys(bodyObject);
+        let valid = true;
+        // Check that no body parts have a definition of 0 or negative
+        for (const part in partNames) {
+            if (bodyObject[part] <= 0) {
+                valid = false;
+            }
+            if (!(part in BODYPARTS_ALL)) {
+                valid = false;
+            }
+        }
+        return valid;
+    }
+    /**
+     * Helper function - Returns an array containing @numParts of @part
+     * @part The part to create
+     * @numParts The number of parts to create
+     */
+    static generateParts(part, numParts) {
+        const returnArray = [];
+        for (let i = 0; i < numParts; i++) {
+            returnArray.push(part);
+        }
+        return returnArray;
+    }
+    /**
+     * Groups the body parts -- e.g. WORK, WORK, CARRY, CARRY, MOVE, MOVE
+     * @param descriptor A StringMap of creepbody limits -- { MOVE: 3, CARRY: 2, ... }
+     */
+    static getBody_Grouped(descriptor) {
+        const creepBody = [];
+        _.forEach(Object.keys(descriptor), (part) => {
+            // Having ! after property removes 'null' and 'undefined'
+            for (let i = 0; i < descriptor[part]; i++) {
+                creepBody.push(part);
+            }
+        });
+        return creepBody;
+    }
+    /**
+     * Collates the body parts -- e.g. WORK, CARRY, MOVE, WORK, CARRY, ...
+     * @param descriptor A StringMap of creepbody limits -- { MOVE: 3, CARRY: 2, ... }
+     */
+    static getBody_Collated(descriptor) {
+        const returnParts = [];
+        const numParts = _.sum(_.values(descriptor));
+        const partNames = Object.keys(descriptor);
+        let i = 0;
+        while (i < numParts) {
+            for (let j = 0; j < partNames.length; j++) {
+                const currPart = partNames[j];
+                if (descriptor[currPart] >= 1) {
+                    returnParts.push(currPart);
+                    descriptor[currPart]--;
+                    i++;
+                }
+            }
+        }
+        return returnParts;
+    }
+    /**
+     * Generates a creep name in the format role_tier_uniqueID
+     * @param role The role of the creep being generated
+     * @param tier The tier of the creep being generated
+     */
+    static generateCreepName(role, tier, room) {
+        const modifier = Game.time.toString().slice(-4);
+        const name = role + "_" + tier + "_" + room.name + "_" + modifier;
+        return name;
+    }
+    // Domestic ----
+    /**
+     * Generate body for miner creep
+     * @param tier The tier of the room
+     */
+    static generateMinerBody(tier) {
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_1: // 2 Work, 2 Move - Total Cost: 300
+                body = { work: 2, move: 2 };
+                opts.mixType = COLLATED; // Just as an example of how we could change opts by tier as well
+                break;
+            case TIER_2: // 5 Work, 1 Move - Total Cost: 550
+                body = { work: 5, move: 1 };
+                break;
+            case TIER_3: // 5 Work, 2 Move - Total Cost: 600
+                body = { work: 5, move: 2 };
+                break;
+        }
+        // Generate the creep body based on the body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for miner creep
+     * @param roomState the room state of the room
+     */
+    static generateMinerOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    harvestSources: true,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: true,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for Harvester creep
+     * @param tier the tier of the room
+     */
+    static generateHarvesterBody(tier) {
+        // Default Values for harvester
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
+                body = { work: 1, carry: 2, move: 2 };
+                break;
+            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
+                body = { work: 2, carry: 5, move: 3 };
+                break;
+            case TIER_3: // 2 Work, 6 Carry, 6 Move - Total Cost: 800
+                body = { work: 2, carry: 6, move: 6 };
+                break;
+            case TIER_4: // 2 Work, 11 Carry, 11 Move - Total Cost: 1300
+                body = { work: 2, carry: 11, move: 11 };
+                break;
+            case TIER_5: // 2 Work, 16 Carry, 16 Move - Total Cost: 1800
+                body = { work: 2, carry: 16, move: 16 };
+                break;
+            case TIER_6: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
+                body = { work: 2, carry: 20, move: 20 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for harvester creep
+     * @param roomState the room state of the room
+     */
+    static generateHarvesterOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: true,
+                    upgrade: true,
+                    repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+            case ROOM_STATE_INTER:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: true,
+                    upgrade: true,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+            case ROOM_STATE_ADVANCED:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: true,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: true //
+                };
+                break;
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: false,
+                    upgrade: false,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: true,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,
+                    getFromContainer: false,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: true //
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for worker creep
+     * @param tier the tier of the room
+     */
+    static generateWorkerBody(tier) {
+        // Default Values for Worker
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
+                body = { work: 1, carry: 2, move: 2 };
+                break;
+            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
+                body = { work: 2, carry: 5, move: 3 };
+                break;
+            case TIER_3: // 4 Work, 4 Carry, 4 Move - Total Cost: 800
+                body = { work: 4, carry: 4, move: 4 };
+                break;
+            case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
+                body = { work: 7, carry: 6, move: 6 };
+                break;
+            case TIER_5: // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
+                body = { work: 10, carry: 8, move: 8 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for worker creep
+     * @param roomState the room state of the room
+     */
+    static generateWorkerOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: true,
+                    upgrade: true,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: true,
+                    fillTower: true,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+            case ROOM_STATE_INTER:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: true,
+                    upgrade: true,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: true,
+                    fillTower: true,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+            case ROOM_STATE_ADVANCED:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: true,
+                    upgrade: true,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: true,
+                    fillTower: true,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,
+                    getFromContainer: false,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: true //
+                };
+                break;
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    // Options marked with // are overriding the defaults
+                    build: true,
+                    upgrade: true,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: true,
+                    fillTower: true,
+                    fillStorage: true,
+                    fillContainer: false,
+                    fillLink: true,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: true,
+                    getFromContainer: false,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: true //
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for lorry creep
+     * @param tier the tier of the room
+     */
+    static generateLorryBody(tier) {
+        // Default Values for Lorry
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        // There are currently no plans to use lorry before terminal becomes available
+        switch (tier) {
+            case TIER_1: // 3 Carry, 3 Move - Total Cost: 300
+                body = { carry: 3, move: 3 };
+                break;
+            case TIER_2: // 6 Carry, 5 Move - Total Cost: 550
+                body = { carry: 6, move: 5 };
+                break;
+            case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
+                body = { carry: 8, move: 8 };
+                break;
+            case TIER_4: // 10 Carry, 10 Move - Total Cost: 1000
+                body = { carry: 10, move: 10 };
+                break;
+            case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
+                body = { carry: 20, move: 20 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for lorry creep
+     * @param roomState the room state of the room
+     */
+    static generateLorryOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: true,
+                    fillStorage: true,
+                    fillContainer: true,
+                    fillLink: true,
+                    fillTerminal: true,
+                    fillLab: true,
+                    getFromStorage: true,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: true //
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for power upgrader creep
+     * @param tier the tier of the room
+     */
+    static generatePowerUpgraderBody(tier) {
+        // Default Values for Power Upgrader
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        // There are currently no plans to use power upgraders before links become available
+        // Need to experiment with work parts here and find out whats keeps up with the links
+        // Without over draining the storage, but still puts up numbers
+        switch (tier) {
+            case TIER_6: // 15 Work, 1 Carry, 1 Move - Total Cost: 2300
+                body = { work: 18, carry: 8, move: 4 };
+                break;
+            case TIER_7: // 1 Work, 8 Carry, 4 Move - Total Cost: 2800
+                body = { work: 22, carry: 8, move: 4 };
+                break;
+            case TIER_8: // 1 Work, 8 Carry, 4 Move - Total Cost: 2100
+                body = { work: 15, carry: 8, move: 4 }; // RCL 8 you can only do 15 per tick
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for power upgrader creep
+     * @param roomState the room state of the room
+     */
+    static generatePowerUpgraderOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    build: false,
+                    upgrade: true,
+                    repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: true,
+                    getFromTerminal: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    // ------------
+    // Remote -----
+    // No need to start building these guys until tier 4, but allow them at tier 3 in case our strategy changes
+    /**
+     * Generate body for remote miner creep
+     * @param tier the tier of the room
+     */
+    static generateRemoteMinerBody(tier) {
+        // Default Values for Remote Miner
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        // Cap the remote miner at 6 work parts (6 so they finish mining early and can build/repair their container)
+        switch (tier) {
+            case TIER_3: // 6 Work, 1 Carry, 3 Move - Total Cost: 800
+                body = { work: 6, carry: 1, move: 3 };
+                break;
+            case TIER_4: // 6 Work, 1 Carry, 4 Move - Total Cost: 850
+                body = { work: 6, carry: 1, move: 4 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for remote miner creep
+     * @param roomState the room state of the room
+     */
+    static generateRemoteMinerOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+                creepOptions = {
+                    build: true,
+                    upgrade: false,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: true,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for remote harvester creep
+     * @param tier the tier of the room
+     */
+    static generateRemoteHarvesterBody(tier) {
+        // Default Values for Remote Harvester
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
+                body = { carry: 8, move: 8 };
+                break;
+            case TIER_4: // 10 Carry, 10 Move- Total Cost: 1000
+                body = { carry: 10, move: 10 };
+                break;
+            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1600
+                body = { carry: 16, move: 16 };
+                break;
+            case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
+                body = { carry: 20, move: 20 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for remote harvester creep
+     * @param roomState the room state of the room
+     */
+    static generateRemoteHarvesterOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+                creepOptions = {
+                    build: true,
+                    upgrade: true,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: true,
+                    fillTower: true,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+            case ROOM_STATE_ADVANCED:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: true,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: true,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: true,
+                    fillContainer: false,
+                    fillLink: true,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for remote reserver creep
+     * @param tier the tier of the room
+     */
+    static generateRemoteReserverBody(tier) {
+        // Default Values for Remote Reserver
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_4: // 2 Claim, 2 Move - Total Cost: 800
+                body = { claim: 2, move: 2 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for remote reserver creep
+     * @param roomState the room state of the room
+     */
+    static generateRemoteReserverOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                // Remote reservers don't really have options perse, so just leave as defaults
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for remote colonizer creep
+     * @param tier the tier of the room
+     */
+    static generateRemoteColonizerBody(tier) {
+        // Default Values for Remote Colonizer
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_4: // 7 Work, 5 Carry, 5 Move - Total Cost: 1300
+                body = { work: 7, carry: 5, move: 6 };
+                break;
+            case TIER_5: // 9 Work, 8 Carry, 10 Move - Total Cost: 1800
+                body = { work: 9, carry: 8, move: 10 };
+                break;
+            case TIER_6: // 12 Work, 10 Carry, 10 Move - Total Cost: 2300
+                body = { work: 12, carry: 10, move: 12 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for remote colonizer creep
+     * @param tier the tier of the room
+     */
+    static generateRemoteColonizerOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    build: true,
+                    upgrade: true,
+                    repair: true,
+                    harvestSources: true,
+                    harvestMinerals: false,
+                    wallRepair: true,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: true,
+                    getDroppedEnergy: true,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for claimer creep
+     * @param roomState the room state for the room
+     */
+    static generateClaimerOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsCiv();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    build: false,
+                    upgrade: false,
+                    repair: false,
+                    harvestSources: false,
+                    harvestMinerals: false,
+                    wallRepair: false,
+                    fillTower: false,
+                    fillStorage: false,
+                    fillContainer: false,
+                    fillLink: false,
+                    fillTerminal: false,
+                    fillLab: false,
+                    getFromStorage: false,
+                    getFromContainer: false,
+                    getDroppedEnergy: false,
+                    getFromLink: false,
+                    getFromTerminal: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate options for claimer creep
+     * @param tier the tier of the room
+     */
+    static generateClaimerBody(tier) {
+        // Default Values for Claimer
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_2: // 1 Claim, 2 Move, Total Cost: 400
+                body = { claim: 1, move: 2 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate body for remote defender creep
+     * @param tier the tier of the room
+     */
+    static generateRemoteDefenderBody(tier) {
+        // Default Values for Remote Defender
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_3: // 5 Attack, 5 Move - Total Cost: 550
+                body = { attack: 5, move: 5 };
+                break;
+            case TIER_4: //  6 Ranged Attack, 6 Move, - Total Cost: 1200
+                body = { ranged_attack: 6, move: 6 };
+                break;
+            case TIER_5: // 8 Ranged Attack, 7 Move, 1 Heal - Total Cost: 1800
+                body = { ranged_attack: 8, move: 7, heal: 1 };
+                break;
+            case TIER_6: // 8 Ranged Attack, 10 Move, 2 Heal
+                body = { ranged_attack: 8, move: 10, heal: 2 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for remote defender creep
+     * @param tier the tier of the room
+     */
+    static generateRemoteDefenderOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsMili();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    squadSize: 1,
+                    squadUUID: null,
+                    rallyLocation: null,
+                    seige: false,
+                    dismantler: false,
+                    healer: true,
+                    attacker: false,
+                    defender: true,
+                    flee: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    // ----------
+    // Military -----
+    /**
+     * Generate body for zealot creep
+     * @param tier the tier of the room
+     */
+    static generateZealotBody(tier) {
+        // Default Values for Zealot
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
+                body = { attack: 2, move: 2 };
+                break;
+            case TIER_2: // 3 Attack, 3 Move  - Total Cost: 390
+                body = { attack: 3, move: 3 };
+                break;
+            case TIER_3: // 5 Attack, 5 Move - Total Cost: 650
+                body = { attack: 5, move: 5 };
+                break;
+            case TIER_4: // 10 Attack, 10 Move - Total Cost: 1300
+                body = { attack: 2, move: 2 };
+                break;
+            case TIER_5: // 15 Attack, 12 Move - Total Cost: 1800
+                body = { attack: 15, move: 12 };
+                break;
+            case TIER_6: // 20 Attack, 14 Move - Total Cost: 2300
+                body = { attack: 20, move: 14 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for zealot creep
+     * @param roomState the room state of the room
+     * @param squadSizeParam the size of the squad associated with the zealot
+     * @param squadUUIDParam the squad id that the zealot is a member of
+     * @param rallyLocationParam the meeting place for the squad
+     */
+    static generateZealotOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
+        let creepOptions = this.getDefaultCreepOptionsMili();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    squadSize: squadSizeParam,
+                    squadUUID: squadUUIDParam,
+                    rallyLocation: rallyLocationParam,
+                    seige: false,
+                    dismantler: false,
+                    healer: false,
+                    attacker: true,
+                    defender: false,
+                    flee: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for medic creep
+     * @param tier the tier of the room
+     */
+    static generateMedicBody(tier) {
+        // Default Values for Medic
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_1: // 1 Heal, 1 Move - Total Cost: 300
+                body = { heal: 1, move: 1 };
+                break;
+            case TIER_2: // 2 Heal, 1 Move - Total Cost: 550
+                body = { heal: 2, move: 1 };
+                break;
+            case TIER_3: // 2 Heal, 2 Move - Total Cost: 600
+                body = { heal: 2, move: 2 };
+                break;
+            case TIER_4: // 4 Heal, 4 Move - Total Cost: 1200
+                body = { heal: 4, move: 4 };
+                break;
+            case TIER_5: // 6 Heal, 6 Move - Total Cost: 1800
+                body = { heal: 6, move: 6 };
+                break;
+            case TIER_6: // 8 Heal, 6 Move - Total Cost: 2300
+                body = { heal: 8, move: 6 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for medic creep
+     * @param tier the tier of the room
+     */
+    static generateMedicOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
+        let creepOptions = this.getDefaultCreepOptionsMili();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    squadSize: squadSizeParam,
+                    squadUUID: squadUUIDParam,
+                    rallyLocation: rallyLocationParam,
+                    seige: false,
+                    dismantler: false,
+                    healer: true,
+                    attacker: false,
+                    defender: false,
+                    flee: true
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * Generate body for stalker creep
+     * @param tier the tier of the room
+     */
+    static generateStalkerBody(tier) {
+        // Default Values for Stalker
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_1: // 1 Ranged Attack, 2 Move - Total Cost: 200
+                body = { ranged_attack: 1, move: 1 };
+                break;
+            case TIER_2: // 3 Ranged Attack, 2 Move - Total Cost: 550
+                body = { ranged_attack: 3, move: 2 };
+                break;
+            case TIER_3: // 4 Ranged Attack, 4 Move - Total Cost: 800
+                body = { ranged_attack: 4, move: 4 };
+                break;
+            case TIER_4: // 6 Ranged Attack, 6 Move - Total Cost: 1200
+                body = { ranged_attack: 6, move: 6 };
+                break;
+            case TIER_5: // 8 Ranged Attack, 8 Move - Total Cost: 1600
+                body = { ranged_attack: 8, move: 8 };
+                break;
+            case TIER_6: // 12 Ranged Attack, 10 Move - Total Cost: 2300
+                body = { ranged_attack: 12, move: 10 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * Generate options for stalker creep
+     * @param roomState the room state of the room
+     * @param squadSizeParam the size of the squad associated with the zealot
+     * @param squadUUIDParam the squad id that the zealot is a member of
+     * @param rallyLocationParam the meeting place for the squad
+     */
+    static generateStalkerOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
+        let creepOptions = this.getDefaultCreepOptionsMili();
+        switch (roomState) {
+            case ROOM_STATE_BEGINNER:
+                creepOptions = {
+                    squadSize: squadSizeParam,
+                    squadUUID: squadUUIDParam,
+                    rallyLocation: rallyLocationParam,
+                    seige: false,
+                    dismantler: false,
+                    healer: false,
+                    attacker: false,
+                    defender: false,
+                    flee: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    /**
+     * generate body for domestic defender creep
+     * @param tier the tier of the room
+     */
+    static generateDomesticDefenderBody(tier) {
+        // Default Values for Stalker
+        let body = { work: 0, move: 0 };
+        const opts = { mixType: GROUPED };
+        switch (tier) {
+            case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
+                body = { attack: 2, move: 2 };
+                break;
+            case TIER_2: // 3 Attack, 2 Move - Total Cost: 340
+                body = { attack: 3, move: 2 };
+                break;
+            case TIER_3: // 5 Attack, 5 Move - Total Cost: 650
+                body = { attack: 5, move: 5 };
+                break;
+            case TIER_4: // 8 Attack, 8 Move - Total Cost: 880
+                body = { attack: 8, move: 8 };
+                break;
+            case TIER_5: // 10 Attack, 10 Move - Total Cost: 1300
+                body = { attack: 10, move: 10 };
+                break;
+            case TIER_6: // 15 Attack, 15 Move - Total Cost: 1950
+                body = { attack: 15, move: 15 };
+                break;
+        }
+        // Generate creep body based on body array and options
+        return SpawnApi.getCreepBody(body, opts);
+    }
+    /**
+     * generate options for domestic defender creep
+     * @param roomState the room state for the room spawning it
+     */
+    static generateDomesticDefenderOptions(roomState) {
+        let creepOptions = this.getDefaultCreepOptionsMili();
+        switch (roomState) {
+            case ROOM_STATE_INTRO:
+            case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_SEIGE:
+            case ROOM_STATE_NUKE_INBOUND:
+                creepOptions = {
+                    squadSize: 0,
+                    squadUUID: null,
+                    rallyLocation: null,
+                    seige: false,
+                    dismantler: false,
+                    healer: false,
+                    attacker: false,
+                    defender: true,
+                    flee: false
+                };
+                break;
+        }
+        return creepOptions;
+    }
+    // --------------
+    /**
+     * returns a set of creep options with all default values
+     */
+    static getDefaultCreepOptionsCiv() {
+        return {
+            build: false,
+            upgrade: false,
+            repair: false,
+            harvestSources: false,
+            harvestMinerals: false,
+            wallRepair: false,
+            fillTower: false,
+            fillStorage: false,
+            fillContainer: false,
+            fillLink: false,
+            fillTerminal: false,
+            fillLab: false,
+            getFromStorage: false,
+            getFromContainer: false,
+            getDroppedEnergy: false,
+            getFromLink: false,
+            getFromTerminal: false
+        };
+    }
+    /**
+     * returns set of mili creep options with all default values
+     */
+    static getDefaultCreepOptionsMili() {
+        return {
+            squadSize: 0,
+            squadUUID: null,
+            rallyLocation: null,
+            seige: false,
+            dismantler: false,
+            healer: false,
+            attacker: false,
+            defender: false,
+            flee: false
+        };
+    }
+    /**
+     * generates a creep memory to give to a creep being spawned
+     */
+    static generateDefaultCreepMemory(roleConst, homeRoomNameParam, targetRoomParam, creepOptions) {
+        return {
+            role: roleConst,
+            homeRoom: homeRoomNameParam,
+            targetRoom: targetRoomParam,
+            job: undefined,
+            options: creepOptions,
+            working: false
+        };
+    }
+    /**
+     * get number of active squad members for a given squad
+     * @param flagMemory the attack flag memory
+     * @param room the room they are coming from
+     */
+    static getNumOfActiveSquadMembers(flagMemory, room) {
+        // Please improve this if possible lol. Had to get around type guards as we don't actually know what a creeps memory has in it unless we explicitly know the type i think
+        // We're going to run into this everytime we use creep memory so we need to find a nicer way around it if possible but if not casting it as a memory type
+        // Isn't the worst solution in the world
+        const militaryCreeps = MemoryApi.getMyCreeps(room, creep => this.isMilitaryRole(creep.memory.role));
+        return _.filter(militaryCreeps, creep => {
+            const creepOptions = creep.memory.options;
+            return creepOptions.squadUUID === flagMemory.squadUUID;
+        }).length;
+    }
+    /**
+     * get if the creep is a military type creep or not
+     * @param roleConst the role of the creep
+     */
+    static isMilitaryRole(roleConst) {
+        return (roleConst === ROLE_DOMESTIC_DEFENDER ||
+            roleConst === ROLE_STALKER ||
+            roleConst === ROLE_ZEALOT ||
+            roleConst === ROLE_MEDIC);
+    }
+    /**
      * Returns the number of miners that are not spawning, and have > 50 ticksToLive
      * @param room the room we are checking in
      */
@@ -2438,46 +3574,1605 @@ class SpawnApi {
         return miners.length;
     }
     /**
-     * generates a UUID for a squad
+     * gets the ClaimRoomMemory with lowest number creeps of the specified role with it as their target room
+     * Must also be less than the max amount of that role allowed for the room
+     * @param room the room spawning the creep
+     * @param roleConst the specified role we are checking for
      */
-    static generateSquadUUID(seed) {
-        return Math.random() * 10000000;
+    static getLowestNumRoleAssignedClaimRoom(room, roleConst) {
+        const allClaimRooms = MemoryApi.getClaimRooms(room);
+        // Get all claim rooms in which the specified role does not yet have
+        const unfulfilledClaimRooms = _.filter(allClaimRooms, claimRoom => this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom) <
+            this.getLimitPerClaimRoomForRole(roleConst));
+        let nextClaimRoom;
+        // Find the unfulfilled with the lowest amount of creeps assigned to it
+        for (const claimRoom of unfulfilledClaimRooms) {
+            if (!nextClaimRoom) {
+                nextClaimRoom = claimRoom;
+                continue;
+            }
+            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, nextClaimRoom);
+            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom);
+            if (currentCreepsAssigned < lowestCreepsAssigned) {
+                nextClaimRoom = claimRoom;
+            }
+        }
+        return nextClaimRoom;
     }
     /**
-     * generates options for spawning a squad based on the attack room's specifications
-     * @param room the room we are spawning the squad in
+     * gets the RemoteRoomMemory with lowest number creeps of the specified role with it as their target room
+     * @param room the room spawning the creep
+     * @param roleConst the specified role we are checking for
      */
-    static generateSquadOptions(room) {
-        const squadOptions = {
-            squadSize: 0,
-            squadUUID: null,
-            rallyLocation: null
-        };
-        // use the attack room memory to get the actual values of the options
-        return squadOptions;
+    static getLowestNumRoleAssignedRemoteRoom(room, roleConst) {
+        const allRemoteRooms = MemoryApi.getRemoteRooms(room);
+        // Get all claim rooms in which the specified role does not yet have
+        const unfulfilledRemoteRooms = _.filter(allRemoteRooms, remoteRoom => this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom) <
+            this.getLimitPerRemoteRoomForRolePerSource(roleConst, remoteRoom.sources.data));
+        let nextRemoteRoom;
+        // Find the unfulfilled with the lowest amount of creeps assigned to it
+        for (const remoteRoom of unfulfilledRemoteRooms) {
+            if (!nextRemoteRoom) {
+                nextRemoteRoom = remoteRoom;
+                continue;
+            }
+            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, nextRemoteRoom);
+            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom);
+            if (currentCreepsAssigned < lowestCreepsAssigned) {
+                nextRemoteRoom = remoteRoom;
+            }
+        }
+        return nextRemoteRoom;
     }
     /**
-     * get the target room for the creep
-     * TODO
-     * @param room the room we are spawning the squad in
+     * gets the AttackRoomMemory with active flags
+     * only one attack flag will be active at a time during any given tick
+     * if this is not true because of some error/oversight, it is self correcting since
+     * this will still only choose the first active flag it finds
+     * @param room the room spawning the creep
      */
-    static getCreepTargetRoom(room) {
-        return "";
+    static getAttackRoomWithActiveFlag(room) {
+        const allAttackRooms = MemoryApi.getAttackRooms(room);
+        // Return the first active flag we find (should only be 1 flag active at a time across all attack rooms)
+        return _.find(allAttackRooms, attackRoom => _.some(attackRoom.flags, (flag) => flag.active));
     }
     /**
-     * get the home room for the creep
-     * @param room the room the creep is spawning in
+     * get number of creeps of role with target room assigned to a specified room
+     * @param room the room spawning the creep
+     * @param roleConst the role of the creep
+     * @param roomMemory the room memory we are checking
      */
-    static getCreepHomeRoom(room) {
-        // incomplete for now, need to handle special case (only reason this is in a function really)
-        // for colonizers. We just wanna set their home room to their target room basically so they automatically will go there
-        // handle their budniss. Another potential use case of this would be sending creeps to other rooms
-        // the easiest way to do that is just changing their home room in memory, so we could add something to detect
-        // if a creep being born is meant for another room and handle that accordingly here (ez pz)
-        return room.name;
+    static getNumCreepAssignedAsTargetRoom(room, roleConst, roomMemory) {
+        const allCreepsOfRole = MemoryApi.getMyCreeps(room, creep => creep.memory.role === roleConst);
+        let sum = 0;
+        for (const creep of allCreepsOfRole) {
+            if (creep.memory.targetRoom === roomMemory.roomName) {
+                ++sum;
+            }
+        }
+        return sum;
+    }
+    /**
+     * gets the number of each claim room creep that is meant to be assigned to a room
+     * @param roleConst the role we are checking the limit for
+     */
+    static getLimitPerClaimRoomForRole(roleConst) {
+        let creepNum = 0;
+        switch (roleConst) {
+            case ROLE_CLAIMER || ROLE_COLONIZER:
+                creepNum = 1;
+                break;
+        }
+        return creepNum;
+    }
+    /**
+     * gets the number of each remote room creep that is meant to be assigned to a room
+     * @param roleConst the role we are checking the limit for
+     * @param numSources the number of sources in the remote room
+     */
+    static getLimitPerRemoteRoomForRolePerSource(roleConst, numSources) {
+        let creepNum = 0;
+        switch (roleConst) {
+            case ROLE_REMOTE_HARVESTER:
+                creepNum = 1 * numSources;
+                break;
+            case ROLE_REMOTE_RESERVER:
+                creepNum = 1;
+        }
+        return creepNum;
+    }
+    /**
+     * gets the number of lorries for the room based on room state
+     * @param room the room we are doing limits for
+     * @param roomState the room state of the room we are checking limit for
+     */
+    static getLorryLimitForRoom(room, roomState) {
+        // ! Some ideas for finding lorry limits for a room
+        // ! Turned in to insane ramblings though
+        /*
+            Potentially, we could check that the room state is within a certain value range
+            like advanced, stimulate, seige, maybe? (same values its changed on anyway, so just extra saftey)
+            And we could like check if any empire jobs exist... still not sure the route we're going to take
+            to make sure terminals and labs get filled exactly, but we do know that those will create room jobs
+            for creeps to follow, we could also have it fill another memory structure and we check that and
+            decide how many lorries we need to do this set of jobs, it also has the benifit of slowly going down
+            as the job is more and more complete ie if we spawn 1 lorry per 25k energy we want to move to a terminal,
+            then as the amount of energy needing to be moved remaining goes down, naturally the number of lorries needed
+            will as well.
+
+            I'm having a flash of an idea about empire job queues. Each room can check empire job queues and decide if they
+            need to create any jobs in the room, and this function for example will check how many lorries need to exist in the room
+            etc, etc, etc. We can see what way we wanna go there, we still are a little bit off from that since we need to finish
+            the more pertinant parts of job queues and set up the flag system and make sure the room structures run themselves (thats
+                when we actually start running into it, since terminals will presumably check this emprie job queue and decide if it needs
+                to sell energy, move to another room)
+
+            It would also be interesting to set up a system to supply each other with energy as needed. Like if you're being seiged and in real trouble
+            and you're running dry (lets say they've knocked out a couple of your other rooms too) i could send energy and help keep your
+            last room alive... possibly military support to would be really cool (that would be as simple as detecting and auto placing a flag
+                in your room and the system will handle itself)
+
+            Even more off-topic, but we make sure creep.attack() and tower.attack() is never called on an ally creep (maybe even override the functions)
+            (to ensure extra saftey in the case of abug)
+        */
+        return 0;
     }
 }
-//# sourceMappingURL=Spawn.Api.js.map
+
+// the api for the memory class
+class MemoryApi {
+    /**
+     * Remove all memory objects that are dead
+     */
+    static garbageCollection() {
+        // Remove all dead creeps from memory
+        for (const name in Memory.creeps) {
+            if (!(name in Game.creeps)) {
+                delete Memory.creeps[name];
+            }
+        }
+        // Remove all dead rooms from memory
+        for (const roomName in Memory.rooms) {
+            if (!(roomName in Game.rooms)) {
+                delete Memory.rooms[roomName];
+            }
+        }
+        // Remvoe all dead flags from memory
+        for (const flag in Memory.flags) {
+            if (!_.some(Game.flags, (flagLoop) => flagLoop.name === Memory.flags[flag].flagName)) {
+                delete Memory.flags[flag];
+            }
+        }
+    }
+    /**
+     * Go through the room's depedent room memory and remove null values
+     * @param room the room we are cleaning the memory structure for
+     */
+    static cleanDependentRoomMemory(room) {
+        // Re-map Remote Room array to remove null values
+        const allRemoteRooms = Memory.rooms[room.name].remoteRooms;
+        const nonNullRemoteRooms = [];
+        _.forEach(allRemoteRooms, (rr) => {
+            if (rr !== null) {
+                nonNullRemoteRooms.push(rr);
+            }
+        });
+        Memory.rooms[room.name].remoteRooms = nonNullRemoteRooms;
+        // Re-map Remote Room array to remove null values
+        const allClaimRooms = Memory.rooms[room.name].claimRooms;
+        const nonNullClaimRooms = [];
+        _.forEach(allClaimRooms, (rr) => {
+            if (rr !== null) {
+                nonNullClaimRooms.push(rr);
+            }
+        });
+        Memory.rooms[room.name].claimRooms = nonNullClaimRooms;
+        // Re-map Remote Room array to remove null values
+        const allAttackRooms = Memory.rooms[room.name].attackRooms;
+        const nonNullAttackRooms = [];
+        _.forEach(allAttackRooms, (rr) => {
+            if (rr !== null) {
+                nonNullAttackRooms.push(rr);
+            }
+        });
+        Memory.rooms[room.name].attackRooms = nonNullAttackRooms;
+    }
+    /**
+     * Initialize the Memory object for a new room, and perform all one-time updates
+     * @param room The room to initialize the memory of.
+     */
+    static initRoomMemory(room) {
+        // Abort if Memory already exists
+        if (Memory.rooms[room.name]) {
+            return;
+        }
+        // Initialize Memory - Typescript requires it be done this way
+        //                    unless we define a constructor for RoomMemory.
+        Memory.rooms[room.name] = {
+            attackRooms: [],
+            claimRooms: [],
+            constructionSites: { data: null, cache: null },
+            creepLimit: {},
+            creeps: { data: null, cache: null },
+            defcon: -1,
+            hostiles: { data: null, cache: null },
+            remoteRooms: [],
+            roomState: ROOM_STATE_INTRO,
+            sources: { data: null, cache: null },
+            minerals: { data: null, cache: null },
+            tombstones: { data: null, cache: null },
+            droppedResources: { data: null, cache: null },
+            jobs: {},
+            structures: { data: null, cache: null },
+            upgradeLink: ""
+        };
+        this.getRoomMemory(room, true);
+    }
+    /**
+     * Validates Room Memory and calls update function as needed
+     * for the entire room memory.
+     *
+     * [Cached] Memory.rooms[room.name]
+     * @param room The name of the room to get memory for
+     * @param forceUpdate [Optional] Force all room memory to update
+     */
+    static getRoomMemory(room, forceUpdate) {
+        this.getConstructionSites(room, undefined, forceUpdate);
+        this.getMyCreeps(room, undefined, forceUpdate);
+        this.getHostileCreeps(room, undefined, forceUpdate);
+        this.getSources(room, undefined, forceUpdate);
+        this.getStructures(room, undefined, forceUpdate);
+        this.getAllGetEnergyJobs(room, undefined, forceUpdate);
+        this.getAllClaimPartJobs(room, undefined, forceUpdate);
+        this.getAllWorkPartJobs(room, undefined, forceUpdate);
+        // this.getCreepLimits(room, undefined, forceUpdate);
+        // this.getDefcon(room, undefined, forceUpdate);
+        // this.getRoomState(room, undefined, forceUpdate);
+    }
+    /**
+     * Initializes the memory of a newly spawned creep
+     * @param creep the creep we want to initialize memory for
+     */
+    static initCreepMemory(creep, creepRole, creepHomeRoom, creepOptions, creepTargetRoom) {
+        // abort if memory already exists
+        if (Memory.creeps[creep.name]) {
+            return;
+        }
+        // Initialize Memory
+        Memory.creeps[creep.name] = {
+            homeRoom: creepHomeRoom,
+            options: creepOptions,
+            role: creepRole,
+            targetRoom: creepTargetRoom || "",
+            job: undefined,
+            working: false
+        };
+    }
+    /**
+     * Gets the owned creeps in a room, updating memory if necessary.
+     *
+     * [Cached] Memory.rooms[room.name].creeps
+     * @param room The room to retrieve from
+     * @param filterFunction [Optional] The function to filter all creep objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Creep[ ] -- An array of owned creeps, empty if there are none
+     */
+    static getMyCreeps(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].creeps ||
+            Memory.rooms[room.name].creeps.cache < Game.time - FCREEP_CACHE_TTL) {
+            MemoryHelper_Room.updateMyCreeps(room);
+        }
+        const creepIDs = Memory.rooms[room.name].creeps.data;
+        let creeps = MemoryHelper.getOnlyObjectsFromIDs(creepIDs);
+        if (filterFunction !== undefined) {
+            creeps = _.filter(creeps, filterFunction);
+        }
+        return creeps;
+    }
+    /**
+     * Get all hostile creeps in a room, updating if necessary
+     *
+     * [Cached] Memory.rooms[room.name].hostiles
+     * @param room The room to retrieve from
+     * @param filterFunction [Optional] The function to filter all creep objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Creep[ ]  -- An array of hostile creeps, empty if none
+     */
+    static getHostileCreeps(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].hostiles ||
+            Memory.rooms[room.name].creeps.cache < Game.time - HCREEP_CACHE_TTL) {
+            MemoryHelper_Room.updateHostileCreeps(room);
+        }
+        const creepIDs = Memory.rooms[room.name].hostiles.data;
+        let creeps = MemoryHelper.getOnlyObjectsFromIDs(creepIDs);
+        if (filterFunction !== undefined) {
+            creeps = _.filter(creeps, filterFunction);
+        }
+        return creeps;
+    }
+    /**
+     * Get structures in a room, updating if necessary
+     *
+     * [Cached] Memory.rooms[room.name].structures
+     * @param room The room to retrieve from
+     * @param filterFunction [Optional] The function to filter all structure objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Array<Structure> -- An array of structures
+     */
+    static getStructures(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            Memory.rooms[room.name].structures === undefined ||
+            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL) {
+            MemoryHelper_Room.updateStructures(room);
+        }
+        const structureIDs = _.flattenDeep(Memory.rooms[room.name].structures.data);
+        let structures = MemoryHelper.getOnlyObjectsFromIDs(structureIDs);
+        if (filterFunction !== undefined) {
+            structures = _.filter(structures, filterFunction);
+        }
+        return structures;
+    }
+    /**
+     * Get structures of a single type in a room, updating if necessary
+     *
+     * [Cached] Memory.rooms[room.name].structures
+     * @param room The room to check in
+     * @param type The type of structure to retrieve
+     * @param filterFunction [Optional] A function to filter by
+     * @param forceUpdate [Optional] Force structures memory to be updated
+     * @returns Structure[] An array of structures of a single type
+     */
+    static getStructureOfType(room, type, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            Memory.rooms[room.name].structures === undefined ||
+            Memory.rooms[room.name].structures.data[type] === undefined ||
+            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL) {
+            MemoryHelper_Room.updateStructures(room);
+        }
+        const structureIDs = Memory.rooms[room.name].structures.data[type];
+        let structures = MemoryHelper.getOnlyObjectsFromIDs(structureIDs);
+        if (filterFunction !== undefined) {
+            structures = _.filter(structures, filterFunction);
+        }
+        return structures;
+    }
+    /**
+     * Get all construction sites in a room, updating if necessary
+     *
+     * [Cached] Memory.rooms[room.name].constructionSites
+     * @param room The room to retrieve from
+     * @param filterFunction [Optional] The function to filter all structure objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Array<ConstructionSite> -- An array of ConstructionSites
+     */
+    static getConstructionSites(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].constructionSites ||
+            Memory.rooms[room.name].constructionSites.cache < Game.time - CONSTR_CACHE_TTL) {
+            MemoryHelper_Room.updateConstructionSites(room);
+        }
+        const constructionSiteIDs = Memory.rooms[room.name].constructionSites.data;
+        let constructionSites = MemoryHelper.getOnlyObjectsFromIDs(constructionSiteIDs);
+        if (filterFunction !== undefined) {
+            constructionSites = _.filter(constructionSites, filterFunction);
+        }
+        return constructionSites;
+    }
+    /**
+     * Returns a list of tombstones in the room, updating if necessary
+     *
+     * @param room The room we want to look in
+     * @param filterFunction [Optional] The function to filter the tombstones objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Tombstone[]  An array of tombstones, if there are any
+     */
+    static getTombstones(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].tombstones ||
+            Memory.rooms[room.name].tombstones.cache < Game.time - TOMBSTONE_CACHE_TTL) {
+            MemoryHelper_Room.updateTombstones(room);
+        }
+        const tombstoneIDs = Memory.rooms[room.name].tombstones.data;
+        let tombstones = MemoryHelper.getOnlyObjectsFromIDs(tombstoneIDs);
+        if (filterFunction !== undefined) {
+            tombstones = _.filter(tombstones, filterFunction);
+        }
+        return tombstones;
+    }
+    /**
+     * Returns a list of the dropped resources in a room, updating if necessary
+     *
+     * @param room The room we want to look in
+     * @param filterFunction [Optional] The function to filter the resource objects
+     * @param forceUpdate [Optional] Invalidate Cache by force
+     * @returns Resource[]  An array of dropped resources, if there are any
+     */
+    static getDroppedResources(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].droppedResources ||
+            Memory.rooms[room.name].droppedResources.cache < Game.time - DROPS_CACHE_TTL) {
+            MemoryHelper_Room.updateDroppedResources(room);
+        }
+        const resourceIDs = Memory.rooms[room.name].droppedResources.data;
+        let droppedResources = MemoryHelper.getOnlyObjectsFromIDs(resourceIDs);
+        if (filterFunction !== undefined) {
+            droppedResources = _.filter(droppedResources, filterFunction);
+        }
+        return droppedResources;
+    }
+    /**
+     * get sources in the room
+     * @param room the room we want sources from
+     * @param filterFunction [Optional] The function to filter all source objects
+     * @param forceUpdate [Optional] Invalidate cache by force
+     * @returns Source[]  An array of sources, if there are any
+     */
+    static getSources(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            Memory.rooms[room.name].sources === undefined ||
+            Memory.rooms[room.name].sources.cache < Game.time - SOURCE_CACHE_TTL) {
+            MemoryHelper_Room.updateSources(room);
+        }
+        const sourceIDs = Memory.rooms[room.name].sources.data;
+        let sources = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+        if (filterFunction !== undefined) {
+            sources = _.filter(sources, filterFunction);
+        }
+        return sources;
+    }
+    /**
+     * get minerals in the room
+     * @param room the room we want minerals from
+     * @param filterFunction [Optional] The function to filter all mineral objects
+     * @param forceUpdate [Optional] Invalidate cache by force
+     * @returns Mineral[]  An array of minerals, if there are any
+     */
+    static getMinerals(room, filterFunction, forceUpdate) {
+        //
+        // TODO Fill this out
+        return [];
+    }
+    /**
+     * Get the remoteRoom objects
+     *
+     * Updates all dependencies if the cache is invalid, for efficiency
+     * @param room The room to check dependencies of
+     * @param filterFunction [Optional] The function to filter the room objects
+     * @param targetRoom [Optional] the name of the room we want to grab if we already know it
+     */
+    static getRemoteRooms(room, filterFunction, targetRoom) {
+        let remoteRooms;
+        // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
+        if (!filterFunction) {
+            filterFunction = (badPractice) => true;
+        }
+        // TargetRoom parameter provided
+        if (targetRoom) {
+            remoteRooms = _.filter(Memory.rooms[room.name].remoteRooms, (roomMemory) => roomMemory.roomName === targetRoom && filterFunction);
+        }
+        else {
+            // No target room provided, just return them all
+            remoteRooms = _.filter(Memory.rooms[room.name].remoteRooms, (roomMemory) => filterFunction);
+        }
+        return remoteRooms;
+    }
+    /**
+     * Get the claimRoom objects
+     *
+     * Updates all dependencies if the cache is invalid
+     * @param room The room to check the dependencies of
+     * @param filterFunction [Optional] THe function to filter the room objects
+     * @param targetRoom the name of the room we want to grab if we already know it
+     */
+    static getClaimRooms(room, filterFunction, targetRoom) {
+        let claimRooms;
+        // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
+        if (!filterFunction) {
+            filterFunction = (badPractice) => true;
+        }
+        // TargetRoom parameter provided
+        if (targetRoom) {
+            claimRooms = _.filter(Memory.rooms[room.name].claimRooms, (roomMemory) => roomMemory.roomName === targetRoom && filterFunction);
+        }
+        else {
+            // No target room provided, just return them all
+            claimRooms = _.filter(Memory.rooms[room.name].claimRooms, (roomMemory) => filterFunction);
+        }
+        return claimRooms;
+    }
+    /**
+     * Get the attack room objects
+     *
+     * Updates all dependencies if the cache is invalid, for efficiency
+     * @param room The room to check dependencies of
+     * @param filterFunction [Optional] The function to filter the room objects
+     * @param targetRoom [Optional] the name of the specific room we want to grab
+     */
+    static getAttackRooms(room, targetRoom, filterFunction) {
+        let attackRooms;
+        // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
+        if (!filterFunction) {
+            filterFunction = (badPractice) => true;
+        }
+        // TargetRoom parameter provided
+        if (targetRoom) {
+            attackRooms = _.filter(Memory.rooms[room.name].attackRooms, (roomMemory) => roomMemory.roomName === targetRoom && filterFunction);
+        }
+        else {
+            // No target room provided, just return them all
+            attackRooms = _.filter(Memory.rooms[room.name].attackRooms, (roomMemory) => filterFunction);
+        }
+        return attackRooms;
+    }
+    /**
+     * Adjust creep limits given the amount and creep limit you want adjusted
+     * @param room the room we are adjusting limits for
+     * @param limitType the classification of limit (mili, remote, domestic)
+     * @param roleConst the actual role we are adjusting
+     * @param delta the change we are applying to the limit
+     */
+    static adjustCreepLimitByDelta(room, limitType, role, delta) {
+        Memory.rooms[room.name].creepLimit[limitType][role] += delta;
+    }
+    /**
+     * get the defcon level for the room
+     * @param room the room we are checking defcon for
+     */
+    static getDefconLevel(room) {
+        return Memory.rooms[room.name].defcon;
+    }
+    /**
+     * Get count of all creeps, or of one if creepConst is specified
+     * @param room the room we are getting the count for
+     * @param creepConst [Optional] Count only one role
+     */
+    static getCreepCount(room, creepConst) {
+        const filterFunction = creepConst === undefined ? undefined : (c) => c.memory.role === creepConst;
+        // Use get active mienrs instead specifically for miners to get them out early before they die
+        if (creepConst === ROLE_MINER) {
+            return SpawnHelper.getActiveMiners(room);
+        }
+        else {
+            // Otherwise just get the actual count of the creeps
+            return MemoryApi.getMyCreeps(room, filterFunction).length;
+        }
+    }
+    /**
+     * get creep limits
+     * @param room the room we want the limits for
+     */
+    static getCreepLimits(room) {
+        const creepLimits = {
+            domesticLimits: Memory.rooms[room.name].creepLimit["domesticLimits"],
+            remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
+            militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
+        };
+        return creepLimits;
+    }
+    /**
+     * get all owned rooms
+     * @param filterFunction [Optional] a filter function for the rooms
+     * @returns Room[] array of rooms
+     */
+    static getOwnedRooms(filterFunction) {
+        if (filterFunction) {
+            return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom) && filterFunction);
+        }
+        return _.filter(Game.rooms, currentRoom => RoomHelper.isOwnedRoom(currentRoom));
+    }
+    /**
+     * get all flags as an array
+     * @param filterFunction [Optional] a function to filter the flags out
+     * @returns Flag[] an array of all flags
+     */
+    static getAllFlags(filterFunction) {
+        const allFlags = Object.keys(Game.flags).map(function (flagIndex) {
+            return Game.flags[flagIndex];
+        });
+        // Apply filter function if it exists, otherwise just return all flags
+        if (filterFunction) {
+            return _.filter(allFlags, filterFunction);
+        }
+        return allFlags;
+    }
+    /**
+     * Get all jobs (in a flatted list) of GetEnergyJobs.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the GetEnergyJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    static getAllGetEnergyJobs(room, filterFunction, forceUpdate) {
+        const allGetEnergyJobs = [];
+        _.forEach(this.getSourceJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getContainerJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getLinkJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getBackupStructuresJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        return allGetEnergyJobs;
+    }
+    /**
+     * Get the list of GetEnergyJobs.sourceJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getSourceJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs.cache < Game.time - SOURCE_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateGetEnergy_sourceJobs(room);
+        }
+        let sourceJobs = Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs.data;
+        if (filterFunction !== undefined) {
+            sourceJobs = _.filter(sourceJobs, filterFunction);
+        }
+        return sourceJobs;
+    }
+    /**
+     * Get the list of GetEnergyJobs.containerJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getContainerJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs.cache < Game.time - CONTAINER_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateGetEnergy_containerJobs(room);
+        }
+        let containerJobs = Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs.data;
+        if (filterFunction !== undefined) {
+            containerJobs = _.filter(containerJobs, filterFunction);
+        }
+        return containerJobs;
+    }
+    /**
+     * Get the list of GetEnergyJobs.linkJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getLinkJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs ||
+            Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs.cache < Game.time - LINK_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateGetEnergy_linkJobs(room);
+        }
+        let linkJobs = Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs.data;
+        if (filterFunction !== undefined) {
+            linkJobs = _.filter(linkJobs, filterFunction);
+        }
+        return linkJobs;
+    }
+    /**
+     * Get the list of GetEnergyJobs.sourceJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getBackupStructuresJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures ||
+            Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures.cache < Game.time - BACKUP_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateGetEnergy_backupStructuresJobs(room);
+        }
+        let backupStructureJobs = Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures.data;
+        if (filterFunction !== undefined) {
+            backupStructureJobs = _.filter(backupStructureJobs, filterFunction);
+        }
+        return backupStructureJobs;
+    }
+    /**
+     * Get all jobs (in a flatted list) of ClaimPartJobs.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    static getAllClaimPartJobs(room, filterFunction, forceUpdate) {
+        const allClaimPartJobs = [];
+        _.forEach(this.getClaimJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+        _.forEach(this.getReserveJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+        _.forEach(this.getSignJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+        _.forEach(this.getControllerAttackJobs(room, filterFunction, forceUpdate), job => allClaimPartJobs.push(job));
+        return allClaimPartJobs;
+    }
+    /**
+     * Get the list of ClaimPartJobs.claimJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getClaimJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs.claimJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs.claimJobs.cache < Game.time - CLAIM_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateClaimPart_claimJobs(room);
+        }
+        let claimJobs = Memory.rooms[room.name].jobs.claimPartJobs.claimJobs.data;
+        if (filterFunction !== undefined) {
+            claimJobs = _.filter(claimJobs, filterFunction);
+        }
+        return claimJobs;
+    }
+    /**
+     * Get the list of ClaimPartJobs.reserveJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getReserveJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs.cache < Game.time - RESERVE_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateClaimPart_reserveJobs(room);
+        }
+        let claimJobs = Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs.data;
+        if (filterFunction !== undefined) {
+            claimJobs = _.filter(claimJobs, filterFunction);
+        }
+        return claimJobs;
+    }
+    /**
+     * Get the list of ClaimPartJobs.signJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getSignJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs.signJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs.signJobs.cache < Game.time - SIGN_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateClaimPart_signJobs(room);
+        }
+        let signJobs = Memory.rooms[room.name].jobs.claimPartJobs.signJobs.data;
+        if (filterFunction !== undefined) {
+            signJobs = _.filter(signJobs, filterFunction);
+        }
+        return signJobs;
+    }
+    /**
+     * Get the list of ClaimPartJobs.attackJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the ClaimPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getControllerAttackJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.claimPartJobs ||
+            !Memory.rooms[room.name].jobs.claimPartJobs.attackJobs ||
+            Memory.rooms[room.name].jobs.claimPartJobs.attackJobs.cache < Game.time - ATTACK_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateClaimPart_controllerAttackJobs(room);
+        }
+        let attackJobs = Memory.rooms[room.name].jobs.claimPartJobs.attackJobs.data;
+        if (filterFunction !== undefined) {
+            attackJobs = _.filter(attackJobs, filterFunction);
+        }
+        return attackJobs;
+    }
+    /**
+     * Get all jobs (in a flatted list) of WorkPartJobs.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    static getAllWorkPartJobs(room, filterFunction, forceUpdate) {
+        const allWorkPartJobs = [];
+        _.forEach(this.getRepairJobs(room, filterFunction, forceUpdate), job => allWorkPartJobs.push(job));
+        _.forEach(this.getBuildJobs(room, filterFunction, forceUpdate), job => allWorkPartJobs.push(job));
+        _.forEach(this.getUpgradeJobs(room, filterFunction, forceUpdate), job => allWorkPartJobs.push(job));
+        return allWorkPartJobs;
+    }
+    /**
+     * Get the list of WorkPartJobs.repairJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getRepairJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.workPartJobs ||
+            !Memory.rooms[room.name].jobs.workPartJobs.repairJobs ||
+            Memory.rooms[room.name].jobs.workPartJobs.repairJobs.cache < Game.time - REPAIR_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateWorkPart_repairJobs(room);
+        }
+        let repairJobs = Memory.rooms[room.name].jobs.workPartJobs.repairJobs.data;
+        if (filterFunction !== undefined) {
+            repairJobs = _.filter(repairJobs, filterFunction);
+        }
+        return repairJobs;
+    }
+    /**
+     * Get the list of WorkPartJobs.buildJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getBuildJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.workPartJobs ||
+            !Memory.rooms[room.name].jobs.workPartJobs.buildJobs ||
+            Memory.rooms[room.name].jobs.workPartJobs.buildJobs.cache < Game.time - BUILD_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateWorkPart_buildJobs(room);
+        }
+        let buildJobs = Memory.rooms[room.name].jobs.workPartJobs.buildJobs.data;
+        if (filterFunction !== undefined) {
+            buildJobs = _.filter(buildJobs, filterFunction);
+        }
+        return buildJobs;
+    }
+    /**
+     * Get the list of WorkPartJobs.upgradeJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getUpgradeJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.workPartJobs ||
+            !Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs ||
+            Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs.cache < Game.time - UPGRADE_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateWorkPart_upgradeJobs(room);
+        }
+        let upgradeJobs = Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs.data;
+        if (filterFunction !== undefined) {
+            upgradeJobs = _.filter(upgradeJobs, filterFunction);
+        }
+        return upgradeJobs;
+    }
+    /**
+     * Get all jobs (in a flatted list) of CarryPartJob.xxx
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the CarryPartJob list
+     * @param forceUpdate [Optional] Forcibly invalidate the caches
+     */
+    static getAllCarryPartJobs(room, filterFunction, forceUpdate) {
+        const allCarryPartJobs = [];
+        _.forEach(this.getStoreJobs(room, filterFunction, forceUpdate), job => allCarryPartJobs.push(job));
+        _.forEach(this.getFillJobs(room, filterFunction, forceUpdate), job => allCarryPartJobs.push(job));
+        return allCarryPartJobs;
+    }
+    /**
+     * Get the list of CarryPartJobs.fillJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the CarryPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getFillJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.carryPartJobs ||
+            !Memory.rooms[room.name].jobs.carryPartJobs.fillJobs ||
+            Memory.rooms[room.name].jobs.carryPartJobs.fillJobs.cache < Game.time - FILL_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateCarryPart_fillJobs(room);
+        }
+        let fillJobs = Memory.rooms[room.name].jobs.carryPartJobs.fillJobs.data;
+        if (filterFunction !== undefined) {
+            fillJobs = _.filter(fillJobs, filterFunction);
+        }
+        return fillJobs;
+    }
+    /**
+     * Get the list of CarryPartJobs.storeJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the CarryPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    static getStoreJobs(room, filterFunction, forceUpdate) {
+        if (forceUpdate ||
+            !Memory.rooms[room.name].jobs.carryPartJobs ||
+            !Memory.rooms[room.name].jobs.carryPartJobs.storeJobs ||
+            Memory.rooms[room.name].jobs.carryPartJobs.storeJobs.cache < Game.time - STORE_JOB_CACHE_TTL) {
+            MemoryHelper_Room.updateCarryPart_storeJobs(room);
+        }
+        let storeJobs = Memory.rooms[room.name].jobs.carryPartJobs.storeJobs.data;
+        if (filterFunction !== undefined) {
+            storeJobs = _.filter(storeJobs, filterFunction);
+        }
+        return storeJobs;
+    }
+}
+
+class EmpireHelper {
+    /**
+     * commit a remote flag to memory
+     * @param flag the flag we want to commit
+     */
+    static processNewRemoteFlag(flag) {
+        // Get the host room and set the flags memory
+        const dependentRoom = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
+        const flagTypeConst = this.getFlagType(flag);
+        const roomName = flag.pos.roomName;
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+        Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
+        // Create the RemoteFlagMemory object for this flag
+        const remoteFlagMemory = {
+            active: true,
+            flagName: flag.name,
+            flagType: flagTypeConst
+        };
+        // If the dependent room already has this room covered, set the flag to be deleted and throw a warning
+        const existingDepedentRemoteRoomMem = _.find(MemoryApi.getRemoteRooms(dependentRoom), (rr) => {
+            if (rr) {
+                return rr.roomName === roomName;
+            }
+            return false;
+        });
+        if (existingDepedentRemoteRoomMem) {
+            Memory.flags[flag.name].complete = true;
+            throw new UserException("Already working this dependent room!", "The room you placed the remote flag in is already being worked by " + existingDepedentRemoteRoomMem.roomName, ERROR_WARN$1);
+        }
+        // Otherwise, add a brand new memory structure onto it
+        const remoteRoomMemory = {
+            sources: { cache: Game.time, data: 1 },
+            hostiles: { cache: Game.time, data: null },
+            structures: { cache: Game.time, data: null },
+            roomName: flag.pos.roomName,
+            flags: [remoteFlagMemory],
+        };
+        console.log("Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
+        dependentRoom.memory.remoteRooms.push(remoteRoomMemory);
+    }
+    /**
+     * commit a attack flag to memory
+     * @param flag the flag we want to commit
+     */
+    static processNewAttackFlag(flag) {
+        // Get the host room and set the flags memory
+        const dependentRoom = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
+        const flagTypeConst = this.getFlagType(flag);
+        const roomName = flag.pos.roomName;
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+        Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
+        // Create the RemoteFlagMemory object for this flag
+        const attackFlagMemory = this.generateAttackFlagOptions(flag, flagTypeConst, dependentRoom.name);
+        // If the dependent room already has this room covered, just push this flag onto the existing structure
+        const existingDepedentAttackRoomMem = _.find(MemoryApi.getAttackRooms(dependentRoom), (rr) => {
+            if (rr) {
+                return rr.roomName === roomName;
+            }
+            return false;
+        });
+        if (existingDepedentAttackRoomMem) {
+            console.log("Attack Flag [" + flag.name + "] processed. Added to existing Host Room: [" + existingDepedentAttackRoomMem.roomName + "]");
+            existingDepedentAttackRoomMem.flags.push(attackFlagMemory);
+            return;
+        }
+        // Otherwise, add a brand new memory structure onto it
+        const attackRoomMemory = {
+            hostiles: { cache: Game.time, data: null },
+            structures: { cache: Game.time, data: null },
+            roomName: flag.pos.roomName,
+            flags: [attackFlagMemory],
+        };
+        console.log("Attack Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
+        dependentRoom.memory.attackRooms.push(attackRoomMemory);
+    }
+    /**
+     * commit a claim flag to memory
+     * @param flag the flag we want to commit
+     */
+    static processNewClaimFlag(flag) {
+        // Get the host room and set the flags memory
+        const dependentRoom = Game.rooms[this.findDependentRoom(flag.pos.roomName)];
+        const flagTypeConst = this.getFlagType(flag);
+        const roomName = flag.pos.roomName;
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+        Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
+        // Create the ClaimFlagMemory object for this flag
+        const claimFlagMemory = {
+            active: true,
+            flagName: flag.name,
+            flagType: flagTypeConst
+        };
+        // If the dependent room already has this room covered, set the flag to be deleted and throw a warning
+        const existingDepedentClaimRoomMem = _.find(MemoryApi.getClaimRooms(dependentRoom), (rr) => {
+            if (rr) {
+                return rr.roomName === roomName;
+            }
+            return false;
+        });
+        if (existingDepedentClaimRoomMem) {
+            Memory.flags[flag.name].complete = true;
+            throw new UserException("Already working this dependent room!", "The room you placed the claim flag in is already being worked by " + existingDepedentClaimRoomMem.roomName, ERROR_WARN$1);
+        }
+        // Otherwise, add a brand new memory structure onto it
+        const claimRoomMemory = {
+            roomName: flag.pos.roomName,
+            flags: [claimFlagMemory],
+        };
+        console.log("Claim Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
+        dependentRoom.memory.claimRooms.push(claimRoomMemory);
+    }
+    /**
+     * commit a depedent room over-ride flag to memory
+     * @param flag the flag we are commiting to memory
+     */
+    static processNewDependentRoomOverrideFlag(flag) {
+        // Set all the memory values for the flag
+        const flagTypeConst = this.getFlagType(flag);
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+        Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
+        console.log("Option Flag [" + flag.name + "] processed. Flag Type: [" + flagTypeConst + "]");
+    }
+    /**
+     * commit a stimulate flag to an owned room
+     * @param flag the flag we are commiting to memory
+     */
+    static processNewStimulateFlag(flag) {
+        // Set all the memory values for the flag
+        const flagTypeConst = this.getFlagType(flag);
+        Memory.flags[flag.name].complete = false;
+        Memory.flags[flag.name].processed = true;
+        Memory.flags[flag.name].timePlaced = Game.time;
+        Memory.flags[flag.name].flagType = flagTypeConst;
+        Memory.flags[flag.name].flagName = flag.name;
+    }
+    /**
+     * finds the closest colonized room to support a
+     * Remote/Attack/Claim room
+     * Calls helper functions to decide auto or over-ride
+     * @param targetRoom the room we want to support
+     */
+    static findDependentRoom(targetRoom) {
+        // Green & White flags are considered override flags, get those and find the one that was placed most recently
+        // ! - Idea for here... going to add a constant to describe each flag type, then we can make an empire api function
+        // that returns the flag type, so this next line could be replaced with (flag: Flag) => this.getFlagType === OVERRIDE_FLAG
+        const allOverrideFlags = MemoryApi.getAllFlags((flag) => flag.color === COLOR_GREEN && flag.secondaryColor === COLOR_WHITE);
+        let overrideFlag;
+        // If we don't have any d-room override flags, we don't need to worry about it and will use auto room detection
+        if (allOverrideFlags.length > 0) {
+            for (const flag of allOverrideFlags) {
+                if (!overrideFlag) {
+                    overrideFlag = flag;
+                }
+                else {
+                    if (flag.memory.timePlaced > overrideFlag.memory.timePlaced) {
+                        overrideFlag = flag;
+                    }
+                }
+            }
+            // Set the override flag as complete and call the helper to find the override room
+            Memory.flags[overrideFlag.name].complete = true;
+            return this.findDependentRoomManual(overrideFlag);
+        }
+        // If no override flag was found, automatically find closest dependent room
+        return this.findDependentRoomAuto(targetRoom);
+    }
+    /**
+     * Automatically come up with a dependent room
+     * @param targetRoom the room we want to support
+     */
+    static findDependentRoomAuto(targetRoom) {
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        let shortestPathRoom;
+        // Loop over owned rooms, finding the shortest path
+        for (const currentRoom of ownedRooms) {
+            if (!shortestPathRoom) {
+                shortestPathRoom = currentRoom;
+                continue;
+            }
+            const shortestPath = Game.map.findRoute(shortestPathRoom.name, targetRoom);
+            const currentPath = Game.map.findRoute(currentRoom.name, targetRoom);
+            // If the path is shorter, its the new canidate room
+            if (currentPath.length < shortestPath.length) {
+                shortestPathRoom = currentRoom;
+            }
+        }
+        // Throw exception if no rooms were found
+        if (!shortestPathRoom) {
+            throw new UserException("Auto-Dependent Room Finder Error", "No room with shortest path found to the target room.", ERROR_WARN$1);
+        }
+        return shortestPathRoom.name;
+    }
+    /**
+     * Manually get the dependent room based on flags
+     * @param targetRoom the room we want to support
+     * @param overrideFlag the flag for the selected override flag
+     */
+    static findDependentRoomManual(overrideFlag) {
+        // Throw error if we have no vision in the override flag room
+        // (Shouldn't happen, but user error can allow it to occur)
+        if (!Game.flags[overrideFlag.name].room) {
+            throw new UserException("Manual Dependent Room Finding Error", "Flag [" + overrideFlag.name + "]. We have no vision in the room you attempted to manually set as override dependent room.", ERROR_ERROR);
+        }
+        return Game.flags[overrideFlag.name].room.name;
+    }
+    /**
+     * get the rally location for the room we are attacking
+     * @param homeRoom the room we are spawning from
+     * @param targetRoom the room we are attacking
+     */
+    static findRallyLocation(homeRoom, targetRoom) {
+        const fullPath = Game.map.findRoute(homeRoom, targetRoom);
+        // To prevent out of bounds, only allow room paths that have as least 2 elements (should literally never occur unless we
+        // are attacking our own room (??? maybe an active defender strategy, so i won't throw an error for it tbh)
+        if (fullPath.length <= 2) {
+            return new RoomPosition(25, 25, homeRoom);
+        }
+        // Return the room right BEFORE the room we are attacking. This is the rally room (location is just in middle of room)
+        return new RoomPosition(25, 25, fullPath[fullPath.length - 2].room);
+    }
+    /**
+     * if a claim room has no flags associated with it, delete the claim room memory structure
+     * @param claimRooms an array of all the claim room memory structures in the empire
+     */
+    static cleanDeadClaimRooms(claimRooms) {
+        // Loop over claim rooms, and if we find one with no associated flag, remove it
+        for (const claimRoom in claimRooms) {
+            if (!claimRooms[claimRoom]) {
+                continue;
+            }
+            const claimRoomName = claimRooms[claimRoom].roomName;
+            if (!claimRooms[claimRoom].flags[0]) {
+                console.log("Removing Claim Room [" + claimRooms[claimRoom].roomName + "]");
+                // Get the dependent room for the attack room we are removing from memory
+                const dependentRoom = _.find(MemoryApi.getOwnedRooms(), (room) => {
+                    const rr = room.memory.claimRooms;
+                    return _.some(rr, (innerRR) => {
+                        if (innerRR) {
+                            return innerRR.roomName === claimRoomName;
+                        }
+                        return false;
+                    });
+                });
+                delete Memory.rooms[dependentRoom.name].claimRooms[claimRoom];
+            }
+        }
+    }
+    /**
+     * removes all claim room memory structures that do not have an existing flag associated with them
+     * @param claimRooms an array of all the claim room memory structures in the empire
+     */
+    static cleanDeadClaimRoomFlags(claimRooms) {
+        // Loop over claim rooms, remote rooms, and attack rooms, and make sure the flag they're referencing actually exists
+        // Delete the memory structure if its not associated with an existing flag
+        for (const claimRoom of claimRooms) {
+            if (!claimRoom) {
+                continue;
+            }
+            for (const flag in claimRoom.flags) {
+                if (!claimRoom.flags[flag]) {
+                    continue;
+                }
+                // Tell typescript that these are claim flag memory structures
+                const currentFlag = claimRoom.flags[flag];
+                if (!Game.flags[currentFlag.flagName]) {
+                    console.log("Removing [" + flag + "] from Claim Room [" + claimRoom.roomName + "]");
+                    delete claimRoom.flags[flag];
+                }
+            }
+        }
+    }
+    /**
+     * if an attack room has no flags associated with it, delete the attack room memory structure
+     * @param attackRooms an array of all the attack room memory structures in the empire
+     */
+    static cleanDeadAttackRooms(attackRooms) {
+        // Loop over remote rooms, and if we find one with no associated flag, remove it
+        for (const attackRoom in attackRooms) {
+            if (!attackRooms[attackRoom]) {
+                continue;
+            }
+            const attackRoomName = attackRooms[attackRoom].roomName;
+            if (!attackRooms[attackRoom].flags[0]) {
+                console.log("Removing Attack Room [" + attackRooms[attackRoom].roomName + "]");
+                // Get the dependent room for the attack room we are removing from memory
+                const dependentRoom = _.find(MemoryApi.getOwnedRooms(), (room) => {
+                    const rr = room.memory.attackRooms;
+                    return _.some(rr, (innerRR) => {
+                        if (innerRR) {
+                            return innerRR.roomName === attackRoomName;
+                        }
+                        return false;
+                    });
+                });
+                delete Memory.rooms[dependentRoom.name].attackRooms[attackRoom];
+            }
+        }
+    }
+    /**
+     * clean dead attack room flags from a live attack room
+     */
+    static cleanDeadAttackRoomFlags(attackRooms) {
+        // Loop over attack rooms, and make sure the flag they're referencing actually exists
+        // Delete the memory structure if its not associated with an existing flag
+        for (const attackRoom of attackRooms) {
+            if (!attackRoom) {
+                continue;
+            }
+            for (const flag in attackRoom.flags) {
+                if (!attackRoom.flags[flag]) {
+                    continue;
+                }
+                // Tell typescript that these are claim flag memory structures
+                const currentFlag = attackRoom.flags[flag];
+                if (!Game.flags[currentFlag.flagName]) {
+                    console.log("Removing [" + flag + "] from Attack Room [" + attackRoom.roomName + "]");
+                    delete attackRoom.flags[flag];
+                }
+            }
+        }
+    }
+    /**
+     * if an remote room has no flags associated with it, delete the attack room memory structure
+     * @param attackRooms an array of all the attack room memory structures in the empire
+     */
+    static cleanDeadRemoteRooms(remoteRooms) {
+        // Loop over remote rooms, and if we find one with no associated flag, remove it
+        for (const remoteRoom in remoteRooms) {
+            if (!remoteRooms[remoteRoom]) {
+                continue;
+            }
+            const remoteRoomName = remoteRooms[remoteRoom].roomName;
+            if (!remoteRooms[remoteRoom].flags[0]) {
+                console.log("Removing Remote Room [" + remoteRooms[remoteRoom].roomName + "]");
+                // Get the dependent room for this room
+                const dependentRoom = _.find(MemoryApi.getOwnedRooms(), (room) => {
+                    const rr = room.memory.remoteRooms;
+                    return _.some(rr, (innerRR) => {
+                        if (innerRR) {
+                            return innerRR.roomName === remoteRoomName;
+                        }
+                        return false;
+                    });
+                });
+                delete Memory.rooms[dependentRoom.name].remoteRooms[remoteRoom];
+            }
+        }
+    }
+    /**
+     * removes all claim room memory structures that do not have an existing flag associated with them
+     * @param claimRooms an array of all the claim room memory structures in the empire
+     */
+    static cleanDeadRemoteRoomsFlags(remoteRooms) {
+        // Loop over remote rooms and make sure the flag they're referencing actually exists
+        // Delete the memory structure if its not associated with an existing flag
+        for (const remoteRoom of remoteRooms) {
+            if (!remoteRoom) {
+                continue;
+            }
+            for (const flag in remoteRoom.flags) {
+                if (!remoteRoom.flags[flag]) {
+                    continue;
+                }
+                // Tell typescript that these are claim flag memory structures
+                const currentFlag = remoteRoom.flags[flag];
+                if (!Game.flags[currentFlag.flagName]) {
+                    console.log("Removing [" + flag + "] from Remote Room Memory [" + remoteRoom.roomName + "]");
+                    delete remoteRoom.flags[flag];
+                }
+            }
+        }
+    }
+    /**
+     * gets the flag type for a flag
+     * @param flag the flag we are checking the type for
+     * @returns the flag type constant that tells you the type of flag it is
+     */
+    static getFlagType(flag) {
+        let flagType;
+        // Attack flags
+        if (flag.color === COLOR_RED) {
+            // Check the subtype
+            switch (flag.secondaryColor) {
+                // Zealot Solo
+                case COLOR_BLUE:
+                    flagType = ZEALOT_SOLO;
+                    break;
+                // Stalker Solo
+                case COLOR_BROWN:
+                    flagType = STALKER_SOLO;
+                // Standard Squad
+                case COLOR_RED:
+                    flagType = STANDARD_SQUAD;
+            }
+        }
+        // Claim Flags
+        else if (flag.color === COLOR_WHITE) {
+            flagType = CLAIM_FLAG;
+        }
+        // Option Flags
+        else if (flag.color === COLOR_GREEN) {
+            // Check the subtype
+            switch (flag.secondaryColor) {
+                // Depedent Room Override Flag
+                case COLOR_WHITE:
+                    flagType = OVERRIDE_D_ROOM_FLAG;
+                    break;
+                case COLOR_YELLOW:
+                    flagType = STIMULATE_FLAG;
+            }
+        }
+        // Remote Flags
+        else if (flag.color === COLOR_YELLOW) {
+            flagType = REMOTE_FLAG;
+        }
+        // Unknown Flag Type
+        else {
+            // If it isn't a valid flag type, set it to complete to flag it for deletion and throw a warning
+            Memory.flags[flag.name].complete = true;
+            throw new UserException("Invalid flag type", "The flag you placed has no defined type.", ERROR_WARN$1);
+        }
+        return flagType;
+    }
+    /**
+     * generate the options for an attack flag based on its type
+     * @param flag the flag we are getting options for
+     * @param flagTypeConst the flag type of this flag
+     * @param dependentRoom the room that will be hosting this attack room
+     * @returns the object for the attack flag associated memory structure
+     */
+    static generateAttackFlagOptions(flag, flagTypeConst, dependentRoom) {
+        // Generate the attack flag options based on the type of flag it is
+        const attackFlagMemory = {
+            active: false,
+            squadSize: 0,
+            squadUUID: 0,
+            rallyLocation: null,
+            flagName: flag.name,
+            flagType: flagTypeConst
+        };
+        // Fill in these options based on the flag type
+        switch (flagTypeConst) {
+            // Zealot Solo
+            case ZEALOT_SOLO:
+                // We don't need to adjust the memory for this type
+                break;
+            // Stalker Solo
+            case STALKER_SOLO:
+                // We don't need to adjust memory for this type
+                break;
+            // Standard Squad
+            case STANDARD_SQUAD:
+                attackFlagMemory.squadSize = 3;
+                attackFlagMemory.squadUUID = SpawnApi.generateSquadUUID();
+                attackFlagMemory.rallyLocation = this.findRallyLocation(dependentRoom, flag.pos.roomName);
+                break;
+            // Throw a warning if we were unable to generate memory for this flag type, and set it to be deleted
+            default:
+                flag.memory.complete = true;
+                throw new UserException("Unable to get attack flag memory for flag type " + flagTypeConst, "Flag " + flag.name + " was of an invalid type for the purpose of generating attack flag memory", ERROR_WARN$1);
+        }
+        return attackFlagMemory;
+    }
+}
+
+class Empire {
+    /**
+     * get new flags that need to be processed
+     * @returns Flag[] an array of flags that need to be processed (empty if none)
+     */
+    static getUnprocessedFlags() {
+        // Create an array of all flags
+        const allFlags = MemoryApi.getAllFlags();
+        const newFlags = [];
+        // Create an array of all unprocessed flags
+        for (const flag of allFlags) {
+            if (!flag.memory.processed || flag.memory.processed === undefined) {
+                newFlags.push(flag);
+            }
+        }
+        // Returns all unprocessed flags, empty array if there are none
+        return newFlags;
+    }
+    /**
+     * search for new flags and properly commit them
+     * @param newFlags StringMap of new flags we need to process
+     */
+    static processNewFlags(newFlags) {
+        // Don't run the function if theres no new flags
+        if (newFlags.length === 0) {
+            return;
+        }
+        // Loop over all new flags and call the proper helper
+        for (const flag of newFlags) {
+            switch (flag.color) {
+                // Remote Flags
+                case COLOR_YELLOW:
+                    EmpireHelper.processNewRemoteFlag(flag);
+                    break;
+                // Attack Flags
+                case COLOR_RED:
+                    EmpireHelper.processNewAttackFlag(flag);
+                    break;
+                // Claim Flags
+                case COLOR_WHITE:
+                    EmpireHelper.processNewClaimFlag(flag);
+                    break;
+                // Option flags
+                case COLOR_GREEN:
+                    // Dependent Room override flag
+                    if (flag.secondaryColor === COLOR_WHITE) {
+                        EmpireHelper.processNewDependentRoomOverrideFlag(flag);
+                    }
+                    else if (flag.secondaryColor === COLOR_YELLOW) {
+                        EmpireHelper.processNewStimulateFlag(flag);
+                    }
+                // Unhandled Flag, print warning to console
+                // Set to processed to prevent the flag from attempting processization every tick
+                default:
+                    console.log("Attempted to process flag of an unhandled type.");
+                    flag.memory.processed = true;
+                    break;
+            }
+        }
+    }
+    /**
+     * deletes all flags marked as complete
+     */
+    static deleteCompleteFlags() {
+        const completeFlags = MemoryApi.getAllFlags((flag) => flag.memory.complete);
+        // Loop over all flags, removing them and their direct memory from the game
+        for (const flag of completeFlags) {
+            console.log("Removing flag [" + flag.name + "]");
+            flag.remove();
+            delete Memory.flags[flag.name];
+        }
+    }
+    /**
+     * look for dead flags (memory with no associated flag existing) and remove them
+     */
+    static cleanDeadFlags() {
+        // Get all flag based action memory structures (Remote, Claim, and Attack Room Memory)
+        const allRooms = MemoryApi.getOwnedRooms();
+        const claimRooms = _.flatten(_.map(allRooms, room => MemoryApi.getClaimRooms(room)));
+        const remoteRooms = _.flatten(_.map(allRooms, room => MemoryApi.getRemoteRooms(room)));
+        const attackRooms = _.flatten(_.map(allRooms, room => MemoryApi.getAttackRooms(room)));
+        // Clean dead flags from memory structures
+        EmpireHelper.cleanDeadClaimRoomFlags(claimRooms);
+        EmpireHelper.cleanDeadRemoteRoomsFlags(remoteRooms);
+        EmpireHelper.cleanDeadAttackRoomFlags(attackRooms);
+        // Clean the memory of each type of dependent room memory structure with no existing flags associated
+        EmpireHelper.cleanDeadClaimRooms(claimRooms);
+        EmpireHelper.cleanDeadRemoteRooms(remoteRooms);
+        EmpireHelper.cleanDeadAttackRooms(attackRooms);
+    }
+    /**
+     * get if the flag is considered a one time use flag
+     */
+    static isAttackFlagOneTimeUse(flagMemory) {
+        // Currently all flags are one time use, add the flag constant here if its like a tower draining for example
+        return true;
+    }
+    /**
+     * if there are no active attack flags for a specific room, active one
+     */
+    static activateAttackFlags(room) {
+        const attackRooms = MemoryApi.getAttackRooms(room);
+        const attackRoomWithNoActiveFlag = _.find(attackRooms, (attackRoom) => {
+            if (attackRoom) {
+                return !_.some(attackRoom.flags, (flag) => flag.active);
+            }
+            return false;
+        });
+        // Break early if there are none
+        if (!attackRoomWithNoActiveFlag) {
+            return;
+        }
+        // Break early if no attack flags on this room (possible to happen from an error with cleaning)
+        if (!attackRoomWithNoActiveFlag.flags) {
+            return;
+        }
+        // Activate the first one we see, possible to change later for another standard
+        for (const arf in attackRoomWithNoActiveFlag.flags) {
+            if (attackRoomWithNoActiveFlag.flags[arf]) {
+                attackRoomWithNoActiveFlag.flags[arf].active = true;
+                break;
+            }
+        }
+    }
+}
+
+// empire-wide manager
+class EmpireManager {
+    /**
+     * run the empire for the AI
+     */
+    static runEmpireManager() {
+        // Get unprocessed flags and process them
+        const unprocessedFlags = Empire.getUnprocessedFlags();
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        if (unprocessedFlags.length > 0) {
+            Empire.processNewFlags(unprocessedFlags);
+        }
+        // Delete unused flags and flag memory
+        Empire.deleteCompleteFlags();
+        Empire.cleanDeadFlags();
+        // Activate attack flags for every room
+        _.forEach(ownedRooms, (room) => Empire.activateAttackFlags(room));
+        // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
+    }
+}
+
+// @ts-ignore
+// manager for the memory of the empire
+class MemoryManager {
+    /**
+     * run the memory for the AI
+     */
+    static runMemoryManager() {
+        this.initMainMemory();
+        MemoryApi.garbageCollection();
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        _.forEach(ownedRooms, (room) => {
+            MemoryApi.initRoomMemory(room);
+            MemoryApi.cleanDependentRoomMemory(room);
+        });
+    }
+    /**
+     * Ensures the initial Memory object is defined properly
+     */
+    static initMainMemory() {
+        if (!Memory.rooms) {
+            Memory.rooms = {};
+        }
+        if (!Memory.flags) {
+            Memory.flags = {};
+        }
+        if (!Memory.creeps) {
+            Memory.creeps = {};
+        }
+    }
+}
+
+// room-wide manager
+class RoomManager {
+    /**
+     * run the room for every room
+     */
+    static runRoomManager() {
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        _.forEach(ownedRooms, (room) => {
+            this.runSingleRoom(room);
+        });
+    }
+    /**
+     * run the room for a single room
+     * @param room the room we are running this manager function on
+     */
+    static runSingleRoom(room) {
+        // Set Defcon and Room State (roomState relies on defcon being set first)
+        RoomApi.setDefconLevel(room);
+        RoomApi.setRoomState(room);
+        // Run all structures in the room if they exist
+        // Run Towers
+        const defcon = MemoryApi.getDefconLevel(room);
+        if (defcon >= 1) {
+            RoomApi.runTowers(room);
+        }
+        // Run Labs
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LAB)) {
+            RoomApi.runLabs(room);
+        }
+        // Run Links
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK)) {
+            RoomApi.runLinks(room);
+        }
+        // Run Terminals
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL)) {
+            RoomApi.runTerminal(room);
+        }
+    }
+}
 
 // handles spawning for every room
 class SpawnManager {
@@ -2485,7 +5180,7 @@ class SpawnManager {
      * run the spawning for the AI for each room
      */
     static runSpawnManager() {
-        const ownedRooms = _.filter(Game.rooms, (room) => RoomHelper.isOwnedRoom(room));
+        const ownedRooms = MemoryApi.getOwnedRooms();
         // Loop over all rooms and run the spawn for each one
         for (const room of ownedRooms) {
             this.runSpawnForRoom(room);
@@ -2516,9 +5211,9 @@ class SpawnManager {
             if (energyAvailable >= bodyEnergyCost) {
                 // Get all the information we will need to spawn the next creep
                 const roomState = room.memory.roomState;
-                const militarySquadOptions = SpawnApi.generateSquadOptions(room);
-                const targetRoom = SpawnApi.getCreepTargetRoom(room);
-                const homeRoom = SpawnApi.getCreepHomeRoom(room);
+                const targetRoom = SpawnApi.getCreepTargetRoom(room, nextCreepRole);
+                const militarySquadOptions = SpawnApi.generateSquadOptions(room, targetRoom, nextCreepRole);
+                const homeRoom = SpawnApi.getCreepHomeRoom(room, nextCreepRole, targetRoom);
                 const creepOptions = SpawnApi.generateCreepOptions(room, nextCreepRole, roomState, militarySquadOptions["squadSize"], militarySquadOptions["squadUUID"], militarySquadOptions["rallyLocation"]);
                 // Spawn the creep
                 SpawnApi.spawnNextCreep(room, creepBody, creepOptions, nextCreepRole, openSpawn, homeRoom, targetRoom);
@@ -2526,37 +5221,6 @@ class SpawnManager {
         }
     }
 }
-// Current todo to finish Spawning ------
-/*
-            getCreepTargetRoom()
-            We need to come up with a way to figure out what room a remote/military creep
-            needs to go to.
-            My idea for this is to create a function in SpawnApi that does precisely this.
-            Using remote room for example let say we have 2 remote rooms and want to spawn a remote miner:
-            The function will get both remote rooms and add their names to an array
-            We will get every living creep that is a remote miner and loop over them
-            we get the remtoe room that has the least amount of remote miners that consider them a target room
-            we return this room as the creeps target room
-            If they are all the same value, we just select the closeset one potentially
-
-            fill out generateSquadOptions
-            This one is a little simpler as it will just find the attackRoom in the spawning room's memory
-            (this will be the same room found in the previous function btw, so this will have to come second)
-            Then it just scrapes the values from the memory object.. easy enough
-
-            complete getCreepHomeRoom to handle colonizers (it might be literally as easy as calling the getCreepTargetRoom
-            function from that method if its a remote colonizer)
-            When we start handling empire level stuff like inter-room assistance then we can add to it then
-
-            Thats all I can think of, add to this if you think of anything. But I believe once the above cases
-            are handled that spawn is completely functional. We will obviously be tweaking numbers later once we are
-            implementing the code base in game. biggest one i can think of is when we need lorries to spawn. Like we will
-            def have to go back and decide for cases for lorries/more workers/etc to spawn later and we can add it into
-            spawn api on like get limits (so we avoid directly changing the limits from wherever we are working out of)
-            We will probably just have like a getLorryLimit function that it calls to decide all of this stuff, similar to
-            how remoteDefenders are handled since they are also a special case
-        */
-//# sourceMappingURL=SpawnManager.js.map
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
@@ -4867,7 +7531,12 @@ class ErrorMapper {
                 loop();
             }
             catch (e) {
-                if (e instanceof Error) {
+                // * if this causes an error later on, remove the first if statement and change else if to 'if'
+                if (e instanceof UserException) {
+                    console.log('<font color="' + e.titleColor + '">' + e.title + "</font>");
+                    console.log('<font color="' + e.bodyColor + '">' + e.body + "</font>");
+                }
+                else if (e instanceof Error) {
                     if ("sim" in Game.rooms) {
                         const message = `Source maps don't work in the simulator - displaying original error`;
                         console.log(`<span style='color:red'>${message}<br>${_.escape(e.stack)}</span>`);
@@ -4886,7 +7555,6 @@ class ErrorMapper {
 }
 // Cache previously mapped traces to improve performance
 ErrorMapper.cache = {};
-//# sourceMappingURL=ErrorMapper.js.map
 
 class UtilHelper {
     /**
@@ -4904,7 +7572,1190 @@ class UtilHelper {
         }
     }
 }
-//# sourceMappingURL=UtilHelper.js.map
+
+const textColor = '#bab8ba';
+const textSize = .8;
+const charHeight = textSize * 1.1;
+// Helper for room visuals
+class RoomVisualManager {
+    /**
+     * display m
+     * @param lines the array of text we want to display
+     * @param x the x value we are starting it at
+     * @param y the y value we are starting it at
+     * @param roomName the room name its going in
+     * @param isLeft if we are left aligning
+     */
+    static multiLineText(lines, x, y, roomName, isLeft) {
+        if (lines.length === 0) {
+            return;
+        }
+        const vis = new RoomVisual(roomName);
+        // Draw text
+        let dy = 0;
+        for (const line of lines) {
+            if (isLeft) {
+                vis.text(line, x, y + dy, {
+                    align: 'left',
+                    color: textColor,
+                    opacity: .8,
+                    font: ' .7 Trebuchet MS'
+                });
+            }
+            else {
+                vis.text(line, x, y + dy, {
+                    align: 'right',
+                    color: textColor,
+                    opacity: .8,
+                    font: ' .7 Trebuchet MS'
+                });
+            }
+            dy += charHeight;
+        }
+    }
+    /**
+     * take the room state we are given and return the name of that room state
+     * @param roomState the room state we are getting the string for
+     */
+    static convertRoomStateToString(roomState) {
+        switch (roomState) {
+            case ROOM_STATE_INTRO$1:
+                return "Intro";
+            case ROOM_STATE_BEGINNER$1:
+                return "Beginner";
+            case ROOM_STATE_INTER$1:
+                return "Advanced";
+            case ROOM_STATE_ADVANCED$1:
+                return "Beginner";
+            case ROOM_STATE_NUKE_INBOUND$1:
+                return "Nuke Incoming!";
+            case ROOM_STATE_SEIGE$1:
+                return "Seige!";
+            case ROOM_STATE_STIMULATE$1:
+                return "Stimulate";
+            case ROOM_STATE_UPGRADER$1:
+                return "Upgrader";
+        }
+    }
+    /**
+     * take the flag type we are given and return the string name of that flag type
+     * @param flagType the type of flag we are getting the string for
+     */
+    static convertFlagTypeToString(flagType) {
+        switch (flagType) {
+            case STANDARD_SQUAD$1:
+                return "Standard Squad";
+            case STALKER_SOLO$1:
+                return "Stalker Solo";
+            case ZEALOT_SOLO$1:
+                return "Zealot Solo";
+            default:
+                return "Not An Attack Flag";
+        }
+    }
+}
+
+// Api for room visuals
+class RoomVisualApi {
+    /**
+     * draws the information that is empire wide (will be same for every room)
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    static createEmpireInfoVisual(room, x, y) {
+        // Get all the information we will need to display in the box
+        const usedCpu = Game.cpu.getUsed();
+        const cpuLimit = Game.cpu['limit'];
+        const bucket = Game.cpu['bucket'];
+        const BUCKET_LIMIT = 10000;
+        const gclProgress = Game.gcl['progress'];
+        const gclTotal = Game.gcl['progressTotal'];
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        const totalCreeps = _.sum(ownedRooms, (r) => MemoryApi.getMyCreeps(room).length);
+        const cpuPercent = Math.floor((usedCpu / cpuLimit * 100) * 10) / 10;
+        const bucketPercent = Math.floor((bucket / BUCKET_LIMIT * 100) * 10) / 10;
+        const gclPercent = Math.floor((gclProgress / gclTotal * 100) * 10) / 10;
+        // Draw the text
+        const lines = [];
+        lines.push("");
+        lines.push("Empire Info");
+        lines.push("");
+        lines.push("CPU:   " + cpuPercent + "%");
+        lines.push("BKT:   " + bucketPercent + "%");
+        lines.push("GCL:   " + gclPercent + "%");
+        lines.push("LVL:    " + Game.gcl['level']);
+        lines.push("");
+        lines.push("Viewing:  [ " + room.name + " ]");
+        lines.push("Empire Rooms:    " + ownedRooms.length);
+        lines.push("Empire Creeps:   " + totalCreeps);
+        RoomVisualManager.multiLineText(lines, x, y, room.name, true);
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 1, y + lines.length - 1, x + 7.5, y + lines.length - 1) // bottom line
+            .line(x - 1, y - 1, x + 7.5, y - 1) // top line
+            .line(x - 1, y - 1, x - 1, y + lines.length - 1) // left line
+            .line(x + 7.5, y - 1, x + 7.5, y + lines.length - 1); // right line
+        // Return where the next box should start
+        return y + lines.length;
+    }
+    /**
+     * draws the information of creep limits and currently living members
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    static createCreepCountVisual(room, x, y) {
+        // Get the info we need to display
+        const creepsInRoom = MemoryApi.getMyCreeps(room);
+        const creepLimits = MemoryApi.getCreepLimits(room);
+        const roles = {
+            miner: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_MINER$1).length,
+            harvester: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_HARVESTER$1).length,
+            worker: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_WORKER$1).length,
+            lorry: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_LORRY$1).length,
+            powerUpgrader: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_POWER_UPGRADER$1).length,
+            remoteMiner: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_MINER$1).length,
+            remoteReserver: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_RESERVER$1).length,
+            remoteHarvester: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_HARVESTER$1).length,
+            claimer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_CLAIMER$2).length,
+            colonizer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_COLONIZER$1).length
+        };
+        const lines = [];
+        lines.push("");
+        lines.push("Creep Info");
+        lines.push("");
+        lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
+        if (creepLimits['domesticLimits']) {
+            // Add creeps to the lines array
+            if (creepLimits.domesticLimits.miner > 0) {
+                lines.push("Miners:     " + roles[ROLE_MINER$1] + " / " + creepLimits.domesticLimits.miner);
+            }
+            if (creepLimits.domesticLimits.harvester > 0) {
+                lines.push("Harvesters:     " + roles[ROLE_HARVESTER$1] + " / " + creepLimits.domesticLimits.harvester);
+            }
+            if (creepLimits.domesticLimits.worker > 0) {
+                lines.push("Workers:     " + roles[ROLE_WORKER$1] + " / " + creepLimits.domesticLimits.worker);
+            }
+            if (creepLimits.domesticLimits.lorry > 0) {
+                lines.push("Lorries:    " + roles[ROLE_LORRY$1] + " / " + creepLimits.domesticLimits.lorry);
+            }
+            if (creepLimits.domesticLimits.powerUpgrader > 0) {
+                lines.push("Power Upgraders:    " + roles[ROLE_POWER_UPGRADER$1] + " / " + creepLimits.domesticLimits.powerUpgrader);
+            }
+        }
+        if (creepLimits['remoteLimits']) {
+            if (creepLimits.remoteLimits.remoteMiner > 0) {
+                lines.push("Remote Miners:      " + roles[ROLE_REMOTE_MINER$1] + " / " + creepLimits.remoteLimits.remoteMiner);
+            }
+            if (creepLimits.remoteLimits.remoteHarvester > 0) {
+                lines.push("Remote Harvesters:    " + roles[ROLE_REMOTE_HARVESTER$1] + " / " + creepLimits.remoteLimits.remoteHarvester);
+            }
+            if (creepLimits.remoteLimits.remoteReserver > 0) {
+                lines.push("Remote Reservers:    " + roles[ROLE_REMOTE_RESERVER$1] + " / " + creepLimits.remoteLimits.remoteReserver);
+            }
+            if (creepLimits.remoteLimits.remoteColonizer > 0) {
+                lines.push("Remote Colonizers:    " + roles[ROLE_COLONIZER$1] + " / " + creepLimits.remoteLimits.remoteColonizer);
+            }
+            if (creepLimits.remoteLimits.claimer > 0) {
+                lines.push("Claimers:       " + roles[ROLE_CLAIMER$2] + " / " + creepLimits.remoteLimits.claimer);
+            }
+        }
+        lines.push("");
+        RoomVisualManager.multiLineText(lines, x, y, room.name, true);
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 1, y + lines.length - 1, x + 10, y + lines.length - 1) // bottom line
+            .line(x - 1, y - 1, x + 10, y - 1) // top line
+            .line(x - 1, y - 1, x - 1, y + lines.length - 1) // left line
+            .line(x + 10, y - 1, x + 10, y + lines.length - 1); // right line
+        // Return the end of this box
+        return y + lines.length;
+    }
+    /**
+     * draws the information of the room state
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    static createRoomInfoVisual(room, x, y) {
+        // Get the info we need
+        const roomState = RoomVisualManager.convertRoomStateToString(room.memory.roomState);
+        const level = room.controller.level;
+        const controllerProgress = room.controller.progress;
+        const controllerTotal = room.controller.progressTotal;
+        const controllerPercent = Math.floor((controllerProgress / controllerTotal * 100) * 10) / 10;
+        // Draw the text
+        const lines = [];
+        lines.push("");
+        lines.push("Room Info");
+        lines.push("");
+        lines.push("Room State:     " + roomState);
+        lines.push("Room Level:     " + level);
+        lines.push("Progress:         " + controllerPercent + "%");
+        lines.push("");
+        RoomVisualManager.multiLineText(lines, x, y, room.name, true);
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 1, y + lines.length - 1, x + 10, y + lines.length - 1) // bottom line
+            .line(x - 1, y - 1, x + 10, y - 1) // top line
+            .line(x - 1, y - 1, x - 1, y + lines.length - 1) // left line
+            .line(x + 10, y - 1, x + 10, y + lines.length - 1); // right line
+        // Return where the next box should start
+        return y + lines.length;
+    }
+    /**
+     * draws the information for remote flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    static createRemoteFlagVisual(room, x, y) {
+        const dependentRemoteRooms = MemoryApi.getRemoteRooms(room);
+        // Draw the text
+        const lines = [];
+        lines.push("");
+        lines.push("Remote Rooms ");
+        lines.push("");
+        for (const dr of dependentRemoteRooms) {
+            if (!dr) {
+                continue;
+            }
+            lines.push("Room:   [ " + dr.roomName + " ] ");
+            lines.push("Flag:   [ " + dr.flags[0].flagName + " ] ");
+            lines.push("");
+        }
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Remote Rooms ");
+            lines.push("");
+        }
+        RoomVisualManager.multiLineText(lines, x, y, room.name, false);
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1); // right line
+        // Return where the next box should start
+        return y + lines.length;
+    }
+    /**
+     * draws the information for claim flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    static createClaimFlagVisual(room, x, y) {
+        const dependentRemoteRooms = MemoryApi.getClaimRooms(room);
+        // Draw the text
+        const lines = [];
+        lines.push("");
+        lines.push("Claim Rooms ");
+        lines.push("");
+        for (const dr of dependentRemoteRooms) {
+            if (!dr) {
+                continue;
+            }
+            lines.push("Room:   [ " + dr.roomName + " ] ");
+            lines.push("Flag:   [ " + dr.flags[0].flagName + " ] ");
+            lines.push("");
+        }
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Claim Rooms ");
+            lines.push("");
+        }
+        RoomVisualManager.multiLineText(lines, x, y, room.name, false);
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1); // right line
+        // Return where the next box should start
+        return y + lines.length;
+    }
+    /**
+     * draws the information for attack flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    static createAttackFlagVisual(room, x, y) {
+        const dependentRemoteRooms = MemoryApi.getAttackRooms(room);
+        // Draw the text
+        const lines = [];
+        lines.push("");
+        lines.push("Attack Rooms ");
+        lines.push("");
+        for (const dr of dependentRemoteRooms) {
+            if (!dr) {
+                continue;
+            }
+            lines.push("Room:   [ " + dr.roomName + " ] ");
+            for (const flag of dr.flags) {
+                if (!flag) {
+                    continue;
+                }
+                lines.push("Flag:   [ " + flag.flagName + " ] ");
+                lines.push("Type:   [ " + RoomVisualManager.convertFlagTypeToString(flag.flagType) + " ]");
+            }
+            lines.push("");
+        }
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Attack Rooms ");
+            lines.push("");
+        }
+        RoomVisualManager.multiLineText(lines, x, y, room.name, false);
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1); // right line
+        // Return where the next box should start
+        return y + lines.length;
+    }
+    /**
+     * draws the information for option flags
+     * @param room the room we are displaying it in
+     * @param x the x coord for the visual
+     * @param y the y coord for the visual
+     */
+    static createOptionFlagVisual(room, x, y) {
+        const optionFlags = _.filter(Memory.flags, (flag) => flag.flagType ===
+            (OVERRIDE_D_ROOM_FLAG$1) &&
+            (Game.flags[flag.flagName].pos.roomName === room.name));
+        // Draw the text
+        const lines = [];
+        lines.push("");
+        lines.push("Option Flags ");
+        lines.push("");
+        for (const of of optionFlags) {
+            if (!of) {
+                continue;
+            }
+            lines.push("Flag:   [ " + of.flagName + " ] ");
+            lines.push("Type:   [ " + of.flagType + " ] ");
+            lines.push("");
+        }
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Option Flags ");
+            lines.push("");
+        }
+        RoomVisualManager.multiLineText(lines, x, y, room.name, false);
+        // Draw the box around the text
+        // Draw a box around the text
+        new RoomVisual(room.name)
+            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + .25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1); // right line
+        // Return where the next box should start
+        return y + lines.length;
+    }
+}
+
+// Manager for room visuals
+class RoomVisualManager$1 {
+    /**
+     * FUTURE PLANS FOR THIS MANAGER
+     *
+     * Create progreess bars for all the percentages
+     * Place more ideas here --
+     */
+    /**
+     * run the manager for each room
+     */
+    static runRoomVisualManager() {
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        _.forEach(ownedRooms, (room) => this.runSingleRoomVisualManager(room));
+    }
+    /**
+     * run the manager for a single room
+     * @param room the room we want to run the room visual for
+     */
+    static runSingleRoomVisualManager(room) {
+        let endLeftLine = 1;
+        let endRightLine = 1;
+        const LEFT_START_X = 1;
+        const RIGHT_START_X = 48;
+        // Left Side -----
+        // Display the Empire box in the top left
+        endLeftLine = RoomVisualApi.createEmpireInfoVisual(room, LEFT_START_X, endLeftLine);
+        // Display the Creep Info box in middle left
+        endLeftLine = RoomVisualApi.createCreepCountVisual(room, LEFT_START_X, endLeftLine);
+        // Display the Room Info box in the bottom left
+        endLeftLine = RoomVisualApi.createRoomInfoVisual(room, LEFT_START_X, endLeftLine);
+        // ------
+        // Right Side -----
+        // Display Remote Flag box on the top right
+        endRightLine = RoomVisualApi.createRemoteFlagVisual(room, RIGHT_START_X, endRightLine);
+        // Display Claim Flag Box on the upper middle right
+        endRightLine = RoomVisualApi.createClaimFlagVisual(room, RIGHT_START_X, endRightLine);
+        // Display Attack Flag Box on the lower middle right
+        endRightLine = RoomVisualApi.createAttackFlagVisual(room, RIGHT_START_X, endRightLine);
+        // Display Option Flag box on the bottom right
+        endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
+    }
+}
+
+class Normalize {
+    /**
+     * Returns a mockup of a room object for a given roomname
+     * @param roomName
+     */
+    static getMockRoomObject(roomName) {
+        const mockRoom = new Room(roomName);
+        mockRoom.name = roomName;
+        mockRoom.visual.roomName = roomName;
+        mockRoom.memory = Memory.rooms[roomName];
+        mockRoom.energyAvailable = -1; // Unknown Value
+        mockRoom.energyCapacityAvailable = -1; // Unknown Value
+    }
+    /**
+     * Normalizes to a Room Name
+     * @param room The name of a room as a string, or the Room object
+     * @returns Room.name The name of the room object
+     */
+    static roomName(room) {
+        if (room instanceof Room) {
+            room = room.name;
+        }
+        return room;
+    }
+    /**
+     * Normalizes to a Room Object
+     * @param room
+     * @returns Room The Room Object
+     */
+    static roomObject(room) {
+        if (!(room instanceof Room)) {
+            room = Game.rooms[room];
+        }
+        return room;
+    }
+    /**
+     * Normalizes to a RoomPosition object
+     * @param pos A RoomPosition object or an object with a pos property
+     */
+    static roomPos(object) {
+        if (object instanceof RoomPosition) {
+            return object;
+        }
+        return object.pos;
+    }
+    /**
+     * Normalizes to a creep object given an ID or Name
+     * @param creep
+     */
+    static creepObject(creep) {
+        if (creep instanceof Creep) {
+            return creep;
+        }
+        // If passed a name - Tested first since hash keys are faster than the Game.getObjectById function
+        let obj = Game.creeps[creep];
+        // If passed an ID instead of a name, use the slower getObjectById function
+        if (obj === undefined) {
+            obj = Game.getObjectById(creep);
+        }
+        // Risks returning null instead of a creep object, but I think that is outside the scope of a normalize method
+        return obj;
+    }
+}
+
+// helper function for creeps
+class CreepHelper {
+    /**
+     * get the mining container for a specific job
+     * @param job the job we are getting the mining container from
+     * @param room the room we are checking in
+     */
+    static getMiningContainer(job, room) {
+        if (!job) {
+            throw new UserException("Job is undefined", "Job is undefined for creep " + room.name + ", can't move to mining container.", ERROR_WARN$2);
+        }
+        const source = Game.getObjectById(job.targetID);
+        if (!source) {
+            throw new UserException("Source null in getMiningContainer", "room: " + room.name, ERROR_WARN$2);
+        }
+        // Get containers and find the closest one to the source
+        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
+        const closestContainer = source.pos.findClosestByRange(containers);
+        if (!closestContainer) {
+            return undefined;
+        }
+        else {
+            // If we have a container, but its not next to the source, its not the correct container
+            if (source.pos.isNearTo(closestContainer)) {
+                return closestContainer;
+            }
+            return undefined;
+        }
+    }
+    /**
+     * Get the text to sign a controller with
+     */
+    static getSigningText() {
+        // TODO Implement some kind of options interface that allows for customizing signing text
+        // * for now we just use a constant from config to sign
+        return CONTROLLER_SIGNING_TEXT;
+    }
+    /**
+     * Check if the targetPosition is the destination of the creep's current move target
+     * @target The target object or roomposition to move to
+     * @range [Optional] The range to stop at from the target
+     */
+    static targetIsCurrentDestination(creep, target, range = 0) {
+        if (creep.memory._move === undefined) {
+            return false;
+        }
+        let targetPosition;
+        if (target.hasOwnProperty("pos") || target instanceof RoomPosition) {
+            targetPosition = Normalize.roomPos(target);
+        }
+        else {
+            throw new UserException("Error in targetIsCurrentDestination", "Creep [" +
+                creep.name +
+                "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
+                JSON.stringify(target) +
+                "]", ERROR_ERROR);
+        }
+        const currentDestination = creep.memory._move.dest;
+        // Check if curr_dest = targetPosition
+        // TODO Change this so that it checks if it is in a variable range
+        if (currentDestination.roomName !== targetPosition.roomName) {
+            return false;
+        }
+        const distanceApart = Math.abs(currentDestination.x - targetPosition.x) + Math.abs(currentDestination.y - targetPosition.y);
+        // Return true if distance from currentDestination to targetPosition is within the allowed range (default is 0, exact match)
+        return distanceApart <= range;
+    }
+}
+
+// Api for all types of creeps (more general stuff here)
+class CreepApi {
+    /**
+     * Call the proper doWork function based on job.jobType
+     */
+    static doWork(creep, job) {
+        switch (job.jobType) {
+            case "getEnergyJob":
+                this.doWork_GetEnergyJob(creep, job);
+                break;
+            case "carryPartJob":
+                this.doWork_CarryPartJob(creep, job);
+                break;
+            case "claimPartJob":
+                this.doWork_ClaimPartJob(creep, job);
+                break;
+            case "workPartJob":
+                this.doWork_WorkPartJob(creep, job);
+                break;
+            default:
+                throw new UserException("Bad job.jobType in CreepApi.doWork", "The jobtype of the job passed to CreepApi.doWork was invalid.", ERROR_FATAL);
+        }
+    }
+    /**
+     * Call the proper travelTo function based on job.jobType
+     */
+    static travelTo(creep, job) {
+        switch (job.jobType) {
+            case "getEnergyJob":
+                this.travelTo_GetEnergyJob(creep, job);
+                break;
+            case "carryPartJob":
+                this.travelTo_CarryPartJob(creep, job);
+                break;
+            case "claimPartJob":
+                this.travelTo_ClaimPartJob(creep, job);
+                break;
+            case "workPartJob":
+                this.travelTo_WorkPartJob(creep, job);
+                break;
+            default:
+                throw new UserException("Bad job.jobType in CreepApi.travelTo", "The jobtype of the job passed to CreepApi.travelTo was invalid", ERROR_FATAL);
+        }
+    }
+    /**
+     * Do work on the target provided by claimPartJob
+     */
+    static doWork_ClaimPartJob(creep, job) {
+        const target = Game.getObjectById(job.targetID);
+        this.nullCheck_target(creep, target);
+        let returnCode;
+        if (job.actionType === "claim" && target instanceof StructureController) {
+            returnCode = creep.claimController(target);
+        }
+        else if (job.actionType === "reserve" && target instanceof StructureController) {
+            returnCode = creep.reserveController(target);
+        }
+        else if (job.actionType === "sign" && target instanceof StructureController) {
+            returnCode = creep.signController(target, CreepHelper.getSigningText());
+        }
+        else if (job.actionType === "attack" && target instanceof StructureController) {
+            returnCode = creep.attackController(target);
+        }
+        else {
+            throw this.badTarget_Error(creep, job);
+        }
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            default:
+                break;
+        }
+    }
+    /**
+     * Do work on the target provided by carryPartJob
+     */
+    static doWork_CarryPartJob(creep, job) {
+        let target;
+        if (job.targetType === "roomPosition") {
+            // TODO Change this to parse a string to create a RoomPosition object
+            // * Should be something like "25,25,W12S49" that corresponds to x, y, roomName
+            // ! Temporary, not used for anything atm, but target needs to be of type RoomPosition.
+            target = new RoomPosition(25, 25, creep.memory.homeRoom);
+        }
+        else {
+            target = Game.getObjectById(job.targetID);
+            this.nullCheck_target(creep, target);
+        }
+        let returnCode;
+        if (job.actionType === "transfer" && (target instanceof Structure || target instanceof Creep)) {
+            returnCode = creep.transfer(target, RESOURCE_ENERGY);
+        }
+        else if (job.actionType === "drop" && target instanceof RoomPosition) {
+            returnCode = creep.drop(RESOURCE_ENERGY);
+        }
+        else {
+            throw this.badTarget_Error(creep, job);
+        }
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            default:
+                break;
+        }
+    }
+    /**
+     * Do work on the target provided by workPartJob
+     */
+    static doWork_WorkPartJob(creep, job) {
+        const target = Game.getObjectById(job.targetID);
+        this.nullCheck_target(creep, target);
+        let returnCode;
+        if (job.actionType === "build" && target instanceof ConstructionSite) {
+            returnCode = creep.build(target);
+        }
+        else if (job.actionType === "repair" && target instanceof Structure) {
+            returnCode = creep.repair(target);
+        }
+        else if (job.actionType === "upgrade" && target instanceof StructureController) {
+            returnCode = creep.upgradeController(target);
+        }
+        else {
+            throw this.badTarget_Error(creep, job);
+        }
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            default:
+                break;
+        }
+    }
+    /**
+     * Do work on the target provided by a getEnergyJob
+     */
+    static doWork_GetEnergyJob(creep, job) {
+        const target = Game.getObjectById(job.targetID);
+        this.nullCheck_target(creep, target);
+        let returnCode;
+        if (job.actionType === "harvest" && (target instanceof Source || target instanceof Mineral)) {
+            returnCode = creep.harvest(target);
+        }
+        else if (job.actionType === "pickup" && target instanceof Resource) {
+            returnCode = creep.pickup(target);
+        }
+        else if (job.actionType === "withdraw" && target instanceof Structure) {
+            returnCode = creep.withdraw(target, RESOURCE_ENERGY);
+        }
+        else {
+            throw this.badTarget_Error(creep, job);
+        }
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            default:
+                break;
+        }
+    }
+    /**
+     * Travel to the target provided by GetEnergyJob in creep.memory.job
+     */
+    static travelTo_GetEnergyJob(creep, job) {
+        let moveTarget;
+        // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
+        if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
+            moveTarget = Game.getObjectById(creep.memory.supplementary.moveTargetID);
+        }
+        else {
+            moveTarget = Game.getObjectById(job.targetID);
+        }
+        this.nullCheck_target(creep, moveTarget);
+        // Move options target
+        const moveOpts = DEFAULT_MOVE_OPTS$1;
+        // In this case all actions are complete with a range of 1, but keeping for structure
+        if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
+            moveOpts.range = 1;
+        }
+        else if (job.actionType === "withdraw" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
+            moveOpts.range = 1;
+        }
+        else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
+            moveOpts.range = 1;
+        }
+        else {
+            // Assumes that if we specify a different target, we want to be on top of it.
+            moveOpts.range = 0;
+        }
+        if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
+            creep.memory.working = true;
+            return; // If we are in range to the target, then we do not need to move again, and next tick we will begin work
+        }
+        creep.moveTo(moveTarget, moveOpts);
+    }
+    /**
+     * Travel to the target provided by CarryPartJob in creep.memory.job
+     */
+    static travelTo_CarryPartJob(creep, job) {
+        return;
+    }
+    /**
+     * Travel to the target provided by ClaimPartJob in creep.memory.job
+     */
+    static travelTo_ClaimPartJob(creep, job) {
+        return;
+    }
+    /**
+     * Travel to the target provided by WorkPartJob in creep.memory.job
+     */
+    static travelTo_WorkPartJob(creep, job) {
+        return;
+    }
+    /**
+     * Checks if the target is null and throws the appropriate error
+     */
+    static nullCheck_target(creep, target) {
+        if (target === null) {
+            throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\n The error occurred in: " + this.caller, ERROR_ERROR);
+        }
+    }
+    /**
+     * Throws an error that the job actionType or targetType is invalid for the job type
+     */
+    static badTarget_Error(creep, job) {
+        return new UserException("Invalid Job actionType or targetType", "An invalid actionType or structureType has been provided by creep [" +
+            creep.name +
+            "] for function [" +
+            this.caller +
+            "]" +
+            "\n Job: " +
+            JSON.stringify(job), ERROR_ERROR);
+    }
+}
+
+// Manager for the miner creep role
+class MinerCreepManager {
+    /**
+     * Run the miner creep
+     * @param creep The creep to run
+     */
+    static runCreepRole(creep) {
+        // * The following is the general flow of the runMethod
+        //
+        // X Check if creep has a job
+        //     X If not, get a new job (always source job for miners)
+        //         X If no job still, return/idle for the tick
+        //     X If we have a job
+        //         X Check if creep is 'working' (meaning it is AT the target, and ready to perform the action on it)
+        //             X If it is working
+        //                 X doWork on the target
+        //             X If it is not working
+        //                 X travelTo the target
+        const homeRoom = Game.rooms[creep.memory.homeRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewSourceJob(creep, homeRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            // Set supplementary.moveTarget to container if one exists and isn't already taken
+            this.handleNewJob(creep);
+        }
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Find a job for the creep
+     */
+    static getNewSourceJob(creep, room) {
+        // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
+        return _.find(MemoryApi.getAllGetEnergyJobs(room, (sJob) => !sJob.isTaken && sJob.targetType === "source"));
+    }
+    /**
+     * Handle initalizing a new job
+     */
+    static handleNewJob(creep) {
+        const miningContainer = CreepHelper.getMiningContainer(creep.memory.job, Game.rooms[creep.memory.homeRoom]);
+        if (miningContainer === undefined) {
+            return; // We don't need to do anything else if the container doesn't exist
+        }
+        const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
+        if (creepsOnContainer.length > 0) {
+            if (creepsOnContainer[0].memory.role === ROLE_MINER$1) {
+                return; // If there is already a miner creep on the container, then we don't target it
+            }
+        }
+        if (creep.memory.supplementary === undefined) {
+            creep.memory.supplementary = {};
+        }
+        creep.memory.supplementary.moveTargetID = miningContainer.id;
+    }
+}
+
+// Manager for the miner creep role
+class HarvesterCreepManager {
+    /**
+     * run the harvester creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class WorkerCreepManager {
+    /**
+     * run the worker creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class LorryCreepManager {
+    /**
+     * run the lorry creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class PowerUpgraderCreepManager {
+    /**
+     * run the power upgrader creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class RemoteMinerCreepManager {
+    /**
+     * run the remote miner creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class RemoteHarvesterCreepManager {
+    /**
+     * run the remote harvester creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class RemoteColonizerCreepManager {
+    /**
+     * run the remote colonizer creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class ClaimerCreepManager {
+    /**
+     * run the claimer creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class RemoteDefenderCreepManager {
+    /**
+     * run the remote defender creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class RemoteReserverCreepManager {
+    /**
+     * run the remote reserver creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class ZealotCreepManager {
+    /**
+     * run the zealot creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class MedicCreepManager {
+    /**
+     * run the medic creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class StalkerCreepManager {
+    /**
+     * run the stalker creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Manager for the miner creep role
+class DomesticDefenderCreepManager {
+    /**
+     * run the domestic defender creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+    }
+}
+
+// Call the creep manager for each role
+class CreepManager {
+    /**
+     * loop over all creeps and call single creep manager for it
+     */
+    static runCreepManager() {
+        for (const creep in Game.creeps) {
+            this.runSingleCreepManager(Game.creeps[creep]);
+        }
+    }
+    /**
+     * run single creep manager
+     * @param creep the creep we are calling the manager for
+     */
+    static runSingleCreepManager(creep) {
+        const role = creep.memory.role;
+        // Call the correct helper function based on creep role
+        switch (role) {
+            case ROLE_MINER:
+                MinerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_HARVESTER:
+                HarvesterCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_WORKER:
+                WorkerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_LORRY:
+                LorryCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_POWER_UPGRADER:
+                PowerUpgraderCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_MINER:
+                RemoteMinerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_HARVESTER:
+                RemoteHarvesterCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_COLONIZER:
+                RemoteColonizerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_CLAIMER$1:
+                ClaimerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_DEFENDER:
+                RemoteDefenderCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_RESERVER:
+                RemoteReserverCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_ZEALOT:
+                ZealotCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_MEDIC:
+                MedicCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_STALKER:
+                StalkerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_DOMESTIC_DEFENDER:
+                DomesticDefenderCreepManager.runCreepRole(creep);
+                break;
+            default:
+                throw new UserException("Creep body failed generating.", 'The role "' + role + '" was invalid for generating the creep body.', ERROR_ERROR$1);
+        }
+    }
+}
+
+class ConsoleCommands {
+    static init() {
+        global.removeFlags = this.removeFlags;
+        global.removeConstructionSites = this.removeConstructionSites;
+        global.killAllCreeps = this.killAllCreeps;
+        global.sendResource = this.sendResource;
+        global.displayRoomStatus = this.displayRoomStatus;
+    }
+}
+/**
+ * remove all construction sites from the room when called
+ * @param roomName the name of the room we want to remove construction sites from
+ * @param structureType [optional] the type of structure we want to remove the sites of
+ */
+ConsoleCommands.removeConstructionSites = function (roomName, structureType) {
+    Game.rooms[roomName].find(FIND_MY_CONSTRUCTION_SITES).forEach((site) => {
+        if (!structureType || site.structureType === structureType) {
+            site.remove();
+        }
+    });
+};
+/**
+ * remove all flags from the empire when called
+ * @param substr a name contained in flags we want to remove
+ */
+ConsoleCommands.removeFlags = function (substr) {
+    _.forEach(Game.flags, (flag) => {
+        if (_.includes(flag.name, substr)) {
+            console.log(`removing flag ${flag.name} in ${flag.pos.roomName}`);
+            flag.remove();
+        }
+    });
+};
+/**
+ * display status of specified room or all rooms if room specified
+ * @param room [optional] the room we want to display the stats for (default all rooms)
+ */
+ConsoleCommands.displayRoomStatus = function (roomName) {
+    // if no room was specified, display status for all
+    if (!roomName) {
+        _.forEach(Game.rooms, (currentRoom) => {
+            console.log(`Room: ${currentRoom.name} -----------`);
+            console.log(`State: ${currentRoom.memory.roomState}`);
+            console.log(`Storage: ${RoomHelper.getStoredAmount(currentRoom.storage, RESOURCE_ENERGY)}`);
+            console.log('----------------------------');
+        });
+    }
+    else {
+        const room = Game.rooms[roomName];
+        console.log(`Room: ${room.name} -----------`);
+        console.log(`State: ${room.memory.roomState}`);
+        if (room.storage) {
+            console.log(`Storage: ${RoomHelper.getStoredAmount(room.storage, RESOURCE_ENERGY)}`);
+        }
+        console.log('----------------------------');
+    }
+};
+/**
+ * kill all creeps
+ * @param room [optional] the room we want to kill all creeps in (default all rooms)
+ */
+ConsoleCommands.killAllCreeps = function (room, role) {
+    // if no room specified, kill all creeps
+    if (!room) {
+        _.forEach(Game.creeps, (creep) => {
+            if (!role || creep.memory.role === role) {
+                creep.suicide();
+            }
+        });
+    }
+    else {
+        _.forEach(Game.creeps, (creep) => {
+            if (creep.room.name === room.name) {
+                if (!role || creep.memory.role === role) {
+                    creep.suicide();
+                }
+            }
+        });
+    }
+};
+/**
+ * send energy from one room to another
+ * @param sendingRoom the room sending resources
+ * @param receivingRoom the room receiving resources
+ * @param resourceType the type of resource we want to transfer
+ * @param amount the amount of the resource we want to send
+ */
+ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceType, amount) {
+    // check if terminal exists in the sending room
+    // check if we have enough energy to send the resource
+    // send the resources
+};
 
 /*
   Kung Fu Klan's Screeps Code
@@ -4915,22 +8766,54 @@ class UtilHelper {
   Starting Jan 2019
 */
 const loop = ErrorMapper.wrapLoop(() => {
+    // Init console commands
+    ConsoleCommands.init();
+    // run the empire and get all relevant info from that into memory
     try {
-        // clean up memory first
-        MemoryManager.runMemoryManager();
-        // run the empire and get all relevant info from that into memory
         EmpireManager.runEmpireManager();
-        // run rooms
+    }
+    catch (e) {
+        UtilHelper.printError(e);
+    }
+    // run rooms
+    try {
         RoomManager.runRoomManager();
-        // run spawning
+    }
+    catch (e) {
+        UtilHelper.printError(e);
+    }
+    // run spawning
+    try {
         SpawnManager.runSpawnManager();
     }
     catch (e) {
         UtilHelper.printError(e);
     }
+    // run creeps
+    try {
+        CreepManager.runCreepManager();
+    }
+    catch (e) {
+        UtilHelper.printError(e);
+    }
+    // clean up memory
+    try {
+        MemoryManager.runMemoryManager();
+    }
+    catch (e) {
+        UtilHelper.printError(e);
+    }
+    // Display room visuals if we have a fat enough bucket and config option allows it
+    if (Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
+        try {
+            RoomVisualManager$1.runRoomVisualManager();
+        }
+        catch (e) {
+            UtilHelper.printError(e);
+        }
+    }
     // -------- end managers --------
 });
-//# sourceMappingURL=main.js.map
 
 exports.loop = loop;
 //# sourceMappingURL=main.js.map

@@ -1,13 +1,11 @@
-import {
-    ERROR_WARN,
-} from "utils/constants";
+import { ERROR_WARN } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
 import { CONTROLLER_SIGNING_TEXT } from "utils/config";
+import Normalize from "./Normalize";
 
 // helper function for creeps
 export default class CreepHelper {
-
     /**
      * get the mining container for a specific job
      * @param job the job we are getting the mining container from
@@ -18,7 +16,8 @@ export default class CreepHelper {
             throw new UserException(
                 "Job is undefined",
                 "Job is undefined for creep " + room.name + ", can't move to mining container.",
-                ERROR_WARN);
+                ERROR_WARN
+            );
         }
 
         const source: Source | null = Game.getObjectById(job.targetID);
@@ -27,12 +26,14 @@ export default class CreepHelper {
         }
 
         // Get containers and find the closest one to the source
-        const containers: StructureContainer[] = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER) as StructureContainer[];
+        const containers: StructureContainer[] = MemoryApi.getStructureOfType(
+            room,
+            STRUCTURE_CONTAINER
+        ) as StructureContainer[];
         const closestContainer = source.pos.findClosestByRange(containers);
         if (!closestContainer) {
             return undefined;
-        }
-        else {
+        } else {
             // If we have a container, but its not next to the source, its not the correct container
             if (source.pos.isNearTo(closestContainer)) {
                 return closestContainer;
@@ -48,5 +49,46 @@ export default class CreepHelper {
         // TODO Implement some kind of options interface that allows for customizing signing text
         // * for now we just use a constant from config to sign
         return CONTROLLER_SIGNING_TEXT;
+    }
+
+    /**
+     * Check if the targetPosition is the destination of the creep's current move target
+     * @target The target object or roomposition to move to
+     * @range [Optional] The range to stop at from the target
+     */
+    public static targetIsCurrentDestination(creep: Creep, target: object, range = 0): boolean {
+        if (creep.memory._move === undefined) {
+            return false;
+        }
+
+        let targetPosition: RoomPosition;
+
+        if (target.hasOwnProperty("pos") || target instanceof RoomPosition) {
+            targetPosition = Normalize.roomPos(target as _HasRoomPosition | RoomPosition);
+        } else {
+            throw new UserException(
+                "Error in targetIsCurrentDestination",
+                "Creep [" +
+                    creep.name +
+                    "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
+                    JSON.stringify(target) +
+                    "]",
+                ERROR_ERROR
+            );
+        }
+
+        const currentDestination = creep.memory._move.dest;
+
+        // Check if curr_dest = targetPosition
+        // TODO Change this so that it checks if it is in a variable range
+
+        if (currentDestination.roomName !== targetPosition.roomName) {
+            return false;
+        }
+
+        const distanceApart =
+            Math.abs(currentDestination.x - targetPosition.x) + Math.abs(currentDestination.y - targetPosition.y);
+        // Return true if distance from currentDestination to targetPosition is within the allowed range (default is 0, exact match)
+        return distanceApart <= range;
     }
 }

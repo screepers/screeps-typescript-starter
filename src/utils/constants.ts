@@ -147,3 +147,13 @@ COLORS[ERROR_FATAL] = "#FF0000";
 COLORS[ERROR_ERROR] = "#E300FF";
 COLORS[ERROR_WARN] = "#F0FF00";
 COLORS[ERROR_INFO] = "#0045FF";
+
+// Our default moveOpts object. Assign this to a new object and then adjust the values for the situation
+export const DEFAULT_MOVE_OPTS: MoveToOpts = {
+    heuristicWeight: 1.5, // TODO Test this to see if we can afford to raise it ( higher number = less CPU use, lower number = more likely to get best path each time)
+    range: 0, // Assume we want to go to the location, if not told otherwise
+    ignoreCreeps: false, // TODO Change this to true, and set up a type of collision avoidance/collision handling
+    reusePath: 10, // TODO Change this value to be much higher, and set up a type of 'stuck detection'
+    swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
+    visualizePathStyle: {} // Empty object for now, just uses default visualization
+};
