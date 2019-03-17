@@ -26,7 +26,14 @@ import {
     UPGRADE_JOB_CACHE_TTL,
     STORE_JOB_CACHE_TTL,
     FILL_JOB_CACHE_TTL,
-    PICKUP_JOB_CACHE_TTL
+    PICKUP_JOB_CACHE_TTL,
+    ROOM_STATE_BEGINNER,
+    ROOM_STATE_INTER,
+    ROOM_STATE_ADVANCED,
+    ROOM_STATE_NUKE_INBOUND,
+    ROOM_STATE_SEIGE,
+    ROOM_STATE_STIMULATE,
+    ROOM_STATE_UPGRADER,
 } from "utils/Constants";
 
 // the api for the memory class
@@ -55,6 +62,15 @@ export default class MemoryApi {
                 delete Memory.flags[flag];
             }
         }
+    }
+
+    /**
+     *
+     * @param room the room we are updating the room state for
+     * @param roomState the new room state we are saving
+     */
+    public static updateRoomState(roomState: RoomStateConstant, room: Room): void {
+        room.memory.roomState = roomState;
     }
 
     /**
@@ -650,7 +666,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
             return Game.flags[flagIndex];
         });
 

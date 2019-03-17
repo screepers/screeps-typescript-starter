@@ -2,7 +2,10 @@ import UtilHelper from "Helpers/UtilHelper";
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
 import Normalize from "Helpers/Normalize";
-import { DEFAULT_MOVE_OPTS } from "utils/constants";
+import {
+    DEFAULT_MOVE_OPTS,
+    ERROR_ERROR
+} from "utils/constants";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -338,12 +341,12 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-                creep.name +
-                "] for function [" +
-                this.caller +
-                "]" +
-                "\n Job: " +
-                JSON.stringify(job),
+            creep.name +
+            "] for function [" +
+            // this.caller +
+            "]" +
+            "\n Job: " +
+            JSON.stringify(job),
             ERROR_ERROR
         );
     }

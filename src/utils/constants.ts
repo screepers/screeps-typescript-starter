@@ -155,6 +155,6 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
     range: 0, // Assume we want to go to the location, if not told otherwise
     ignoreCreeps: false, // TODO Change this to true, and set up a type of collision avoidance/collision handling
     reusePath: 10, // TODO Change this value to be much higher, and set up a type of 'stuck detection'
-    swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
+    // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
     visualizePathStyle: {} // Empty object for now, just uses default visualization
 };

@@ -114,8 +114,8 @@ export default class HarvesterCreepManager {
             return;
         }
         else if (creep.memory.job!.jobType === "carryPartJob") {
-            // TODO Mark the job we chose as taken 
-            return; 
+            // TODO Mark the job we chose as taken
+            return;
         }
     }
 }

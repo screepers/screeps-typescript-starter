@@ -37,7 +37,7 @@ export default class RoomApi {
      * (note: assumes defcon already being found for simplicity sake)
      * @param room the room we are setting state for
      */
-    public static setRoomState(room: Room): RoomStateConstant {
+    public static setRoomState(room: Room): void {
 
         // If theres no controller, throw an error
         if (!room.controller) {
@@ -53,7 +53,8 @@ export default class RoomApi {
         if (RoomHelper.excecuteEveryTicks(1000)) {
             const incomingNukes = room.find(FIND_NUKES);
             if (incomingNukes.length > 0) {
-                return ROOM_STATE_NUKE_INBOUND;
+                MemoryApi.updateRoomState(ROOM_STATE_NUKE_INBOUND, room);
+                return;
             }
         }
         // ----------
@@ -63,7 +64,8 @@ export default class RoomApi {
         // defcon is level 3+ and hostiles activity in the room is high
         const defconLevel: number = MemoryApi.getDefconLevel(room);
         if (defconLevel >= 3) {
-            return ROOM_STATE_SEIGE;
+            MemoryApi.updateRoomState(ROOM_STATE_SEIGE, room);
+            return;
         }
         // ----------
 
@@ -81,10 +83,12 @@ export default class RoomApi {
             ) {
 
                 if (RoomHelper.isStimulateRoom(room)) {
-                    return ROOM_STATE_STIMULATE;
+                    MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
+                    return;
                 }
                 // otherwise, just upgrader room state
-                return ROOM_STATE_UPGRADER;
+                MemoryApi.updateRoomState(ROOM_STATE_UPGRADER, room);
+                return;
             }
         }
         // ----------
@@ -97,10 +101,12 @@ export default class RoomApi {
             if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
 
                 if (RoomHelper.isStimulateRoom(room)) {
-                    return ROOM_STATE_STIMULATE;
+                    MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
+                    return;
                 }
                 // otherwise, just advanced room state
-                return ROOM_STATE_ADVANCED;
+                MemoryApi.updateRoomState(ROOM_STATE_ADVANCED, room);
+                return;
             }
         }
         // ----------
@@ -110,7 +116,8 @@ export default class RoomApi {
             // check if we are in intermediate room state
             // container mining set up, but no storage
             if (RoomHelper.isContainerMining(room, sources, containers) && storage === undefined) {
-                return ROOM_STATE_INTER;
+                MemoryApi.updateRoomState(ROOM_STATE_INTER, room);
+                return;
             }
         }
         // ----------
@@ -119,15 +126,16 @@ export default class RoomApi {
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
         const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room);
-        if (creeps.length > 3) {
-            return ROOM_STATE_BEGINNER;
+        if (creeps.length >= 3) {
+            MemoryApi.updateRoomState(ROOM_STATE_BEGINNER, room);
+            return;
         }
         // ----------
 
 
         // check if we are in intro room state
         // 3 or less creeps so we need to (re)start the room
-        return ROOM_STATE_INTRO;
+        MemoryApi.updateRoomState(ROOM_STATE_INTRO, room);
     }
 
     /**
