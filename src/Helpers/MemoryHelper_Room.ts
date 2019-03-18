@@ -196,7 +196,7 @@ export default class MemoryHelper_Room {
      * @param stateConst the state we are applying to the room
      */
     public static updateRoomState(room: Room): void {
-        Memory.rooms[room.name].roomState = RoomApi.setRoomState(room);
+        RoomApi.setRoomState(room);
         return;
     }
 

@@ -1,4 +1,5 @@
 import RoomApi from "Api/Room.Api";
+import MemoryApi from "Api/Memory.Api";
 
 export default class CarryPartJobs {
     /**

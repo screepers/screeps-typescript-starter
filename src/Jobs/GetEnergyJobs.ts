@@ -76,34 +76,25 @@ export default class GetEnergyJobs {
      * @param room The room to create the job list for
      */
     public static createLinkJobs(room: Room): GetEnergyJob[] {
-        // List of all the links in the room with > LINK_MINIMUM_ENERGY (from config.ts)
-        // AND no active cooldown
-        const activeLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link: StructureLink) => {
-            return link.energy > LINK_MINIMUM_ENERGY && link.cooldown === 0;
-        });
 
-        if (activeLinks.length === 0) {
+        const linkJobList: GetEnergyJob[] = [];
+        if (linkJobList.length === 0) {
             return [];
         }
 
-        const linkJobList: GetEnergyJob[] = [];
-
-        _.forEach(activeLinks, (link: StructureLink) => {
-            // Create the StoreDefinition for the link
-            const linkStore: StoreDefinition = { energy: link.energy };
-
+        const upgraderLink = MemoryApi.getUpgraderLink(room);
+        if (upgraderLink !== undefined && upgraderLink !== null) {
+            const linkStore: StoreDefinition = { energy: upgraderLink.energy };
             const linkJob: GetEnergyJob = {
                 jobType: "getEnergyJob",
-                targetID: link.id,
+                targetID: upgraderLink!.id,
                 targetType: STRUCTURE_LINK,
                 actionType: "withdraw",
                 resources: linkStore,
                 isTaken: false
             };
-
             linkJobList.push(linkJob);
-        });
-
+        }
         return linkJobList;
     }
 

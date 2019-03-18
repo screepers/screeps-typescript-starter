@@ -608,7 +608,7 @@ interface RoomMemory {
     jobs: JobListing;
 }
 
-interface EmpireMemory {}
+interface EmpireMemory { }
 // ----------------------------------
 
 /**

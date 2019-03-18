@@ -56,7 +56,7 @@ export default class HarvesterCreepManager {
         // All container jobs with enough energy to fill creep.carry, and not taken
         const containerJobs = MemoryApi.getContainerJobs(
             room,
-            (cJob: GetEnergyJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity
+            (cJob: GetEnergyJob) => !cJob.isTaken && cJob.resources!.energy >= creep.carryCapacity
         );
 
         if (containerJobs.length > 0) {
@@ -66,7 +66,7 @@ export default class HarvesterCreepManager {
         // All dropped resources with enough energy to fill creep.carry, and not taken
         const dropJobs = MemoryApi.getPickupJobs(
             room,
-            (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity
+            (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources!.energy >= creep.carryCapacity
         );
 
         if (dropJobs.length > 0) {
@@ -76,7 +76,7 @@ export default class HarvesterCreepManager {
         // All backupStructures with enough energy to fill creep.carry, and not taken
         const backupStructures = MemoryApi.getBackupStructuresJobs(
             room,
-            (job: GetEnergyJob) => !job.isTaken && job.resources.energy >= creep.carryCapacity
+            (job: GetEnergyJob) => !job.isTaken && job.resources!.energy >= creep.carryCapacity
         );
 
         if (backupStructures.length > 0) {
