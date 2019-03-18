@@ -69,7 +69,7 @@ export default class PowerUpgraderCreepManager {
     }
 
     /**
-     * Get a GetEnergyJob for the harvester
+     * Get a GetEnergyJob for the power upgrader
      */
     public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
         // All link jobs with enough energy to fill creep.carry, and not taken

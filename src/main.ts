@@ -8,19 +8,12 @@
 */
 
 // ------ end imports
-// @ts-ignore
 import EmpireManager from "Managers/EmpireManager";
-// @ts-ignore
 import MemoryManager from "Managers/MemoryManagement";
-// @ts-ignore
 import RoomManager from "Managers/RoomManager";
-// @ts-ignore
 import SpawnManager from "Managers/SpawnManager";
-// @ts-ignore
 import { ErrorMapper } from "utils/ErrorMapper";
-// @ts-ignore
 import UtilHelper from "Helpers/UtilHelper";
-// @ts-ignore
 import RoomVisualManager from "Managers/RoomVisuals/RoomVisualManager";
 import { ROOM_OVERLAY_ON } from "utils/config";
 import CreepManager from "Managers/CreepManager";
