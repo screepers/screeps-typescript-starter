@@ -259,12 +259,41 @@ export default class RoomHelper {
      * TODO actually choose an ideal target not just the first one lol
      * @param room the room we are in
      */
-    public static chooseTowerTarget(room: Room): Creep | null {
+    public static chooseTowerTarget(room: Room): Creep | null | undefined {
         // get the creep we will do the most damage to
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
+        let isHealers: boolean = _.some(hostileCreeps, (c: Creep) =>
+            _.some(c.body, (b: BodyPartDefinition) => b.type === "heal"));
+        let isAttackers: boolean = _.some(hostileCreeps, (c: Creep) =>
+            _.some(c.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack"));
+        let isWorkers: boolean = _.some(hostileCreeps, (c: Creep) =>
+            _.some(c.body, (b: BodyPartDefinition) => b.type === "work"));
 
-        // temp, in future get one we do most dmg to
-        return hostileCreeps[0];
+        // If only healers are present, don't waste ammo
+        if (isHealers && !isAttackers && !isWorkers) {
+            return undefined;
+        }
+
+        // If healers are present with attackers, target healers
+        if (isHealers && isAttackers && !isWorkers) {
+            return _.find(hostileCreeps, (c: Creep) =>
+                _.some(c.body, (b: BodyPartDefinition) => b.type === "heal"));
+        }
+
+        // If workers are present, target worker
+        if (isWorkers) {
+            return _.find(hostileCreeps, (c: Creep) =>
+                _.some(c.body, (b: BodyPartDefinition) => b.type === "work"));
+        }
+
+        // If attackers are present, target them
+        if (isAttackers) {
+            return _.find(hostileCreeps, (c: Creep) =>
+                _.some(c.body, (b: BodyPartDefinition) => b.type === "attack"));
+        }
+
+        // If there are no hostile creeps, or we didn't find a valid target, return undefined
+        return undefined;
     }
 
     /**

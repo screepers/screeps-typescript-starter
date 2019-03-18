@@ -56,7 +56,7 @@ export default class MemoryApi {
             }
         }
 
-        // Remvoe all dead flags from memory
+        // Remove all dead flags from memory
         for (const flag in Memory.flags) {
             if (!_.some(Game.flags, (flagLoop: Flag) => flagLoop.name === Memory.flags[flag].flagName)) {
                 delete Memory.flags[flag];
@@ -65,12 +65,29 @@ export default class MemoryApi {
     }
 
     /**
-     *
+     * update the room state for the room
      * @param room the room we are updating the room state for
      * @param roomState the new room state we are saving
      */
     public static updateRoomState(roomState: RoomStateConstant, room: Room): void {
         room.memory.roomState = roomState;
+    }
+
+    /**
+     * get the upgrader link for the room
+     * @param room the room memory we are getting the upgrader link from
+     */
+    public static getUpgraderLink(room: Room): StructureLink | null {
+        return Game.getObjectById(room.memory.upgradeLink);
+    }
+
+    /**
+     * update the upgrader link for the room
+     * @param room the room we are updating it for
+     * @param id the id of the link
+     */
+    public static updateUpgraderLink(room: Room, id: string): void {
+        room.memory.upgradeLink = id;
     }
 
     /**

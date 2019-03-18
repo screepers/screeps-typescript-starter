@@ -146,11 +146,11 @@ export default class RoomApi {
 
         const towers = MemoryApi.getStructureOfType(room, STRUCTURE_TOWER);
         // choose the most ideal target and have every tower attack it
-        const idealTarget = RoomHelper.chooseTowerTarget(room);
+        const idealTarget: Creep | undefined | null = RoomHelper.chooseTowerTarget(room);
 
         // have each tower attack this target
         towers.forEach((t: any) => {
-            if (t !== null) {
+            if (t) {
                 t.attack(idealTarget);
             }
         });
@@ -243,7 +243,6 @@ export default class RoomApi {
 
     /**
      * get ramparts, or ramparts and walls that need to be repaired
-     * TODO limit by something, not sure yet.. room state possibly... controller level? open to input
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
     public static getWallRepairTargets(room: Room): Array<Structure<StructureConstant>> {
@@ -350,12 +349,33 @@ export default class RoomApi {
      * @param room the room we want to run links for
      */
     public static runLinks(room: Room): void {
-        // we find a way to get an upgrader link (closest one to controller)
-        // and make sure the other links keep this one full
-        // possibly also if all links energy together is below the
-        // carry cap of upgrader we could have workers fill it for them
-        // we might want to let workers help with spawning IF NEEDED in
-        // seige/military situation but im just rambling now
+
+        // If we don't have an upgrader link, cancel early
+        const upgraderLink: StructureLink | null = MemoryApi.getUpgraderLink(room);
+        if (!upgraderLink || upgraderLink.energy <= 400) {
+            return;
+        }
+
+        // Get non-upgrader links above 100 energy to fill the upgrader link
+        const nonUpgraderLinks: StructureLink[] = MemoryApi.getStructureOfType(room, STRUCTURE_LINK,
+            (link: StructureLink) => link.id !== upgraderLink.id && link.energy >= 100) as StructureLink[];
+        for (const link of nonUpgraderLinks) {
+            if (link.cooldown > 0) {
+                continue;
+            }
+
+            // Get the amount of energy we are sending over
+            const missingEnergy: number = upgraderLink.energyCapacity - upgraderLink.energy;
+            let amountToTransfer: number = 0;
+            if (missingEnergy > link.energy) {
+                amountToTransfer = link.energy;
+            }
+            else {
+                amountToTransfer = missingEnergy;
+            }
+
+            link.transferEnergy(upgraderLink, amountToTransfer);
+        }
     }
 
     /**

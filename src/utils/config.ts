@@ -34,3 +34,13 @@ export const ROOM_OVERLAY_ON = true;
  * The text to sign controllers with
  */
 export const CONTROLLER_SIGNING_TEXT = "get signed on boy";
+
+/**
+ * Constants for Tick Timers - Number of ticks between running the specified constant this is deciding
+ */
+export const RUN_TOWER_TIMER = 1;
+export const RUN_LAB_TIMER = 5;
+export const RUN_LINKS_TIMER = 2;
+export const RUN_TERMINAL_TIMER = 5;
+export const RUN_ROOM_STATE_TIMER = 5;
+export const RUN_DEFCON_TIMER = 2;
