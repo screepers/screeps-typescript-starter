@@ -109,9 +109,6 @@ export default class RemoteHarvesterCreepManager {
             if (storageJob) {
                 return storageJob;
             }
-            else {
-                return storeJobs[0];
-            }
         }
 
         return undefined;
