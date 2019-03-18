@@ -71,7 +71,20 @@ Option Flags:
 
 
 -------- Console Commands --------
+// removes constructions sites in a room, can specify which type
+removeConstructionSites(roomName: string, structureType?: string): void;
 
+// Removes flags by name
+removeFlags(substr: string): void;
+
+// Display room status, can specify which room
+displayRoomStatus(roomName: string): void;
+
+// Kills all creeps, can specify which room
+killAllCreeps(room?: Room): void;
+
+// Send amount of type of resource from one room to the target room
+sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void;
 
 ----- Adding New Creep Role ------
 Add to creep limits memory Type
