@@ -69,6 +69,7 @@ export default class PowerUpgraderCreepManager {
 
             return undefined;
         }
+        return undefined;
     }
 
     /**

@@ -656,6 +656,10 @@ interface CreepOptionsCiv {
      */
     fillLink: boolean;
     /**
+     * fill spawn/extensions
+     */
+    fillSpawn: boolean;
+    /**
      * if the creep can fill the terminal
      */
     fillTerminal: boolean;

@@ -183,6 +183,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: true, //
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -259,6 +260,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -283,6 +285,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -307,6 +310,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true, //
@@ -334,6 +338,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true, //
@@ -406,6 +411,7 @@ export class SpawnHelper {
                     fillStorage: false, //
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -430,6 +436,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -454,6 +461,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true, //
@@ -481,6 +489,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: true, //
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true, //
@@ -559,6 +568,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: true, //
                     fillLink: true, //
+                    fillSpawn: false,
                     fillTerminal: true, //
                     fillLab: true, //
                     getFromStorage: true, //
@@ -627,6 +637,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -691,6 +702,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: true, //
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -759,6 +771,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -782,6 +795,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -808,6 +822,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: true, //
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -870,6 +885,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -939,6 +955,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -981,6 +998,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -1411,6 +1429,7 @@ export class SpawnHelper {
             fillStorage: false,
             fillContainer: false,
             fillLink: false,
+            fillSpawn: false,
             fillTerminal: false,
             fillLab: false,
             getFromStorage: false,

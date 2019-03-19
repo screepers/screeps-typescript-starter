@@ -17,7 +17,7 @@ export default class MinerCreepManager {
      */
     public static runCreepRole(creep: Creep): void {
 
-        if(creep.spawning){
+        if (creep.spawning) {
             return; // Don't do anything until you've spawned
         }
 
@@ -46,14 +46,15 @@ export default class MinerCreepManager {
      * Find a job for the creep
      */
     public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
-        // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-        const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
-
-        if (sourceJobs.length > 0) {
-            return sourceJobs[0];
-        } else {
-            return undefined;
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        if (creepOptions.harvestSources) {
+            // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
+            if (sourceJobs.length > 0) {
+                return sourceJobs[0];
+            }
         }
+        return undefined;
     }
 
     /**
