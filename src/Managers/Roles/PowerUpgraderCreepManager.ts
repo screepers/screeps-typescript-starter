@@ -57,15 +57,18 @@ export default class PowerUpgraderCreepManager {
      * get an upgrading job
      */
     public static newUpgradeJob(creep: Creep, room: Room): WorkPartJob | undefined {
-        // All link jobs with enough energy to fill creep.carry, and not taken
-        const upgraderJob = MemoryApi.getAllWorkPartJobs(room,
-            (job: WorkPartJob) => !job.isTaken && job.targetType === STRUCTURE_CONTROLLER);
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        if (creepOptions.upgrade) {
+            // All link jobs with enough energy to fill creep.carry, and not taken
+            const upgraderJob = MemoryApi.getAllWorkPartJobs(room,
+                (job: WorkPartJob) => !job.isTaken && job.targetType === STRUCTURE_CONTROLLER);
 
-        if (upgraderJob.length > 0) {
-            return upgraderJob[0];
+            if (upgraderJob.length > 0) {
+                return upgraderJob[0];
+            }
+
+            return undefined;
         }
-
-        return undefined;
     }
 
     /**
@@ -87,13 +90,16 @@ export default class PowerUpgraderCreepManager {
      * Handles setup for a new job
      */
     public static handleNewJob(creep: Creep): void {
-        if (creep.memory.job!.jobType === "getEnergyJob") {
-            // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
-            return;
-        }
-        else if (creep.memory.job!.jobType === "workPartJob") {
-            // TODO Mark the job we chose as taken
-            return;
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        if (creepOptions.getFromLink) {
+            if (creep.memory.job!.jobType === "getEnergyJob") {
+                // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
+                return;
+            }
+            else if (creep.memory.job!.jobType === "workPartJob") {
+                // TODO Mark the job we chose as taken
+                return;
+            }
         }
     }
 }
