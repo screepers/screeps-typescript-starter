@@ -1429,7 +1429,8 @@ class MemoryHelper_Room {
      * @param stateConst the state we are applying to the room
      */
     static updateRoomState(room) {
-        Memory.rooms[room.name].roomState = RoomApi.setRoomState(room);
+        // This calls MemoryApi.updateRoomState and changes the state in memory
+        RoomApi.setRoomState(room);
         return;
     }
     /**
@@ -8687,6 +8688,104 @@ class WorkerCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        if (creep.spawning) {
+            return;
+        }
+        const homeRoom = Game.rooms[creep.memory.homeRoom];
+        if (creep.memory.job === undefined) {
+            this.getNewJob(creep, homeRoom);
+            if (creep.memory.job === undefined) {
+                return;
+            }
+            this.handleNewJob(creep, homeRoom);
+        }
+        if (creep.memory.working) {
+            CreepApi.doWork(creep, creep.memory.job);
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Gets a new job for the worker creep
+     */
+    static getNewJob(creep, room) {
+        if (creep.carry.energy === 0) {
+            return this.newGetEnergyJob(creep, room);
+        }
+        else {
+            let job = this.newWorkPartJob(creep, room);
+            if (job === undefined) {
+                job = this.newCarryPartJob(creep, room);
+            }
+            return job;
+        }
+    }
+    /**
+     * Get a GetEnergyJob for the harvester
+     */
+    static newGetEnergyJob(creep, room) {
+        // All container jobs with enough energy to fill creep.carry, and not taken
+        const containerJobs = MemoryApi.getContainerJobs(room, (cJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity);
+        if (containerJobs.length > 0) {
+            return containerJobs[0];
+        }
+        // All dropped resources with enough energy to fill creep.carry, and not taken
+        const dropJobs = MemoryApi.getPickupJobs(room, (dJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity);
+        if (dropJobs.length > 0) {
+            return dropJobs[0];
+        }
+        // All backupStructures with enough energy to fill creep.carry, and not taken
+        const backupStructures = MemoryApi.getBackupStructuresJobs(room, (job) => !job.isTaken && job.resources.energy >= creep.carryCapacity);
+        if (backupStructures.length > 0) {
+            return backupStructures[0];
+        }
+        return undefined;
+    }
+    /**
+     * Gets a new WorkPartJob for worker
+     */
+    static newWorkPartJob(creep, room) {
+        const buildJobs = MemoryApi.getBuildJobs(room, (job) => !job.isTaken);
+        if (buildJobs.length > 0) {
+            return buildJobs[0];
+        }
+        const repairJobs = MemoryApi.getRepairJobs(room, (job) => !job.isTaken);
+        if (repairJobs.length > 0) {
+            return repairJobs[0];
+        }
+        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
+        if (upgradeJobs.length > 0) {
+            return upgradeJobs[0];
+        }
+        return undefined;
+    }
+    /**
+     * Get a CarryPartJob for the harvester
+     */
+    static newCarryPartJob(creep, room) {
+        const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken);
+        if (fillJobs.length > 0) {
+            return fillJobs[0];
+        }
+        const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
+        if (storeJobs.length > 0) {
+            return storeJobs[0];
+        }
+        return undefined;
+    }
+    /**
+     * Handles new job initializing
+     */
+    static handleNewJob(creep, room) {
+        switch (creep.memory.job.jobType) {
+            case "getEnergyJob":
+                break;
+            case "carryPartJob":
+                break;
+            case "workPartJob":
+                break;
+            default:
+                break;
+        }
     }
 }
 
