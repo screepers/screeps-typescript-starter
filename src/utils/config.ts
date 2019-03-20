@@ -44,3 +44,12 @@ export const RUN_LINKS_TIMER = 2;
 export const RUN_TERMINAL_TIMER = 5;
 export const RUN_ROOM_STATE_TIMER = 5;
 export const RUN_DEFCON_TIMER = 2;
+
+/**
+ * bucket limits for manager
+ * decides the min the bucket must be to run this manager
+ */
+export const CREEP_MANAGER_BUCKET_LIMIT = 1000;
+export const SPAWN_MANAGER_BUCKET_LIMIT = 50;
+export const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
+export const ROOM_MANAGER_BUCKET_LIMIT = 500;

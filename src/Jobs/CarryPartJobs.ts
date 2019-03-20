@@ -1,4 +1,5 @@
 import RoomApi from "Api/Room.Api";
+import RoomHelper from "Helpers/RoomHelper";
 import MemoryApi from "Api/Memory.Api";
 
 export default class CarryPartJobs {
@@ -71,6 +72,22 @@ export default class CarryPartJobs {
             };
 
             storeJobs.push(terminalJob);
+        }
+
+        const upgraderLink: StructureLink | null = MemoryApi.getUpgraderLink(room);
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK) && upgraderLink) {
+            const nonUpgraderLinks: StructureLink[] = MemoryApi.getStructureOfType(room, STRUCTURE_LINK,
+                (link: StructureLink) => link.id !== upgraderLink!.id && link.energy < link.energyCapacity) as StructureLink[];
+
+            const fillLinkJob: CarryPartJob = {
+                jobType: "carryPartJob",
+                targetID: nonUpgraderLinks[0].id,
+                targetType: STRUCTURE_LINK,
+                actionType: "transfer",
+                isTaken: false
+            };
+
+            storeJobs.push(fillLinkJob);
         }
 
         return storeJobs;

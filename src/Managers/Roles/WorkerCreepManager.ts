@@ -135,7 +135,7 @@ export default class WorkerCreepManager {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillSpawn || creepOptions.fillTower) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken);
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== 'link');
 
             if (fillJobs.length > 0) {
                 return fillJobs[0];

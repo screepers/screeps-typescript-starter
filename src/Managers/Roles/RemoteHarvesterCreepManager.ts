@@ -56,36 +56,32 @@ export default class RemoteHarvesterCreepManager {
      * Get a GetEnergyJob for the harvester
      */
     public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
-        // All container jobs with enough energy to fill creep.carry, and not taken
-        const containerJobs = MemoryApi.getContainerJobs(
-            room,
-            (cJob: GetEnergyJob) => !cJob.isTaken && cJob.resources!.energy >= creep.carryCapacity
-        );
 
-        if (containerJobs.length > 0) {
-            return containerJobs[0];
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+
+        if (creepOptions.getFromContainer) {
+            // All container jobs with enough energy to fill creep.carry, and not taken
+            const containerJobs = MemoryApi.getContainerJobs(
+                room,
+                (cJob: GetEnergyJob) => !cJob.isTaken && cJob.resources!.energy >= creep.carryCapacity
+            );
+
+            if (containerJobs.length > 0) {
+                return containerJobs[0];
+            }
         }
 
-        // All dropped resources with enough energy to fill creep.carry, and not taken
-        const dropJobs = MemoryApi.getPickupJobs(
-            room,
-            (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources!.energy >= creep.carryCapacity
-        );
+        if (creepOptions.getDroppedEnergy) {
+            // All dropped resources with enough energy to fill creep.carry, and not taken
+            const dropJobs = MemoryApi.getPickupJobs(
+                room,
+                (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources!.energy >= creep.carryCapacity
+            );
 
-        if (dropJobs.length > 0) {
-            return dropJobs[0];
+            if (dropJobs.length > 0) {
+                return dropJobs[0];
+            }
         }
-
-        // All backupStructures with enough energy to fill creep.carry, and not taken
-        const backupStructures = MemoryApi.getBackupStructuresJobs(
-            room,
-            (job: GetEnergyJob) => !job.isTaken && job.resources!.energy >= creep.carryCapacity
-        );
-
-        if (backupStructures.length > 0) {
-            return backupStructures[0];
-        }
-
         return undefined;
     }
 
@@ -93,10 +89,18 @@ export default class RemoteHarvesterCreepManager {
      * Get a CarryPartJob for the harvester
      */
     public static newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
-        const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken);
 
-        if (fillJobs.length > 0) {
-            return fillJobs[0];
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+
+        if (creepOptions.fillLink) {
+            const linkJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType === 'link');
+        }
+        if (creepOptions.fillSpawn) {
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== 'link');
+
+            if (fillJobs.length > 0) {
+                return fillJobs[0];
+            }
         }
 
         const storeJobs = MemoryApi.getStoreJobs(room, (bsJob: CarryPartJob) => !bsJob.isTaken);
