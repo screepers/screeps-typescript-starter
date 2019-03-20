@@ -53,8 +53,6 @@ export default class RemoteMinerCreepManager {
             const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
             if (sourceJobs.length > 0) {
                 return sourceJobs[0];
-            } else {
-                return undefined;
             }
         }
         return undefined;

@@ -628,6 +628,10 @@ interface CreepOptionsCiv {
      */
     repair: boolean;
     /**
+     * claim or reserve
+     */
+    claim: boolean;
+    /**
      * if the creep can harvest sources
      */
     harvestSources: boolean;
