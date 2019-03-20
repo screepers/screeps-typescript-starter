@@ -176,6 +176,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: true, //
                     harvestMinerals: false,
                     wallRepair: false,
@@ -253,6 +254,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -260,7 +262,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
-                    fillSpawn: false,
+                    fillSpawn: true,    //
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -278,6 +280,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -285,7 +288,7 @@ export class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
-                    fillSpawn: false,
+                    fillSpawn: true,    //
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -303,6 +306,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -310,7 +314,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: false,
-                    fillSpawn: false,
+                    fillSpawn: true,    //
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true, //
@@ -331,6 +335,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -338,7 +343,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: false,
-                    fillSpawn: false,
+                    fillSpawn: true,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true, //
@@ -404,6 +409,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true, //
@@ -429,6 +435,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true, //
@@ -454,6 +461,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true, //
@@ -482,6 +490,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true, //
@@ -561,6 +570,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -630,6 +640,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: true, //
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -695,6 +706,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: false,
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -764,6 +776,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true, //
@@ -788,6 +801,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -815,6 +829,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: true, //
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -878,6 +893,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -948,6 +964,7 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
+                    claim: false,
                     harvestSources: true,
                     harvestMinerals: false,
                     wallRepair: true, //
@@ -991,6 +1008,7 @@ export class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -1422,6 +1440,7 @@ export class SpawnHelper {
             build: false,
             upgrade: false,
             repair: false,
+            claim: false,
             harvestSources: false,
             harvestMinerals: false,
             wallRepair: false,
