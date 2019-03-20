@@ -1,21 +1,13 @@
-import RoomApi from "../../Api/Room.Api";
 import MemoryApi from "../../Api/Memory.Api";
-import CreepDomesticApi from "Api/CreepDomestic.Api";
 import CreepApi from "Api/Creep.Api";
-import CreepDomestic from "Api/CreepDomestic.Api";
-import {
-    ERROR_WARN
-} from "utils/constants";
 
 // Manager for the miner creep role
 export default class PowerUpgraderCreepManager {
-
     /**
      * run the power upgrader creep
      * @param creep the creep we are running
      */
     public static runCreepRole(creep: Creep): void {
-
         if (creep.spawning) {
             return; // don't do anything until spawned
         }
@@ -60,8 +52,7 @@ export default class PowerUpgraderCreepManager {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
         if (creepOptions.upgrade) {
             // All link jobs with enough energy to fill creep.carry, and not taken
-            const upgraderJob = MemoryApi.getAllWorkPartJobs(room,
-                (job: WorkPartJob) => !job.isTaken && job.targetType === STRUCTURE_CONTROLLER);
+            const upgraderJob = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
 
             if (upgraderJob.length > 0) {
                 return upgraderJob[0];
@@ -77,8 +68,7 @@ export default class PowerUpgraderCreepManager {
      */
     public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
         // All link jobs with enough energy to fill creep.carry, and not taken
-        const linkJobs = MemoryApi.getAllGetEnergyJobs(room,
-            (job: GetEnergyJob) => !job.isTaken && job.targetType === STRUCTURE_LINK);
+        const linkJobs = MemoryApi.getLinkJobs(room, (job: GetEnergyJob) => !job.isTaken);
 
         if (linkJobs.length > 0) {
             return linkJobs[0];
@@ -96,8 +86,7 @@ export default class PowerUpgraderCreepManager {
             if (creep.memory.job!.jobType === "getEnergyJob") {
                 // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
                 return;
-            }
-            else if (creep.memory.job!.jobType === "workPartJob") {
+            } else if (creep.memory.job!.jobType === "workPartJob") {
                 // TODO Mark the job we chose as taken
                 return;
             }
