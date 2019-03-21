@@ -1504,7 +1504,7 @@ export class SpawnHelper {
         // Please improve this if possible lol. Had to get around type guards as we don't actually know what a creeps memory has in it unless we explicitly know the type i think
         // We're going to run into this everytime we use creep memory so we need to find a nicer way around it if possible but if not casting it as a memory type
         // Isn't the worst solution in the world
-        const militaryCreeps: Array<Creep | null> = MemoryApi.getMyCreeps(room, creep =>
+        const militaryCreeps: Array<Creep | null> = MemoryApi.getMyCreeps(room.name, creep =>
             this.isMilitaryRole(creep.memory.role)
         );
         return _.filter(militaryCreeps, creep => {
@@ -1639,7 +1639,7 @@ export class SpawnHelper {
         roomMemory: ClaimRoomMemory | AttackRoomMemory | RemoteRoomMemory | undefined
     ): number {
         const allCreepsOfRole: Array<Creep | null> = MemoryApi.getMyCreeps(
-            room,
+            room.name,
             creep => creep.memory.role === roleConst
         );
         let sum = 0;

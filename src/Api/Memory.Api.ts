@@ -173,7 +173,7 @@ export default class MemoryApi {
      */
     public static getRoomMemory(room: Room, forceUpdate?: boolean): void {
         this.getConstructionSites(room, undefined, forceUpdate);
-        this.getMyCreeps(room, undefined, forceUpdate);
+        this.getMyCreeps(room.name, undefined, forceUpdate);
         this.getHostileCreeps(room, undefined, forceUpdate);
         this.getSources(room, undefined, forceUpdate);
         this.getStructures(room, undefined, forceUpdate);
@@ -221,17 +221,17 @@ export default class MemoryApi {
      * @param forceUpdate [Optional] Invalidate Cache by force
      * @returns Creep[ ] -- An array of owned creeps, empty if there are none
      */
-    public static getMyCreeps(room: Room, filterFunction?: (object: Creep) => boolean, forceUpdate?: boolean): Creep[] {
+    public static getMyCreeps(roomName: string, filterFunction?: (object: Creep) => boolean, forceUpdate?: boolean): Creep[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].creeps ||
-            Memory.rooms[room.name].creeps.cache < Game.time - FCREEP_CACHE_TTL
+            !Memory.rooms[roomName].creeps ||
+            Memory.rooms[roomName].creeps.cache < Game.time - FCREEP_CACHE_TTL
         ) {
-            MemoryHelper_Room.updateMyCreeps(room);
+            MemoryHelper_Room.updateMyCreeps(roomName);
         }
 
-        const creepIDs: string[] = Memory.rooms[room.name].creeps.data;
+        const creepIDs: string[] = Memory.rooms[roomName].creeps.data;
 
         let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
 
@@ -647,7 +647,7 @@ export default class MemoryApi {
             return SpawnHelper.getActiveMiners(room);
         } else {
             // Otherwise just get the actual count of the creeps
-            return MemoryApi.getMyCreeps(room, filterFunction).length;
+            return MemoryApi.getMyCreeps(room.name, filterFunction).length;
         }
     }
 

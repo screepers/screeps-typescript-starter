@@ -13,7 +13,7 @@ export default class MemoryHelper {
         const filterByRole = (creep: Creep) => {
             return creep.memory.role === role;
         };
-        const creepsOfRole = MemoryApi.getMyCreeps(room, filterByRole);
+        const creepsOfRole = MemoryApi.getMyCreeps(room.name, filterByRole);
 
         return creepsOfRole;
     }

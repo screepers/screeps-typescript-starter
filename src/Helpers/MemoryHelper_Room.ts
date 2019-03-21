@@ -18,7 +18,7 @@ export default class MemoryHelper_Room {
     public static updateRoomMemory(room: Room): void {
         // Update All Creeps
         this.updateHostileCreeps(room);
-        this.updateMyCreeps(room);
+        this.updateMyCreeps(room.name);
         // Update structures/construction sites
         this.updateConstructionSites(room);
         this.updateStructures(room);
@@ -83,15 +83,15 @@ export default class MemoryHelper_Room {
      * [Cached] Room.memory.creeps
      * @param room The Room we are checking in
      */
-    public static updateMyCreeps(room: Room): void {
-        Memory.rooms[room.name].creeps = { data: null, cache: null };
+    public static updateMyCreeps(roomName: string): void {
+        Memory.rooms[roomName].creeps = { data: null, cache: null };
 
         // Changed this because it wouldn't catch remote squads for example
         // as they aren't actually in the room all the time (had this problem with my last solo code base)
-        const creeps = _.filter(Game.creeps, creep => creep.memory.homeRoom === room.name);
+        const creeps = _.filter(Game.creeps, creep => creep.memory.homeRoom === roomName);
 
-        Memory.rooms[room.name].creeps.data = _.map(creeps, (creep: Creep) => creep.id);
-        Memory.rooms[room.name].creeps.cache = Game.time;
+        Memory.rooms[roomName].creeps.data = _.map(creeps, (creep: Creep) => creep.id);
+        Memory.rooms[roomName].creeps.cache = Game.time;
     }
 
     /**

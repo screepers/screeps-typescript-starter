@@ -125,7 +125,7 @@ export default class RoomApi {
 
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
-        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room);
+        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room.name);
         if (creeps.length >= 3) {
             MemoryApi.updateRoomState(ROOM_STATE_BEGINNER, room);
             return;
