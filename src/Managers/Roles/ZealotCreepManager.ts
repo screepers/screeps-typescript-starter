@@ -19,6 +19,7 @@ export default class ZealotCreepManager {
 
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const targetRoom: string = creep.memory.targetRoom;
+        const CREEP_RANGE: number = 1;
 
         // Check if we need to flee
         if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
@@ -47,7 +48,7 @@ export default class ZealotCreepManager {
         }
 
         // Find a target for the creep
-        const target: Creep | Structure<StructureConstant> | undefined = MiliApi.getAttackTarget(creep, creepOptions, 1);
+        const target: Creep | Structure<StructureConstant> | undefined = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
         const isMelee: boolean = true;
         if (!target) {
             return; // idle if no current target

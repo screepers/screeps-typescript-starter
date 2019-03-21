@@ -200,4 +200,24 @@ export default class CreepMili {
         }
         return (wall ? wall : rampart);
     }
+
+    /**
+     * moves the creep away from the target
+     */
+    public static kiteEnemyCreep(creep: Creep): boolean {
+        const hostileCreep: Creep | null = creep.pos.findClosestByPath(MemoryApi.getHostileCreeps(creep.room));
+        const CREEP_RANGE: number = 3;
+        if (!hostileCreep) {
+            return false;
+        }
+        let path: PathFinderPath;
+        let goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: CREEP_RANGE }
+        let pathFinderOptions: PathFinderOpts = { flee: true }
+        path = PathFinder.search(hostileCreep!.pos, goal, pathFinderOptions);
+        if (path.path.length > 0) {
+            creep.moveTo(path.path[0], DEFAULT_MOVE_OPTS);
+            return true;
+        }
+        return false;
+    }
 };
