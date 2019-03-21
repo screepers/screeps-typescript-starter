@@ -710,6 +710,10 @@ interface CreepOptionsMili {
      */
     rallyLocation: RoomPosition | null;
     /**
+     * if the rally conditions have already been met
+     */
+    rallyDone: boolean;
+    /**
      * if the creep is meant to seige the room to attrition (tower drain, etc)
      */
     seige: boolean;

@@ -338,13 +338,43 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-                creep.name +
-                "] for function [" +
-                // this.caller +
-                "]" +
-                "\n Job: " +
-                JSON.stringify(job),
+            creep.name +
+            "] for function [" +
+            // this.caller +
+            "]" +
+            "\n Job: " +
+            JSON.stringify(job),
             ERROR_ERROR
         );
+    }
+
+    /**
+     * move the creep off of the exit tile
+     * @param creep the creep we are moving
+     * @returns if the creep had to be moved
+     */
+    public static moveCreepOffExit(creep: Creep): boolean {
+        const x: number = creep.pos.x;
+        const y: number = creep.pos.y;
+
+        if (x === 0) {
+            creep.move(RIGHT);
+            return true;
+        }
+        if (y === 0) {
+            creep.move(BOTTOM);
+            return true;
+        }
+        if (x === 49) {
+            creep.move(LEFT);
+            return true;
+        }
+        if (y === 49) {
+            creep.move(TOP);
+            return true;
+        }
+
+        // Creep is not on exit tile
+        return false;
     }
 }

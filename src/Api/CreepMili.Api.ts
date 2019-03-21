@@ -1,4 +1,5 @@
 import MemoryApi from "./Memory.Api";
+import { DEFAULT_MOVE_OPTS } from "utils/constants";
 
 // Api for military creep's
 export default class CreepMili {
@@ -7,7 +8,7 @@ export default class CreepMili {
      * check if we're still waiting on creeps to rally
      * @param creepOptions the options for the military creep
      */
-    public static isWaitingForRally(creepOptions: CreepOptionsMili): boolean {
+    public static setWaitingForRally(creepOptions: CreepOptionsMili): boolean {
 
         // If these options aren't defined, creep isn't waiting for rally
         if (!creepOptions.rallyLocation || !creepOptions.squadSize || !creepOptions.rallyLocation) {
@@ -21,7 +22,7 @@ export default class CreepMili {
             if (!currentCreepOptions.squadUUID) {
                 return false;
             }
-            return currentCreepOptions.squadUUID === creepOptions.squadUUID;
+            return currentCreepOptions.squadUUID === squadUUID;
         });
 
         // If we don't have the full squad spawned yet, creep is waiting
@@ -49,5 +50,26 @@ export default class CreepMili {
 
         // If we make it to here, we are done waiting
         return false;
+    }
+
+    /**
+     * check if the creep is in range to attack the target
+     * @param creep the creep we are checking for
+     * @param target the room position for the target in question
+     * @param isMelee if the creep can only melee
+     */
+    public static isInAttackRange(creep: Creep, target: RoomPosition, isMelee: boolean): boolean {
+        if (isMelee) {
+            return creep.pos.isNearTo(target);
+        }
+        return creep.pos.inRangeTo(target, 3);
+    }
+
+    /**
+     * have the creep flee back to the homestead
+     * @param creep the creep that is fleeing
+     */
+    public static fleeCreep(creep: Creep, homeRoom: string): void {
+        creep.moveTo(new RoomPosition(25, 25, homeRoom), DEFAULT_MOVE_OPTS);
     }
 };
