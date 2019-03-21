@@ -1,5 +1,6 @@
 import MemoryApi from "./Memory.Api";
 import { DEFAULT_MOVE_OPTS } from "utils/constants";
+import CreepApi from "./Creep.Api";
 
 // Api for military creep's
 export default class CreepMili {
@@ -7,8 +8,9 @@ export default class CreepMili {
     /**
      * check if we're still waiting on creeps to rally
      * @param creepOptions the options for the military creep
+     * @param creep the creep we're checking on
      */
-    public static setWaitingForRally(creepOptions: CreepOptionsMili): boolean {
+    public static setWaitingForRally(creep: Creep, creepOptions: CreepOptionsMili): boolean {
 
         // If these options aren't defined, creep isn't waiting for rally
         if (!creepOptions.rallyLocation || !creepOptions.squadSize || !creepOptions.rallyLocation) {
@@ -17,31 +19,26 @@ export default class CreepMili {
         const squadSize: number = creepOptions.squadSize!;
         const squadUUID: number = creepOptions.squadUUID!;
         const rallyRoom: string = creepOptions.rallyLocation.roomName;
-        const creepsInSquad: Creep[] = MemoryApi.getMyCreeps(rallyRoom, (creep: Creep) => {
-            const currentCreepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
-            if (!currentCreepOptions.squadUUID) {
-                return false;
-            }
-            return currentCreepOptions.squadUUID === squadUUID;
-        });
+        const creepsInSquad: Creep[] | null = MemoryApi.getCreepsInSquad(creep.room.name, squadUUID);
+
 
         // If we don't have the full squad spawned yet, creep is waiting
-        if (creepsInSquad.length < squadSize) {
+        if (!creepsInSquad && creepsInSquad!.length < squadSize) {
             return true;
         }
 
         // If not every creep is in the rally room, we are waiting
-        if (_.some(creepsInSquad, (c: Creep) => c.room.name !== rallyRoom)) {
+        if (_.some(creepsInSquad!, (c: Creep) => c.room.name !== rallyRoom)) {
             return true;
         }
 
         // Finally, make sure every creep is within an acceptable distance of each other
         const creepsWithinRallyDistance: boolean =
-            _.every(creepsInSquad, (cis: Creep) =>  // Check that every creep is within 2 tiles of at least 1 other creep in squad
-                _.some(creepsInSquad, (innerC: Creep) => innerC.pos.inRangeTo(cis.pos.x, cis.pos.y, 2))
+            _.every(creepsInSquad!, (cis: Creep) =>  // Check that every creep is within 2 tiles of at least 1 other creep in squad
+                _.some(creepsInSquad!, (innerC: Creep) => innerC.pos.inRangeTo(cis.pos.x, cis.pos.y, 2))
             ) &&
-            _.every(creepsInSquad, (c: Creep) =>    // Check that every creep is within 7 tiles of every creep in the squad
-                _.every(creepsInSquad, (innerC: Creep) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, 7))
+            _.every(creepsInSquad!, (c: Creep) =>    // Check that every creep is within 7 tiles of every creep in the squad
+                _.every(creepsInSquad!, (innerC: Creep) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, 7))
             );
 
         if (creepsWithinRallyDistance) {
@@ -74,7 +71,7 @@ export default class CreepMili {
     }
 
     /**
-     * get an attack target for the zealot creep
+     * get an attack target for the attack creep
      * @param creep the creep we are getting the target for
      * @param creepOptions the creep's military options
      * @param rangeNum the range the creep is requesting for a target
@@ -178,6 +175,32 @@ export default class CreepMili {
     }
 
     /**
+     * get a healing target for the healer creep
+     * @param creep the creep we are geting the target for
+     * @param creepOptions the options for the military creep
+     */
+    public static getHealingTarget(creep: Creep, creepOptions: CreepOptionsMili): Creep | null {
+
+        let healingTarget: Creep | null;
+        const squadMembers: Creep[] | null = MemoryApi.getCreepsInSquad(creep.room.name, creepOptions.squadUUID!);
+
+        // If squad, find closest squad member with missing health
+        if (creepOptions.squadUUID && squadMembers) {
+
+            // Squad implied, find closest squadMember with missing health
+            healingTarget = creep.pos.findClosestByPath(squadMembers!, {
+                filter: (c: Creep) => c.hits < c.hitsMax
+            });
+
+            return healingTarget;
+        }
+
+        // No squad members, find closest creep
+        const creepsInRoom: Creep[] = creep.room.find(FIND_MY_CREEPS);
+        return creep.pos.findClosestByPath(creepsInRoom, { filter: (c: Creep) => c.hits < c.hitsMax });
+    }
+
+    /**
      * find the ideal wall to attack
      * TODO make this balance between distance and health (ie if a 9m wall is 2 tiles closer than a 2m wall)
      * @param creep the creep we are checking for
@@ -218,6 +241,44 @@ export default class CreepMili {
             creep.moveTo(path.path[0], DEFAULT_MOVE_OPTS);
             return true;
         }
+        return false;
+    }
+
+    /**
+     * perform the basic operations for military creeps
+     * This includes: Fleeing, Rallying, moving into target room, and moving off exit tile
+     * @param creep the creep we are doing the operations for
+     * @param creepOptions the options for the military creep
+     */
+    public static checkMilitaryCreepBasics(creep: Creep, creepOptions: CreepOptionsMili): boolean {
+        const targetRoom: string = creep.memory.targetRoom;
+        // Check if we need to flee
+        if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
+            this.fleeCreep(creep, creep.memory.homeRoom);
+            return true;
+        }
+
+        if (!creepOptions.rallyDone) {
+            if (this.setWaitingForRally(creep, creepOptions)) {
+                return true; // idle if we are waiting on everyone to rally still
+            }
+            // Have the creep stop checking for rally
+            creepOptions.rallyDone = true;
+            creep.memory.options = creepOptions;
+        }
+
+        // Everyone is rallied, time to move out into the target room as a group if not already there
+        if (creep.room.name !== targetRoom) {
+            creep.moveTo(new RoomPosition(25, 25, targetRoom), DEFAULT_MOVE_OPTS);
+            return true;
+        }
+
+        // If creep is on exit tile, move them off
+        if (CreepApi.moveCreepOffExit(creep)) {
+            return true;
+        }
+
+        // Return false if we didn't need to do any of this
         return false;
     }
 };

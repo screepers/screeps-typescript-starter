@@ -1193,4 +1193,19 @@ export default class MemoryApi {
 
         return storeJobs;
     }
+
+    /**
+     * get all creeps in a specific squad given the squad uuid
+     * @param squadUUID the id for the squad
+     */
+    public static getCreepsInSquad(roomName: string, squadUUID: number): Creep[] | null {
+
+        return MemoryApi.getMyCreeps(roomName, (creep: Creep) => {
+            const currentCreepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
+            if (!currentCreepOptions.squadUUID) {
+                return false;
+            }
+            return currentCreepOptions.squadUUID === squadUUID;
+        });
+    }
 }

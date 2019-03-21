@@ -18,32 +18,10 @@ export default class ZealotCreepManager {
     public static runCreepRole(creep: Creep): void {
 
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
-        const targetRoom: string = creep.memory.targetRoom;
         const CREEP_RANGE: number = 1;
 
-        // Check if we need to flee
-        if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
-            MiliApi.fleeCreep(creep, creep.memory.homeRoom);
-            return;
-        }
-
-        if (!creepOptions.rallyDone) {
-            if (MiliApi.setWaitingForRally(creepOptions)) {
-                return; // idle if we are waiting on everyone to rally still
-            }
-            // Have the creep stop checking for rally
-            creepOptions.rallyDone = true;
-            creep.memory.options = creepOptions;
-        }
-
-        // Everyone is rallied, time to move out into the target room as a group if not already there
-        if (creep.room.name !== targetRoom) {
-            creep.moveTo(new RoomPosition(25, 25, targetRoom), DEFAULT_MOVE_OPTS);
-            return;
-        }
-
-        // If creep is on exit tile, move them off
-        if (CreepApi.moveCreepOffExit(creep)) {
+        // Carry out the basics of a military creep before moving on to specific logic
+        if (MiliApi.checkMilitaryCreepBasics(creep, creepOptions)) {
             return;
         }
 
