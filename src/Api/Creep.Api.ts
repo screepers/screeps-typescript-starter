@@ -146,7 +146,7 @@ export default class CreepApi {
 
         if (job.actionType === "build" && target instanceof ConstructionSite) {
             returnCode = creep.build(target);
-            if (!target) {
+            if (!target || creep.carry.energy === 0) {
                 deleteOnSuccess = true;
             }
         } else if (job.actionType === "repair" && target instanceof Structure) {

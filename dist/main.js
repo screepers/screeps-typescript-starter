@@ -8520,7 +8520,7 @@ class CreepApi {
         let deleteOnSuccess = false;
         if (job.actionType === "build" && target instanceof ConstructionSite) {
             returnCode = creep.build(target);
-            if (!target) {
+            if (!target || creep.carry.energy === 0) {
                 deleteOnSuccess = true;
             }
         }
