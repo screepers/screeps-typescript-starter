@@ -1722,4 +1722,26 @@ export class SpawnHelper {
         */
         return 0;
     }
+
+    /**
+     * get the number of accesssible tiles for the sources in a room
+     * @param room the room we are checking for
+     */
+    public static getNumAccessTilesToSources(room: Room): number {
+        const sources: Source[] = MemoryApi.getSources(room);
+        let accesssibleTiles: number = 0;
+        _.forEach(sources, (source: Source) => {
+            for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
+                for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
+                    if (source.pos.x === x && source.pos.y === y) {
+                        continue;
+                    }
+                    if (Game.map.getTerrainAt(x, y, room.name) !== 'wall') {
+                        accesssibleTiles++;
+                    }
+                }
+            }
+        });
+        return accesssibleTiles;
+    }
 }

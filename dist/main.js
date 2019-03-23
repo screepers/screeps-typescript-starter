@@ -1854,7 +1854,8 @@ class SpawnApi {
             // Beginner
             case ROOM_STATE_BEGINNER:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 4;
+                const numAccessTilesToSource = SpawnHelper.getNumAccessTilesToSources(room);
+                domesticLimits[ROLE_MINER] = numAccessTilesToSource < 4 ? 4 : numAccessTilesToSource;
                 domesticLimits[ROLE_HARVESTER] = 4;
                 domesticLimits[ROLE_WORKER] = 4;
                 break;
@@ -3866,6 +3867,24 @@ class SpawnHelper {
             (to ensure extra saftey in the case of abug)
         */
         return 0;
+    }
+    /**
+     * get the number of accesssible tiles for the sources in a room
+     * @param room the room we are checking for
+     */
+    static getNumAccessTilesToSources(room) {
+        const sources = MemoryApi.getSources(room);
+        let accesssibleTiles = 0;
+        for (const source of sources) {
+            for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
+                for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
+                    if (Game.map.getTerrainAt(x, y, room.name) !== 'wall' && !(source.pos.x === x && source.pos.y === y)) {
+                        accesssibleTiles++;
+                    }
+                }
+            }
+        }
+        return accesssibleTiles;
     }
 }
 
