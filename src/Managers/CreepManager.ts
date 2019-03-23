@@ -54,6 +54,7 @@ export default class CreepManager {
     public static runSingleCreepManager(creep: Creep): void {
 
         const role = creep.memory.role;
+
         // Call the correct helper function based on creep role
         switch (role) {
             case ROLE_MINER:

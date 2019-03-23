@@ -24,12 +24,14 @@ export default class PowerUpgraderCreepManager {
             this.handleNewJob(creep);
         }
 
-        if (creep.memory.working === true) {
-            CreepApi.doWork(creep, creep.memory.job);
-            return;
-        }
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
 
-        CreepApi.travelTo(creep, creep.memory.job);
+            CreepApi.travelTo(creep, creep.memory.job);
+        }
     }
 
     /**

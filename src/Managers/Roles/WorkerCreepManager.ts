@@ -19,7 +19,7 @@ export default class WorkerCreepManager {
         const homeRoom = Game.rooms[creep.memory.homeRoom];
 
         if (creep.memory.job === undefined) {
-            this.getNewJob(creep, homeRoom);
+            creep.memory.job = this.getNewJob(creep, homeRoom);
 
             if (creep.memory.job === undefined) {
                 return;
@@ -28,11 +28,14 @@ export default class WorkerCreepManager {
             this.handleNewJob(creep, homeRoom);
         }
 
-        if (creep.memory.working) {
-            CreepApi.doWork(creep, creep.memory.job);
-        }
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
 
-        CreepApi.travelTo(creep, creep.memory.job);
+            CreepApi.travelTo(creep, creep.memory.job);
+        }
     }
 
     /**
@@ -102,6 +105,17 @@ export default class WorkerCreepManager {
      */
     public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
+        const isCurrentUpgrader: boolean = _.some(MemoryApi.getMyCreeps(room.name), (c: Creep) =>
+            c.memory.job && c.memory.job!.actionType === 'upgrade'
+        );
+
+        // Assign upgrade job is one isn't currently being worked
+        if (creepOptions.upgrade && !isCurrentUpgrader) {
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
+            }
+        }
 
         if (creepOptions.build) {
             const buildJobs = MemoryApi.getBuildJobs(room, (job: WorkPartJob) => !job.isTaken);
@@ -119,7 +133,6 @@ export default class WorkerCreepManager {
         }
 
         if (creepOptions.upgrade) {
-            const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
             if (upgradeJobs.length > 0) {
                 return upgradeJobs[0];
             }

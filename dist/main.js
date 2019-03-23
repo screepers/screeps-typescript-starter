@@ -8714,11 +8714,13 @@ class MinerCreepManager {
             // Set supplementary.moveTarget to container if one exists and isn't already taken
             this.handleNewJob(creep);
         }
-        if (creep.memory.working === true) {
-            CreepApi.doWork(creep, creep.memory.job);
-            return;
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
         }
-        CreepApi.travelTo(creep, creep.memory.job);
     }
     /**
      * Find a job for the creep
@@ -8773,11 +8775,13 @@ class HarvesterCreepManager {
             }
             this.handleNewJob(creep);
         }
-        if (creep.memory.working === true) {
-            CreepApi.doWork(creep, creep.memory.job);
-            return;
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
         }
-        CreepApi.travelTo(creep, creep.memory.job);
     }
     /**
      * Decides which kind of job to get and calls the appropriate function
@@ -8868,16 +8872,19 @@ class WorkerCreepManager {
         }
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         if (creep.memory.job === undefined) {
-            this.getNewJob(creep, homeRoom);
+            creep.memory.job = this.getNewJob(creep, homeRoom);
             if (creep.memory.job === undefined) {
                 return;
             }
             this.handleNewJob(creep, homeRoom);
         }
-        if (creep.memory.working) {
-            CreepApi.doWork(creep, creep.memory.job);
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
         }
-        CreepApi.travelTo(creep, creep.memory.job);
     }
     /**
      * Gets a new job for the worker creep
@@ -8928,6 +8935,14 @@ class WorkerCreepManager {
      */
     static newWorkPartJob(creep, room) {
         const creepOptions = creep.memory.options;
+        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
+        const isCurrentUpgrader = _.some(MemoryApi.getMyCreeps(room.name), (c) => c.memory.job && c.memory.job.actionType === 'upgrade');
+        // Assign upgrade job is one isn't currently being worked
+        if (creepOptions.upgrade && !isCurrentUpgrader) {
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
+            }
+        }
         if (creepOptions.build) {
             const buildJobs = MemoryApi.getBuildJobs(room, (job) => !job.isTaken);
             if (buildJobs.length > 0) {
@@ -8941,7 +8956,6 @@ class WorkerCreepManager {
             }
         }
         if (creepOptions.upgrade) {
-            const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
             if (upgradeJobs.length > 0) {
                 return upgradeJobs[0];
             }
@@ -9012,11 +9026,13 @@ class PowerUpgraderCreepManager {
             }
             this.handleNewJob(creep);
         }
-        if (creep.memory.working === true) {
-            CreepApi.doWork(creep, creep.memory.job);
-            return;
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
         }
-        CreepApi.travelTo(creep, creep.memory.job);
     }
     /**
      * Decides which kind of job to get and calls the appropriate function
@@ -9094,11 +9110,13 @@ class RemoteMinerCreepManager {
             // Set supplementary.moveTarget to container if one exists and isn't already taken
             this.handleNewJob(creep);
         }
-        if (creep.memory.working === true) {
-            CreepApi.doWork(creep, creep.memory.job);
-            return;
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
         }
-        CreepApi.travelTo(creep, creep.memory.job);
     }
     /**
      * Find a job for the creep
@@ -9152,11 +9170,13 @@ class RemoteHarvesterCreepManager {
             }
             this.handleNewJob(creep);
         }
-        if (creep.memory.working === true) {
-            CreepApi.doWork(creep, creep.memory.job);
-            return;
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
         }
-        CreepApi.travelTo(creep, creep.memory.job);
     }
     /**
      * Decides which kind of job to get and calls the appropriate function
@@ -9199,6 +9219,9 @@ class RemoteHarvesterCreepManager {
         const creepOptions = creep.memory.options;
         if (creepOptions.fillLink) {
             const linkJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType === 'link');
+            if (linkJobs.length > 0) {
+                return linkJobs[0];
+            }
         }
         if (creepOptions.fillSpawn) {
             const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link');
@@ -9247,62 +9270,6 @@ class ClaimerCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
-    }
-}
-
-// Manager for the miner creep role
-class RemoteDefenderCreepManager {
-    /**
-     * run the remote defender creep
-     * @param creep the creep we are running
-     */
-    static runCreepRole(creep) {
-    }
-}
-
-// Manager for the miner creep role
-class RemoteReserverCreepManager {
-    /**
-     * run the remote reserver creep
-     * @param creep the creep we are running
-     */
-    static runCreepRole(creep) {
-        if (creep.spawning) {
-            return; // Don't do anything until you've spawned
-        }
-        const targetRoom = Game.rooms[creep.memory.targetRoom];
-        if (creep.memory.job === undefined) {
-            creep.memory.job = this.getNewClaimJob(creep, targetRoom);
-            if (creep.memory.job === undefined) {
-                return; // idle for a tick
-            }
-            // Set supplementary.moveTarget to container if one exists and isn't already taken
-            this.handleNewJob(creep);
-        }
-        if (creep.memory.working === true) {
-            CreepApi.doWork(creep, creep.memory.job);
-            return;
-        }
-        CreepApi.travelTo(creep, creep.memory.job);
-    }
-    /**
-     * Find a job for the creep
-     */
-    static getNewClaimJob(creep, room) {
-        const creepOptions = creep.memory.options;
-        if (creepOptions.claim) {
-            const claimJob = MemoryApi.getClaimJobs(room, (sjob) => !sjob.isTaken);
-            if (claimJob.length > 0) {
-                return claimJob[0];
-            }
-        }
-        return undefined;
-    }
-    /**
-     * Handle initalizing a new job
-     */
-    static handleNewJob(creep) {
-        // set is taken to true
     }
 }
 
@@ -9447,6 +9414,18 @@ class CreepMili {
         return this.getIdealWallTarget(creep);
     }
     /**
+     * get a target for a domestic defender
+     * @param creep the defender creep
+     * @param creepOptions the options for the defender creep
+     */
+    static getDomesticDefenseAttackTarget(creep, creepOptions, CREEP_RANGE) {
+        const hostileCreeps = MemoryApi.getHostileCreeps(creep.room);
+        if (hostileCreeps.length > 0) {
+            return creep.pos.findClosestByPath(hostileCreeps);
+        }
+        return null;
+    }
+    /**
      * get a healing target for the healer creep
      * @param creep the creep we are geting the target for
      * @param creepOptions the options for the military creep
@@ -9542,12 +9521,96 @@ class CreepMili {
 }
 
 // Manager for the miner creep role
+class RemoteDefenderCreepManager {
+    /**
+     * run the remote defender creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+        if (creep.spawning) {
+            return;
+        }
+        const creepOptions = creep.memory.options;
+        const CREEP_RANGE = 3;
+        // Carry out the basics of a military creep before moving on to specific logic
+        if (CreepMili.checkMilitaryCreepBasics(creep, creepOptions)) {
+            return;
+        }
+        // Find a target for the creep
+        const target = CreepMili.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const isMelee = false;
+        if (!target) {
+            return; // idle if no current target
+        }
+        // If we aren't in attack range, move towards the attack target
+        if (!CreepMili.isInAttackRange(creep, target.pos, isMelee)) {
+            creep.moveTo(target, DEFAULT_MOVE_OPTS$1);
+            return;
+        }
+        else {
+            CreepMili.kiteEnemyCreep(creep);
+        }
+        // We are in attack range and healthy, attack the target
+        creep.attack(target);
+    }
+}
+
+// Manager for the miner creep role
+class RemoteReserverCreepManager {
+    /**
+     * run the remote reserver creep
+     * @param creep the creep we are running
+     */
+    static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // Don't do anything until you've spawned
+        }
+        const targetRoom = Game.rooms[creep.memory.targetRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewClaimJob(creep, targetRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            // Set supplementary.moveTarget to container if one exists and isn't already taken
+            this.handleNewJob(creep);
+        }
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Find a job for the creep
+     */
+    static getNewClaimJob(creep, room) {
+        const creepOptions = creep.memory.options;
+        if (creepOptions.claim) {
+            const claimJob = MemoryApi.getClaimJobs(room, (sjob) => !sjob.isTaken);
+            if (claimJob.length > 0) {
+                return claimJob[0];
+            }
+        }
+        return undefined;
+    }
+    /**
+     * Handle initalizing a new job
+     */
+    static handleNewJob(creep) {
+        // set is taken to true
+    }
+}
+
+// Manager for the miner creep role
 class ZealotCreepManager {
     /**
      * run the zealot creep
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        if (creep.spawning) {
+            return;
+        }
         const creepOptions = creep.memory.options;
         const CREEP_RANGE = 1;
         // Carry out the basics of a military creep before moving on to specific logic
@@ -9654,13 +9717,38 @@ class StalkerCreepManager {
     }
 }
 
-// Manager for the miner creep role
+// Manager for the Domestic Defender Creep Role
 class DomesticDefenderCreepManager {
     /**
      * run the domestic defender creep
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        // This iteration of domestic defender is a melee creep that bee-lines to the enemy.
+        // Possible upgrade if this proves to be a weakness would be switching to ranged
+        // creep that seeks out the nearest rampart to the closest enemy creep and camps it
+        if (creep.spawning) {
+            return;
+        }
+        const creepOptions = creep.memory.options;
+        const CREEP_RANGE = 1;
+        // Carry out the basics of a military creep before moving on to specific logic
+        if (CreepMili.checkMilitaryCreepBasics(creep, creepOptions)) {
+            return;
+        }
+        // Find a target for the creep
+        const target = CreepMili.getDomesticDefenseAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const isMelee = true;
+        if (!target) {
+            return; // idle if no current target
+        }
+        // If we aren't in attack range, move towards the attack target
+        if (!CreepMili.isInAttackRange(creep, target.pos, isMelee)) {
+            creep.moveTo(target, DEFAULT_MOVE_OPTS$1);
+            return;
+        }
+        // We are in attack range and healthy, attack the target
+        creep.attack(target);
     }
 }
 
