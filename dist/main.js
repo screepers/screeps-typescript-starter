@@ -12,7 +12,7 @@ class MemoryHelper {
         const filterByRole = (creep) => {
             return creep.memory.role === role;
         };
-        const creepsOfRole = MemoryApi.getMyCreeps(room, filterByRole);
+        const creepsOfRole = MemoryApi.getMyCreeps(room.name, filterByRole);
         return creepsOfRole;
     }
     /**
@@ -462,8 +462,27 @@ class RoomHelper {
     static chooseTowerTarget(room) {
         // get the creep we will do the most damage to
         const hostileCreeps = MemoryApi.getHostileCreeps(room);
-        // temp, in future get one we do most dmg to
-        return hostileCreeps[0];
+        const isHealers = _.some(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "heal"));
+        const isAttackers = _.some(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "attack" || b.type === "ranged_attack"));
+        const isWorkers = _.some(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "work"));
+        // If only healers are present, don't waste ammo
+        if (isHealers && !isAttackers && !isWorkers) {
+            return undefined;
+        }
+        // If healers are present with attackers, target healers
+        if (isHealers && isAttackers && !isWorkers) {
+            return _.find(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "heal"));
+        }
+        // If workers are present, target worker
+        if (isWorkers) {
+            return _.find(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "work"));
+        }
+        // If attackers are present, target them
+        if (isAttackers) {
+            return _.find(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "attack"));
+        }
+        // If there are no hostile creeps, or we didn't find a valid target, return undefined
+        return undefined;
     }
     /**
      * Get the difference in Wall/Rampart HP between the current and previous RCL
@@ -584,10 +603,6 @@ class RoomHelper {
  */
 const CONTAINER_MINIMUM_ENERGY = 100;
 /**
- * Minimum amount of energy a link must have to be used in a GetEnergyJob
- */
-const LINK_MINIMUM_ENERGY = 1;
-/**
  * Percentage HP to begin repairing structures (besides Ramparts and Walls)
  */
 const REPAIR_THRESHOLD = .75;
@@ -599,6 +614,23 @@ const ROOM_OVERLAY_ON = true;
  * The text to sign controllers with
  */
 const CONTROLLER_SIGNING_TEXT = "get signed on boy";
+/**
+ * Constants for Tick Timers - Number of ticks between running the specified constant this is deciding
+ */
+const RUN_TOWER_TIMER = 1;
+const RUN_LAB_TIMER = 5;
+const RUN_LINKS_TIMER = 2;
+const RUN_TERMINAL_TIMER = 5;
+const RUN_ROOM_STATE_TIMER = 5;
+const RUN_DEFCON_TIMER = 2;
+/**
+ * bucket limits for manager
+ * decides the min the bucket must be to run this manager
+ */
+const CREEP_MANAGER_BUCKET_LIMIT = 1000;
+const SPAWN_MANAGER_BUCKET_LIMIT = 50;
+const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
+const ROOM_MANAGER_BUCKET_LIMIT = 500;
 
 // an api used for functions related to the room
 class RoomApi {
@@ -686,7 +718,7 @@ class RoomApi {
         // ----------
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
-        const creeps = MemoryApi.getMyCreeps(room);
+        const creeps = MemoryApi.getMyCreeps(room.name);
         if (creeps.length >= 3) {
             MemoryApi.updateRoomState(ROOM_STATE_BEGINNER$1, room);
             return;
@@ -706,7 +738,7 @@ class RoomApi {
         const idealTarget = RoomHelper.chooseTowerTarget(room);
         // have each tower attack this target
         towers.forEach((t) => {
-            if (t !== null) {
+            if (t) {
                 t.attack(idealTarget);
             }
         });
@@ -782,7 +814,6 @@ class RoomApi {
     }
     /**
      * get ramparts, or ramparts and walls that need to be repaired
-     * TODO limit by something, not sure yet.. room state possibly... controller level? open to input
      * @param room the room we are getting ramparts/walls that need to be repaired from
      */
     static getWallRepairTargets(room) {
@@ -869,12 +900,28 @@ class RoomApi {
      * @param room the room we want to run links for
      */
     static runLinks(room) {
-        // we find a way to get an upgrader link (closest one to controller)
-        // and make sure the other links keep this one full
-        // possibly also if all links energy together is below the
-        // carry cap of upgrader we could have workers fill it for them
-        // we might want to let workers help with spawning IF NEEDED in
-        // seige/military situation but im just rambling now
+        // If we don't have an upgrader link, cancel early
+        const upgraderLink = MemoryApi.getUpgraderLink(room);
+        if (!upgraderLink || upgraderLink.energy <= 400) {
+            return;
+        }
+        // Get non-upgrader links above 100 energy to fill the upgrader link
+        const nonUpgraderLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link) => link.id !== upgraderLink.id && link.energy >= 100);
+        for (const link of nonUpgraderLinks) {
+            if (link.cooldown > 0) {
+                continue;
+            }
+            // Get the amount of energy we are sending over
+            const missingEnergy = upgraderLink.energyCapacity - upgraderLink.energy;
+            let amountToTransfer = 0;
+            if (missingEnergy > link.energy) {
+                amountToTransfer = link.energy;
+            }
+            else {
+                amountToTransfer = missingEnergy;
+            }
+            link.transferEnergy(upgraderLink, amountToTransfer);
+        }
     }
     /**
      * run terminal for the room
@@ -954,28 +1001,23 @@ class GetEnergyJobs {
      * @param room The room to create the job list for
      */
     static createLinkJobs(room) {
-        // List of all the links in the room with > LINK_MINIMUM_ENERGY (from config.ts)
-        // AND no active cooldown
-        const activeLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link) => {
-            return link.energy > LINK_MINIMUM_ENERGY && link.cooldown === 0;
-        });
-        if (activeLinks.length === 0) {
+        const linkJobList = [];
+        if (linkJobList.length === 0) {
             return [];
         }
-        const linkJobList = [];
-        _.forEach(activeLinks, (link) => {
-            // Create the StoreDefinition for the link
-            const linkStore = { energy: link.energy };
+        const upgraderLink = MemoryApi.getUpgraderLink(room);
+        if (upgraderLink !== undefined && upgraderLink !== null) {
+            const linkStore = { energy: upgraderLink.energy };
             const linkJob = {
                 jobType: "getEnergyJob",
-                targetID: link.id,
+                targetID: upgraderLink.id,
                 targetType: STRUCTURE_LINK,
                 actionType: "withdraw",
                 resources: linkStore,
                 isTaken: false
             };
             linkJobList.push(linkJob);
-        });
+        }
         return linkJobList;
     }
     /**
@@ -1260,6 +1302,18 @@ class CarryPartJobs {
             };
             storeJobs.push(terminalJob);
         }
+        const upgraderLink = MemoryApi.getUpgraderLink(room);
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK) && upgraderLink) {
+            const nonUpgraderLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link) => link.id !== upgraderLink.id && link.energy < link.energyCapacity);
+            const fillLinkJob = {
+                jobType: "carryPartJob",
+                targetID: nonUpgraderLinks[0].id,
+                targetType: STRUCTURE_LINK,
+                actionType: "transfer",
+                isTaken: false
+            };
+            storeJobs.push(fillLinkJob);
+        }
         return storeJobs;
     }
 }
@@ -1277,7 +1331,7 @@ class MemoryHelper_Room {
     static updateRoomMemory(room) {
         // Update All Creeps
         this.updateHostileCreeps(room);
-        this.updateMyCreeps(room);
+        this.updateMyCreeps(room.name);
         // Update structures/construction sites
         this.updateConstructionSites(room);
         this.updateStructures(room);
@@ -1340,13 +1394,13 @@ class MemoryHelper_Room {
      * [Cached] Room.memory.creeps
      * @param room The Room we are checking in
      */
-    static updateMyCreeps(room) {
-        Memory.rooms[room.name].creeps = { data: null, cache: null };
+    static updateMyCreeps(roomName) {
+        Memory.rooms[roomName].creeps = { data: null, cache: null };
         // Changed this because it wouldn't catch remote squads for example
         // as they aren't actually in the room all the time (had this problem with my last solo code base)
-        const creeps = _.filter(Game.creeps, creep => creep.memory.homeRoom === room.name);
-        Memory.rooms[room.name].creeps.data = _.map(creeps, (creep) => creep.id);
-        Memory.rooms[room.name].creeps.cache = Game.time;
+        const creeps = _.filter(Game.creeps, creep => creep.memory.homeRoom === roomName);
+        Memory.rooms[roomName].creeps.data = _.map(creeps, (creep) => creep.id);
+        Memory.rooms[roomName].creeps.cache = Game.time;
     }
     /**
      * Find all construction sites in room
@@ -1429,7 +1483,6 @@ class MemoryHelper_Room {
      * @param stateConst the state we are applying to the room
      */
     static updateRoomState(room) {
-        // This calls MemoryApi.updateRoomState and changes the state in memory
         RoomApi.setRoomState(room);
         return;
     }
@@ -2499,6 +2552,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: true,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2506,6 +2560,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: true,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -2563,6 +2618,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2570,6 +2626,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: true,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -2585,6 +2642,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2592,6 +2650,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: true,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -2607,6 +2666,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2614,6 +2674,7 @@ class SpawnHelper {
                     fillStorage: true,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: true,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true,
@@ -2632,6 +2693,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2639,6 +2701,7 @@ class SpawnHelper {
                     fillStorage: true,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: true,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true,
@@ -2693,6 +2756,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true,
@@ -2700,6 +2764,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -2715,6 +2780,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true,
@@ -2722,6 +2788,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -2737,6 +2804,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true,
@@ -2744,6 +2812,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true,
@@ -2762,6 +2831,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true,
@@ -2769,6 +2839,7 @@ class SpawnHelper {
                     fillStorage: true,
                     fillContainer: false,
                     fillLink: true,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: true,
@@ -2829,6 +2900,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2836,6 +2908,7 @@ class SpawnHelper {
                     fillStorage: true,
                     fillContainer: true,
                     fillLink: true,
+                    fillSpawn: false,
                     fillTerminal: true,
                     fillLab: true,
                     getFromStorage: true,
@@ -2888,6 +2961,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: true,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2895,6 +2969,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -2944,6 +3019,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: false,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -2951,6 +3027,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: true,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -3002,6 +3079,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: true,
@@ -3009,6 +3087,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -3023,6 +3102,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -3030,6 +3110,7 @@ class SpawnHelper {
                     fillStorage: true,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -3047,6 +3128,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: true,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -3054,6 +3136,7 @@ class SpawnHelper {
                     fillStorage: true,
                     fillContainer: false,
                     fillLink: true,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -3102,6 +3185,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -3109,6 +3193,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -3162,6 +3247,7 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
+                    claim: false,
                     harvestSources: true,
                     harvestMinerals: false,
                     wallRepair: true,
@@ -3169,6 +3255,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -3200,6 +3287,7 @@ class SpawnHelper {
                     build: false,
                     upgrade: false,
                     repair: false,
+                    claim: false,
                     harvestSources: false,
                     harvestMinerals: false,
                     wallRepair: false,
@@ -3207,6 +3295,7 @@ class SpawnHelper {
                     fillStorage: false,
                     fillContainer: false,
                     fillLink: false,
+                    fillSpawn: false,
                     fillTerminal: false,
                     fillLab: false,
                     getFromStorage: false,
@@ -3279,6 +3368,7 @@ class SpawnHelper {
                     squadSize: 1,
                     squadUUID: null,
                     rallyLocation: null,
+                    rallyDone: false,
                     seige: false,
                     dismantler: false,
                     healer: true,
@@ -3345,6 +3435,7 @@ class SpawnHelper {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
+                    rallyDone: false,
                     seige: false,
                     dismantler: false,
                     healer: false,
@@ -3406,6 +3497,7 @@ class SpawnHelper {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
+                    rallyDone: false,
                     seige: false,
                     dismantler: false,
                     healer: true,
@@ -3463,6 +3555,7 @@ class SpawnHelper {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
+                    rallyDone: false,
                     seige: false,
                     dismantler: false,
                     healer: false,
@@ -3524,6 +3617,7 @@ class SpawnHelper {
                     squadSize: 0,
                     squadUUID: null,
                     rallyLocation: null,
+                    rallyDone: false,
                     seige: false,
                     dismantler: false,
                     healer: false,
@@ -3544,6 +3638,7 @@ class SpawnHelper {
             build: false,
             upgrade: false,
             repair: false,
+            claim: false,
             harvestSources: false,
             harvestMinerals: false,
             wallRepair: false,
@@ -3551,6 +3646,7 @@ class SpawnHelper {
             fillStorage: false,
             fillContainer: false,
             fillLink: false,
+            fillSpawn: false,
             fillTerminal: false,
             fillLab: false,
             getFromStorage: false,
@@ -3568,6 +3664,7 @@ class SpawnHelper {
             squadSize: 0,
             squadUUID: null,
             rallyLocation: null,
+            rallyDone: false,
             seige: false,
             dismantler: false,
             healer: false,
@@ -3598,7 +3695,7 @@ class SpawnHelper {
         // Please improve this if possible lol. Had to get around type guards as we don't actually know what a creeps memory has in it unless we explicitly know the type i think
         // We're going to run into this everytime we use creep memory so we need to find a nicer way around it if possible but if not casting it as a memory type
         // Isn't the worst solution in the world
-        const militaryCreeps = MemoryApi.getMyCreeps(room, creep => this.isMilitaryRole(creep.memory.role));
+        const militaryCreeps = MemoryApi.getMyCreeps(room.name, creep => this.isMilitaryRole(creep.memory.role));
         return _.filter(militaryCreeps, creep => {
             const creepOptions = creep.memory.options;
             return creepOptions.squadUUID === flagMemory.squadUUID;
@@ -3696,7 +3793,7 @@ class SpawnHelper {
      * @param roomMemory the room memory we are checking
      */
     static getNumCreepAssignedAsTargetRoom(room, roleConst, roomMemory) {
-        const allCreepsOfRole = MemoryApi.getMyCreeps(room, creep => creep.memory.role === roleConst);
+        const allCreepsOfRole = MemoryApi.getMyCreeps(room.name, creep => creep.memory.role === roleConst);
         let sum = 0;
         for (const creep of allCreepsOfRole) {
             if (creep.memory.targetRoom === roomMemory.roomName) {
@@ -3790,7 +3887,7 @@ class MemoryApi {
                 delete Memory.rooms[roomName];
             }
         }
-        // Remvoe all dead flags from memory
+        // Remove all dead flags from memory
         for (const flag in Memory.flags) {
             if (!_.some(Game.flags, (flagLoop) => flagLoop.name === Memory.flags[flag].flagName)) {
                 delete Memory.flags[flag];
@@ -3798,12 +3895,27 @@ class MemoryApi {
         }
     }
     /**
-     *
+     * update the room state for the room
      * @param room the room we are updating the room state for
      * @param roomState the new room state we are saving
      */
     static updateRoomState(roomState, room) {
         room.memory.roomState = roomState;
+    }
+    /**
+     * get the upgrader link for the room
+     * @param room the room memory we are getting the upgrader link from
+     */
+    static getUpgraderLink(room) {
+        return Game.getObjectById(room.memory.upgradeLink);
+    }
+    /**
+     * update the upgrader link for the room
+     * @param room the room we are updating it for
+     * @param id the id of the link
+     */
+    static updateUpgraderLink(room, id) {
+        room.memory.upgradeLink = id;
     }
     /**
      * Go through the room's depedent room memory and remove null values
@@ -3879,7 +3991,7 @@ class MemoryApi {
      */
     static getRoomMemory(room, forceUpdate) {
         this.getConstructionSites(room, undefined, forceUpdate);
-        this.getMyCreeps(room, undefined, forceUpdate);
+        this.getMyCreeps(room.name, undefined, forceUpdate);
         this.getHostileCreeps(room, undefined, forceUpdate);
         this.getSources(room, undefined, forceUpdate);
         this.getStructures(room, undefined, forceUpdate);
@@ -3918,13 +4030,13 @@ class MemoryApi {
      * @param forceUpdate [Optional] Invalidate Cache by force
      * @returns Creep[ ] -- An array of owned creeps, empty if there are none
      */
-    static getMyCreeps(room, filterFunction, forceUpdate) {
+    static getMyCreeps(roomName, filterFunction, forceUpdate) {
         if (forceUpdate ||
-            !Memory.rooms[room.name].creeps ||
-            Memory.rooms[room.name].creeps.cache < Game.time - FCREEP_CACHE_TTL) {
-            MemoryHelper_Room.updateMyCreeps(room);
+            !Memory.rooms[roomName].creeps ||
+            Memory.rooms[roomName].creeps.cache < Game.time - FCREEP_CACHE_TTL) {
+            MemoryHelper_Room.updateMyCreeps(roomName);
         }
-        const creepIDs = Memory.rooms[room.name].creeps.data;
+        const creepIDs = Memory.rooms[roomName].creeps.data;
         let creeps = MemoryHelper.getOnlyObjectsFromIDs(creepIDs);
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
@@ -4204,7 +4316,7 @@ class MemoryApi {
         }
         else {
             // Otherwise just get the actual count of the creeps
-            return MemoryApi.getMyCreeps(room, filterFunction).length;
+            return MemoryApi.getMyCreeps(room.name, filterFunction).length;
         }
     }
     /**
@@ -4563,6 +4675,19 @@ class MemoryApi {
             storeJobs = _.filter(storeJobs, filterFunction);
         }
         return storeJobs;
+    }
+    /**
+     * get all creeps in a specific squad given the squad uuid
+     * @param squadUUID the id for the squad
+     */
+    static getCreepsInSquad(roomName, squadUUID) {
+        return MemoryApi.getMyCreeps(roomName, (creep) => {
+            const currentCreepOptions = creep.memory.options;
+            if (!currentCreepOptions.squadUUID) {
+                return false;
+            }
+            return currentCreepOptions.squadUUID === squadUUID;
+        });
     }
 }
 
@@ -5238,24 +5363,32 @@ class RoomManager {
      */
     static runSingleRoom(room) {
         // Set Defcon and Room State (roomState relies on defcon being set first)
-        RoomApi.setDefconLevel(room);
-        RoomApi.setRoomState(room);
+        if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
+            RoomApi.setDefconLevel(room);
+        }
+        if (RoomHelper.excecuteEveryTicks(RUN_DEFCON_TIMER)) {
+            RoomApi.setRoomState(room);
+        }
         // Run all structures in the room if they exist
         // Run Towers
         const defcon = MemoryApi.getDefconLevel(room);
-        if (defcon >= 1) {
+        if (defcon >= 1 &&
+            RoomHelper.excecuteEveryTicks(RUN_TOWER_TIMER)) {
             RoomApi.runTowers(room);
         }
         // Run Labs
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_LAB)) {
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LAB) &&
+            RoomHelper.excecuteEveryTicks(RUN_LAB_TIMER)) {
             RoomApi.runLabs(room);
         }
         // Run Links
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK)) {
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK) &&
+            RoomHelper.excecuteEveryTicks(RUN_LINKS_TIMER)) {
             RoomApi.runLinks(room);
         }
         // Run Terminals
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL)) {
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL) &&
+            RoomHelper.excecuteEveryTicks(RUN_TERMINAL_TIMER)) {
             RoomApi.runTerminal(room);
         }
     }
@@ -7759,7 +7892,7 @@ class RoomVisualApi {
         const gclProgress = Game.gcl['progress'];
         const gclTotal = Game.gcl['progressTotal'];
         const ownedRooms = MemoryApi.getOwnedRooms();
-        const totalCreeps = _.sum(ownedRooms, (r) => MemoryApi.getMyCreeps(room).length);
+        const totalCreeps = _.sum(ownedRooms, (r) => MemoryApi.getMyCreeps(room.name).length);
         const cpuPercent = Math.floor((usedCpu / cpuLimit * 100) * 10) / 10;
         const bucketPercent = Math.floor((bucket / BUCKET_LIMIT * 100) * 10) / 10;
         const gclPercent = Math.floor((gclProgress / gclTotal * 100) * 10) / 10;
@@ -7794,7 +7927,7 @@ class RoomVisualApi {
      */
     static createCreepCountVisual(room, x, y) {
         // Get the info we need to display
-        const creepsInRoom = MemoryApi.getMyCreeps(room);
+        const creepsInRoom = MemoryApi.getMyCreeps(room.name);
         const creepLimits = MemoryApi.getCreepLimits(room);
         const roles = {
             miner: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_MINER$1).length,
@@ -8533,6 +8666,33 @@ class CreepApi {
             "\n Job: " +
             JSON.stringify(job), ERROR_ERROR$2);
     }
+    /**
+     * move the creep off of the exit tile
+     * @param creep the creep we are moving
+     * @returns if the creep had to be moved
+     */
+    static moveCreepOffExit(creep) {
+        const x = creep.pos.x;
+        const y = creep.pos.y;
+        if (x === 0) {
+            creep.move(RIGHT);
+            return true;
+        }
+        if (y === 0) {
+            creep.move(BOTTOM);
+            return true;
+        }
+        if (x === 49) {
+            creep.move(LEFT);
+            return true;
+        }
+        if (y === 49) {
+            creep.move(TOP);
+            return true;
+        }
+        // Creep is not on exit tile
+        return false;
+    }
 }
 
 // Manager for the miner creep role
@@ -8564,14 +8724,15 @@ class MinerCreepManager {
      * Find a job for the creep
      */
     static getNewSourceJob(creep, room) {
-        // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-        const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
-        if (sourceJobs.length > 0) {
-            return sourceJobs[0];
+        const creepOptions = creep.memory.options;
+        if (creepOptions.harvestSources) {
+            // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
+            if (sourceJobs.length > 0) {
+                return sourceJobs[0];
+            }
         }
-        else {
-            return undefined;
-        }
+        return undefined;
     }
     /**
      * Handle initalizing a new job
@@ -8635,20 +8796,28 @@ class HarvesterCreepManager {
      * Get a GetEnergyJob for the harvester
      */
     static newGetEnergyJob(creep, room) {
-        // All container jobs with enough energy to fill creep.carry, and not taken
-        const containerJobs = MemoryApi.getContainerJobs(room, (cJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity);
-        if (containerJobs.length > 0) {
-            return containerJobs[0];
+        const creepOptions = creep.memory.options;
+        if (creepOptions.getFromContainer) {
+            // All container jobs with enough energy to fill creep.carry, and not taken
+            const containerJobs = MemoryApi.getContainerJobs(room, (cJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity);
+            if (containerJobs.length > 0) {
+                return containerJobs[0];
+            }
         }
-        // All dropped resources with enough energy to fill creep.carry, and not taken
-        const dropJobs = MemoryApi.getPickupJobs(room, (dJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity);
-        if (dropJobs.length > 0) {
-            return dropJobs[0];
+        if (creepOptions.getDroppedEnergy) {
+            // All dropped resources with enough energy to fill creep.carry, and not taken
+            const dropJobs = MemoryApi.getPickupJobs(room, (dJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity);
+            if (dropJobs.length > 0) {
+                return dropJobs[0];
+            }
         }
-        // All backupStructures with enough energy to fill creep.carry, and not taken
-        const backupStructures = MemoryApi.getBackupStructuresJobs(room, (job) => !job.isTaken && job.resources.energy >= creep.carryCapacity);
-        if (backupStructures.length > 0) {
-            return backupStructures[0];
+        if (creepOptions.getFromStorage || creepOptions.getFromTerminal) {
+            // All backupStructures with enough energy to fill creep.carry, and not taken
+            const backupStructures = MemoryApi.getBackupStructuresJobs(room, (job) => !job.isTaken && job.resources.energy >= creep.carryCapacity);
+            if (backupStructures.length > 0) {
+                return backupStructures[0];
+            }
+            return undefined;
         }
         return undefined;
     }
@@ -8656,13 +8825,19 @@ class HarvesterCreepManager {
      * Get a CarryPartJob for the harvester
      */
     static newCarryPartJob(creep, room) {
-        const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken);
-        if (fillJobs.length > 0) {
-            return fillJobs[0];
+        const creepOptions = creep.memory.options;
+        if (creepOptions.fillTower || creepOptions.fillSpawn) {
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            if (fillJobs.length > 0) {
+                return fillJobs[0];
+            }
         }
-        const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
-        if (storeJobs.length > 0) {
-            return storeJobs[0];
+        if (creepOptions.fillStorage || creepOptions.fillContainer) {
+            const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
+            if (storeJobs.length > 0) {
+                return storeJobs[0];
+            }
+            return undefined;
         }
         return undefined;
     }
@@ -8723,20 +8898,28 @@ class WorkerCreepManager {
      * Get a GetEnergyJob for the harvester
      */
     static newGetEnergyJob(creep, room) {
-        // All container jobs with enough energy to fill creep.carry, and not taken
-        const containerJobs = MemoryApi.getContainerJobs(room, (cJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity);
-        if (containerJobs.length > 0) {
-            return containerJobs[0];
+        const creepOptions = creep.memory.options;
+        if (creepOptions.getFromContainer) {
+            // All container jobs with enough energy to fill creep.carry, and not taken
+            const containerJobs = MemoryApi.getContainerJobs(room, (cJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity);
+            if (containerJobs.length > 0) {
+                return containerJobs[0];
+            }
         }
-        // All dropped resources with enough energy to fill creep.carry, and not taken
-        const dropJobs = MemoryApi.getPickupJobs(room, (dJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity);
-        if (dropJobs.length > 0) {
-            return dropJobs[0];
+        if (creepOptions.getDroppedEnergy) {
+            // All dropped resources with enough energy to fill creep.carry, and not taken
+            const dropJobs = MemoryApi.getPickupJobs(room, (dJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity);
+            if (dropJobs.length > 0) {
+                return dropJobs[0];
+            }
         }
-        // All backupStructures with enough energy to fill creep.carry, and not taken
-        const backupStructures = MemoryApi.getBackupStructuresJobs(room, (job) => !job.isTaken && job.resources.energy >= creep.carryCapacity);
-        if (backupStructures.length > 0) {
-            return backupStructures[0];
+        if (creepOptions.getFromTerminal || creepOptions.getFromStorage) {
+            // All backupStructures with enough energy to fill creep.carry, and not taken
+            const backupStructures = MemoryApi.getBackupStructuresJobs(room, (job) => !job.isTaken && job.resources.energy >= creep.carryCapacity);
+            if (backupStructures.length > 0) {
+                return backupStructures[0];
+            }
+            return undefined;
         }
         return undefined;
     }
@@ -8744,31 +8927,43 @@ class WorkerCreepManager {
      * Gets a new WorkPartJob for worker
      */
     static newWorkPartJob(creep, room) {
-        const buildJobs = MemoryApi.getBuildJobs(room, (job) => !job.isTaken);
-        if (buildJobs.length > 0) {
-            return buildJobs[0];
+        const creepOptions = creep.memory.options;
+        if (creepOptions.build) {
+            const buildJobs = MemoryApi.getBuildJobs(room, (job) => !job.isTaken);
+            if (buildJobs.length > 0) {
+                return buildJobs[0];
+            }
         }
-        const repairJobs = MemoryApi.getRepairJobs(room, (job) => !job.isTaken);
-        if (repairJobs.length > 0) {
-            return repairJobs[0];
+        if (creepOptions.repair) {
+            const repairJobs = MemoryApi.getRepairJobs(room, (job) => !job.isTaken);
+            if (repairJobs.length > 0) {
+                return repairJobs[0];
+            }
         }
-        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
-        if (upgradeJobs.length > 0) {
-            return upgradeJobs[0];
+        if (creepOptions.upgrade) {
+            const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
+            }
         }
         return undefined;
     }
     /**
-     * Get a CarryPartJob for the harvester
+     * Get a CarryPartJob for the worker
      */
     static newCarryPartJob(creep, room) {
-        const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken);
-        if (fillJobs.length > 0) {
-            return fillJobs[0];
+        const creepOptions = creep.memory.options;
+        if (creepOptions.fillSpawn || creepOptions.fillTower) {
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            if (fillJobs.length > 0) {
+                return fillJobs[0];
+            }
         }
-        const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
-        if (storeJobs.length > 0) {
-            return storeJobs[0];
+        if (creepOptions.fillStorage || creepOptions.fillTerminal) {
+            const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
+            if (storeJobs.length > 0) {
+                return storeJobs[0];
+            }
         }
         return undefined;
     }
@@ -8806,16 +9001,136 @@ class PowerUpgraderCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // don't do anything until spawned
+        }
+        const homeRoom = Game.rooms[creep.memory.homeRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewJob(creep, homeRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            this.handleNewJob(creep);
+        }
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Decides which kind of job to get and calls the appropriate function
+     */
+    static getNewJob(creep, room) {
+        // if creep is empty, get a GetEnergyJob
+        if (creep.carry.energy === 0) {
+            return this.newGetEnergyJob(creep, room);
+        }
+        else {
+            // Creep energy > 0
+            return this.newUpgradeJob(creep, room);
+        }
+    }
+    /**
+     * get an upgrading job
+     */
+    static newUpgradeJob(creep, room) {
+        const creepOptions = creep.memory.options;
+        if (creepOptions.upgrade) {
+            // All link jobs with enough energy to fill creep.carry, and not taken
+            const upgraderJob = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
+            if (upgraderJob.length > 0) {
+                return upgraderJob[0];
+            }
+            return undefined;
+        }
+        return undefined;
+    }
+    /**
+     * Get a GetEnergyJob for the power upgrader
+     */
+    static newGetEnergyJob(creep, room) {
+        // All link jobs with enough energy to fill creep.carry, and not taken
+        const linkJobs = MemoryApi.getLinkJobs(room, (job) => !job.isTaken);
+        if (linkJobs.length > 0) {
+            return linkJobs[0];
+        }
+        return undefined;
+    }
+    /**
+     * Handles setup for a new job
+     */
+    static handleNewJob(creep) {
+        const creepOptions = creep.memory.options;
+        if (creepOptions.getFromLink) {
+            if (creep.memory.job.jobType === "getEnergyJob") {
+                // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
+                return;
+            }
+            else if (creep.memory.job.jobType === "workPartJob") {
+                // TODO Mark the job we chose as taken
+                return;
+            }
+        }
     }
 }
 
 // Manager for the miner creep role
 class RemoteMinerCreepManager {
     /**
-     * run the remote miner creep
-     * @param creep the creep we are running
+     * Run the remote miner creep
+     * @param creep The creep to run
      */
     static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // Don't do anything until you've spawned
+        }
+        const targetRoom = Game.rooms[creep.memory.targetRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewSourceJob(creep, targetRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            // Set supplementary.moveTarget to container if one exists and isn't already taken
+            this.handleNewJob(creep);
+        }
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Find a job for the creep
+     */
+    static getNewSourceJob(creep, room) {
+        const creepOptions = creep.memory.options;
+        if (creepOptions.harvestSources) {
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
+            if (sourceJobs.length > 0) {
+                return sourceJobs[0];
+            }
+        }
+        return undefined;
+    }
+    /**
+     * Handle initalizing a new job
+     */
+    static handleNewJob(creep) {
+        const miningContainer = CreepHelper.getMiningContainer(creep.memory.job, Game.rooms[creep.memory.targetRoom]);
+        if (miningContainer === undefined) {
+            return; // We don't need to do anything else if the container doesn't exist
+        }
+        const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
+        if (creepsOnContainer.length > 0) {
+            if (creepsOnContainer[0].memory.role === ROLE_REMOTE_MINER$1) {
+                return; // If there is already a miner creep on the container, then we don't target it
+            }
+        }
+        if (creep.memory.supplementary === undefined) {
+            creep.memory.supplementary = {};
+        }
+        creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
 
@@ -8826,6 +9141,92 @@ class RemoteHarvesterCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // don't do anything until spawned
+        }
+        const targetRoom = Game.rooms[creep.memory.targetRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewJob(creep, targetRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            this.handleNewJob(creep);
+        }
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Decides which kind of job to get and calls the appropriate function
+     */
+    static getNewJob(creep, room) {
+        // if creep is empty, get a GetEnergyJob
+        if (creep.carry.energy === 0) {
+            return this.newGetEnergyJob(creep, room);
+        }
+        else {
+            // Creep energy > 0
+            return this.newCarryPartJob(creep, room);
+        }
+    }
+    /**
+     * Get a GetEnergyJob for the harvester
+     */
+    static newGetEnergyJob(creep, room) {
+        const creepOptions = creep.memory.options;
+        if (creepOptions.getFromContainer) {
+            // All container jobs with enough energy to fill creep.carry, and not taken
+            const containerJobs = MemoryApi.getContainerJobs(room, (cJob) => !cJob.isTaken && cJob.resources.energy >= creep.carryCapacity);
+            if (containerJobs.length > 0) {
+                return containerJobs[0];
+            }
+        }
+        if (creepOptions.getDroppedEnergy) {
+            // All dropped resources with enough energy to fill creep.carry, and not taken
+            const dropJobs = MemoryApi.getPickupJobs(room, (dJob) => !dJob.isTaken && dJob.resources.energy >= creep.carryCapacity);
+            if (dropJobs.length > 0) {
+                return dropJobs[0];
+            }
+        }
+        return undefined;
+    }
+    /**
+     * Get a CarryPartJob for the harvester
+     */
+    static newCarryPartJob(creep, room) {
+        const creepOptions = creep.memory.options;
+        if (creepOptions.fillLink) {
+            const linkJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType === 'link');
+        }
+        if (creepOptions.fillSpawn) {
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            if (fillJobs.length > 0) {
+                return fillJobs[0];
+            }
+        }
+        const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
+        if (storeJobs.length > 0) {
+            const storageJob = _.find(storeJobs, (storeJob) => !storeJob.isTaken && storeJob.targetType === STRUCTURE_STORAGE);
+            if (storageJob) {
+                return storageJob;
+            }
+        }
+        return undefined;
+    }
+    /**
+     * Handles setup for a new job
+     */
+    static handleNewJob(creep) {
+        if (creep.memory.job.jobType === "getEnergyJob") {
+            // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
+            return;
+        }
+        else if (creep.memory.job.jobType === "carryPartJob") {
+            // TODO Mark the job we chose as taken
+            return;
+        }
     }
 }
 
@@ -8866,6 +9267,277 @@ class RemoteReserverCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // Don't do anything until you've spawned
+        }
+        const targetRoom = Game.rooms[creep.memory.targetRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = this.getNewClaimJob(creep, targetRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            // Set supplementary.moveTarget to container if one exists and isn't already taken
+            this.handleNewJob(creep);
+        }
+        if (creep.memory.working === true) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
+        }
+        CreepApi.travelTo(creep, creep.memory.job);
+    }
+    /**
+     * Find a job for the creep
+     */
+    static getNewClaimJob(creep, room) {
+        const creepOptions = creep.memory.options;
+        if (creepOptions.claim) {
+            const claimJob = MemoryApi.getClaimJobs(room, (sjob) => !sjob.isTaken);
+            if (claimJob.length > 0) {
+                return claimJob[0];
+            }
+        }
+        return undefined;
+    }
+    /**
+     * Handle initalizing a new job
+     */
+    static handleNewJob(creep) {
+        // set is taken to true
+    }
+}
+
+// Api for military creep's
+class CreepMili {
+    /**
+     * check if we're still waiting on creeps to rally
+     * @param creepOptions the options for the military creep
+     * @param creep the creep we're checking on
+     */
+    static setWaitingForRally(creep, creepOptions) {
+        // If these options aren't defined, creep isn't waiting for rally
+        if (!creepOptions.rallyLocation || !creepOptions.squadSize || !creepOptions.rallyLocation) {
+            return false;
+        }
+        const squadSize = creepOptions.squadSize;
+        const squadUUID = creepOptions.squadUUID;
+        const rallyRoom = creepOptions.rallyLocation.roomName;
+        const creepsInSquad = MemoryApi.getCreepsInSquad(creep.room.name, squadUUID);
+        // If we don't have the full squad spawned yet, creep is waiting
+        if (!creepsInSquad && creepsInSquad.length < squadSize) {
+            return true;
+        }
+        // If not every creep is in the rally room, we are waiting
+        if (_.some(creepsInSquad, (c) => c.room.name !== rallyRoom)) {
+            return true;
+        }
+        // Finally, make sure every creep is within an acceptable distance of each other
+        const creepsWithinRallyDistance = _.every(creepsInSquad, (cis) => // Check that every creep is within 2 tiles of at least 1 other creep in squad
+         _.some(creepsInSquad, (innerC) => innerC.pos.inRangeTo(cis.pos.x, cis.pos.y, 2))) &&
+            _.every(creepsInSquad, (c) => // Check that every creep is within 7 tiles of every creep in the squad
+             _.every(creepsInSquad, (innerC) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, 7)));
+        if (creepsWithinRallyDistance) {
+            return true;
+        }
+        // If we make it to here, we are done waiting
+        return false;
+    }
+    /**
+     * check if the creep is in range to attack the target
+     * @param creep the creep we are checking for
+     * @param target the room position for the target in question
+     * @param isMelee if the creep can only melee
+     */
+    static isInAttackRange(creep, target, isMelee) {
+        if (isMelee) {
+            return creep.pos.isNearTo(target);
+        }
+        return creep.pos.inRangeTo(target, 3);
+    }
+    /**
+     * have the creep flee back to the homestead
+     * @param creep the creep that is fleeing
+     * @param fleeRoom the room the creep is running too
+     */
+    static fleeCreep(creep, fleeRoom) {
+        creep.moveTo(new RoomPosition(25, 25, fleeRoom), DEFAULT_MOVE_OPTS$1);
+    }
+    /**
+     * get an attack target for the attack creep
+     * @param creep the creep we are getting the target for
+     * @param creepOptions the creep's military options
+     * @param rangeNum the range the creep is requesting for a target
+     */
+    static getAttackTarget(creep, creepOptions, rangeNum) {
+        let path;
+        const goal = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: rangeNum };
+        const pathFinderOptions = {
+            roomCallback: (roomName) => {
+                const room = Game.rooms[roomName];
+                const costs = new PathFinder.CostMatrix;
+                if (!room) {
+                    return false;
+                }
+                // Set walls and ramparts as unwalkable
+                room.find(FIND_STRUCTURES).forEach(function (struct) {
+                    if (struct.structureType === STRUCTURE_WALL ||
+                        struct.structureType === STRUCTURE_RAMPART) {
+                        // Set walls and ramparts as unwalkable
+                        costs.set(struct.pos.x, struct.pos.y, 0xff);
+                    }
+                });
+                // Set creeps as unwalkable
+                room.find(FIND_CREEPS).forEach(function (currentCreep) {
+                    costs.set(currentCreep.pos.x, currentCreep.pos.y, 0xff);
+                });
+                return costs;
+            },
+        };
+        // Check for a straight path to one of the preferred targets
+        // Enemy Creeps
+        const hostileCreeps = MemoryApi.getHostileCreeps(creep.room);
+        const closestCreep = _.first(hostileCreeps);
+        if (closestCreep) {
+            goal.pos = closestCreep.pos;
+            path = PathFinder.search(creep.pos, goal, pathFinderOptions);
+            if (!path.incomplete) {
+                return closestCreep;
+            }
+        }
+        // Enemy Towers
+        const enemyTower = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, { filter: (struct) => struct.structureType === STRUCTURE_TOWER });
+        if (enemyTower) {
+            goal.pos = enemyTower.pos;
+            path = PathFinder.search(creep.pos, goal, pathFinderOptions);
+            if (!path.incomplete) {
+                return enemyTower;
+            }
+        }
+        // Enemy Spawn
+        const enemySpawn = creep.pos.findClosestByRange(FIND_HOSTILE_SPAWNS);
+        if (enemySpawn) {
+            goal.pos = enemySpawn.pos;
+            path = PathFinder.search(creep.pos, goal, pathFinderOptions);
+            if (!path.incomplete) {
+                return enemySpawn;
+            }
+        }
+        // Enemy Extensions
+        const enemyExtension = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, { filter: (struct) => struct.structureType === STRUCTURE_TOWER });
+        if (enemyExtension) {
+            goal.pos = enemyExtension.pos;
+            path = PathFinder.search(creep.pos, goal, pathFinderOptions);
+            if (!path.incomplete) {
+                return enemyExtension;
+            }
+        }
+        // Other Structures
+        const enemyStructure = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
+            filter: (struct) => struct.structureType !== STRUCTURE_TOWER &&
+                struct.structureType !== STRUCTURE_SPAWN &&
+                struct.structureType !== STRUCTURE_EXTENSION
+        });
+        if (enemyStructure) {
+            goal.pos = enemyStructure.pos;
+            path = PathFinder.search(creep.pos, goal, pathFinderOptions);
+            if (!path.incomplete) {
+                return enemyStructure;
+            }
+        }
+        // Get a wall target
+        return this.getIdealWallTarget(creep);
+    }
+    /**
+     * get a healing target for the healer creep
+     * @param creep the creep we are geting the target for
+     * @param creepOptions the options for the military creep
+     */
+    static getHealingTarget(creep, creepOptions) {
+        let healingTarget;
+        const squadMembers = MemoryApi.getCreepsInSquad(creep.room.name, creepOptions.squadUUID);
+        // If squad, find closest squad member with missing health
+        if (creepOptions.squadUUID && squadMembers) {
+            // Squad implied, find closest squadMember with missing health
+            healingTarget = creep.pos.findClosestByPath(squadMembers, {
+                filter: (c) => c.hits < c.hitsMax
+            });
+            return healingTarget;
+        }
+        // No squad members, find closest creep
+        const creepsInRoom = creep.room.find(FIND_MY_CREEPS);
+        return creep.pos.findClosestByPath(creepsInRoom, { filter: (c) => c.hits < c.hitsMax });
+    }
+    /**
+     * find the ideal wall to attack
+     * TODO make this balance between distance and health (ie if a 9m wall is 2 tiles closer than a 2m wall)
+     * @param creep the creep we are checking for
+     */
+    static getIdealWallTarget(creep) {
+        const rampart = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+            filter: (struct) => struct.structureType === STRUCTURE_RAMPART
+        });
+        const wall = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: (struct) => struct.structureType === STRUCTURE_WALL
+        });
+        if (!wall && !rampart) {
+            return undefined;
+        }
+        if (wall && rampart) {
+            return (wall.pos.getRangeTo(creep.pos) < rampart.pos.getRangeTo(creep.pos) ? wall : rampart);
+        }
+        return (wall ? wall : rampart);
+    }
+    /**
+     * moves the creep away from the target
+     */
+    static kiteEnemyCreep(creep) {
+        const hostileCreep = creep.pos.findClosestByPath(MemoryApi.getHostileCreeps(creep.room));
+        const CREEP_RANGE = 3;
+        if (!hostileCreep) {
+            return false;
+        }
+        let path;
+        const goal = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: CREEP_RANGE };
+        const pathFinderOptions = { flee: true };
+        path = PathFinder.search(hostileCreep.pos, goal, pathFinderOptions);
+        if (path.path.length > 0) {
+            creep.moveTo(path.path[0], DEFAULT_MOVE_OPTS$1);
+            return true;
+        }
+        return false;
+    }
+    /**
+     * perform the basic operations for military creeps
+     * This includes: Fleeing, Rallying, moving into target room, and moving off exit tile
+     * @param creep the creep we are doing the operations for
+     * @param creepOptions the options for the military creep
+     */
+    static checkMilitaryCreepBasics(creep, creepOptions) {
+        const targetRoom = creep.memory.targetRoom;
+        const fleeLocation = creepOptions.rallyLocation ? creepOptions.rallyLocation.roomName : creep.memory.homeRoom;
+        // Check if we need to flee
+        if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
+            this.fleeCreep(creep, fleeLocation);
+            return true;
+        }
+        if (!creepOptions.rallyDone) {
+            if (this.setWaitingForRally(creep, creepOptions)) {
+                return true; // idle if we are waiting on everyone to rally still
+            }
+            // Have the creep stop checking for rally
+            creepOptions.rallyDone = true;
+            creep.memory.options = creepOptions;
+        }
+        // Everyone is rallied, time to move out into the target room as a group if not already there
+        if (creep.room.name !== targetRoom) {
+            creep.moveTo(new RoomPosition(25, 25, targetRoom), DEFAULT_MOVE_OPTS$1);
+            return true;
+        }
+        // If creep is on exit tile, move them off
+        if (CreepApi.moveCreepOffExit(creep)) {
+            return true;
+        }
+        // Return false if we didn't need to do any of this
+        return false;
     }
 }
 
@@ -8876,6 +9548,25 @@ class ZealotCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        const creepOptions = creep.memory.options;
+        const CREEP_RANGE = 1;
+        // Carry out the basics of a military creep before moving on to specific logic
+        if (CreepMili.checkMilitaryCreepBasics(creep, creepOptions)) {
+            return;
+        }
+        // Find a target for the creep
+        const target = CreepMili.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const isMelee = true;
+        if (!target) {
+            return; // idle if no current target
+        }
+        // If we aren't in attack range, move towards the attack target
+        if (!CreepMili.isInAttackRange(creep, target.pos, isMelee)) {
+            creep.moveTo(target, DEFAULT_MOVE_OPTS$1);
+            return;
+        }
+        // We are in attack range and healthy, attack the target
+        creep.attack(target);
     }
 }
 
@@ -8886,6 +9577,48 @@ class MedicCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        const creepOptions = creep.memory.options;
+        const CREEP_RANGE = 3;
+        if (CreepMili.checkMilitaryCreepBasics(creep, creepOptions)) {
+            return;
+        }
+        // Get a healing target
+        const healingTarget = CreepMili.getHealingTarget(creep, creepOptions);
+        if (creepOptions.squadUUID) {
+            const squadMembers = MemoryApi.getCreepsInSquad(creep.room.name, creepOptions.squadUUID);
+            // No healing target, move towards closest squad member
+            if (!healingTarget && squadMembers) {
+                const closestSquadMember = creep.pos.findClosestByRange(squadMembers);
+                if (closestSquadMember && !creep.pos.isNearTo(closestSquadMember)) {
+                    creep.moveTo(closestSquadMember, DEFAULT_MOVE_OPTS$1);
+                }
+                CreepMili.fleeCreep(creep, creep.memory.homeRoom);
+                return;
+            }
+        }
+        // If no healing target and we aren't in a squad, find closest friendly creep and move to them, flee otherwise
+        if (!healingTarget) {
+            const closestFriendlyCreep = creep.pos.findClosestByPath(FIND_MY_CREEPS);
+            if (closestFriendlyCreep) {
+                creep.moveTo(closestFriendlyCreep, DEFAULT_MOVE_OPTS$1);
+            }
+            return;
+        }
+        // If we are in range, heal it, otherwise move to it
+        if (creep.pos.inRangeTo(healingTarget.pos, CREEP_RANGE)) {
+            if (!creep.pos.isNearTo(healingTarget)) {
+                creep.moveTo(healingTarget);
+            }
+            if (creep.hits < creep.hitsMax) {
+                creep.heal(creep); // heal self first if we need to
+            }
+            else {
+                creep.heal(healingTarget);
+            }
+        }
+        else {
+            creep.moveTo(healingTarget, DEFAULT_MOVE_OPTS$1);
+        }
     }
 }
 
@@ -8896,6 +9629,28 @@ class StalkerCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
+        const creepOptions = creep.memory.options;
+        const CREEP_RANGE = 3;
+        // Carry out the basics of a military creep before moving on to specific logic
+        if (CreepMili.checkMilitaryCreepBasics(creep, creepOptions)) {
+            return;
+        }
+        // Find a target for the creep
+        const target = CreepMili.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const isMelee = false;
+        if (!target) {
+            return; // idle if no current target
+        }
+        // If we aren't in attack range, move towards the attack target
+        if (!CreepMili.isInAttackRange(creep, target.pos, isMelee)) {
+            creep.moveTo(target, DEFAULT_MOVE_OPTS$1);
+            return;
+        }
+        else {
+            CreepMili.kiteEnemyCreep(creep);
+        }
+        // We are in attack range and healthy, attack the target
+        creep.attack(target);
     }
 }
 
@@ -9083,6 +9838,7 @@ const loop = ErrorMapper.wrapLoop(() => {
     // Init console commands
     ConsoleCommands.init();
     // run the empire and get all relevant info from that into memory
+    if (Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) ;
     try {
         EmpireManager.runEmpireManager();
     }
@@ -9090,6 +9846,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         UtilHelper.printError(e);
     }
     // run rooms
+    if (Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) ;
     try {
         RoomManager.runRoomManager();
     }
@@ -9097,6 +9854,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         UtilHelper.printError(e);
     }
     // run spawning
+    if (Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) ;
     try {
         SpawnManager.runSpawnManager();
     }
@@ -9104,11 +9862,13 @@ const loop = ErrorMapper.wrapLoop(() => {
         UtilHelper.printError(e);
     }
     // run creeps
-    try {
-        CreepManager.runCreepManager();
-    }
-    catch (e) {
-        UtilHelper.printError(e);
+    if (Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
+        try {
+            CreepManager.runCreepManager();
+        }
+        catch (e) {
+            UtilHelper.printError(e);
+        }
     }
     // clean up memory
     try {

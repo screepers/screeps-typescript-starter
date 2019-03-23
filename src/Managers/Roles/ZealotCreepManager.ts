@@ -16,6 +16,9 @@ export default class ZealotCreepManager {
      * @param creep the creep we are running
      */
     public static runCreepRole(creep: Creep): void {
+        if (creep.spawning) {
+            return;
+        }
 
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 1;

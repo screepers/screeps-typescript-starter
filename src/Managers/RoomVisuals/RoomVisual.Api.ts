@@ -35,7 +35,7 @@ export default class RoomVisualApi {
         const gclProgress: number = Game.gcl['progress'];
         const gclTotal: number = Game.gcl['progressTotal'];
         const ownedRooms = MemoryApi.getOwnedRooms();
-        const totalCreeps = _.sum(ownedRooms, (r: Room) => MemoryApi.getMyCreeps(room).length);
+        const totalCreeps = _.sum(ownedRooms, (r: Room) => MemoryApi.getMyCreeps(room.name).length);
 
         const cpuPercent = Math.floor((usedCpu / cpuLimit * 100) * 10) / 10;
         const bucketPercent = Math.floor((bucket / BUCKET_LIMIT * 100) * 10) / 10;
@@ -76,7 +76,7 @@ export default class RoomVisualApi {
     public static createCreepCountVisual(room: Room, x: number, y: number): number {
 
         // Get the info we need to display
-        const creepsInRoom = MemoryApi.getMyCreeps(room);
+        const creepsInRoom = MemoryApi.getMyCreeps(room.name);
         const creepLimits = MemoryApi.getCreepLimits(room);
         const roles: StringMap = {
             miner: _.filter(creepsInRoom, (c: Creep) => c.memory.role === ROLE_MINER).length,

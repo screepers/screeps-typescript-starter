@@ -94,6 +94,10 @@ export default class RemoteHarvesterCreepManager {
 
         if (creepOptions.fillLink) {
             const linkJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType === 'link');
+
+            if (linkJobs.length > 0) {
+                return linkJobs[0];
+            }
         }
         if (creepOptions.fillSpawn) {
             const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== 'link');

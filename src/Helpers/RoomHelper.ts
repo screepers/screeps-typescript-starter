@@ -262,11 +262,11 @@ export default class RoomHelper {
     public static chooseTowerTarget(room: Room): Creep | null | undefined {
         // get the creep we will do the most damage to
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
-        let isHealers: boolean = _.some(hostileCreeps, (c: Creep) =>
+        const isHealers: boolean = _.some(hostileCreeps, (c: Creep) =>
             _.some(c.body, (b: BodyPartDefinition) => b.type === "heal"));
-        let isAttackers: boolean = _.some(hostileCreeps, (c: Creep) =>
+        const isAttackers: boolean = _.some(hostileCreeps, (c: Creep) =>
             _.some(c.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack"));
-        let isWorkers: boolean = _.some(hostileCreeps, (c: Creep) =>
+        const isWorkers: boolean = _.some(hostileCreeps, (c: Creep) =>
             _.some(c.body, (b: BodyPartDefinition) => b.type === "work"));
 
         // If only healers are present, don't waste ammo

@@ -65,9 +65,10 @@ export default class CreepMili {
     /**
      * have the creep flee back to the homestead
      * @param creep the creep that is fleeing
+     * @param fleeRoom the room the creep is running too
      */
-    public static fleeCreep(creep: Creep, homeRoom: string): void {
-        creep.moveTo(new RoomPosition(25, 25, homeRoom), DEFAULT_MOVE_OPTS);
+    public static fleeCreep(creep: Creep, fleeRoom: string): void {
+        creep.moveTo(new RoomPosition(25, 25, fleeRoom), DEFAULT_MOVE_OPTS);
     }
 
     /**
@@ -79,12 +80,12 @@ export default class CreepMili {
     public static getAttackTarget(creep: Creep, creepOptions: CreepOptionsMili, rangeNum: number): Creep | Structure<StructureConstant> | undefined {
 
         let path: PathFinderPath;
-        let goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: rangeNum }
-        let pathFinderOptions: PathFinderOpts = {
-            roomCallback: function (roomName): boolean | CostMatrix {
+        const goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: rangeNum }
+        const pathFinderOptions: PathFinderOpts = {
+            roomCallback: (roomName): boolean | CostMatrix => {
 
-                let room: Room = Game.rooms[roomName];
-                let costs = new PathFinder.CostMatrix;
+                const room: Room = Game.rooms[roomName];
+                const costs = new PathFinder.CostMatrix;
                 if (!room) {
                     return false;
                 }
@@ -99,8 +100,8 @@ export default class CreepMili {
                 });
 
                 // Set creeps as unwalkable
-                room.find(FIND_CREEPS).forEach(function (creep: Creep) {
-                    costs.set(creep.pos.x, creep.pos.y, 0xff);
+                room.find(FIND_CREEPS).forEach(function (currentCreep: Creep) {
+                    costs.set(currentCreep.pos.x, currentCreep.pos.y, 0xff);
                 });
 
                 return costs;
@@ -175,6 +176,21 @@ export default class CreepMili {
     }
 
     /**
+     * get a target for a domestic defender
+     * @param creep the defender creep
+     * @param creepOptions the options for the defender creep
+     */
+    public static getDomesticDefenseAttackTarget(creep: Creep, creepOptions: CreepOptionsMili, CREEP_RANGE: number): Creep | null {
+
+        const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room);
+
+        if (hostileCreeps.length > 0) {
+            return creep.pos.findClosestByPath(hostileCreeps);
+        }
+        return null;
+    }
+
+    /**
      * get a healing target for the healer creep
      * @param creep the creep we are geting the target for
      * @param creepOptions the options for the military creep
@@ -234,8 +250,8 @@ export default class CreepMili {
             return false;
         }
         let path: PathFinderPath;
-        let goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: CREEP_RANGE }
-        let pathFinderOptions: PathFinderOpts = { flee: true }
+        const goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: CREEP_RANGE }
+        const pathFinderOptions: PathFinderOpts = { flee: true }
         path = PathFinder.search(hostileCreep!.pos, goal, pathFinderOptions);
         if (path.path.length > 0) {
             creep.moveTo(path.path[0], DEFAULT_MOVE_OPTS);
@@ -252,9 +268,10 @@ export default class CreepMili {
      */
     public static checkMilitaryCreepBasics(creep: Creep, creepOptions: CreepOptionsMili): boolean {
         const targetRoom: string = creep.memory.targetRoom;
+        const fleeLocation = creepOptions.rallyLocation ? creepOptions.rallyLocation.roomName : creep.memory.homeRoom;
         // Check if we need to flee
         if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
-            this.fleeCreep(creep, creep.memory.homeRoom);
+            this.fleeCreep(creep, fleeLocation);
             return true;
         }
 
