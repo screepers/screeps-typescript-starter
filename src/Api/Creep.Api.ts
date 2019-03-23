@@ -235,7 +235,12 @@ export default class CreepApi {
     public static travelTo_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
 
-        this.nullCheck_target(creep, moveTarget);
+        // temp fix for harvesters getting null job, need to find a perm fix for this soon
+        if (!moveTarget) {
+            creep.memory.working = false;
+            delete creep.memory.job;
+        }
+        // this.nullCheck_target(creep, moveTarget);
 
         // Move options target
         const moveOpts: MoveToOpts = DEFAULT_MOVE_OPTS;
