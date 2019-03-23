@@ -139,7 +139,11 @@ export default class CreepApi {
     public static doWork_WorkPartJob(creep: Creep, job: WorkPartJob) {
         const target = Game.getObjectById(job.targetID);
 
-        this.nullCheck_target(creep, target);
+        if (!target) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
 
         let returnCode: number;
         let deleteOnSuccess: boolean = false;
@@ -194,7 +198,11 @@ export default class CreepApi {
     public static doWork_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
         const target = Game.getObjectById(job.targetID);
 
-        this.nullCheck_target(creep, target);
+        if (!target) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
 
         let returnCode: number;
 
@@ -318,7 +326,7 @@ export default class CreepApi {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
 
         // Same bandaid fix
-        if (creep.memory.job) {
+        if (!moveTarget) {
             delete creep.memory.job;
             creep.memory.working = false;
         }

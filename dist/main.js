@@ -8515,7 +8515,11 @@ class CreepApi {
      */
     static doWork_WorkPartJob(creep, job) {
         const target = Game.getObjectById(job.targetID);
-        this.nullCheck_target(creep, target);
+        if (!target) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
         let returnCode;
         let deleteOnSuccess = false;
         if (job.actionType === "build" && target instanceof ConstructionSite) {
@@ -8568,7 +8572,11 @@ class CreepApi {
      */
     static doWork_GetEnergyJob(creep, job) {
         const target = Game.getObjectById(job.targetID);
-        this.nullCheck_target(creep, target);
+        if (!target) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
         let returnCode;
         if (job.actionType === "harvest" && (target instanceof Source || target instanceof Mineral)) {
             returnCode = creep.harvest(target);
@@ -8674,7 +8682,7 @@ class CreepApi {
     static travelTo_WorkPartJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
         // Same bandaid fix
-        if (creep.memory.job) {
+        if (!moveTarget) {
             delete creep.memory.job;
             creep.memory.working = false;
         }
