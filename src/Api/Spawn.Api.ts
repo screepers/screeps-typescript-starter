@@ -80,7 +80,7 @@ export default class SpawnApi {
             case ROOM_STATE_BEGINNER:
                 // Domestic Creep Definitions
                 const numAccessTilesToSource: number = SpawnHelper.getNumAccessTilesToSources(room);
-                domesticLimits[ROLE_MINER] = numAccessTilesToSource < 4 ? 4 : numAccessTilesToSource;
+                domesticLimits[ROLE_MINER] = numAccessTilesToSource < 4 ? numAccessTilesToSource : 4;
                 domesticLimits[ROLE_HARVESTER] = 4;
                 domesticLimits[ROLE_WORKER] = 4;
 

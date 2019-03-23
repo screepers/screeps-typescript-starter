@@ -1730,13 +1730,14 @@ export class SpawnHelper {
     public static getNumAccessTilesToSources(room: Room): number {
         const sources: Source[] = MemoryApi.getSources(room);
         let accesssibleTiles: number = 0;
+        const roomTerrian: RoomTerrain = new Room.Terrain(room.name)
         _.forEach(sources, (source: Source) => {
             for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
                 for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
                     if (source.pos.x === x && source.pos.y === y) {
                         continue;
                     }
-                    if (Game.map.getTerrainAt(x, y, room.name) !== 'wall') {
+                    if (roomTerrian.get(x, y) !== TERRAIN_MASK_WALL) {
                         accesssibleTiles++;
                     }
                 }

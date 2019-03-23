@@ -1855,7 +1855,7 @@ class SpawnApi {
             case ROOM_STATE_BEGINNER:
                 // Domestic Creep Definitions
                 const numAccessTilesToSource = SpawnHelper.getNumAccessTilesToSources(room);
-                domesticLimits[ROLE_MINER] = numAccessTilesToSource < 4 ? 4 : numAccessTilesToSource;
+                domesticLimits[ROLE_MINER] = numAccessTilesToSource < 4 ? numAccessTilesToSource : 4;
                 domesticLimits[ROLE_HARVESTER] = 4;
                 domesticLimits[ROLE_WORKER] = 4;
                 break;
@@ -3875,15 +3875,19 @@ class SpawnHelper {
     static getNumAccessTilesToSources(room) {
         const sources = MemoryApi.getSources(room);
         let accesssibleTiles = 0;
-        for (const source of sources) {
+        const roomTerrian = new Room.Terrain(room.name);
+        _.forEach(sources, (source) => {
             for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
                 for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
-                    if (Game.map.getTerrainAt(x, y, room.name) !== 'wall' && !(source.pos.x === x && source.pos.y === y)) {
+                    if (source.pos.x === x && source.pos.y === y) {
+                        continue;
+                    }
+                    if (roomTerrian.get(x, y) !== TERRAIN_MASK_WALL) {
                         accesssibleTiles++;
                     }
                 }
             }
-        }
+        });
         return accesssibleTiles;
     }
 }
