@@ -1,5 +1,3 @@
-import { ERROR_FATAL, ERROR_ERROR, ERROR_WARN, COLORS } from "utils/Constants";
-import { ALLOW_CUSTOM_ERRORS } from "utils/config";
 import UserException from "utils/UserException";
 
 export default class UtilHelper {
@@ -10,11 +8,11 @@ export default class UtilHelper {
     public static printError(
         e: UserException | Error
     ): void {
-        if(e instanceof UserException){
+        if (e instanceof UserException) {
             console.log('<font color="' + e.titleColor + '">' + e.title + "</font>");
             console.log('<font color="' + e.bodyColor + '">' + e.body + "</font>");
         }
-        else{
+        else {
             console.log("Unexpected error, see the details below: ");
             console.log(e.stack);
         }

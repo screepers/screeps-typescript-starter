@@ -1,10 +1,5 @@
-import RoomApi from "../../Api/Room.Api";
-import MemoryApi from "../../Api/Memory.Api";
-import CreepDomesticApi from "Api/CreepDomestic.Api";
-import CreepApi from "Api/Creep.Api";
-import CreepDomestic from "Api/CreepDomestic.Api";
 import {
-    ERROR_WARN, DEFAULT_MOVE_OPTS
+    DEFAULT_MOVE_OPTS
 } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";
 

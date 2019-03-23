@@ -1,5 +1,4 @@
 import MemoryApi from "../Api/Memory.Api";
-import UtilHelper from "./UtilHelper";
 import UserException from "utils/UserException";
 import SpawnApi from "../Api/Spawn.Api";
 import {

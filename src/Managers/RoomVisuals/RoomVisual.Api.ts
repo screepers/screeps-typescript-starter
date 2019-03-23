@@ -14,7 +14,6 @@ import {
     OVERRIDE_D_ROOM_FLAG,
     STIMULATE_FLAG
 } from "utils/constants";
-import RoomHelper from "Helpers/RoomHelper";
 
 // Api for room visuals
 export default class RoomVisualApi {

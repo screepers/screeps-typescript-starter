@@ -1,22 +1,13 @@
-import UtilHelper from "./UtilHelper";
 import MemoryHelper from "./MemoryHelper";
 import SpawnApi from "Api/Spawn.Api";
 import {
-    domesticRolePriority,
-    militaryRolePriority,
-    remoteRolePriority,
     ROLE_COLONIZER,
     ROLE_REMOTE_MINER,
     ROLE_REMOTE_RESERVER,
-    ROLE_LORRY,
-    ROLE_HARVESTER,
     ROLE_MEDIC,
     ROLE_MINER,
-    ROLE_POWER_UPGRADER,
-    ROLE_REMOTE_DEFENDER,
     ROLE_REMOTE_HARVESTER,
     ROLE_STALKER,
-    ROLE_WORKER,
     ROLE_ZEALOT,
     GROUPED,
     COLLATED,

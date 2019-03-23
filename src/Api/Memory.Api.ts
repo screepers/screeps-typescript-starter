@@ -27,13 +27,6 @@ import {
     STORE_JOB_CACHE_TTL,
     FILL_JOB_CACHE_TTL,
     PICKUP_JOB_CACHE_TTL,
-    ROOM_STATE_BEGINNER,
-    ROOM_STATE_INTER,
-    ROOM_STATE_ADVANCED,
-    ROOM_STATE_NUKE_INBOUND,
-    ROOM_STATE_SEIGE,
-    ROOM_STATE_STIMULATE,
-    ROOM_STATE_UPGRADER,
 } from "utils/Constants";
 
 // the api for the memory class

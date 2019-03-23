@@ -1,12 +1,10 @@
-import UtilHelper from "./UtilHelper";
-
 export default class Normalize {
 
     /**
      * Returns a mockup of a room object for a given roomname
-     * @param roomName 
+     * @param roomName
      */
-    public static getMockRoomObject(roomName: string){
+    public static getMockRoomObject(roomName: string) {
         const mockRoom: Room = new Room(roomName);
         mockRoom.name = roomName;
         mockRoom.visual.roomName = roomName;

@@ -1,5 +1,5 @@
 import RoomApi from "Api/Room.Api";
-import { LINK_MINIMUM_ENERGY, CONTAINER_MINIMUM_ENERGY } from "utils/config";
+import { CONTAINER_MINIMUM_ENERGY } from "utils/config";
 import MemoryApi from "Api/Memory.Api";
 
 // TODO Create jobs for tombstones and dropped resources if wanted

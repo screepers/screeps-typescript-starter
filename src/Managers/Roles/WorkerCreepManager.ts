@@ -1,9 +1,6 @@
-import RoomApi from "../../Api/Room.Api";
 import MemoryApi from "../../Api/Memory.Api";
-import CreepDomesticApi from "Api/CreepDomestic.Api";
 import CreepApi from "Api/Creep.Api";
-import CreepDomestic from "Api/CreepDomestic.Api";
-import { ERROR_WARN } from "utils/constants";
+import { ROOM_STATE_UPGRADER } from "utils/constants";
 
 // Manager for the miner creep role
 export default class WorkerCreepManager {
@@ -111,7 +108,7 @@ export default class WorkerCreepManager {
         );
 
         // Assign upgrade job is one isn't currently being worked
-        if (creepOptions.upgrade && !isCurrentUpgrader) {
+        if (creepOptions.upgrade && !isCurrentUpgrader && room.memory.roomState !== ROOM_STATE_UPGRADER) {
             if (upgradeJobs.length > 0) {
                 return upgradeJobs[0];
             }

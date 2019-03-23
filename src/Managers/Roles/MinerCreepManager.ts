@@ -1,12 +1,6 @@
-import RoomApi from "../../Api/Room.Api";
 import MemoryApi from "../../Api/Memory.Api";
-import CreepDomesticApi from "Api/CreepDomestic.Api";
 import CreepApi from "Api/Creep.Api";
-import CreepDomestic from "Api/CreepDomestic.Api";
-import { ERROR_WARN, ERROR_ERROR, ROLE_MINER } from "utils/constants";
-import GetEnergyJobs from "Jobs/GetEnergyJobs";
-import UserException from "utils/UserException";
-import CreepManager from "Managers/CreepManager";
+import { ROLE_MINER } from "utils/constants";
 import CreepHelper from "Helpers/CreepHelper";
 
 // Manager for the miner creep role

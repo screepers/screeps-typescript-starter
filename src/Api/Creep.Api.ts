@@ -1,7 +1,5 @@
-import UtilHelper from "Helpers/UtilHelper";
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
-import Normalize from "Helpers/Normalize";
 import { DEFAULT_MOVE_OPTS, ERROR_ERROR } from "utils/constants";
 
 // Api for all types of creeps (more general stuff here)

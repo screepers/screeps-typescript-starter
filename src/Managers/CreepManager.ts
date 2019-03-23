@@ -1,4 +1,3 @@
-import MemoryApi from "Api/Memory.Api";
 import MinerCreepManager from "./Roles/MinerCreepManager";
 import UserException from "utils/UserException";
 import HarvesterCreepManager from "./Roles/HarvesterCreepManager";
