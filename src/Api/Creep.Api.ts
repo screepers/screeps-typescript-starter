@@ -106,7 +106,11 @@ export default class CreepApi {
         let target;
 
         target = Game.getObjectById(job.targetID);
-        this.nullCheck_target(creep, target);
+        if (!target) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
 
         let returnCode: number;
 
@@ -276,7 +280,11 @@ export default class CreepApi {
     public static travelTo_CarryPartJob(creep: Creep, job: CarryPartJob) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
 
-        this.nullCheck_target(creep, moveTarget);
+        if (!moveTarget) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
