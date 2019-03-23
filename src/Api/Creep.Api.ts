@@ -180,6 +180,10 @@ export default class CreepApi {
                 creep.memory.working = false;
                 break;
             default:
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
                 break;
         }
     }
