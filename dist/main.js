@@ -8673,7 +8673,12 @@ class CreepApi {
      */
     static travelTo_WorkPartJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
-        this.nullCheck_target(creep, moveTarget);
+        // Same bandaid fix
+        if (creep.memory.job) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, moveTarget);
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
