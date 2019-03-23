@@ -8494,14 +8494,24 @@ class CreepApi {
         const target = Game.getObjectById(job.targetID);
         this.nullCheck_target(creep, target);
         let returnCode;
+        let deleteOnSuccess = false;
         if (job.actionType === "build" && target instanceof ConstructionSite) {
             returnCode = creep.build(target);
+            if (!target) {
+                deleteOnSuccess = true;
+            }
         }
         else if (job.actionType === "repair" && target instanceof Structure) {
             returnCode = creep.repair(target);
+            if (target.hits === target.hitsMax) {
+                deleteOnSuccess = true;
+            }
         }
         else if (job.actionType === "upgrade" && target instanceof StructureController) {
             returnCode = creep.upgradeController(target);
+            if (creep.carry.energy === 0) {
+                deleteOnSuccess = true;
+            }
         }
         else {
             throw this.badTarget_Error(creep, job);
@@ -8509,14 +8519,18 @@ class CreepApi {
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
         switch (returnCode) {
             case OK:
-                // If successful, delete the job from creep memory
-                delete creep.memory.job;
-                creep.memory.working = false;
+                // If successful and creep is empty, delete the job from creep memory
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
                 break;
             case ERR_NOT_IN_RANGE:
                 creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
+                delete creep.memory.job;
+                creep.memory.working = false;
                 break;
             default:
                 break;
@@ -8938,7 +8952,7 @@ class WorkerCreepManager {
         const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
         const isCurrentUpgrader = _.some(MemoryApi.getMyCreeps(room.name), (c) => c.memory.job && c.memory.job.actionType === 'upgrade');
         // Assign upgrade job is one isn't currently being worked
-        if (creepOptions.upgrade && !isCurrentUpgrader) {
+        if (creepOptions.upgrade && !isCurrentUpgrader && room.memory.roomState !== ROOM_STATE_UPGRADER$1) {
             if (upgradeJobs.length > 0) {
                 return upgradeJobs[0];
             }
