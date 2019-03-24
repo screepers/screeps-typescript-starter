@@ -217,14 +217,22 @@ export default class RoomApi {
      * @param room the room we are getting spawns/extensions to be filled from
      */
     public static getLowSpawnAndExtensions(room: Room): Array<StructureSpawn | StructureExtension> {
-        const extensionsNeedFilled = <Array<StructureSpawn | StructureExtension>>MemoryApi.getStructures(
-            room,
-            (e: any) =>
-                (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION) &&
-                e.energy < e.energyCapacity
-        );
+        const extensionsNeedFilled: StructureExtension[] = MemoryApi.getStructureOfType(
+            room, STRUCTURE_EXTENSION,
+            (e: StructureExtension) => {
+                return e.energy < e.energyCapacity;
+            }) as StructureExtension[];
 
-        return extensionsNeedFilled;
+        const spawnsNeedFilled: StructureSpawn[] = MemoryApi.getStructureOfType(
+            room, STRUCTURE_SPAWN,
+            (e: StructureSpawn) => {
+                return e.energy < e.energyCapacity;
+            }) as StructureSpawn[];
+
+        const extensionsAndSpawns: Array<StructureExtension | StructureSpawn> = [];
+        _.forEach(extensionsNeedFilled, (ext: StructureExtension) => extensionsAndSpawns.push(ext));
+        _.forEach(spawnsNeedFilled, (ext: StructureSpawn) => extensionsAndSpawns.push(ext));
+        return extensionsAndSpawns;
     }
 
     /**

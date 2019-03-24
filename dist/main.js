@@ -797,9 +797,16 @@ class RoomApi {
      * @param room the room we are getting spawns/extensions to be filled from
      */
     static getLowSpawnAndExtensions(room) {
-        const extensionsNeedFilled = MemoryApi.getStructures(room, (e) => (e.structureType === STRUCTURE_SPAWN || e.structureType === STRUCTURE_EXTENSION) &&
-            e.energy < e.energyCapacity);
-        return extensionsNeedFilled;
+        const extensionsNeedFilled = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION, (e) => {
+            return e.energy < e.energyCapacity;
+        });
+        const spawnsNeedFilled = MemoryApi.getStructureOfType(room, STRUCTURE_SPAWN, (e) => {
+            return e.energy < e.energyCapacity;
+        });
+        const extensionsAndSpawns = [];
+        _.forEach(extensionsNeedFilled, (ext) => extensionsAndSpawns.push(ext));
+        _.forEach(spawnsNeedFilled, (ext) => extensionsAndSpawns.push(ext));
+        return extensionsAndSpawns;
     }
     /**
      * get towers that need to be filled for the room
@@ -8486,9 +8493,15 @@ class CreepApi {
     static doWork_CarryPartJob(creep, job) {
         let target;
         target = Game.getObjectById(job.targetID);
-        this.nullCheck_target(creep, target);
+        if (!target) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
         let returnCode;
+        let deleteOnSuccess = false;
         if (job.actionType === "transfer" && (target instanceof Structure || target instanceof Creep)) {
+            deleteOnSuccess = true;
             returnCode = creep.transfer(target, RESOURCE_ENERGY);
         }
         else {
@@ -8498,13 +8511,19 @@ class CreepApi {
         switch (returnCode) {
             case OK:
                 // If successful, delete the job from creep memory
-                delete creep.memory.job;
-                creep.memory.working = false;
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
                 break;
             case ERR_NOT_IN_RANGE:
                 creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
+                break;
+            case ERR_FULL:
+                delete creep.memory.job;
+                creep.memory.working = false;
                 break;
             default:
                 break;
@@ -8644,7 +8663,11 @@ class CreepApi {
      */
     static travelTo_CarryPartJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
-        this.nullCheck_target(creep, moveTarget);
+        if (!moveTarget) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+        }
+        // this.nullCheck_target(creep, target);
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
         if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
@@ -8851,8 +8874,11 @@ class HarvesterCreepManager {
             return this.newGetEnergyJob(creep, room);
         }
         else {
-            // Creep energy > 0
-            return this.newCarryPartJob(creep, room);
+            let job = this.newCarryPartJob(creep, room);
+            if (job === undefined) {
+                job = this.newWorkPartJob(creep, room);
+            }
+            return job;
         }
     }
     /**
@@ -8890,7 +8916,7 @@ class HarvesterCreepManager {
     static newCarryPartJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.fillTower || creepOptions.fillSpawn) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link', true);
             if (fillJobs.length > 0) {
                 return fillJobs[0];
             }
@@ -8905,6 +8931,25 @@ class HarvesterCreepManager {
         return undefined;
     }
     /**
+     * Gets a new WorkPartJob for harvester
+     */
+    static newWorkPartJob(creep, room) {
+        const creepOptions = creep.memory.options;
+        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
+        if (creepOptions.upgrade) {
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
+            }
+        }
+        if (creepOptions.build) {
+            const buildJobs = MemoryApi.getBuildJobs(room, (job) => !job.isTaken);
+            if (buildJobs.length > 0) {
+                return buildJobs[0];
+            }
+        }
+        return undefined;
+    }
+    /**
      * Handles setup for a new job
      */
     static handleNewJob(creep) {
@@ -8913,7 +8958,7 @@ class HarvesterCreepManager {
             return;
         }
         else if (creep.memory.job.jobType === "carryPartJob") {
-            // TODO Mark the job we chose as taken
+            // Find the reference to the job we currently have and mark it as taken
             return;
         }
     }
@@ -8997,7 +9042,7 @@ class WorkerCreepManager {
         const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
         const isCurrentUpgrader = _.some(MemoryApi.getMyCreeps(room.name), (c) => c.memory.job && c.memory.job.actionType === 'upgrade');
         // Assign upgrade job is one isn't currently being worked
-        if (creepOptions.upgrade && !isCurrentUpgrader && room.memory.roomState !== ROOM_STATE_UPGRADER$1) {
+        if (creepOptions.upgrade && !isCurrentUpgrader) {
             if (upgradeJobs.length > 0) {
                 return upgradeJobs[0];
             }

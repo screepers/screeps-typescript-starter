@@ -108,7 +108,7 @@ export default class WorkerCreepManager {
         );
 
         // Assign upgrade job is one isn't currently being worked
-        if (creepOptions.upgrade && !isCurrentUpgrader && room.memory.roomState !== ROOM_STATE_UPGRADER) {
+        if (creepOptions.upgrade && !isCurrentUpgrader) {
             if (upgradeJobs.length > 0) {
                 return upgradeJobs[0];
             }

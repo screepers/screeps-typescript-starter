@@ -42,8 +42,12 @@ export default class HarvesterCreepManager {
         if (creep.carry.energy === 0) {
             return this.newGetEnergyJob(creep, room);
         } else {
-            // Creep energy > 0
-            return this.newCarryPartJob(creep, room);
+            let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
+            if (job === undefined) {
+                job = this.newWorkPartJob(creep, room);
+            }
+
+            return job;
         }
     }
 
@@ -100,7 +104,7 @@ export default class HarvesterCreepManager {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillTower || creepOptions.fillSpawn) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== 'link', true);
 
             if (fillJobs.length > 0) {
                 return fillJobs[0];
@@ -121,6 +125,30 @@ export default class HarvesterCreepManager {
     }
 
     /**
+     * Gets a new WorkPartJob for harvester
+     */
+    public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
+
+        if (creepOptions.upgrade) {
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
+            }
+        }
+
+        if (creepOptions.build) {
+            const buildJobs = MemoryApi.getBuildJobs(room, (job: WorkPartJob) => !job.isTaken);
+            if (buildJobs.length > 0) {
+                return buildJobs[0];
+            }
+
+        }
+
+        return undefined;
+    }
+
+    /**
      * Handles setup for a new job
      */
     public static handleNewJob(creep: Creep): void {
@@ -129,7 +157,7 @@ export default class HarvesterCreepManager {
             return;
         }
         else if (creep.memory.job!.jobType === "carryPartJob") {
-            // TODO Mark the job we chose as taken
+            // Find the reference to the job we currently have and mark it as taken
             return;
         }
     }

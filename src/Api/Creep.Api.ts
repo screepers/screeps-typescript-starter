@@ -113,8 +113,10 @@ export default class CreepApi {
         // this.nullCheck_target(creep, target);
 
         let returnCode: number;
+        let deleteOnSuccess: boolean = false;
 
         if (job.actionType === "transfer" && (target instanceof Structure || target instanceof Creep)) {
+            deleteOnSuccess = true;
             returnCode = creep.transfer(target, RESOURCE_ENERGY);
         } else {
             throw this.badTarget_Error(creep, job);
@@ -124,13 +126,19 @@ export default class CreepApi {
         switch (returnCode) {
             case OK:
                 // If successful, delete the job from creep memory
-                delete creep.memory.job;
-                creep.memory.working = false;
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
                 break;
             case ERR_NOT_IN_RANGE:
                 creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
+                break;
+            case ERR_FULL:
+                delete creep.memory.job;
+                creep.memory.working = false;
                 break;
             default:
                 break;
