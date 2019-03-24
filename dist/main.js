@@ -2132,8 +2132,11 @@ class SpawnApi {
      * @param RoleConstant the role of the creep
      */
     static getTier(room, roleConst) {
-        const energyAvailable = room.energyAvailable;
+        const energyAvailable = room.energyCapacityAvailable;
         // Check what tier we are in based on the amount of energy the room has
+        if (room.memory.roomState === ROOM_STATE_INTRO) {
+            return TIER_1;
+        }
         if (energyAvailable === TIER_8) {
             return TIER_8;
         }
@@ -7907,6 +7910,61 @@ class RoomVisualManager {
                 return "Not An Attack Flag";
         }
     }
+    /**
+     * get the amount of seconds in each tick (estimate)
+     */
+    static getSecondsPerTick() {
+        const TIME_BETWEEN_CHECKS = 50;
+        if (!Memory.visual) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: []
+            };
+        }
+        // Every 50 ticks, update the time and find the new seconds per tick
+        if (RoomHelper.excecuteEveryTicks(TIME_BETWEEN_CHECKS)) {
+            const updatedTime = Date.now();
+            const oldTime = Memory.visual.time;
+            const avgTimePerTick = ((updatedTime - oldTime) / TIME_BETWEEN_CHECKS) / 1000;
+            Memory.visual.time = updatedTime;
+            Memory.visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
+        }
+        return Memory.visual.secondsPerTick;
+    }
+    /**
+     * get the average controller progress over the last specified ticks
+     * @param ticks the number of ticks we are wanting to collect
+     * @param room the room we are getting the CPPT for
+     */
+    static getAverageControlPointsPerTick(ticks, room) {
+        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: []
+            };
+        }
+        const progressSampleSize = Memory.visual.controllerProgressArray.length;
+        const newControllerProgress = room.controller.progress;
+        let progressSum = 0;
+        if (progressSampleSize < ticks) {
+            // Add this ticks value to the array if it isn't already too large
+            Memory.visual.controllerProgressArray.push(newControllerProgress);
+        }
+        else {
+            // Move everything left, then add new value to end
+            for (let j = 0; j < progressSampleSize; ++j) {
+                Memory.visual.controllerProgressArray[j] = Memory.visual.controllerProgressArray[j + 1];
+            }
+            Memory.visual.controllerProgressArray[progressSampleSize - 1] = newControllerProgress;
+        }
+        // Get the average control points per tick
+        for (let i = 0; i < progressSampleSize - 1; ++i) {
+            progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
+        }
+        return Math.floor(((progressSum / progressSampleSize) * 1) / 1);
+    }
 }
 
 // Api for room visuals
@@ -7925,8 +7983,6 @@ class RoomVisualApi {
         const BUCKET_LIMIT = 10000;
         const gclProgress = Game.gcl['progress'];
         const gclTotal = Game.gcl['progressTotal'];
-        const ownedRooms = MemoryApi.getOwnedRooms();
-        const totalCreeps = _.sum(ownedRooms, (r) => MemoryApi.getMyCreeps(room.name).length);
         const cpuPercent = Math.floor((usedCpu / cpuLimit * 100) * 10) / 10;
         const bucketPercent = Math.floor((bucket / BUCKET_LIMIT * 100) * 10) / 10;
         const gclPercent = Math.floor((gclProgress / gclTotal * 100) * 10) / 10;
@@ -7941,8 +7997,6 @@ class RoomVisualApi {
         lines.push("LVL:    " + Game.gcl['level']);
         lines.push("");
         lines.push("Viewing:  [ " + room.name + " ]");
-        lines.push("Empire Rooms:    " + ownedRooms.length);
-        lines.push("Empire Creeps:   " + totalCreeps);
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
         // Draw a box around the text
         new RoomVisual(room.name)
@@ -8205,7 +8259,6 @@ class RoomVisualApi {
         }
         RoomVisualManager.multiLineText(lines, x, y, room.name, false);
         // Draw the box around the text
-        // Draw a box around the text
         new RoomVisual(room.name)
             .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1) // bottom line
             .line(x - 10, y - 1, x + .25, y - 1) // top line
@@ -8213,6 +8266,31 @@ class RoomVisualApi {
             .line(x + .25, y - 1, x + .25, y + lines.length - 1); // right line
         // Return where the next box should start
         return y + lines.length;
+    }
+    /**
+     *
+     * @param room the room we are creating the visual for
+     * @param x the x value for the starting point of the graph
+     * @param y the y value for the starting point of the graph
+     */
+    static createUpgradeGraphVisual(room, x, y) {
+        const secondsPerTick = RoomVisualManager.getSecondsPerTick();
+        const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(10, room);
+        // Draw the Graph Lines
+        new RoomVisual(room.name)
+            .line(x, y, x, y - 7.5) // bottom line
+            .line(x, y, x + 15, y) // left line
+            .line(x + 3, y - .25, x + 3, y + .25) // tick marks
+            .line(x + 6, y - .25, x + 6, y + .25)
+            .line(x + 9, y - .25, x + 9, y + .25)
+            .line(x + 12, y - .25, x + 12, y + .25);
+        // Get the current scale
+        // Draw current scale on left side of graph
+        // Delete the first line of the array
+        // Move everything back one value, leaving the 5th slot open
+        // Put the new value in the 5th slot
+        // Adjust all Y values based on current scale
+        // Draw all lines on graph
     }
 }
 
@@ -8247,6 +8325,9 @@ class RoomVisualManager$1 {
         endLeftLine = RoomVisualApi.createCreepCountVisual(room, LEFT_START_X, endLeftLine);
         // Display the Room Info box in the bottom left
         endLeftLine = RoomVisualApi.createRoomInfoVisual(room, LEFT_START_X, endLeftLine);
+        {
+            RoomVisualApi.createUpgradeGraphVisual(room, LEFT_START_X + 1, 45);
+        }
         // ------
         // Right Side -----
         // Display Remote Flag box on the top right

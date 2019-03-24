@@ -33,8 +33,6 @@ export default class RoomVisualApi {
         const BUCKET_LIMIT: number = 10000;
         const gclProgress: number = Game.gcl['progress'];
         const gclTotal: number = Game.gcl['progressTotal'];
-        const ownedRooms = MemoryApi.getOwnedRooms();
-        const totalCreeps = _.sum(ownedRooms, (r: Room) => MemoryApi.getMyCreeps(room.name).length);
 
         const cpuPercent = Math.floor((usedCpu / cpuLimit * 100) * 10) / 10;
         const bucketPercent = Math.floor((bucket / BUCKET_LIMIT * 100) * 10) / 10;
@@ -51,8 +49,6 @@ export default class RoomVisualApi {
         lines.push("LVL:    " + Game.gcl['level']);
         lines.push("");
         lines.push("Viewing:  [ " + room.name + " ]");
-        lines.push("Empire Rooms:    " + ownedRooms.length);
-        lines.push("Empire Creeps:   " + totalCreeps);
         RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 
         // Draw a box around the text
@@ -361,7 +357,6 @@ export default class RoomVisualApi {
         RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
 
         // Draw the box around the text
-        // Draw a box around the text
         new RoomVisual(room.name)
             .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
             .line(x - 10, y - 1, x + .25, y - 1)                  // top line
@@ -370,5 +365,34 @@ export default class RoomVisualApi {
 
         // Return where the next box should start
         return y + lines.length;
+    }
+
+    /**
+     *
+     * @param room the room we are creating the visual for
+     * @param x the x value for the starting point of the graph
+     * @param y the y value for the starting point of the graph
+     */
+    public static createUpgradeGraphVisual(room: Room, x: number, y: number): void {
+
+        const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick();
+        const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(10, room);
+
+        // Draw the Graph Lines
+        new RoomVisual(room.name)
+            .line(x, y, x, y - 7.5)    // bottom line
+            .line(x, y, x + 15, y)   // left line
+            .line(x + 3, y - .25, x + 3, y + .25) // tick marks
+            .line(x + 6, y - .25, x + 6, y + .25)
+            .line(x + 9, y - .25, x + 9, y + .25)
+            .line(x + 12, y - .25, x + 12, y + .25)
+
+        // Get the current scale
+        // Draw current scale on left side of graph
+        // Delete the first line of the array
+        // Move everything back one value, leaving the 5th slot open
+        // Put the new value in the 5th slot
+        // Adjust all Y values based on current scale
+        // Draw all lines on graph
     }
 }
