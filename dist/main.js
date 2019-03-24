@@ -2738,8 +2738,8 @@ class SpawnHelper {
             case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
                 body = { work: 1, carry: 2, move: 2 };
                 break;
-            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
-                body = { work: 2, carry: 5, move: 3 };
+            case TIER_2: // 2 Work, 4 Carry, 3 Move - Total Cost: 550
+                body = { work: 2, carry: 4, move: 3 };
                 break;
             case TIER_3: // 4 Work, 4 Carry, 4 Move - Total Cost: 800
                 body = { work: 4, carry: 4, move: 4 };
