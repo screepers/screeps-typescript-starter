@@ -1849,6 +1849,7 @@ class SpawnApi {
             lorry: 0
         };
         const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
+        let minerLimits = MemoryApi.getSources(room).length;
         // check what room state we are in
         switch (room.memory.roomState) {
             // Intro
@@ -1861,22 +1862,25 @@ class SpawnApi {
             // Beginner
             case ROOM_STATE_BEGINNER:
                 // Domestic Creep Definitions
-                const numAccessTilesToSource = SpawnHelper.getNumAccessTilesToSources(room);
-                domesticLimits[ROLE_MINER] = numAccessTilesToSource < 4 ? numAccessTilesToSource : 4;
+                if (room.energyCapacityAvailable < 550) {
+                    const numAccessTilesToSource = SpawnHelper.getNumAccessTilesToSources(room);
+                    minerLimits = numAccessTilesToSource < 4 ? numAccessTilesToSource : 4;
+                }
+                domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 4;
                 domesticLimits[ROLE_WORKER] = 4;
                 break;
             // Intermediate
             case ROOM_STATE_INTER:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 5;
                 break;
             // Advanced
             case ROOM_STATE_ADVANCED:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 4;
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
@@ -1885,7 +1889,7 @@ class SpawnApi {
             // Upgrader
             case ROOM_STATE_UPGRADER:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_POWER_UPGRADER] = 1;
@@ -1894,7 +1898,7 @@ class SpawnApi {
             // Stimulate
             case ROOM_STATE_STIMULATE:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 3;
                 domesticLimits[ROLE_POWER_UPGRADER] = 2;
@@ -1903,7 +1907,7 @@ class SpawnApi {
             // Seige
             case ROOM_STATE_SEIGE:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 2;
+                domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_LORRY] = numLorries;
@@ -2593,8 +2597,8 @@ class SpawnHelper {
             case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
                 body = { work: 1, carry: 2, move: 2 };
                 break;
-            case TIER_2: // 2 Work, 5 Carry, 3 Move - Total Cost: 550
-                body = { work: 2, carry: 5, move: 3 };
+            case TIER_2: // 2 Work, 4 Carry, 3 Move - Total Cost: 550
+                body = { work: 2, carry: 4, move: 3 };
                 break;
             case TIER_3: // 2 Work, 6 Carry, 6 Move - Total Cost: 800
                 body = { work: 2, carry: 6, move: 6 };
