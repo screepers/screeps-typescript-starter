@@ -69,7 +69,7 @@ export default class RoomApi {
         // ----------
 
         const storage: StructureStorage | undefined = room.storage;
-        const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
+        const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
         const sources: Array<Source | null> = MemoryApi.getSources(room);
         if (room.controller!.level >= 6) {
 
@@ -103,6 +103,7 @@ export default class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
                     return;
                 }
+                console.log("how");
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED, room);
                 return;
@@ -203,13 +204,15 @@ export default class RoomApi {
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): Array<Structure<StructureConstant>> {
-        return MemoryApi.getStructures(room, (s: Structure<StructureConstant>) => {
-            if (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) {
-                return s.hits < s.hitsMax * REPAIR_THRESHOLD;
-            } else {
-                return s.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+        const repairStructures = MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
+            if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
+                return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
+            }
+            else {
+                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
             }
         });
+        return repairStructures
     }
 
     /**

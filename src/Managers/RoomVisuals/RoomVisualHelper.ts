@@ -71,9 +71,9 @@ export default class RoomVisualManager {
             case ROOM_STATE_BEGINNER:
                 return "Beginner";
             case ROOM_STATE_INTER:
-                return "Advanced";
+                return "Intermediate";
             case ROOM_STATE_ADVANCED:
-                return "Beginner";
+                return "Advanced";
             case ROOM_STATE_NUKE_INBOUND:
                 return "Nuke Incoming!";
             case ROOM_STATE_SEIGE:
@@ -161,6 +161,6 @@ export default class RoomVisualManager {
             progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
         }
 
-        return Math.floor(((progressSum / progressSampleSize) * 1) / 1);
+        return Math.floor(progressSum / progressSampleSize);
     }
 }

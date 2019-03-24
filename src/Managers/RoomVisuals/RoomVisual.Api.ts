@@ -375,17 +375,20 @@ export default class RoomVisualApi {
      */
     public static createUpgradeGraphVisual(room: Room, x: number, y: number): void {
 
+        const X_VALS = { '1': x + 3, '2': x + 6, '3': x + 9, '4': x + 12, '5': x + 15 };
         const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick();
+        const ticksPerHour: number = Math.floor(3600 / secondsPerTick);
         const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(10, room);
+        const controlPointsPerHourEstimate: number = avgControlPointsPerTick * ticksPerHour;
 
         // Draw the Graph Lines
         new RoomVisual(room.name)
             .line(x, y, x, y - 7.5)    // bottom line
             .line(x, y, x + 15, y)   // left line
-            .line(x + 3, y - .25, x + 3, y + .25) // tick marks
-            .line(x + 6, y - .25, x + 6, y + .25)
-            .line(x + 9, y - .25, x + 9, y + .25)
-            .line(x + 12, y - .25, x + 12, y + .25)
+            .line(X_VALS['1'], y - .25, X_VALS['1'], y + .25) // tick marks
+            .line(X_VALS['2'], y - .25, X_VALS['2'], y + .25)
+            .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
+            .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25)
 
         // Get the current scale
         // Draw current scale on left side of graph

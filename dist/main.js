@@ -393,7 +393,7 @@ class RoomHelper {
         // Loop over sources and make sure theres at least one container in range to it
         let numMiningContainers = 0;
         _.forEach(sources, (source) => {
-            if (_.some(containers, (container) => source.pos.inRangeTo(container.pos, 1))) {
+            if (_.some(containers, (container) => source.pos.inRangeTo(container.pos, 2))) {
                 numMiningContainers++;
             }
         });
@@ -674,7 +674,7 @@ class RoomApi {
         }
         // ----------
         const storage = room.storage;
-        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
+        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
         const sources = MemoryApi.getSources(room);
         if (room.controller.level >= 6) {
             // check if we are in upgrader room state
@@ -701,6 +701,7 @@ class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE$1, room);
                     return;
                 }
+                console.log("how");
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED$1, room);
                 return;
@@ -783,14 +784,15 @@ class RoomApi {
      * @param room the room we are checking for repair targets
      */
     static getRepairTargets(room) {
-        return MemoryApi.getStructures(room, (s) => {
-            if (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) {
-                return s.hits < s.hitsMax * REPAIR_THRESHOLD;
+        const repairStructures = MemoryApi.getStructures(room, (struct) => {
+            if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
+                return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
             }
             else {
-                return s.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
             }
         });
+        return repairStructures;
     }
     /**
      * get spawn/extensions that need to be filled for the room
@@ -4121,8 +4123,10 @@ class MemoryApi {
         // Flatten the object into an array of IDs
         for (const type in Memory.rooms[room.name].structures.data) {
             const IDs = Memory.rooms[room.name].structures.data[type];
-            if (IDs.length) {
-                structureIDs.push(IDs);
+            for (const singleID of IDs) {
+                if (singleID) {
+                    structureIDs.push(singleID);
+                }
             }
         }
         let structures = MemoryHelper.getOnlyObjectsFromIDs(structureIDs);
@@ -7881,9 +7885,9 @@ class RoomVisualManager {
             case ROOM_STATE_BEGINNER$1:
                 return "Beginner";
             case ROOM_STATE_INTER$1:
-                return "Advanced";
+                return "Intermediate";
             case ROOM_STATE_ADVANCED$1:
-                return "Beginner";
+                return "Advanced";
             case ROOM_STATE_NUKE_INBOUND$1:
                 return "Nuke Incoming!";
             case ROOM_STATE_SEIGE$1:
@@ -7963,7 +7967,7 @@ class RoomVisualManager {
         for (let i = 0; i < progressSampleSize - 1; ++i) {
             progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
         }
-        return Math.floor(((progressSum / progressSampleSize) * 1) / 1);
+        return Math.floor(progressSum / progressSampleSize);
     }
 }
 
@@ -8274,16 +8278,17 @@ class RoomVisualApi {
      * @param y the y value for the starting point of the graph
      */
     static createUpgradeGraphVisual(room, x, y) {
+        const X_VALS = { '1': x + 3, '2': x + 6, '3': x + 9, '4': x + 12, '5': x + 15 };
         const secondsPerTick = RoomVisualManager.getSecondsPerTick();
         const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(10, room);
         // Draw the Graph Lines
         new RoomVisual(room.name)
             .line(x, y, x, y - 7.5) // bottom line
             .line(x, y, x + 15, y) // left line
-            .line(x + 3, y - .25, x + 3, y + .25) // tick marks
-            .line(x + 6, y - .25, x + 6, y + .25)
-            .line(x + 9, y - .25, x + 9, y + .25)
-            .line(x + 12, y - .25, x + 12, y + .25);
+            .line(X_VALS['1'], y - .25, X_VALS['1'], y + .25) // tick marks
+            .line(X_VALS['2'], y - .25, X_VALS['2'], y + .25)
+            .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
+            .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25);
         // Get the current scale
         // Draw current scale on left side of graph
         // Delete the first line of the array
@@ -8634,7 +8639,7 @@ class CreepApi {
         }
         else if (job.actionType === "repair" && target instanceof Structure) {
             returnCode = creep.repair(target);
-            if (target.hits === target.hitsMax) {
+            if (target.hits === target.hitsMax || creep.carry.energy === 0) {
                 deleteOnSuccess = true;
             }
         }
@@ -8736,6 +8741,14 @@ class CreepApi {
         }
         else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
             moveOpts.range = 1;
+        }
+        if (job.actionType === "harvest" &&
+            creep.memory.role === ROLE_MINER$1 &&
+            creep.room.memory.roomState !== ROOM_STATE_INTRO$1 &&
+            creep.room.memory.roomState !== ROOM_STATE_BEGINNER$1) {
+            // This case implies container mining is available, and miner was stopping 1 tile before the container
+            // If you can find a better way to do this, please do lol
+            moveOpts.range = 0;
         }
         if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
             creep.memory.working = true;

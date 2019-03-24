@@ -296,12 +296,14 @@ export default class MemoryApi {
         // Flatten the object into an array of IDs
         for (const type in Memory.rooms[room.name].structures.data) {
             const IDs = Memory.rooms[room.name].structures.data[type];
-            if (IDs.length) {
-                structureIDs.push(IDs);
+            for (const singleID of IDs) {
+                if (singleID) {
+                    structureIDs.push(singleID);
+                }
             }
         }
 
-        let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure>(structureIDs);
+        let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure<StructureConstant>>(structureIDs);
 
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
