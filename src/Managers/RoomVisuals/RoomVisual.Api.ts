@@ -159,7 +159,7 @@ export default class RoomVisualApi {
         const controllerProgress: number = room.controller!.progress;
         const controllerTotal: number = room.controller!.progressTotal;
         const controllerPercent: number = Math.floor((controllerProgress / controllerTotal * 100) * 10) / 10;
-
+        const defconLevel: number = room.memory.defcon;
 
         // Draw the text
         const lines: string[] = [];
@@ -169,6 +169,7 @@ export default class RoomVisualApi {
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
+        lines.push("DEFCON:         " + defconLevel);
         lines.push("");
         RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 

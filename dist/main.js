@@ -753,7 +753,8 @@ class RoomApi {
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
-            return 0;
+            room.memory.defcon = 0;
+            return;
         }
         // now define the variables we will need to check the other cases in the event
         // we are not dealing with a level 0 defcon scenario
@@ -762,22 +763,27 @@ class RoomApi {
             .length;
         // level 5 -- nuke inbound
         if (room.find(FIND_NUKES) !== undefined) {
-            return 5;
+            room.memory.defcon = 5;
+            return;
         }
         // level 4 full seige, 50+ boosted parts
         if (boostedHostileBodyParts >= 50) {
-            return 4;
+            room.memory.defcon = 4;
+            return;
         }
         // level 3 -- 150+ body parts OR any boosted body parts
         if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
-            return 3;
+            room.memory.defcon = 3;
+            return;
         }
         // level 2 -- 50 - 150 body parts
         if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
-            return 2;
+            room.memory.defcon = 2;
+            return;
         }
         // level 1 -- less than 50 body parts
-        return 1;
+        room.memory.defcon = 1;
+        return;
     }
     /**
      * get repair targets for the room (any structure under 75% hp)
@@ -8097,6 +8103,7 @@ class RoomVisualApi {
         const controllerProgress = room.controller.progress;
         const controllerTotal = room.controller.progressTotal;
         const controllerPercent = Math.floor((controllerProgress / controllerTotal * 100) * 10) / 10;
+        const defconLevel = room.memory.defcon;
         // Draw the text
         const lines = [];
         lines.push("");
@@ -8105,6 +8112,7 @@ class RoomVisualApi {
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
+        lines.push("DEFCON:         " + defconLevel);
         lines.push("");
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
         // Draw a box around the text

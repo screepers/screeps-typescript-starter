@@ -160,13 +160,14 @@ export default class RoomApi {
      * set the rooms defcon level
      * @param room the room we are setting defcon for
      */
-    public static setDefconLevel(room: Room): number {
+    public static setDefconLevel(room: Room): void {
 
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
-            return 0;
+            room.memory.defcon = 0;
+            return;
         }
 
         // now define the variables we will need to check the other cases in the event
@@ -177,26 +178,31 @@ export default class RoomApi {
 
         // level 5 -- nuke inbound
         if (room.find(FIND_NUKES) !== undefined) {
-            return 5;
+            room.memory.defcon = 5;
+            return;
         }
 
         // level 4 full seige, 50+ boosted parts
         if (boostedHostileBodyParts >= 50) {
-            return 4;
+            room.memory.defcon = 4;
+            return;
         }
 
         // level 3 -- 150+ body parts OR any boosted body parts
         if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
-            return 3;
+            room.memory.defcon = 3;
+            return;
         }
 
         // level 2 -- 50 - 150 body parts
         if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
-            return 2;
+            room.memory.defcon = 2;
+            return;
         }
 
         // level 1 -- less than 50 body parts
-        return 1;
+        room.memory.defcon = 1;
+        return;
     }
 
     /**
