@@ -665,6 +665,12 @@ class RoomApi {
             }
         }
         // ----------
+        // check if we are in intro room state
+        // 3 or less creeps so we need to (re)start the room
+        const creeps = MemoryApi.getMyCreeps(room.name);
+        if (creeps.length < 3) {
+            MemoryApi.updateRoomState(ROOM_STATE_INTRO$1, room);
+        }
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high
         const defconLevel = MemoryApi.getDefconLevel(room);
@@ -701,7 +707,6 @@ class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE$1, room);
                     return;
                 }
-                console.log("how");
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED$1, room);
                 return;
@@ -719,15 +724,11 @@ class RoomApi {
         // ----------
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
-        const creeps = MemoryApi.getMyCreeps(room.name);
         if (creeps.length >= 3) {
             MemoryApi.updateRoomState(ROOM_STATE_BEGINNER$1, room);
             return;
         }
         // ----------
-        // check if we are in intro room state
-        // 3 or less creeps so we need to (re)start the room
-        MemoryApi.updateRoomState(ROOM_STATE_INTRO$1, room);
     }
     /**
      * run the towers in the room
@@ -2538,7 +2539,7 @@ class SpawnHelper {
      * @param tier The tier of the room
      */
     static generateMinerBody(tier) {
-        let body = { work: 0, move: 0 };
+        let body = { work: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 2 Work, 2 Move - Total Cost: 300
@@ -2548,6 +2549,11 @@ class SpawnHelper {
             case TIER_2: // 5 Work, 1 Move - Total Cost: 550
                 body = { work: 5, move: 1 };
                 break;
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
+            case TIER_4:
             case TIER_3: // 5 Work, 2 Move - Total Cost: 600
                 body = { work: 5, move: 2 };
                 break;
@@ -2602,7 +2608,7 @@ class SpawnHelper {
      */
     static generateHarvesterBody(tier) {
         // Default Values for harvester
-        let body = { work: 0, move: 0 };
+        let body = { work: 1, carry: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
@@ -2620,6 +2626,8 @@ class SpawnHelper {
             case TIER_5: // 2 Work, 16 Carry, 16 Move - Total Cost: 1800
                 body = { work: 2, carry: 16, move: 16 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
                 body = { work: 2, carry: 20, move: 20 };
                 break;
@@ -2743,7 +2751,7 @@ class SpawnHelper {
      */
     static generateWorkerBody(tier) {
         // Default Values for Worker
-        let body = { work: 0, move: 0 };
+        let body = { work: 1, carry: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
@@ -2758,6 +2766,9 @@ class SpawnHelper {
             case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
                 body = { work: 7, carry: 6, move: 6 };
                 break;
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
             case TIER_5: // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
                 body = { work: 10, carry: 8, move: 8 };
                 break;
@@ -2881,7 +2892,7 @@ class SpawnHelper {
      */
     static generateLorryBody(tier) {
         // Default Values for Lorry
-        let body = { work: 0, move: 0 };
+        let body = { carry: 3, move: 3 };
         const opts = { mixType: GROUPED };
         // There are currently no plans to use lorry before terminal becomes available
         switch (tier) {
@@ -2894,9 +2905,12 @@ class SpawnHelper {
             case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
                 body = { carry: 8, move: 8 };
                 break;
+            case TIER_5:
             case TIER_4: // 10 Carry, 10 Move - Total Cost: 1000
                 body = { carry: 10, move: 10 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
                 body = { carry: 20, move: 20 };
                 break;
@@ -2950,7 +2964,7 @@ class SpawnHelper {
      */
     static generatePowerUpgraderBody(tier) {
         // Default Values for Power Upgrader
-        let body = { work: 0, move: 0 };
+        let body = { work: 18, carry: 8, move: 4 };
         const opts = { mixType: GROUPED };
         // There are currently no plans to use power upgraders before links become available
         // Need to experiment with work parts here and find out whats keeps up with the links
@@ -3014,13 +3028,17 @@ class SpawnHelper {
      */
     static generateRemoteMinerBody(tier) {
         // Default Values for Remote Miner
-        let body = { work: 0, move: 0 };
+        let body = { work: 6, carry: 1, move: 3 };
         const opts = { mixType: GROUPED };
         // Cap the remote miner at 6 work parts (6 so they finish mining early and can build/repair their container)
         switch (tier) {
             case TIER_3: // 6 Work, 1 Carry, 3 Move - Total Cost: 800
                 body = { work: 6, carry: 1, move: 3 };
                 break;
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
             case TIER_4: // 6 Work, 1 Carry, 4 Move - Total Cost: 850
                 body = { work: 6, carry: 1, move: 4 };
                 break;
@@ -3069,7 +3087,7 @@ class SpawnHelper {
      */
     static generateRemoteHarvesterBody(tier) {
         // Default Values for Remote Harvester
-        let body = { work: 0, move: 0 };
+        let body = { carry: 8, move: 8 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
@@ -3081,6 +3099,8 @@ class SpawnHelper {
             case TIER_5: // 16 Carry, 16 Move - Total Cost: 1600
                 body = { carry: 16, move: 16 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
                 body = { carry: 20, move: 20 };
                 break;
@@ -3178,9 +3198,13 @@ class SpawnHelper {
      */
     static generateRemoteReserverBody(tier) {
         // Default Values for Remote Reserver
-        let body = { work: 0, move: 0 };
+        let body = { claim: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
             case TIER_4: // 2 Claim, 2 Move - Total Cost: 800
                 body = { claim: 2, move: 2 };
                 break;
@@ -3235,7 +3259,7 @@ class SpawnHelper {
      */
     static generateRemoteColonizerBody(tier) {
         // Default Values for Remote Colonizer
-        let body = { work: 0, move: 0 };
+        let body = { work: 7, carry: 5, move: 6 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_4: // 7 Work, 5 Carry, 5 Move - Total Cost: 1300
@@ -3244,6 +3268,8 @@ class SpawnHelper {
             case TIER_5: // 9 Work, 8 Carry, 10 Move - Total Cost: 1800
                 body = { work: 9, carry: 8, move: 10 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 12 Work, 10 Carry, 10 Move - Total Cost: 2300
                 body = { work: 12, carry: 10, move: 12 };
                 break;
@@ -3337,9 +3363,15 @@ class SpawnHelper {
      */
     static generateClaimerBody(tier) {
         // Default Values for Claimer
-        let body = { work: 0, move: 0 };
+        let body = { claim: 1, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
+            case TIER_4:
+            case TIER_3:
             case TIER_2: // 1 Claim, 2 Move, Total Cost: 400
                 body = { claim: 1, move: 2 };
                 break;
@@ -3353,7 +3385,7 @@ class SpawnHelper {
      */
     static generateRemoteDefenderBody(tier) {
         // Default Values for Remote Defender
-        let body = { work: 0, move: 0 };
+        let body = { attack: 5, move: 5 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_3: // 5 Attack, 5 Move - Total Cost: 550
@@ -3365,6 +3397,8 @@ class SpawnHelper {
             case TIER_5: // 8 Ranged Attack, 7 Move, 1 Heal - Total Cost: 1800
                 body = { ranged_attack: 8, move: 7, heal: 1 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 8 Ranged Attack, 10 Move, 2 Heal
                 body = { ranged_attack: 8, move: 10, heal: 2 };
                 break;
@@ -3429,6 +3463,8 @@ class SpawnHelper {
             case TIER_5: // 15 Attack, 12 Move - Total Cost: 1800
                 body = { attack: 15, move: 12 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 20 Attack, 14 Move - Total Cost: 2300
                 body = { attack: 20, move: 14 };
                 break;
@@ -3476,7 +3512,7 @@ class SpawnHelper {
      */
     static generateMedicBody(tier) {
         // Default Values for Medic
-        let body = { work: 0, move: 0 };
+        let body = { heal: 1, move: 1 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Heal, 1 Move - Total Cost: 300
@@ -3494,6 +3530,8 @@ class SpawnHelper {
             case TIER_5: // 6 Heal, 6 Move - Total Cost: 1800
                 body = { heal: 6, move: 6 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 8 Heal, 6 Move - Total Cost: 2300
                 body = { heal: 8, move: 6 };
                 break;
@@ -3538,7 +3576,7 @@ class SpawnHelper {
      */
     static generateStalkerBody(tier) {
         // Default Values for Stalker
-        let body = { work: 0, move: 0 };
+        let body = { ranged_attack: 1, move: 1 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Ranged Attack, 2 Move - Total Cost: 200
@@ -3556,6 +3594,8 @@ class SpawnHelper {
             case TIER_5: // 8 Ranged Attack, 8 Move - Total Cost: 1600
                 body = { ranged_attack: 8, move: 8 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 12 Ranged Attack, 10 Move - Total Cost: 2300
                 body = { ranged_attack: 12, move: 10 };
                 break;
@@ -3596,7 +3636,7 @@ class SpawnHelper {
      */
     static generateDomesticDefenderBody(tier) {
         // Default Values for Stalker
-        let body = { work: 0, move: 0 };
+        let body = { attack: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
@@ -3614,6 +3654,8 @@ class SpawnHelper {
             case TIER_5: // 10 Attack, 10 Move - Total Cost: 1300
                 body = { attack: 10, move: 10 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 15 Attack, 15 Move - Total Cost: 1950
                 body = { attack: 15, move: 15 };
                 break;

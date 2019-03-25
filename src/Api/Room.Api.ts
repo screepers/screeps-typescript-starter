@@ -58,6 +58,13 @@ export default class RoomApi {
         }
         // ----------
 
+        // check if we are in intro room state
+        // 3 or less creeps so we need to (re)start the room
+        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room.name);
+        if (creeps.length < 3) {
+            MemoryApi.updateRoomState(ROOM_STATE_INTRO, room);
+            return;
+        }
 
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high
@@ -125,17 +132,11 @@ export default class RoomApi {
 
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
-        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room.name);
         if (creeps.length >= 3) {
             MemoryApi.updateRoomState(ROOM_STATE_BEGINNER, room);
             return;
         }
         // ----------
-
-
-        // check if we are in intro room state
-        // 3 or less creeps so we need to (re)start the room
-        MemoryApi.updateRoomState(ROOM_STATE_INTRO, room);
     }
 
     /**
