@@ -8316,6 +8316,8 @@ class RoomVisualApi {
             Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
         }
         // Get the current scale
+        const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minVal = _.min(Memory.visual.avgControlPointsPerHourArray);
         // Draw current scale on left side of graph
         // Delete the first line of the array
         // Move everything back one value, leaving the 5th slot open
@@ -8941,6 +8943,42 @@ class MinerCreepManager {
             // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
             const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
             if (sourceJobs.length > 0) {
+                // Select the source with the lowest TTL miner on it (or no miner at all)
+                const sources = _.map(sourceJobs, (job) => Game.getObjectById(job.targetID));
+                let selectedId;
+                for (const source of sources) {
+                    if (!source) {
+                        continue;
+                    }
+                    const minersOnSource = source.pos.findInRange(FIND_MY_CREEPS, 1, { filter: (c) => c.memory.role === ROLE_MINER$1 });
+                    // If there is a miner, the one with the lower TTL
+                    if (minersOnSource.length === 0) {
+                        selectedId = source.id;
+                        break;
+                    }
+                    else {
+                        let lowestTTL;
+                        for (const miner of minersOnSource) {
+                            if (!selectedId || !lowestTTL) {
+                                selectedId = source.id;
+                                lowestTTL = miner.ticksToLive;
+                                continue;
+                            }
+                            else {
+                                if (miner.spawning) {
+                                    continue;
+                                }
+                                if (miner.ticksToLive < lowestTTL) {
+                                    selectedId = source.id;
+                                    lowestTTL = miner.ticksToLive;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (selectedId) {
+                    return _.find(sourceJobs, (job) => job.targetID === selectedId);
+                }
                 return sourceJobs[0];
             }
         }
