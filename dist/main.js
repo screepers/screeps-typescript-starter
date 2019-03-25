@@ -670,6 +670,7 @@ class RoomApi {
         const creeps = MemoryApi.getMyCreeps(room.name);
         if (creeps.length < 3) {
             MemoryApi.updateRoomState(ROOM_STATE_INTRO$1, room);
+            return;
         }
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high

@@ -211,14 +211,21 @@ export default class RoomApi {
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): Array<Structure<StructureConstant>> {
-        const repairStructures = MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
+        const repairStructures: Array<Structure<StructureConstant>> = MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
             if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
                 return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
             }
-            else {
-                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
-            }
+            return false;
         });
+
+        if (repairStructures.length === 0) {
+            return MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
+                if (struct.structureType === STRUCTURE_RAMPART || struct.structureType === STRUCTURE_WALL) {
+                    return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+                }
+                return false;
+            });
+        }
         return repairStructures
     }
 
