@@ -69,7 +69,7 @@ export default class RoomApi {
         // ----------
 
         const storage: StructureStorage | undefined = room.storage;
-        const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
+        const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
         const sources: Array<Source | null> = MemoryApi.getSources(room);
         if (room.controller!.level >= 6) {
 
@@ -103,6 +103,7 @@ export default class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
                     return;
                 }
+                console.log("how");
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED, room);
                 return;
@@ -159,13 +160,14 @@ export default class RoomApi {
      * set the rooms defcon level
      * @param room the room we are setting defcon for
      */
-    public static setDefconLevel(room: Room): number {
+    public static setDefconLevel(room: Room): void {
 
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
-            return 0;
+            room.memory.defcon = 0;
+            return;
         }
 
         // now define the variables we will need to check the other cases in the event
@@ -175,27 +177,32 @@ export default class RoomApi {
             .length;
 
         // level 5 -- nuke inbound
-        if (room.find(FIND_NUKES) !== undefined) {
-            return 5;
+        if (room.find(FIND_NUKES).length > 0) {
+            room.memory.defcon = 5;
+            return;
         }
 
         // level 4 full seige, 50+ boosted parts
         if (boostedHostileBodyParts >= 50) {
-            return 4;
+            room.memory.defcon = 4;
+            return;
         }
 
         // level 3 -- 150+ body parts OR any boosted body parts
         if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
-            return 3;
+            room.memory.defcon = 3;
+            return;
         }
 
         // level 2 -- 50 - 150 body parts
         if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
-            return 2;
+            room.memory.defcon = 2;
+            return;
         }
 
         // level 1 -- less than 50 body parts
-        return 1;
+        room.memory.defcon = 1;
+        return;
     }
 
     /**
@@ -203,13 +210,15 @@ export default class RoomApi {
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): Array<Structure<StructureConstant>> {
-        return MemoryApi.getStructures(room, (s: Structure<StructureConstant>) => {
-            if (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) {
-                return s.hits < s.hitsMax * REPAIR_THRESHOLD;
-            } else {
-                return s.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+        const repairStructures = MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
+            if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
+                return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
+            }
+            else {
+                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
             }
         });
+        return repairStructures
     }
 
     /**

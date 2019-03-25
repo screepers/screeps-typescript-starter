@@ -1046,3 +1046,19 @@ type TIER_5 = 1800;
 type TIER_6 = 2300;
 type TIER_7 = 5300;
 type TIER_8 = 12300;
+
+/**
+ * Extra data for memory structures
+ */
+interface Memory {
+    visual: VisualMemory;
+}
+/**
+ * room visual memory related memory
+ */
+interface VisualMemory {
+    time: number;
+    secondsPerTick: number;
+    controllerProgressArray: number[];
+    avgControlPointsPerHourArray: number[];
+}

@@ -1,5 +1,8 @@
 import MemoryApi from "../../Api/Memory.Api";
 import RoomVisualApi from "./RoomVisual.Api";
+import {
+    ROOM_OVERLAY_GRAPH_ON
+} from "utils/config";
 
 // Manager for room visuals
 export default class RoomVisualManager {
@@ -40,6 +43,10 @@ export default class RoomVisualManager {
         endLeftLine = RoomVisualApi.createCreepCountVisual(room, LEFT_START_X, endLeftLine);
         // Display the Room Info box in the bottom left
         endLeftLine = RoomVisualApi.createRoomInfoVisual(room, LEFT_START_X, endLeftLine);
+
+        if (ROOM_OVERLAY_GRAPH_ON) {
+            RoomVisualApi.createUpgradeGraphVisual(room, LEFT_START_X + 1, 45);
+        }
         // ------
 
         // Right Side -----

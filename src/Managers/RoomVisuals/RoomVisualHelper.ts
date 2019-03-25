@@ -11,6 +11,7 @@ import {
     ZEALOT_SOLO,
     STALKER_SOLO
 } from "utils/constants";
+import RoomHelper from "Helpers/RoomHelper";
 
 const textColor = '#bab8ba';
 const textSize = .8;
@@ -70,9 +71,9 @@ export default class RoomVisualManager {
             case ROOM_STATE_BEGINNER:
                 return "Beginner";
             case ROOM_STATE_INTER:
-                return "Advanced";
+                return "Intermediate";
             case ROOM_STATE_ADVANCED:
-                return "Beginner";
+                return "Advanced";
             case ROOM_STATE_NUKE_INBOUND:
                 return "Nuke Incoming!";
             case ROOM_STATE_SEIGE:
@@ -99,5 +100,70 @@ export default class RoomVisualManager {
             default:
                 return "Not An Attack Flag"
         }
+    }
+
+    /**
+     * get the amount of seconds in each tick (estimate)
+     */
+    public static getSecondsPerTick(): number {
+        const TIME_BETWEEN_CHECKS: number = 50;
+        if (!Memory.visual) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
+
+            } as VisualMemory;
+        }
+
+        // Every 50 ticks, update the time and find the new seconds per tick
+        if (RoomHelper.excecuteEveryTicks(TIME_BETWEEN_CHECKS)) {
+            const updatedTime: number = Date.now();
+            const oldTime: number = Memory.visual.time;
+            const avgTimePerTick = ((updatedTime - oldTime) / TIME_BETWEEN_CHECKS) / 1000;
+            Memory.visual.time = updatedTime;
+            Memory.visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
+        }
+        return Memory.visual.secondsPerTick;
+    }
+
+    /**
+     * get the average controller progress over the last specified ticks
+     * @param ticks the number of ticks we are wanting to collect
+     * @param room the room we are getting the CPPT for
+     */
+    public static getAverageControlPointsPerTick(ticks: number, room: Room): number {
+        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
+            } as VisualMemory;
+        }
+
+        const progressSampleSize: number = Memory.visual.controllerProgressArray.length;
+        const newControllerProgress: number = room.controller!.progress;
+        let progressSum: number = 0;
+
+        if (progressSampleSize < ticks) {
+            // Add this ticks value to the array if it isn't already too large
+            Memory.visual.controllerProgressArray.push(newControllerProgress);
+        }
+        else {
+            // Move everything left, then add new value to end
+            for (let j = 0; j < progressSampleSize; ++j) {
+                Memory.visual.controllerProgressArray[j] = Memory.visual.controllerProgressArray[j + 1];
+            }
+            Memory.visual.controllerProgressArray[progressSampleSize - 1] = newControllerProgress;
+        }
+
+        // Get the average control points per tick
+        for (let i = 0; i < progressSampleSize - 1; ++i) {
+            progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
+        }
+
+        return Math.floor(progressSum / progressSampleSize);
     }
 }

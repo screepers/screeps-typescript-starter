@@ -1,6 +1,9 @@
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
-import { DEFAULT_MOVE_OPTS, ERROR_ERROR } from "utils/constants";
+import {
+    DEFAULT_MOVE_OPTS, ERROR_ERROR,
+    ROOM_STATE_BEGINNER, ROOM_STATE_INTRO, ROLE_MINER
+} from "utils/constants";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -167,7 +170,7 @@ export default class CreepApi {
             }
         } else if (job.actionType === "repair" && target instanceof Structure) {
             returnCode = creep.repair(target);
-            if (target.hits === target.hitsMax) {
+            if (target.hits === target.hitsMax || creep.carry.energy === 0) {
                 deleteOnSuccess = true;
             }
         } else if (job.actionType === "upgrade" && target instanceof StructureController) {
@@ -244,6 +247,10 @@ export default class CreepApi {
                 break;
             case ERR_NOT_FOUND:
                 break;
+            case ERR_FULL:
+                delete creep.memory.job;
+                creep.memory.working = false;
+                break;
             default:
                 break;
         }
@@ -272,6 +279,16 @@ export default class CreepApi {
             moveOpts.range = 1;
         } else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
             moveOpts.range = 1;
+        }
+
+        if (
+            job.actionType === "harvest" &&
+            creep.memory.role === ROLE_MINER &&
+            creep.room.memory.roomState !== ROOM_STATE_INTRO &&
+            creep.room.memory.roomState !== ROOM_STATE_BEGINNER) {
+            // This case implies container mining is available, and miner was stopping 1 tile before the container
+            // If you can find a better way to do this, please do lol
+            moveOpts.range = 0;
         }
 
         if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {

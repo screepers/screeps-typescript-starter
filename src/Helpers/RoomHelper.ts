@@ -164,7 +164,7 @@ export default class RoomHelper {
 
         _.forEach(sources, (source: Source) => {
             if (_.some(containers, (container: StructureContainer) =>
-                source.pos.inRangeTo(container.pos, 1)
+                source.pos.inRangeTo(container.pos, 2)
             )) {
                 numMiningContainers++;
             }

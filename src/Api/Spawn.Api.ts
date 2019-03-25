@@ -421,9 +421,12 @@ export default class SpawnApi {
      * @param RoleConstant the role of the creep
      */
     public static getTier(room: Room, roleConst: RoleConstant | null): TierConstant {
-        const energyAvailable: number = room.energyAvailable;
+        const energyAvailable: number = room.energyCapacityAvailable;
 
         // Check what tier we are in based on the amount of energy the room has
+        if (room.memory.roomState === ROOM_STATE_INTRO) {
+            return TIER_1;
+        }
         if (energyAvailable === TIER_8) {
             return TIER_8;
         }

@@ -393,7 +393,7 @@ class RoomHelper {
         // Loop over sources and make sure theres at least one container in range to it
         let numMiningContainers = 0;
         _.forEach(sources, (source) => {
-            if (_.some(containers, (container) => source.pos.inRangeTo(container.pos, 1))) {
+            if (_.some(containers, (container) => source.pos.inRangeTo(container.pos, 2))) {
                 numMiningContainers++;
             }
         });
@@ -674,7 +674,7 @@ class RoomApi {
         }
         // ----------
         const storage = room.storage;
-        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION);
+        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
         const sources = MemoryApi.getSources(room);
         if (room.controller.level >= 6) {
             // check if we are in upgrader room state
@@ -701,6 +701,7 @@ class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE$1, room);
                     return;
                 }
+                console.log("how");
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED$1, room);
                 return;
@@ -752,7 +753,8 @@ class RoomApi {
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
-            return 0;
+            room.memory.defcon = 0;
+            return;
         }
         // now define the variables we will need to check the other cases in the event
         // we are not dealing with a level 0 defcon scenario
@@ -760,37 +762,43 @@ class RoomApi {
         const boostedHostileBodyParts = _.filter(_.flatten(_.map(hostileCreeps, "body")), (p) => !!p.boost)
             .length;
         // level 5 -- nuke inbound
-        if (room.find(FIND_NUKES) !== undefined) {
-            return 5;
+        if (room.find(FIND_NUKES).length > 0) {
+            room.memory.defcon = 5;
+            return;
         }
         // level 4 full seige, 50+ boosted parts
         if (boostedHostileBodyParts >= 50) {
-            return 4;
+            room.memory.defcon = 4;
+            return;
         }
         // level 3 -- 150+ body parts OR any boosted body parts
         if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
-            return 3;
+            room.memory.defcon = 3;
+            return;
         }
         // level 2 -- 50 - 150 body parts
         if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
-            return 2;
+            room.memory.defcon = 2;
+            return;
         }
         // level 1 -- less than 50 body parts
-        return 1;
+        room.memory.defcon = 1;
+        return;
     }
     /**
      * get repair targets for the room (any structure under 75% hp)
      * @param room the room we are checking for repair targets
      */
     static getRepairTargets(room) {
-        return MemoryApi.getStructures(room, (s) => {
-            if (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) {
-                return s.hits < s.hitsMax * REPAIR_THRESHOLD;
+        const repairStructures = MemoryApi.getStructures(room, (struct) => {
+            if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
+                return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
             }
             else {
-                return s.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
             }
         });
+        return repairStructures;
     }
     /**
      * get spawn/extensions that need to be filled for the room
@@ -1499,7 +1507,7 @@ class MemoryHelper_Room {
      * @param stateConst the defcon we are applying to the room
      */
     static updateDefcon(room) {
-        Memory.rooms[room.name].defcon = RoomApi.setDefconLevel(room);
+        RoomApi.setDefconLevel(room);
         return;
     }
     /**
@@ -2132,8 +2140,11 @@ class SpawnApi {
      * @param RoleConstant the role of the creep
      */
     static getTier(room, roleConst) {
-        const energyAvailable = room.energyAvailable;
+        const energyAvailable = room.energyCapacityAvailable;
         // Check what tier we are in based on the amount of energy the room has
+        if (room.memory.roomState === ROOM_STATE_INTRO) {
+            return TIER_1;
+        }
         if (energyAvailable === TIER_8) {
             return TIER_8;
         }
@@ -4118,8 +4129,10 @@ class MemoryApi {
         // Flatten the object into an array of IDs
         for (const type in Memory.rooms[room.name].structures.data) {
             const IDs = Memory.rooms[room.name].structures.data[type];
-            if (IDs.length) {
-                structureIDs.push(IDs);
+            for (const singleID of IDs) {
+                if (singleID) {
+                    structureIDs.push(singleID);
+                }
             }
         }
         let structures = MemoryHelper.getOnlyObjectsFromIDs(structureIDs);
@@ -7878,9 +7891,9 @@ class RoomVisualManager {
             case ROOM_STATE_BEGINNER$1:
                 return "Beginner";
             case ROOM_STATE_INTER$1:
-                return "Advanced";
+                return "Intermediate";
             case ROOM_STATE_ADVANCED$1:
-                return "Beginner";
+                return "Advanced";
             case ROOM_STATE_NUKE_INBOUND$1:
                 return "Nuke Incoming!";
             case ROOM_STATE_SEIGE$1:
@@ -7907,6 +7920,63 @@ class RoomVisualManager {
                 return "Not An Attack Flag";
         }
     }
+    /**
+     * get the amount of seconds in each tick (estimate)
+     */
+    static getSecondsPerTick() {
+        const TIME_BETWEEN_CHECKS = 50;
+        if (!Memory.visual) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
+            };
+        }
+        // Every 50 ticks, update the time and find the new seconds per tick
+        if (RoomHelper.excecuteEveryTicks(TIME_BETWEEN_CHECKS)) {
+            const updatedTime = Date.now();
+            const oldTime = Memory.visual.time;
+            const avgTimePerTick = ((updatedTime - oldTime) / TIME_BETWEEN_CHECKS) / 1000;
+            Memory.visual.time = updatedTime;
+            Memory.visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
+        }
+        return Memory.visual.secondsPerTick;
+    }
+    /**
+     * get the average controller progress over the last specified ticks
+     * @param ticks the number of ticks we are wanting to collect
+     * @param room the room we are getting the CPPT for
+     */
+    static getAverageControlPointsPerTick(ticks, room) {
+        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
+            };
+        }
+        const progressSampleSize = Memory.visual.controllerProgressArray.length;
+        const newControllerProgress = room.controller.progress;
+        let progressSum = 0;
+        if (progressSampleSize < ticks) {
+            // Add this ticks value to the array if it isn't already too large
+            Memory.visual.controllerProgressArray.push(newControllerProgress);
+        }
+        else {
+            // Move everything left, then add new value to end
+            for (let j = 0; j < progressSampleSize; ++j) {
+                Memory.visual.controllerProgressArray[j] = Memory.visual.controllerProgressArray[j + 1];
+            }
+            Memory.visual.controllerProgressArray[progressSampleSize - 1] = newControllerProgress;
+        }
+        // Get the average control points per tick
+        for (let i = 0; i < progressSampleSize - 1; ++i) {
+            progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
+        }
+        return Math.floor(progressSum / progressSampleSize);
+    }
 }
 
 // Api for room visuals
@@ -7925,8 +7995,6 @@ class RoomVisualApi {
         const BUCKET_LIMIT = 10000;
         const gclProgress = Game.gcl['progress'];
         const gclTotal = Game.gcl['progressTotal'];
-        const ownedRooms = MemoryApi.getOwnedRooms();
-        const totalCreeps = _.sum(ownedRooms, (r) => MemoryApi.getMyCreeps(room.name).length);
         const cpuPercent = Math.floor((usedCpu / cpuLimit * 100) * 10) / 10;
         const bucketPercent = Math.floor((bucket / BUCKET_LIMIT * 100) * 10) / 10;
         const gclPercent = Math.floor((gclProgress / gclTotal * 100) * 10) / 10;
@@ -7941,8 +8009,6 @@ class RoomVisualApi {
         lines.push("LVL:    " + Game.gcl['level']);
         lines.push("");
         lines.push("Viewing:  [ " + room.name + " ]");
-        lines.push("Empire Rooms:    " + ownedRooms.length);
-        lines.push("Empire Creeps:   " + totalCreeps);
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
         // Draw a box around the text
         new RoomVisual(room.name)
@@ -8039,6 +8105,7 @@ class RoomVisualApi {
         const controllerProgress = room.controller.progress;
         const controllerTotal = room.controller.progressTotal;
         const controllerPercent = Math.floor((controllerProgress / controllerTotal * 100) * 10) / 10;
+        const defconLevel = room.memory.defcon;
         // Draw the text
         const lines = [];
         lines.push("");
@@ -8047,6 +8114,7 @@ class RoomVisualApi {
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
+        lines.push("DEFCON:         " + defconLevel);
         lines.push("");
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
         // Draw a box around the text
@@ -8205,7 +8273,6 @@ class RoomVisualApi {
         }
         RoomVisualManager.multiLineText(lines, x, y, room.name, false);
         // Draw the box around the text
-        // Draw a box around the text
         new RoomVisual(room.name)
             .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1) // bottom line
             .line(x - 10, y - 1, x + .25, y - 1) // top line
@@ -8213,6 +8280,50 @@ class RoomVisualApi {
             .line(x + .25, y - 1, x + .25, y + lines.length - 1); // right line
         // Return where the next box should start
         return y + lines.length;
+    }
+    /**
+     *
+     * @param room the room we are creating the visual for
+     * @param x the x value for the starting point of the graph
+     * @param y the y value for the starting point of the graph
+     */
+    static createUpgradeGraphVisual(room, x, y) {
+        const X_VALS = { '1': x + 3, '2': x + 6, '3': x + 9, '4': x + 12, '5': x + 15 };
+        const secondsPerTick = RoomVisualManager.getSecondsPerTick();
+        const ticksPerHour = Math.floor(3600 / secondsPerTick);
+        const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(10, room);
+        const controlPointsPerHourEstimate = avgControlPointsPerTick * ticksPerHour;
+        // Draw the Graph Lines
+        new RoomVisual(room.name)
+            .line(x, y, x, y - 7.5) // bottom line
+            .line(x, y, x + 15, y) // left line
+            .line(X_VALS['1'], y - .25, X_VALS['1'], y + .25) // tick marks
+            .line(X_VALS['2'], y - .25, X_VALS['2'], y + .25)
+            .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
+            .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25);
+        // Update the control points per hour estimate array
+        if (!Memory.visual.avgControlPointsPerHourArray) {
+            Memory.visual.avgControlPointsPerHourArray = [];
+        }
+        const avgControlPointsPerHourSize = Memory.visual.avgControlPointsPerHourArray.length;
+        if (avgControlPointsPerHourSize < 5) {
+            Memory.visual.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
+        }
+        else {
+            for (let i = 0; i < avgControlPointsPerHourSize - 1; ++i) {
+                Memory.visual.avgControlPointsPerHourArray[i] = Memory.visual.avgControlPointsPerHourArray[i + 1];
+            }
+            Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
+        }
+        // Get the current scale
+        const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minVal = _.min(Memory.visual.avgControlPointsPerHourArray);
+        // Draw current scale on left side of graph
+        // Delete the first line of the array
+        // Move everything back one value, leaving the 5th slot open
+        // Put the new value in the 5th slot
+        // Adjust all Y values based on current scale
+        // Draw all lines on graph
     }
 }
 
@@ -8247,6 +8358,9 @@ class RoomVisualManager$1 {
         endLeftLine = RoomVisualApi.createCreepCountVisual(room, LEFT_START_X, endLeftLine);
         // Display the Room Info box in the bottom left
         endLeftLine = RoomVisualApi.createRoomInfoVisual(room, LEFT_START_X, endLeftLine);
+        {
+            RoomVisualApi.createUpgradeGraphVisual(room, LEFT_START_X + 1, 45);
+        }
         // ------
         // Right Side -----
         // Display Remote Flag box on the top right
@@ -8553,7 +8667,7 @@ class CreepApi {
         }
         else if (job.actionType === "repair" && target instanceof Structure) {
             returnCode = creep.repair(target);
-            if (target.hits === target.hitsMax) {
+            if (target.hits === target.hitsMax || creep.carry.energy === 0) {
                 deleteOnSuccess = true;
             }
         }
@@ -8629,6 +8743,10 @@ class CreepApi {
                 break;
             case ERR_NOT_FOUND:
                 break;
+            case ERR_FULL:
+                delete creep.memory.job;
+                creep.memory.working = false;
+                break;
             default:
                 break;
         }
@@ -8655,6 +8773,14 @@ class CreepApi {
         }
         else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
             moveOpts.range = 1;
+        }
+        if (job.actionType === "harvest" &&
+            creep.memory.role === ROLE_MINER$1 &&
+            creep.room.memory.roomState !== ROOM_STATE_INTRO$1 &&
+            creep.room.memory.roomState !== ROOM_STATE_BEGINNER$1) {
+            // This case implies container mining is available, and miner was stopping 1 tile before the container
+            // If you can find a better way to do this, please do lol
+            moveOpts.range = 0;
         }
         if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
             creep.memory.working = true;
@@ -8817,6 +8943,42 @@ class MinerCreepManager {
             // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
             const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
             if (sourceJobs.length > 0) {
+                // Select the source with the lowest TTL miner on it (or no miner at all)
+                const sources = _.map(sourceJobs, (job) => Game.getObjectById(job.targetID));
+                let selectedId;
+                for (const source of sources) {
+                    if (!source) {
+                        continue;
+                    }
+                    const minersOnSource = source.pos.findInRange(FIND_MY_CREEPS, 1, { filter: (c) => c.memory.role === ROLE_MINER$1 });
+                    // If there is a miner, the one with the lower TTL
+                    if (minersOnSource.length === 0) {
+                        selectedId = source.id;
+                        break;
+                    }
+                    else {
+                        let lowestTTL;
+                        for (const miner of minersOnSource) {
+                            if (!selectedId || !lowestTTL) {
+                                selectedId = source.id;
+                                lowestTTL = miner.ticksToLive;
+                                continue;
+                            }
+                            else {
+                                if (miner.spawning) {
+                                    continue;
+                                }
+                                if (miner.ticksToLive < lowestTTL) {
+                                    selectedId = source.id;
+                                    lowestTTL = miner.ticksToLive;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (selectedId) {
+                    return _.find(sourceJobs, (job) => job.targetID === selectedId);
+                }
                 return sourceJobs[0];
             }
         }

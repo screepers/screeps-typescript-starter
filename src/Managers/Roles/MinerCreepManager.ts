@@ -47,6 +47,42 @@ export default class MinerCreepManager {
             // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
             const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
             if (sourceJobs.length > 0) {
+                // Select the source with the lowest TTL miner on it (or no miner at all)
+                const sources: Array<Source | null> = _.map(sourceJobs, (job: GetEnergyJob) => Game.getObjectById(job.targetID));
+                let selectedId: string | undefined;
+                for (const source of sources) {
+                    if (!source) {
+                        continue;
+                    }
+                    const minersOnSource: Creep[] = source.pos.findInRange(FIND_MY_CREEPS, 1, { filter: (c: Creep) => c.memory.role === ROLE_MINER });
+                    // If there is a miner, the one with the lower TTL
+                    if (minersOnSource.length === 0) {
+                        selectedId = source.id;
+                        break;
+                    }
+                    else {
+                        let lowestTTL: number | undefined;
+                        for (const miner of minersOnSource) {
+                            if (!selectedId || !lowestTTL) {
+                                selectedId = source.id;
+                                lowestTTL = miner.ticksToLive;
+                                continue;
+                            }
+                            else {
+                                if (miner.spawning) {
+                                    continue;
+                                }
+                                if (miner.ticksToLive! < lowestTTL) {
+                                    selectedId = source.id;
+                                    lowestTTL = miner.ticksToLive;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (selectedId) {
+                    return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === selectedId);
+                }
                 return sourceJobs[0];
             }
         }
