@@ -796,10 +796,16 @@ class RoomApi {
             if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
                 return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
             }
-            else {
-                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
-            }
+            return false;
         });
+        if (repairStructures.length === 0) {
+            return MemoryApi.getStructures(room, (struct) => {
+                if (struct.structureType === STRUCTURE_RAMPART || struct.structureType === STRUCTURE_WALL) {
+                    return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+                }
+                return false;
+            });
+        }
         return repairStructures;
     }
     /**
@@ -1860,6 +1866,7 @@ class SpawnApi {
         };
         const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
         let minerLimits = MemoryApi.getSources(room).length;
+        const numRemoteSources = RoomHelper.numRemoteSources(room);
         // check what room state we are in
         switch (room.memory.roomState) {
             // Intro
@@ -1892,7 +1899,7 @@ class SpawnApi {
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 4;
+                domesticLimits[ROLE_WORKER] = 3 + numRemoteSources;
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
                 domesticLimits[ROLE_LORRY] = numLorries;
                 break;
