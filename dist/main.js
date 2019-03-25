@@ -762,7 +762,7 @@ class RoomApi {
         const boostedHostileBodyParts = _.filter(_.flatten(_.map(hostileCreeps, "body")), (p) => !!p.boost)
             .length;
         // level 5 -- nuke inbound
-        if (room.find(FIND_NUKES) !== undefined) {
+        if (room.find(FIND_NUKES).length > 0) {
             room.memory.defcon = 5;
             return;
         }
@@ -1507,7 +1507,7 @@ class MemoryHelper_Room {
      * @param stateConst the defcon we are applying to the room
      */
     static updateDefcon(room) {
-        Memory.rooms[room.name].defcon = RoomApi.setDefconLevel(room);
+        RoomApi.setDefconLevel(room);
         return;
     }
     /**
@@ -7929,7 +7929,8 @@ class RoomVisualManager {
             Memory.visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
-                controllerProgressArray: []
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
             };
         }
         // Every 50 ticks, update the time and find the new seconds per tick
@@ -7952,7 +7953,8 @@ class RoomVisualManager {
             Memory.visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
-                controllerProgressArray: []
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
             };
         }
         const progressSampleSize = Memory.visual.controllerProgressArray.length;
@@ -8288,7 +8290,9 @@ class RoomVisualApi {
     static createUpgradeGraphVisual(room, x, y) {
         const X_VALS = { '1': x + 3, '2': x + 6, '3': x + 9, '4': x + 12, '5': x + 15 };
         const secondsPerTick = RoomVisualManager.getSecondsPerTick();
+        const ticksPerHour = Math.floor(3600 / secondsPerTick);
         const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(10, room);
+        const controlPointsPerHourEstimate = avgControlPointsPerTick * ticksPerHour;
         // Draw the Graph Lines
         new RoomVisual(room.name)
             .line(x, y, x, y - 7.5) // bottom line
@@ -8297,6 +8301,20 @@ class RoomVisualApi {
             .line(X_VALS['2'], y - .25, X_VALS['2'], y + .25)
             .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
             .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25);
+        // Update the control points per hour estimate array
+        if (!Memory.visual.avgControlPointsPerHourArray) {
+            Memory.visual.avgControlPointsPerHourArray = [];
+        }
+        const avgControlPointsPerHourSize = Memory.visual.avgControlPointsPerHourArray.length;
+        if (avgControlPointsPerHourSize < 5) {
+            Memory.visual.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
+        }
+        else {
+            for (let i = 0; i < avgControlPointsPerHourSize - 1; ++i) {
+                Memory.visual.avgControlPointsPerHourArray[i] = Memory.visual.avgControlPointsPerHourArray[i + 1];
+            }
+            Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
+        }
         // Get the current scale
         // Draw current scale on left side of graph
         // Delete the first line of the array
@@ -8722,6 +8740,10 @@ class CreepApi {
                 creep.memory.working = false;
                 break;
             case ERR_NOT_FOUND:
+                break;
+            case ERR_FULL:
+                delete creep.memory.job;
+                creep.memory.working = false;
                 break;
             default:
                 break;

@@ -391,7 +391,25 @@ export default class RoomVisualApi {
             .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
             .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25)
 
+
+        // Update the control points per hour estimate array
+        if (!Memory.visual!.avgControlPointsPerHourArray) {
+            Memory.visual!.avgControlPointsPerHourArray = [];
+        }
+        const avgControlPointsPerHourSize: number = Memory.visual.avgControlPointsPerHourArray.length;
+        if (avgControlPointsPerHourSize < 5) {
+            Memory.visual.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
+        }
+        else {
+            for (let i = 0; i < avgControlPointsPerHourSize - 1; ++i) {
+                Memory.visual.avgControlPointsPerHourArray[i] = Memory.visual.avgControlPointsPerHourArray[i + 1]
+            }
+            Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
+        }
+
         // Get the current scale
+        const maxVal: number = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minVal: number = _.min(Memory.visual.avgControlPointsPerHourArray);
         // Draw current scale on left side of graph
         // Delete the first line of the array
         // Move everything back one value, leaving the 5th slot open

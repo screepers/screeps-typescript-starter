@@ -206,7 +206,7 @@ export default class MemoryHelper_Room {
      * @param stateConst the defcon we are applying to the room
      */
     public static updateDefcon(room: Room): void {
-        Memory.rooms[room.name].defcon = RoomApi.setDefconLevel(room);
+        RoomApi.setDefconLevel(room);
         return;
     }
 

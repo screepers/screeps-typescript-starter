@@ -1060,4 +1060,5 @@ interface VisualMemory {
     time: number;
     secondsPerTick: number;
     controllerProgressArray: number[];
+    avgControlPointsPerHourArray: number[];
 }

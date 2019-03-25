@@ -177,7 +177,7 @@ export default class RoomApi {
             .length;
 
         // level 5 -- nuke inbound
-        if (room.find(FIND_NUKES) !== undefined) {
+        if (room.find(FIND_NUKES).length > 0) {
             room.memory.defcon = 5;
             return;
         }

@@ -111,7 +111,9 @@ export default class RoomVisualManager {
             Memory.visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
-                controllerProgressArray: []
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
+
             } as VisualMemory;
         }
 
@@ -136,7 +138,8 @@ export default class RoomVisualManager {
             Memory.visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
-                controllerProgressArray: []
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: []
             } as VisualMemory;
         }
 
