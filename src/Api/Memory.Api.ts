@@ -1367,5 +1367,15 @@ export default class MemoryApi {
                 ERROR_ERROR
             );
         }
+
+        const jobListing = room.memory.jobs!.getEnergyJobs;
+
+        let roomJob: GetEnergyJob | undefined;
+
+        if(jobListing.containerJobs) {
+            roomJob = _.find(jobListing.containerJobs.data, (cJob: GetEnergyJob) => cJob.targetID === job.targetID);
+        }
+
+        if(roomJob === undefined && jobListing.)
     }
 }
