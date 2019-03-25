@@ -103,7 +103,7 @@ export default class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
                     return;
                 }
-                console.log("how");
+
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED, room);
                 return;

@@ -410,6 +410,8 @@ export default class RoomVisualApi {
         // Get the current scale
         const maxVal: number = _.max(Memory.visual.avgControlPointsPerHourArray);
         const minVal: number = _.min(Memory.visual.avgControlPointsPerHourArray);
+        const maxRange: number = 0;
+        const minRange: number = 0;
         // Draw current scale on left side of graph
         // Delete the first line of the array
         // Move everything back one value, leaving the 5th slot open
