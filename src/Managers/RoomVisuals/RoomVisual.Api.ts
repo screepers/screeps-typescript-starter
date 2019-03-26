@@ -170,6 +170,9 @@ export default class RoomVisualApi {
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
         lines.push("DEFCON:         " + defconLevel);
+        if (room.storage) {
+            lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+        }
         lines.push("");
         RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 

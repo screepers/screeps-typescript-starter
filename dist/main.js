@@ -1866,7 +1866,11 @@ class SpawnApi {
         };
         const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
         let minerLimits = MemoryApi.getSources(room).length;
-        const numRemoteSources = RoomHelper.numRemoteSources(room);
+        let numRemoteRooms = RoomHelper.numRemoteRooms(room);
+        // To prevent dropping to 2 workers if we don't have remote rooms
+        if (numRemoteRooms === 0) {
+            numRemoteRooms = 1;
+        }
         // check what room state we are in
         switch (room.memory.roomState) {
             // Intro
@@ -1899,7 +1903,7 @@ class SpawnApi {
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 3 + numRemoteSources;
+                domesticLimits[ROLE_WORKER] = 3 + (numRemoteRooms - 1);
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
                 domesticLimits[ROLE_LORRY] = numLorries;
                 break;
@@ -8165,6 +8169,9 @@ class RoomVisualApi {
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
         lines.push("DEFCON:         " + defconLevel);
+        if (room.storage) {
+            lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+        }
         lines.push("");
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
         // Draw a box around the text
