@@ -8095,10 +8095,19 @@ class RoomVisualApi {
             claimer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_CLAIMER$2).length,
             colonizer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_COLONIZER$1).length
         };
+        const spawningCreep = _.filter(MemoryApi.getMyCreeps(room.name), (c) => c.spawning);
+        let spawningRole;
         const lines = [];
         lines.push("");
         lines.push("Creep Info");
         lines.push("");
+        if (spawningCreep.length === 0) {
+            lines.push("Spawning:       " + "None");
+        }
+        for (const creep of spawningCreep) {
+            spawningRole = creep.memory.role;
+            lines.push("Spawning:       " + spawningRole);
+        }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
         if (creepLimits['domesticLimits']) {
             // Add creeps to the lines array
