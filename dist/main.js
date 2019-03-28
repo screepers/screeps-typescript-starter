@@ -8031,6 +8031,13 @@ class RoomVisualManager {
         }
         return Math.floor(progressSum / progressSampleSize);
     }
+    /**
+     * converts the value into something shorter so it can be displayed by the graph
+     * ex converts 22,000 -> 22k
+     */
+    static convertRangeToDisplayVal(rangeVal) {
+        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+    }
 }
 
 // Api for room visuals
@@ -8354,19 +8361,20 @@ class RoomVisualApi {
      * @param y the y value for the starting point of the graph
      */
     static createUpgradeGraphVisual(room, x, y) {
-        const X_VALS = { '1': x + 3, '2': x + 6, '3': x + 9, '4': x + 12, '5': x + 15 };
+        const textColor = '#bab8ba';
+        const X_VALS = [
+            { 'start': x, 'end': x + 3 },
+            { 'start': x + 3, 'end': x + 6 },
+            { 'start': x + 6, 'end': x + 9 },
+            { 'start': x + 9, 'end': x + 12 },
+            { 'start': x + 12, 'end': x + 15 },
+        ];
+        const Y_SCALE = 7.5;
+        const X_SCALE = 15;
         const secondsPerTick = RoomVisualManager.getSecondsPerTick();
         const ticksPerHour = Math.floor(3600 / secondsPerTick);
         const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(10, room);
         const controlPointsPerHourEstimate = avgControlPointsPerTick * ticksPerHour;
-        // Draw the Graph Lines
-        new RoomVisual(room.name)
-            .line(x, y, x, y - 7.5) // bottom line
-            .line(x, y, x + 15, y) // left line
-            .line(X_VALS['1'], y - .25, X_VALS['1'], y + .25) // tick marks
-            .line(X_VALS['2'], y - .25, X_VALS['2'], y + .25)
-            .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
-            .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25);
         // Update the control points per hour estimate array
         if (!Memory.visual.avgControlPointsPerHourArray) {
             Memory.visual.avgControlPointsPerHourArray = [];
@@ -8381,15 +8389,55 @@ class RoomVisualApi {
             }
             Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
         }
-        // Get the current scale
-        const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
+        // Collect values and functions needed to draw the lines on the graph
         const minVal = _.min(Memory.visual.avgControlPointsPerHourArray);
-        // Draw current scale on left side of graph
-        // Delete the first line of the array
-        // Move everything back one value, leaving the 5th slot open
-        // Put the new value in the 5th slot
-        // Adjust all Y values based on current scale
-        // Draw all lines on graph
+        const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minRange = minVal * .75;
+        const maxRange = maxVal * 1.25;
+        const getY2Coord = (raw) => {
+            const range = maxRange - minRange;
+            const offset = raw - minVal;
+            const percentage = offset / range;
+            return percentage * Y_SCALE;
+        };
+        // Get the scale for the graph
+        const displayMinRange = RoomVisualManager.convertRangeToDisplayVal(minRange).toString();
+        const displayMaxRange = RoomVisualManager.convertRangeToDisplayVal(maxRange).toString();
+        // Draw the graph outline and the scale text
+        new RoomVisual(room.name)
+            .line(x, y, x, y - Y_SCALE) // bottom line
+            .line(x, y, x + X_SCALE, y) // left line
+            .line(X_VALS[1].start, y - .25, X_VALS[1].start, y + .25) // tick marks
+            .line(X_VALS[2].start, y - .25, X_VALS[2].start, y + .25)
+            .line(X_VALS[3].start, y - .25, X_VALS[3].start, y + .25)
+            .line(X_VALS[4].start, y - .25, X_VALS[4].start, y + .25)
+            .text(displayMaxRange, x - 2.2, y - Y_SCALE + .5, {
+            align: 'left',
+            color: textColor,
+            opacity: .8,
+            font: ' .7 Trebuchet MS'
+        })
+            .text(displayMinRange, x - 2.2, y, {
+            align: 'left',
+            color: textColor,
+            opacity: .8,
+            font: ' .7 Trebuchet MS'
+        });
+        // Draw the lines for the graph
+        let startCoord = 0;
+        let endCoord = 0;
+        for (let i = 0; i < avgControlPointsPerHourSize; ++i) {
+            // Set the initial previous and next coordinate (first line will always be flat)
+            if (i === 0) {
+                startCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+                endCoord = startCoord;
+            }
+            console.log("start " + i + ": " + startCoord);
+            console.log("end " + i + ": " + endCoord);
+            new RoomVisual(room.name)
+                .line(X_VALS[i].start, startCoord, X_VALS[i].end, endCoord);
+            startCoord = endCoord;
+        }
     }
 }
 

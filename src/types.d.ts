@@ -1062,3 +1062,8 @@ interface VisualMemory {
     controllerProgressArray: number[];
     avgControlPointsPerHourArray: number[];
 }
+
+interface GraphTickMarkMemory {
+    start: number;
+    end: number;
+}
