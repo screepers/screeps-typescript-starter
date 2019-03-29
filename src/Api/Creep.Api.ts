@@ -139,6 +139,7 @@ export default class CreepApi {
                 break;
             case ERR_NOT_FOUND:
                 break;
+            case ERR_NOT_ENOUGH_ENERGY:
             case ERR_FULL:
                 delete creep.memory.job;
                 creep.memory.working = false;

@@ -115,7 +115,24 @@ export default class HarvesterCreepManager {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob: CarryPartJob) => !bsJob.isTaken);
 
             if (storeJobs.length > 0) {
-                return storeJobs[0];
+                // Find the closeest job to the creep currently
+                // ! - I'm 90% confident theres a better way to do this, feel free
+                const jobObjects: Array<any | null> = _.map(storeJobs, (storeJob: CarryPartJob) => Game.getObjectById(storeJob.targetID));
+                const jobObjectPos: RoomPosition[] = [];
+                for (const jo of jobObjects) {
+                    if (!jo) {
+                        continue;
+                    }
+                    jobObjectPos.push(jo.pos);
+                }
+                const closestTarget: RoomPosition = creep.pos.findClosestByPath(jobObjectPos) as RoomPosition;
+                const closestJob: CarryPartJob | undefined = _.find(storeJobs,
+                    (j: CarryPartJob) => {
+                        const roomObj: any = Game.getObjectById(j.targetID);
+                        const roomPos: RoomPosition = roomObj.pos as RoomPosition;
+                        return closestTarget === roomPos;
+                    });
+                return closestJob;
             }
 
             return undefined;

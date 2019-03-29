@@ -8760,6 +8760,7 @@ class CreepApi {
                 break;
             case ERR_NOT_FOUND:
                 break;
+            case ERR_NOT_ENOUGH_ENERGY:
             case ERR_FULL:
                 delete creep.memory.job;
                 creep.memory.working = false;
@@ -9179,7 +9180,23 @@ class HarvesterCreepManager {
         if (creepOptions.fillStorage || creepOptions.fillContainer) {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
             if (storeJobs.length > 0) {
-                return storeJobs[0];
+                // Find the closeest job to the creep currently
+                // ! - I'm 90% confident theres a better way to do this, feel free
+                const jobObjects = _.map(storeJobs, (storeJob) => Game.getObjectById(storeJob.targetID));
+                const jobObjectPos = [];
+                for (const jo of jobObjects) {
+                    if (!jo) {
+                        continue;
+                    }
+                    jobObjectPos.push(jo.pos);
+                }
+                const closestTarget = creep.pos.findClosestByPath(jobObjectPos);
+                const closestJob = _.find(storeJobs, (j) => {
+                    const roomObj = Game.getObjectById(j.targetID);
+                    const roomPos = roomObj.pos;
+                    return closestTarget === roomPos;
+                });
+                return closestJob;
             }
             return undefined;
         }
