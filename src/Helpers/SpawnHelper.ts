@@ -379,14 +379,15 @@ export class SpawnHelper {
                 body = { work: 4, carry: 4, move: 4 };
                 break;
 
+            case TIER_6:
+            case TIER_5:
             case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
                 body = { work: 7, carry: 6, move: 6 };
                 break;
 
             case TIER_8:
             case TIER_7:
-            case TIER_6:
-            case TIER_5: // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
+                // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
                 body = { work: 10, carry: 8, move: 8 };
                 break;
         }
