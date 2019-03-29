@@ -4055,6 +4055,12 @@ class MemoryApi {
      * @param room The room to initialize the memory of.
      */
     static initRoomMemory(room) {
+        // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
+        // We want it to be reformed
+        // Make sure jobs exist
+        if (!Memory.rooms[room.name].jobs) {
+            Memory.rooms[room.name].jobs = {};
+        }
         // Abort if Memory already exists
         if (Memory.rooms[room.name]) {
             return;
@@ -9055,45 +9061,11 @@ class MinerCreepManager {
     static getNewSourceJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.harvestSources) {
-            // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
+            // TODO change this to check creep options to filter jobs --
+            // e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
+            // Force update to make sure creeps don't travel to a taken source
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken, true);
             if (sourceJobs.length > 0) {
-                // Select the source with the lowest TTL miner on it (or no miner at all)
-                const sources = _.map(sourceJobs, (job) => Game.getObjectById(job.targetID));
-                let selectedId;
-                for (const source of sources) {
-                    if (!source) {
-                        continue;
-                    }
-                    const minersOnSource = source.pos.findInRange(FIND_MY_CREEPS, 1, { filter: (c) => c.memory.role === ROLE_MINER$1 });
-                    // If there is a miner, the one with the lower TTL
-                    if (minersOnSource.length === 0) {
-                        selectedId = source.id;
-                        break;
-                    }
-                    else {
-                        let lowestTTL;
-                        for (const miner of minersOnSource) {
-                            if (!selectedId || !lowestTTL) {
-                                selectedId = source.id;
-                                lowestTTL = miner.ticksToLive;
-                                continue;
-                            }
-                            else {
-                                if (miner.spawning) {
-                                    continue;
-                                }
-                                if (miner.ticksToLive < lowestTTL) {
-                                    selectedId = source.id;
-                                    lowestTTL = miner.ticksToLive;
-                                }
-                            }
-                        }
-                    }
-                }
-                if (selectedId) {
-                    return _.find(sourceJobs, (job) => job.targetID === selectedId);
-                }
                 return sourceJobs[0];
             }
         }
@@ -9105,7 +9077,9 @@ class MinerCreepManager {
     static handleNewJob(creep) {
         const miningContainer = CreepHelper.getMiningContainer(creep.memory.job, Game.rooms[creep.memory.homeRoom]);
         if (miningContainer === undefined) {
-            return; // We don't need to do anything else if the container doesn't exist
+            // Returning here to prevent supplementary id from being formed,
+            // so in that case creep will just walk up to the source
+            return;
         }
         const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
         if (creepsOnContainer.length > 0) {

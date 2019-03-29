@@ -127,6 +127,14 @@ export default class MemoryApi {
      * @param room The room to initialize the memory of.
      */
     public static initRoomMemory(room: Room): void {
+
+        // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
+        // We want it to be reformed
+        // Make sure jobs exist
+        if (!Memory.rooms[room.name].jobs) {
+            Memory.rooms[room.name].jobs = {};
+        }
+
         // Abort if Memory already exists
         if (Memory.rooms[room.name]) {
             return;

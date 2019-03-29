@@ -75,9 +75,15 @@
  * Also make the system that spawns more workers in the case of remote rooms more reliable and cleanly coded (combine these systems preferrably)
  * into a function like getExtraWorkerAmount: number and add to the base amount of workers for that room state
  *
- * 9. Expand tower targeting to target non-combat creeps if no other targets are found, we might as well snipe out scouts
+ * 14. Expand tower targeting to target non-combat creeps if no other targets are found, we might as well snipe out scouts
  * Still do not target solo healers (maybe consider it if we calculate our damage (we have a function for that, thanks bonzai)
  * and find that we can out damage the amount of healing on a creep and those around it)
+ *
+ * 15. Mark jobs as taken
+ * In the handleNewJob methods of many civilian creeps, we should mark that job as taken in the cases where we need to
+ * Most relevant on get energy jobs, as we don't want 4 creeps going for the same source of 200 energy
+ * this should cut down on cpu use in more idle heavy times, and make jobs targeting overall smarter
+ * This is also needed on claim jobs, so if we have 5 claimers to claim 5 rooms they don't all go to the same one
  *
  *
  * ~~~~~~~~~~~~~~~~
