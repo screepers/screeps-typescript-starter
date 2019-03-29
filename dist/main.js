@@ -8396,7 +8396,7 @@ class RoomVisualApi {
         const maxRange = maxVal * 1.25;
         const getY2Coord = (raw) => {
             const range = maxRange - minRange;
-            const offset = raw - minVal;
+            const offset = raw - minRange;
             const percentage = offset / range;
             return percentage * Y_SCALE;
         };
@@ -8432,10 +8432,10 @@ class RoomVisualApi {
                 startCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
                 endCoord = startCoord;
             }
-            console.log("start " + i + ": " + startCoord);
-            console.log("end " + i + ": " + endCoord);
+            endCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
             new RoomVisual(room.name)
-                .line(X_VALS[i].start, startCoord, X_VALS[i].end, endCoord);
+                .line(X_VALS[i].start, y - startCoord, X_VALS[i].end, y - endCoord)
+                .circle(X_VALS[i].end, y - endCoord);
             startCoord = endCoord;
         }
     }

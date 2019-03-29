@@ -424,7 +424,7 @@ export default class RoomVisualApi {
         const maxRange: number = maxVal * 1.25;
         const getY2Coord = (raw: number) => {
             const range: number = maxRange - minRange;
-            const offset: number = raw - minVal;
+            const offset: number = raw - minRange;
             const percentage: number = offset / range;
             return percentage * Y_SCALE;
         };
@@ -463,11 +463,10 @@ export default class RoomVisualApi {
                 startCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
                 endCoord = startCoord;
             }
-            // getY2 coord is returning 0, look into this
-            // console.log("start " + i + ": " + startCoord);
-            // console.log("end " + i + ": " + endCoord);
+            endCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
             new RoomVisual(room.name)
-                .line(X_VALS[i].start, startCoord, X_VALS[i].end, endCoord);
+                .line(X_VALS[i].start, y - startCoord, X_VALS[i].end, y - endCoord)
+                .circle(X_VALS[i].end, y - endCoord);
 
             startCoord = endCoord;
         }
