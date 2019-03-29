@@ -24,6 +24,11 @@ export default class HarvesterCreepManager {
             this.handleNewJob(creep);
         }
 
+        // I think i know how to fix creeps idling for a tick between traveling and doing the job
+        // Travel to checks if they're there and returns, problem is we call it after do work
+        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
+        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
+        // ticks spent filling up spawn alone
         if (creep.memory.job) {
             if (creep.memory.working) {
                 CreepApi.doWork(creep, creep.memory.job);
