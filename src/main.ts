@@ -22,6 +22,9 @@
  * Delete them from Memory.rooms 1500 ticks after they are removed from memory rooms
  * This is because we want creeps there to finish their job at least, but removing the flag will
  * cut off all spawning, so best of both worlds
+ * Idea for this is in the processing for the flag, set the memory for the room up
+ * Let garbage collection delete it tho (we should consider suiciding or sending to new rooms the creeps to prevent memory issues)
+ * Change garbage collection for memory.rooms to also check for dependent rooms as a result of this
  *
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
@@ -134,31 +137,33 @@ import {
   CREEP_MANAGER_BUCKET_LIMIT,
   SPAWN_MANAGER_BUCKET_LIMIT,
   EMPIRE_MANAGER_BUCKET_LIMIT,
-  ROOM_MANAGER_BUCKET_LIMIT
+  ROOM_MANAGER_BUCKET_LIMIT,
+  MEMORY_MANAGER_BUCKET_LIMIT
 } from "utils/config";
 import CreepManager from "Managers/CreepManager";
 import { ConsoleCommands } from "Helpers/ConsoleCommands";
+import RoomHelper from "Helpers/RoomHelper";
 
 export const loop = ErrorMapper.wrapLoop(() => {
 
-  // Init console commands
-  ConsoleCommands.init();
-
-  // run the empire and get all relevant info from that into memory
-  if (Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
+  if (RoomHelper.excecuteEveryTicks(1000)) {
+    ConsoleCommands.init();
   }
-  try { EmpireManager.runEmpireManager(); } catch (e) { UtilHelper.printError(e); }
+
+  // run the empire
+  if (Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
+    try { EmpireManager.runEmpireManager(); } catch (e) { UtilHelper.printError(e); }
+  }
 
   // run rooms
   if (Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) {
+    try { RoomManager.runRoomManager(); } catch (e) { UtilHelper.printError(e); }
   }
-  try { RoomManager.runRoomManager(); } catch (e) { UtilHelper.printError(e); }
 
   // run spawning
   if (Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) {
+    try { SpawnManager.runSpawnManager(); } catch (e) { UtilHelper.printError(e); }
   }
-  try { SpawnManager.runSpawnManager(); } catch (e) { UtilHelper.printError(e); }
-
 
   // run creeps
   if (Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
@@ -166,12 +171,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
   }
 
   // clean up memory
-  try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
+  if (Game.cpu['bucket'] > MEMORY_MANAGER_BUCKET_LIMIT) {
+    try { MemoryManager.runMemoryManager(); } catch (e) { UtilHelper.printError(e); }
+  }
 
   // Display room visuals if we have a fat enough bucket and config option allows it
   if (Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
     try { RoomVisualManager.runRoomVisualManager(); } catch (e) { UtilHelper.printError(e); }
   }
-
   // -------- end managers --------
 });

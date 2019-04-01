@@ -1063,6 +1063,9 @@ interface VisualMemory {
     avgControlPointsPerHourArray: number[];
 }
 
+/**
+ * structure for nodes on the visual graph
+ */
 interface GraphTickMarkMemory {
     start: number;
     end: number;
