@@ -14,7 +14,7 @@ export default class MemoryManager {
         const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
 
         _.forEach(ownedRooms, (room: Room) => {
-            MemoryApi.initRoomMemory(room);
+            MemoryApi.initRoomMemory(room.name);
             MemoryApi.cleanDependentRoomMemory(room);
         });
     }

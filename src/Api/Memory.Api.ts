@@ -44,7 +44,10 @@ export default class MemoryApi {
 
         // Remove all dead rooms from memory
         for (const roomName in Memory.rooms) {
-            if (!(roomName in Game.rooms)) {
+            if (
+                !(roomName in Game.rooms) &&
+                !MemoryHelper.dependentRoomExists(roomName
+                )) {
                 delete Memory.rooms[roomName];
             }
         }
@@ -126,23 +129,23 @@ export default class MemoryApi {
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    public static initRoomMemory(room: Room): void {
+    public static initRoomMemory(roomName: string): void {
 
         // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
         // We want it to be reformed
         // Make sure jobs exist
-        if (!Memory.rooms[room.name].jobs) {
-            Memory.rooms[room.name].jobs = {};
+        if (!Memory.rooms[roomName].jobs) {
+            Memory.rooms[roomName].jobs = {};
         }
 
         // Abort if Memory already exists
-        if (Memory.rooms[room.name]) {
+        if (Memory.rooms[roomName]) {
             return;
         }
 
         // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
-        Memory.rooms[room.name] = {
+        Memory.rooms[roomName] = {
             attackRooms: [],
             claimRooms: [],
             constructionSites: { data: null, cache: null },
@@ -161,7 +164,10 @@ export default class MemoryApi {
             upgradeLink: ""
         };
 
-        this.getRoomMemory(room, true);
+        // Only fill out the memory structure if we have vision of the room
+        if (Game.rooms[roomName]) {
+            this.getRoomMemory(Game.rooms[roomName], true);
+        }
     }
 
     /**
