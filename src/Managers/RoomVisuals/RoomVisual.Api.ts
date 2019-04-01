@@ -399,7 +399,7 @@ export default class RoomVisualApi {
         const X_SCALE = 15;
         const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick();
         const ticksPerHour: number = Math.floor(3600 / secondsPerTick);
-        const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(10, room);
+        const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(25, room);
         const controlPointsPerHourEstimate: number = avgControlPointsPerTick * ticksPerHour;
 
         // Update the control points per hour estimate array

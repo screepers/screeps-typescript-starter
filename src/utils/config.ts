@@ -38,7 +38,30 @@ export const ROOM_OVERLAY_GRAPH_ON = true;
 /**
  * The text to sign controllers with
  */
-export const CONTROLLER_SIGNING_TEXT = "get signed on boy";
+export const CONTROLLER_SIGNING_TEXT = [
+    "home of the dallas cowboys and the oklahoma city thunder",
+    "7j2Music on spotify",
+    "like taking candy from a baby",
+    "terminating process goldenstatewarriors.exe",
+    "durant is my aunt",
+    "typescript master race",
+    "static type gang",
+    "resource hogs",
+    "PRESCOTT/ELLIOT 2020",
+    "WESTBROOK/PAUL GEORGE 2024",
+    "KANYE 2024",
+    "you just activated my fap card",
+    ">be me\n>sign controller",
+    "braces go on the same line",
+    "camelCaseMasterRace",
+    "++i > i++",
+    "baker mayfield: american hero",
+    "don't be a creep, free-think",
+    "down to die for my rooms",
+    "blueface baby",
+    "dear family, my sanity, go down when my cash grow up",
+    ""
+];
 
 /**
  * Constants for Tick Timers - Number of ticks between running the specified constant this is deciding

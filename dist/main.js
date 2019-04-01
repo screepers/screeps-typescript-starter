@@ -631,6 +631,7 @@ const CREEP_MANAGER_BUCKET_LIMIT = 1000;
 const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 const ROOM_MANAGER_BUCKET_LIMIT = 500;
+const MEMORY_MANAGER_BUCKET_LIMIT = 0;
 
 // an api used for functions related to the room
 class RoomApi {
@@ -9113,6 +9114,11 @@ class HarvesterCreepManager {
             }
             this.handleNewJob(creep);
         }
+        // I think i know how to fix creeps idling for a tick between traveling and doing the job
+        // Travel to checks if they're there and returns, problem is we call it after do work
+        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
+        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
+        // ticks spent filling up spawn alone
         if (creep.memory.job) {
             if (creep.memory.working) {
                 CreepApi.doWork(creep, creep.memory.job);
@@ -10299,31 +10305,35 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
   Starting Jan 2019
 */
 const loop = ErrorMapper.wrapLoop(() => {
-    // Init console commands
-    ConsoleCommands.init();
-    // run the empire and get all relevant info from that into memory
-    if (Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) ;
-    try {
-        EmpireManager.runEmpireManager();
+    if (RoomHelper.excecuteEveryTicks(1000)) {
+        ConsoleCommands.init();
     }
-    catch (e) {
-        UtilHelper.printError(e);
+    // run the empire
+    if (Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
+        try {
+            EmpireManager.runEmpireManager();
+        }
+        catch (e) {
+            UtilHelper.printError(e);
+        }
     }
     // run rooms
-    if (Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) ;
-    try {
-        RoomManager.runRoomManager();
-    }
-    catch (e) {
-        UtilHelper.printError(e);
+    if (Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) {
+        try {
+            RoomManager.runRoomManager();
+        }
+        catch (e) {
+            UtilHelper.printError(e);
+        }
     }
     // run spawning
-    if (Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) ;
-    try {
-        SpawnManager.runSpawnManager();
-    }
-    catch (e) {
-        UtilHelper.printError(e);
+    if (Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) {
+        try {
+            SpawnManager.runSpawnManager();
+        }
+        catch (e) {
+            UtilHelper.printError(e);
+        }
     }
     // run creeps
     if (Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
@@ -10335,11 +10345,13 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // clean up memory
-    try {
-        MemoryManager.runMemoryManager();
-    }
-    catch (e) {
-        UtilHelper.printError(e);
+    if (Game.cpu['bucket'] > MEMORY_MANAGER_BUCKET_LIMIT) {
+        try {
+            MemoryManager.runMemoryManager();
+        }
+        catch (e) {
+            UtilHelper.printError(e);
+        }
     }
     // Display room visuals if we have a fat enough bucket and config option allows it
     if (Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {

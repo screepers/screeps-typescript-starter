@@ -268,6 +268,7 @@ export default class CreepMili {
      */
     public static checkMilitaryCreepBasics(creep: Creep, creepOptions: CreepOptionsMili): boolean {
         const targetRoom: string = creep.memory.targetRoom;
+        // I love tenary operators
         const fleeLocation = creepOptions.rallyLocation ? creepOptions.rallyLocation.roomName : creep.memory.homeRoom;
         // Check if we need to flee
         if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {

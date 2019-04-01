@@ -21,7 +21,6 @@ export default class SpawnManager {
      */
     public static runSpawnForRoom(room: Room): void {
         const openSpawn: StructureSpawn | null = SpawnApi.getOpenSpawn(room);
-        // get tier
 
         // if we don't have an open spawn, return early
         if (openSpawn === null) {
