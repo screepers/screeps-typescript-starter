@@ -162,7 +162,7 @@ export default class RoomVisualApi {
     public static createRoomInfoVisual(room: Room, x: number, y: number): number {
 
         // Get the info we need
-        const roomState: string = RoomVisualHelper.convertRoomStateToString(room.memory.roomState);
+        const roomState: string = RoomVisualHelper.convertRoomStateToString(room.memory.roomState!);
         const level: number = room.controller!.level;
         const controllerProgress: number = room.controller!.progress;
         const controllerTotal: number = room.controller!.progressTotal;

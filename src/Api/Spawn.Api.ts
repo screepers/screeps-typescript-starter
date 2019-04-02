@@ -63,7 +63,7 @@ export default class SpawnApi {
             lorry: 0
         };
 
-        const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
+        const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState!);
         let minerLimits: number = MemoryApi.getSources(room).length;
         let numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
         // To prevent dropping to 2 workers if we don't have remote rooms

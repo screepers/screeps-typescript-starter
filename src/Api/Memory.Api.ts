@@ -92,7 +92,7 @@ export default class MemoryApi {
      */
     public static cleanDependentRoomMemory(room: Room): void {
         // Re-map Remote Room array to remove null values
-        const allRemoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
+        const allRemoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms!;
         const nonNullRemoteRooms: RemoteRoomMemory[] = [];
 
         _.forEach(allRemoteRooms, (rr: RemoteRoomMemory) => {
@@ -103,7 +103,7 @@ export default class MemoryApi {
         Memory.rooms[room.name].remoteRooms = nonNullRemoteRooms;
 
         // Re-map Remote Room array to remove null values
-        const allClaimRooms: ClaimRoomMemory[] = Memory.rooms[room.name].claimRooms;
+        const allClaimRooms: ClaimRoomMemory[] = Memory.rooms[room.name].claimRooms!;
         const nonNullClaimRooms: ClaimRoomMemory[] = [];
 
         _.forEach(allClaimRooms, (rr: ClaimRoomMemory) => {
@@ -114,7 +114,7 @@ export default class MemoryApi {
         Memory.rooms[room.name].claimRooms = nonNullClaimRooms;
 
         // Re-map Remote Room array to remove null values
-        const allAttackRooms: AttackRoomMemory[] = Memory.rooms[room.name].attackRooms;
+        const allAttackRooms: AttackRoomMemory[] = Memory.rooms[room.name].attackRooms!;
         const nonNullAttackRooms: AttackRoomMemory[] = [];
 
         _.forEach(allAttackRooms, (rr: AttackRoomMemory) => {
@@ -129,7 +129,7 @@ export default class MemoryApi {
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    public static initRoomMemory(roomName: string): void {
+    public static initRoomMemory(roomName: string, isOwnedRoom: boolean): void {
 
         // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
         // We want it to be reformed
@@ -145,26 +145,41 @@ export default class MemoryApi {
 
         // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
-        Memory.rooms[roomName] = {
-            attackRooms: [],
-            claimRooms: [],
-            constructionSites: { data: null, cache: null },
-            creepLimit: {},
-            creeps: { data: null, cache: null },
-            defcon: -1,
-            hostiles: { data: null, cache: null },
-            remoteRooms: [],
-            roomState: ROOM_STATE_INTRO,
-            sources: { data: null, cache: null },
-            minerals: { data: null, cache: null },
-            tombstones: { data: null, cache: null },
-            droppedResources: { data: null, cache: null },
-            jobs: {},
-            structures: { data: null, cache: null },
-            upgradeLink: ""
-        };
+        if (isOwnedRoom) {
+            Memory.rooms[roomName] = {
+                attackRooms: [],
+                claimRooms: [],
+                constructionSites: { data: null, cache: null },
+                creepLimit: {},
+                creeps: { data: null, cache: null },
+                defcon: -1,
+                hostiles: { data: null, cache: null },
+                remoteRooms: [],
+                roomState: ROOM_STATE_INTRO,
+                sources: { data: null, cache: null },
+                minerals: { data: null, cache: null },
+                tombstones: { data: null, cache: null },
+                droppedResources: { data: null, cache: null },
+                jobs: {},
+                structures: { data: null, cache: null },
+                upgradeLink: ""
+            };
+        }
+        else {
+            Memory.rooms[roomName] = {
+                structures: { data: null, cache: null },
+                sources: { data: null, cache: null },
+                minerals: { data: null, cache: null },
+                tombstones: { data: null, cache: null },
+                droppedResources: { data: null, cache: null },
+                constructionSites: { data: null, cache: null },
+                defcon: -1,
+                hostiles: { data: null, cache: null },
+            }
+        }
 
-        // Only fill out the memory structure if we have vision of the room
+
+        // Only populate out the memory structure if we have vision of the room
         if (Game.rooms[roomName]) {
             this.getRoomMemory(Game.rooms[roomName], true);
         }
@@ -233,12 +248,12 @@ export default class MemoryApi {
             NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[roomName].creeps ||
-            Memory.rooms[roomName].creeps.cache < Game.time - FCREEP_CACHE_TTL
+            Memory.rooms[roomName].creeps!.cache < Game.time - FCREEP_CACHE_TTL
         ) {
             MemoryHelper_Room.updateMyCreeps(roomName);
         }
 
-        const creepIDs: string[] = Memory.rooms[roomName].creeps.data;
+        const creepIDs: string[] = Memory.rooms[roomName].creeps!.data;
 
         let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
 
@@ -267,7 +282,7 @@ export default class MemoryApi {
             NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[room.name].hostiles ||
-            Memory.rooms[room.name].creeps.cache < Game.time - HCREEP_CACHE_TTL
+            Memory.rooms[room.name].creeps!.cache < Game.time - HCREEP_CACHE_TTL
         ) {
             MemoryHelper_Room.updateHostileCreeps(room);
         }
@@ -539,13 +554,13 @@ export default class MemoryApi {
         // TargetRoom parameter provided
         if (targetRoom) {
             remoteRooms = _.filter(
-                Memory.rooms[room.name].remoteRooms,
+                Memory.rooms[room.name].remoteRooms!,
                 (roomMemory: RemoteRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
         } else {
             // No target room provided, just return them all
             remoteRooms = _.filter(
-                Memory.rooms[room.name].remoteRooms,
+                Memory.rooms[room.name].remoteRooms!,
                 (roomMemory: RemoteRoomMemory) => filterFunction
             );
         }
@@ -576,12 +591,12 @@ export default class MemoryApi {
         // TargetRoom parameter provided
         if (targetRoom) {
             claimRooms = _.filter(
-                Memory.rooms[room.name].claimRooms,
+                Memory.rooms[room.name].claimRooms!,
                 (roomMemory: ClaimRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
         } else {
             // No target room provided, just return them all
-            claimRooms = _.filter(Memory.rooms[room.name].claimRooms, (roomMemory: ClaimRoomMemory) => filterFunction);
+            claimRooms = _.filter(Memory.rooms[room.name].claimRooms!, (roomMemory: ClaimRoomMemory) => filterFunction);
         }
 
         return claimRooms;
@@ -610,13 +625,13 @@ export default class MemoryApi {
         // TargetRoom parameter provided
         if (targetRoom) {
             attackRooms = _.filter(
-                Memory.rooms[room.name].attackRooms,
+                Memory.rooms[room.name].attackRooms!,
                 (roomMemory: AttackRoomMemory) => roomMemory.roomName === targetRoom && filterFunction
             );
         } else {
             // No target room provided, just return them all
             attackRooms = _.filter(
-                Memory.rooms[room.name].attackRooms,
+                Memory.rooms[room.name].attackRooms!,
                 (roomMemory: AttackRoomMemory) => filterFunction
             );
         }
@@ -632,7 +647,7 @@ export default class MemoryApi {
      * @param delta the change we are applying to the limit
      */
     public static adjustCreepLimitByDelta(room: Room, limitType: string, role: string, delta: number): void {
-        Memory.rooms[room.name].creepLimit[limitType][role] += delta;
+        Memory.rooms[room.name].creepLimit![limitType][role] += delta;
     }
 
     /**
@@ -666,9 +681,9 @@ export default class MemoryApi {
      */
     public static getCreepLimits(room: Room): CreepLimits {
         const creepLimits: CreepLimits = {
-            domesticLimits: Memory.rooms[room.name].creepLimit["domesticLimits"],
-            remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
-            militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
+            domesticLimits: Memory.rooms[room.name].creepLimit!["domesticLimits"],
+            remoteLimits: Memory.rooms[room.name].creepLimit!["remoteLimits"],
+            militaryLimits: Memory.rooms[room.name].creepLimit!["militaryLimits"]
         };
 
         return creepLimits;
@@ -737,14 +752,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs ||
-            Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.cache < Game.time - SOURCE_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs ||
+            Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs!.cache < Game.time - SOURCE_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateGetEnergy_sourceJobs(room);
         }
 
-        let sourceJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.data;
+        let sourceJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs!.data;
 
         if (filterFunction !== undefined) {
             sourceJobs = _.filter(sourceJobs, filterFunction);
@@ -767,14 +782,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs ||
-            Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs!.cache < Game.time - CONTAINER_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs ||
+            Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs!.cache < Game.time - CONTAINER_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateGetEnergy_containerJobs(room);
         }
 
-        let containerJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs!.data;
+        let containerJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs!.data;
 
         if (filterFunction !== undefined) {
             containerJobs = _.filter(containerJobs, filterFunction);
@@ -797,14 +812,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs ||
-            Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs!.cache < Game.time - LINK_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs ||
+            Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs!.cache < Game.time - LINK_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateGetEnergy_linkJobs(room);
         }
 
-        let linkJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs!.data;
+        let linkJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs!.data;
 
         if (filterFunction !== undefined) {
             linkJobs = _.filter(linkJobs, filterFunction);
@@ -827,14 +842,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures ||
-            Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures!.cache < Game.time - BACKUP_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures ||
+            Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures!.cache < Game.time - BACKUP_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateGetEnergy_backupStructuresJobs(room);
         }
 
-        let backupStructureJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures!.data;
+        let backupStructureJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures!.data;
 
         if (filterFunction !== undefined) {
             backupStructureJobs = _.filter(backupStructureJobs, filterFunction);
@@ -857,14 +872,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs ||
-            !Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs ||
-            Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs!.cache < Game.time - PICKUP_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs ||
+            Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs!.cache < Game.time - PICKUP_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateGetEnergy_pickupJobs(room);
         }
 
-        let pickupJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs!.data;
+        let pickupJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs!.data;
 
         if (filterFunction !== undefined) {
             pickupJobs = _.filter(pickupJobs, filterFunction);
@@ -908,14 +923,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.claimPartJobs ||
-            !Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs ||
-            Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs!.cache < Game.time - CLAIM_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.claimPartJobs ||
+            !Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs ||
+            Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs!.cache < Game.time - CLAIM_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateClaimPart_claimJobs(room);
         }
 
-        let claimJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs!.data;
+        let claimJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs!.data;
 
         if (filterFunction !== undefined) {
             claimJobs = _.filter(claimJobs, filterFunction);
@@ -938,14 +953,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.claimPartJobs ||
-            !Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs ||
-            Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs!.cache < Game.time - RESERVE_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.claimPartJobs ||
+            !Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs ||
+            Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs!.cache < Game.time - RESERVE_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateClaimPart_reserveJobs(room);
         }
 
-        let claimJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs!.data;
+        let claimJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs!.data;
 
         if (filterFunction !== undefined) {
             claimJobs = _.filter(claimJobs, filterFunction);
@@ -968,14 +983,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.claimPartJobs ||
-            !Memory.rooms[room.name].jobs.claimPartJobs!.signJobs ||
-            Memory.rooms[room.name].jobs.claimPartJobs!.signJobs!.cache < Game.time - SIGN_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.claimPartJobs ||
+            !Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs ||
+            Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs!.cache < Game.time - SIGN_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateClaimPart_signJobs(room);
         }
 
-        let signJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.signJobs!.data;
+        let signJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs!.data;
 
         if (filterFunction !== undefined) {
             signJobs = _.filter(signJobs, filterFunction);
@@ -998,14 +1013,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.claimPartJobs ||
-            !Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs ||
-            Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs!.cache < Game.time - ATTACK_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.claimPartJobs ||
+            !Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs ||
+            Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs!.cache < Game.time - ATTACK_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateClaimPart_controllerAttackJobs(room);
         }
 
-        let attackJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs!.data;
+        let attackJobs: ClaimPartJob[] = Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs!.data;
 
         if (filterFunction !== undefined) {
             attackJobs = _.filter(attackJobs, filterFunction);
@@ -1048,14 +1063,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.workPartJobs ||
-            !Memory.rooms[room.name].jobs.workPartJobs!.repairJobs ||
-            Memory.rooms[room.name].jobs.workPartJobs!.repairJobs!.cache < Game.time - REPAIR_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.workPartJobs ||
+            !Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs ||
+            Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs!.cache < Game.time - REPAIR_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateWorkPart_repairJobs(room);
         }
 
-        let repairJobs: WorkPartJob[] = Memory.rooms[room.name].jobs.workPartJobs!.repairJobs!.data;
+        let repairJobs: WorkPartJob[] = Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs!.data;
 
         if (filterFunction !== undefined) {
             repairJobs = _.filter(repairJobs, filterFunction);
@@ -1078,14 +1093,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.workPartJobs ||
-            !Memory.rooms[room.name].jobs.workPartJobs!.buildJobs ||
-            Memory.rooms[room.name].jobs.workPartJobs!.buildJobs!.cache < Game.time - BUILD_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.workPartJobs ||
+            !Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs ||
+            Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs!.cache < Game.time - BUILD_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateWorkPart_buildJobs(room);
         }
 
-        let buildJobs: WorkPartJob[] = Memory.rooms[room.name].jobs.workPartJobs!.buildJobs!.data;
+        let buildJobs: WorkPartJob[] = Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs!.data;
 
         if (filterFunction !== undefined) {
             buildJobs = _.filter(buildJobs, filterFunction);
@@ -1108,14 +1123,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.workPartJobs ||
-            !Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs ||
-            Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs!.cache < Game.time - UPGRADE_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.workPartJobs ||
+            !Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs ||
+            Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs!.cache < Game.time - UPGRADE_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateWorkPart_upgradeJobs(room);
         }
 
-        let upgradeJobs: WorkPartJob[] = Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs!.data;
+        let upgradeJobs: WorkPartJob[] = Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs!.data;
 
         if (filterFunction !== undefined) {
             upgradeJobs = _.filter(upgradeJobs, filterFunction);
@@ -1157,14 +1172,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.carryPartJobs ||
-            !Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs ||
-            Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs!.cache < Game.time - FILL_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.carryPartJobs ||
+            !Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs ||
+            Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs!.cache < Game.time - FILL_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateCarryPart_fillJobs(room);
         }
 
-        let fillJobs: CarryPartJob[] = Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs!.data;
+        let fillJobs: CarryPartJob[] = Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs!.data;
 
         if (filterFunction !== undefined) {
             fillJobs = _.filter(fillJobs, filterFunction);
@@ -1187,14 +1202,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].jobs.carryPartJobs ||
-            !Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs ||
-            Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs!.cache < Game.time - STORE_JOB_CACHE_TTL
+            !Memory.rooms[room.name].jobs!.carryPartJobs ||
+            !Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs ||
+            Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs!.cache < Game.time - STORE_JOB_CACHE_TTL
         ) {
             MemoryHelper_Room.updateCarryPart_storeJobs(room);
         }
 
-        let storeJobs: CarryPartJob[] = Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs!.data;
+        let storeJobs: CarryPartJob[] = Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs!.data;
 
         if (filterFunction !== undefined) {
             storeJobs = _.filter(storeJobs, filterFunction);

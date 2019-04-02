@@ -90,8 +90,8 @@ export default class MemoryHelper_Room {
         // as they aren't actually in the room all the time (had this problem with my last solo code base)
         const creeps = _.filter(Game.creeps, creep => creep.memory.homeRoom === roomName);
 
-        Memory.rooms[roomName].creeps.data = _.map(creeps, (creep: Creep) => creep.id);
-        Memory.rooms[roomName].creeps.cache = Game.time;
+        Memory.rooms[roomName].creeps!.data = _.map(creeps, (creep: Creep) => creep.id);
+        Memory.rooms[roomName].creeps!.cache = Game.time;
     }
 
     /**
@@ -217,8 +217,8 @@ export default class MemoryHelper_Room {
      */
     public static updateGetEnergy_allJobs(room: Room) {
         // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs;
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.getEnergyJobs;
         }
 
         this.updateGetEnergy_sourceJobs(room);
@@ -234,18 +234,18 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateGetEnergy_sourceJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
-            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
         // What to do if the jobs already exist
         // ! Deletes existing jobs
         // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?
         // ? Or should we just set it up so that each time the Job objects are updated they start fresh? (might require mining creep memory for changes to the job status, or accepting inaccuracy)
-        if (Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs;
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs;
         }
 
-        Memory.rooms[room.name].jobs.getEnergyJobs!.sourceJobs = {
+        Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs = {
             data: GetEnergyJobs.createSourceJobs(room),
             cache: Game.time
         };
@@ -256,15 +256,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory fo
      */
     public static updateGetEnergy_containerJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
-            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
 
-        if (Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs;
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs;
         }
 
-        Memory.rooms[room.name].jobs.getEnergyJobs!.containerJobs = {
+        Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs = {
             data: GetEnergyJobs.createContainerJobs(room),
             cache: Game.time
         };
@@ -275,15 +275,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory fo
      */
     public static updateGetEnergy_linkJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
-            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
 
-        if (Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs;
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs;
         }
 
-        Memory.rooms[room.name].jobs.getEnergyJobs!.linkJobs = {
+        Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs = {
             data: GetEnergyJobs.createLinkJobs(room),
             cache: Game.time
         };
@@ -294,15 +294,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory fo
      */
     public static updateGetEnergy_backupStructuresJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
-            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
 
-        if (Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures;
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures !== undefined) {
+            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures;
         }
 
-        Memory.rooms[room.name].jobs.getEnergyJobs!.backupStructures = {
+        Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures = {
             data: GetEnergyJobs.createBackupStructuresJobs(room),
             cache: Game.time
         };
@@ -313,15 +313,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory fo
      */
     public static updateGetEnergy_pickupJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
-            Memory.rooms[room.name].jobs.getEnergyJobs = {};
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
 
-        if (Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs;
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs;
         }
 
-        Memory.rooms[room.name].jobs.getEnergyJobs!.pickupJobs = {
+        Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs = {
             data: GetEnergyJobs.createPickupJobs(room),
             cache: Game.time
         };
@@ -334,8 +334,8 @@ export default class MemoryHelper_Room {
      */
     public static updateClaimPart_allJobs(room: Room) {
         // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs;
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.getEnergyJobs;
         }
 
         this.updateClaimPart_claimJobs(room);
@@ -350,15 +350,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateClaimPart_claimJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.claimPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs;
+        if (Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs;
         }
 
-        Memory.rooms[room.name].jobs.claimPartJobs!.claimJobs = {
+        Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs = {
             data: ClaimPartJobs.createClaimJobs(room),
             cache: Game.time
         };
@@ -370,15 +370,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateClaimPart_reserveJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.claimPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs;
+        if (Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs;
         }
 
-        Memory.rooms[room.name].jobs.claimPartJobs!.reserveJobs = {
+        Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs = {
             data: ClaimPartJobs.createReserveJobs(room),
             cache: Game.time
         };
@@ -390,15 +390,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateClaimPart_signJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.claimPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs!.signJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs!.signJobs;
+        if (Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs;
         }
 
-        Memory.rooms[room.name].jobs.claimPartJobs!.signJobs = {
+        Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs = {
             data: ClaimPartJobs.createSignJobs(room),
             cache: Game.time
         };
@@ -410,15 +410,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateClaimPart_controllerAttackJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.claimPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.claimPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs;
+        if (Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs;
         }
 
-        Memory.rooms[room.name].jobs.claimPartJobs!.attackJobs = {
+        Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs = {
             data: ClaimPartJobs.createAttackJobs(room),
             cache: Game.time
         };
@@ -430,8 +430,8 @@ export default class MemoryHelper_Room {
      */
     public static updateWorkPart_allJobs(room: Room) {
         // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.workPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs;
+        if (Memory.rooms[room.name].jobs!.workPartJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.workPartJobs;
         }
 
         this.updateWorkPart_repairJobs(room);
@@ -445,15 +445,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateWorkPart_repairJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.workPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.workPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.workPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs!.repairJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs!.repairJobs;
+        if (Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs;
         }
 
-        Memory.rooms[room.name].jobs.workPartJobs!.repairJobs = {
+        Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs = {
             data: WorkPartJobs.createRepairJobs(room),
             cache: Game.time
         };
@@ -465,15 +465,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateWorkPart_buildJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.workPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.workPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.workPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs!.buildJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs!.buildJobs;
+        if (Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs;
         }
 
-        Memory.rooms[room.name].jobs.workPartJobs!.buildJobs = {
+        Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs = {
             data: WorkPartJobs.createBuildJobs(room),
             cache: Game.time
         };
@@ -484,15 +484,15 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateWorkPart_upgradeJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.workPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.workPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.workPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs;
+        if (Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs;
         }
 
-        Memory.rooms[room.name].jobs.workPartJobs!.upgradeJobs = {
+        Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs = {
             data: WorkPartJobs.createUpgradeJobs(room),
             cache: Game.time
         };
@@ -504,8 +504,8 @@ export default class MemoryHelper_Room {
      */
     public static updateCarryPart_allJobs(room: Room) {
         // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.carryPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs;
+        if (Memory.rooms[room.name].jobs!.carryPartJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.carryPartJobs;
         }
 
         this.updateCarryPart_fillJobs(room);
@@ -517,15 +517,15 @@ export default class MemoryHelper_Room {
      * @param room  The room to update the memory of
      */
     public static updateCarryPart_fillJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.carryPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.carryPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.carryPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs;
+        if (Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs;
         }
 
-        Memory.rooms[room.name].jobs.carryPartJobs!.fillJobs = {
+        Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs = {
             data: CarryPartJobs.createFillJobs(room),
             cache: Game.time
         };
@@ -536,15 +536,15 @@ export default class MemoryHelper_Room {
      * @param room  The room to update the memory of
      */
     public static updateCarryPart_storeJobs(room: Room) {
-        if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
-            Memory.rooms[room.name].jobs.carryPartJobs = {};
+        if (Memory.rooms[room.name].jobs!.carryPartJobs === undefined) {
+            Memory.rooms[room.name].jobs!.carryPartJobs = {};
         }
         // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs;
+        if (Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs !== undefined) {
+            delete Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs;
         }
 
-        Memory.rooms[room.name].jobs.carryPartJobs!.storeJobs = {
+        Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs = {
             data: CarryPartJobs.createStoreJobs(room),
             cache: Game.time
         };
@@ -557,7 +557,7 @@ export default class MemoryHelper_Room {
      */
     public static updateDomesticLimits(room: Room, newLimits: DomesticCreepLimits): void {
         // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit["domesticLimits"] = newLimits;
+        Memory.rooms[room.name].creepLimit!["domesticLimits"] = newLimits;
     }
 
     /**
@@ -567,7 +567,7 @@ export default class MemoryHelper_Room {
      */
     public static updateRemoteLimits(room: Room, newLimits: RemoteCreepLimits): void {
         // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit["remoteLimits"] = newLimits;
+        Memory.rooms[room.name].creepLimit!["remoteLimits"] = newLimits;
     }
 
     /**
@@ -577,6 +577,6 @@ export default class MemoryHelper_Room {
      */
     public static updateMilitaryLimits(room: Room, newLimits: MilitaryCreepLimits): void {
         // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
+        Memory.rooms[room.name].creepLimit!["militaryLimits"] = newLimits;
     }
 }

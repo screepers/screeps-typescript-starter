@@ -544,7 +544,7 @@ interface CarryPartJobListing {
 }
 
 interface RoomMemory {
-    roomState: RoomStateConstant;
+    roomState?: RoomStateConstant;
     /**
      * IDs of all structures in the room
      * Stringmap : [structure.type] = String[]
@@ -573,15 +573,15 @@ interface RoomMemory {
     /**
      * IDs of the link the power upgrader pulls from
      */
-    upgradeLink: string;
+    upgradeLink?: string;
     /**
      * Cache of all creeps
      */
-    creeps: Cache;
+    creeps?: Cache;
     /**
      * the limit of each role for the room
      */
-    creepLimit: StringMap | CreepLimits;
+    creepLimit?: StringMap | CreepLimits;
     /**
      * IDs of all hostile creeps in this room
      */
@@ -593,19 +593,19 @@ interface RoomMemory {
     /**
      * Names of all rooms flagged to attack
      */
-    attackRooms: Array<AttackRoomMemory>;
+    attackRooms?: Array<AttackRoomMemory>;
     /**
      * Names of all rooms flagged to remote harvest
      */
-    remoteRooms: Array<RemoteRoomMemory>;
+    remoteRooms?: Array<RemoteRoomMemory>;
     /**
      * Names of all rooms flagged to colonize
      */
-    claimRooms: Array<ClaimRoomMemory>;
+    claimRooms?: Array<ClaimRoomMemory>;
     /**
      * List of all of the room's GetEnergyJobs
      */
-    jobs: JobListing;
+    jobs?: JobListing;
 }
 
 interface EmpireMemory { }

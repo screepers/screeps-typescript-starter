@@ -65,7 +65,7 @@ export default class EmpireHelper {
         };
 
         console.log("Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
-        dependentRoom.memory.remoteRooms.push(remoteRoomMemory);
+        dependentRoom.memory.remoteRooms!.push(remoteRoomMemory);
     }
 
     /**
@@ -112,7 +112,7 @@ export default class EmpireHelper {
         };
 
         console.log("Attack Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
-        dependentRoom.memory.attackRooms.push(attackRoomMemory);
+        dependentRoom.memory.attackRooms!.push(attackRoomMemory);
     }
 
     /**
@@ -163,7 +163,7 @@ export default class EmpireHelper {
         };
 
         console.log("Claim Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
-        dependentRoom.memory.claimRooms.push(claimRoomMemory);
+        dependentRoom.memory.claimRooms!.push(claimRoomMemory);
     }
 
     /**
@@ -331,7 +331,7 @@ export default class EmpireHelper {
                 const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),
                     (room: Room) => {
                         const rr = room.memory.claimRooms;
-                        return _.some(rr, (innerRR: ClaimRoomMemory) => {
+                        return _.some(rr!, (innerRR: ClaimRoomMemory) => {
                             if (innerRR) {
                                 return innerRR.roomName === claimRoomName;
                             }
@@ -339,7 +339,7 @@ export default class EmpireHelper {
                         });
                     });
 
-                delete Memory.rooms[dependentRoom!.name].claimRooms[claimRoom];
+                delete Memory.rooms[dependentRoom!.name].claimRooms![claimRoom];
             }
         }
     }
@@ -392,7 +392,7 @@ export default class EmpireHelper {
                 const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),
                     (room: Room) => {
                         const rr = room.memory.attackRooms;
-                        return _.some(rr, (innerRR: AttackRoomMemory) => {
+                        return _.some(rr!, (innerRR: AttackRoomMemory) => {
                             if (innerRR) {
                                 return innerRR.roomName === attackRoomName;
                             }
@@ -400,7 +400,7 @@ export default class EmpireHelper {
                         });
                     });
 
-                delete Memory.rooms[dependentRoom!.name].attackRooms[attackRoom];
+                delete Memory.rooms[dependentRoom!.name].attackRooms![attackRoom];
             }
         }
     }
@@ -452,7 +452,7 @@ export default class EmpireHelper {
                 const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),
                     (room: Room) => {
                         const rr = room.memory.remoteRooms;
-                        return _.some(rr, (innerRR: RemoteRoomMemory) => {
+                        return _.some(rr!, (innerRR: RemoteRoomMemory) => {
                             if (innerRR) {
                                 return innerRR.roomName === remoteRoomName;
                             }
@@ -460,7 +460,7 @@ export default class EmpireHelper {
                         });
                     });
 
-                delete Memory.rooms[dependentRoom!.name].remoteRooms[remoteRoom];
+                delete Memory.rooms[dependentRoom!.name].remoteRooms![remoteRoom];
             }
         }
     }

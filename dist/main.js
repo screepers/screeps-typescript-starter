@@ -16,6 +16,32 @@ class MemoryHelper {
         return creepsOfRole;
     }
     /**
+     * check if the room name exists as a dependent room
+     * @param roomName the name of the room we are cheking for
+     */
+    static dependentRoomExists(roomName) {
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        // Loop over d-rooms within each room looking for the parameter room name
+        for (const room of ownedRooms) {
+            for (const rr of room.memory.remoteRooms) {
+                if (roomName === rr.roomName) {
+                    return true;
+                }
+            }
+            for (const cr of room.memory.claimRooms) {
+                if (roomName === cr.roomName) {
+                    return true;
+                }
+            }
+            for (const ar of room.memory.attackRooms) {
+                if (roomName === ar.roomName) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    /**
      * Performs the length checks and null checks for all getXXX functions that use IDs to get the objects
      * @param idArray An array of ids to check
      */
@@ -613,7 +639,30 @@ const ROOM_OVERLAY_ON = true;
 /**
  * The text to sign controllers with
  */
-const CONTROLLER_SIGNING_TEXT = "get signed on boy";
+const CONTROLLER_SIGNING_TEXT = [
+    "home of the dallas cowboys and the oklahoma city thunder",
+    "7j2Music on spotify",
+    "like taking candy from a baby",
+    "terminating process goldenstatewarriors.exe",
+    "durant is my aunt",
+    "typescript master race",
+    "static type gang",
+    "resource hogs",
+    "PRESCOTT/ELLIOT 2020",
+    "WESTBROOK/PAUL GEORGE 2024",
+    "KANYE 2024",
+    "you just activated my fap card",
+    ">be me\n>sign controller",
+    "braces go on the same line",
+    "camelCaseMasterRace",
+    "++i > i++",
+    "baker mayfield: american hero",
+    "don't be a creep, free-think",
+    "down to die for my rooms",
+    "blueface baby",
+    "dear family, my sanity, go down when my cash grow up",
+    ""
+];
 /**
  * Constants for Tick Timers - Number of ticks between running the specified constant this is deciding
  */
@@ -631,7 +680,7 @@ const CREEP_MANAGER_BUCKET_LIMIT = 1000;
 const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 const ROOM_MANAGER_BUCKET_LIMIT = 500;
-const MEMORY_MANAGER_BUCKET_LIMIT = 0;
+const MEMORY_MANAGER_BUCKET_LIMIT = 1;
 
 // an api used for functions related to the room
 class RoomApi {
@@ -3984,7 +4033,8 @@ class MemoryApi {
         }
         // Remove all dead rooms from memory
         for (const roomName in Memory.rooms) {
-            if (!(roomName in Game.rooms)) {
+            if (!(roomName in Game.rooms) &&
+                !MemoryHelper.dependentRoomExists(roomName)) {
                 delete Memory.rooms[roomName];
             }
         }
@@ -4055,20 +4105,20 @@ class MemoryApi {
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    static initRoomMemory(room) {
+    static initRoomMemory(roomName) {
         // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
         // We want it to be reformed
         // Make sure jobs exist
-        if (!Memory.rooms[room.name].jobs) {
-            Memory.rooms[room.name].jobs = {};
+        if (!Memory.rooms[roomName].jobs) {
+            Memory.rooms[roomName].jobs = {};
         }
         // Abort if Memory already exists
-        if (Memory.rooms[room.name]) {
+        if (Memory.rooms[roomName]) {
             return;
         }
         // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
-        Memory.rooms[room.name] = {
+        Memory.rooms[roomName] = {
             attackRooms: [],
             claimRooms: [],
             constructionSites: { data: null, cache: null },
@@ -4086,7 +4136,10 @@ class MemoryApi {
             structures: { data: null, cache: null },
             upgradeLink: ""
         };
-        this.getRoomMemory(room, true);
+        // Only fill out the memory structure if we have vision of the room
+        if (Game.rooms[roomName]) {
+            this.getRoomMemory(Game.rooms[roomName], true);
+        }
     }
     /**
      * Validates Room Memory and calls update function as needed
@@ -5335,6 +5388,11 @@ class Empire {
                     flag.memory.processed = true;
                     break;
             }
+            // Set up the memory for the room if it doesn't already exist
+            const roomName = flag.pos.roomName;
+            if (!Memory.rooms[roomName]) {
+                MemoryApi.initRoomMemory(roomName);
+            }
         }
     }
     /**
@@ -5435,7 +5493,7 @@ class MemoryManager {
         MemoryApi.garbageCollection();
         const ownedRooms = MemoryApi.getOwnedRooms();
         _.forEach(ownedRooms, (room) => {
-            MemoryApi.initRoomMemory(room);
+            MemoryApi.initRoomMemory(room.name);
             MemoryApi.cleanDependentRoomMemory(room);
         });
     }
@@ -5521,7 +5579,6 @@ class SpawnManager {
      */
     static runSpawnForRoom(room) {
         const openSpawn = SpawnApi.getOpenSpawn(room);
-        // get tier
         // if we don't have an open spawn, return early
         if (openSpawn === null) {
             return;
@@ -8381,7 +8438,7 @@ class RoomVisualApi {
         const X_SCALE = 15;
         const secondsPerTick = RoomVisualManager.getSecondsPerTick();
         const ticksPerHour = Math.floor(3600 / secondsPerTick);
-        const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(10, room);
+        const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(25, room);
         const controlPointsPerHourEstimate = avgControlPointsPerTick * ticksPerHour;
         // Update the control points per hour estimate array
         if (!Memory.visual.avgControlPointsPerHourArray) {
@@ -8593,9 +8650,11 @@ class CreepHelper {
      * Get the text to sign a controller with
      */
     static getSigningText() {
-        // TODO Implement some kind of options interface that allows for customizing signing text
-        // * for now we just use a constant from config to sign
-        return CONTROLLER_SIGNING_TEXT;
+        // Find a random index in the array of messages and choose that
+        const MIN = 0;
+        const MAX = CONTROLLER_SIGNING_TEXT.length - 1;
+        const numberOfMessages = Math.floor(Math.random() * (+MAX - +MIN)) + +MIN;
+        return CONTROLLER_SIGNING_TEXT[numberOfMessages];
     }
     /**
      * Check if the targetPosition is the destination of the creep's current move target
@@ -9874,6 +9933,7 @@ class CreepMili {
      */
     static checkMilitaryCreepBasics(creep, creepOptions) {
         const targetRoom = creep.memory.targetRoom;
+        // I love tenary operators
         const fleeLocation = creepOptions.rallyLocation ? creepOptions.rallyLocation.roomName : creep.memory.homeRoom;
         // Check if we need to flee
         if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
