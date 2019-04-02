@@ -26,19 +26,19 @@ export default class MemoryHelper {
         for (const room of ownedRooms) {
 
             for (const rr of room.memory.remoteRooms!) {
-                if (roomName === rr.roomName) {
+                if (rr && roomName === rr.roomName) {
                     return true;
                 }
             }
 
             for (const cr of room.memory.claimRooms!) {
-                if (roomName === cr.roomName) {
+                if (cr && roomName === cr.roomName) {
                     return true;
                 }
             }
 
             for (const ar of room.memory.attackRooms!) {
-                if (roomName === ar.roomName) {
+                if (ar && roomName === ar.roomName) {
                     return true;
                 }
             }

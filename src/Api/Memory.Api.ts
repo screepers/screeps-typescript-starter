@@ -134,7 +134,7 @@ export default class MemoryApi {
         // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
         // We want it to be reformed
         // Make sure jobs exist
-        if (!Memory.rooms[roomName].jobs) {
+        if (Memory.rooms[roomName] && !Memory.rooms[roomName].jobs && isOwnedRoom) {
             Memory.rooms[roomName].jobs = {};
         }
 

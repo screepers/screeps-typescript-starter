@@ -24,17 +24,17 @@ class MemoryHelper {
         // Loop over d-rooms within each room looking for the parameter room name
         for (const room of ownedRooms) {
             for (const rr of room.memory.remoteRooms) {
-                if (roomName === rr.roomName) {
+                if (rr && roomName === rr.roomName) {
                     return true;
                 }
             }
             for (const cr of room.memory.claimRooms) {
-                if (roomName === cr.roomName) {
+                if (cr && roomName === cr.roomName) {
                     return true;
                 }
             }
             for (const ar of room.memory.attackRooms) {
-                if (roomName === ar.roomName) {
+                if (ar && roomName === ar.roomName) {
                     return true;
                 }
             }
@@ -99,7 +99,7 @@ const ROLE_REMOTE_MINER = "remoteMiner";
 const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 const ROLE_REMOTE_RESERVER = "remoteReserver";
 const ROLE_REMOTE_DEFENDER = "remoteDefender";
-const ROLE_CLAIMER$1 = "claimer";
+const ROLE_CLAIMER = "claimer";
 const ROLE_COLONIZER = "remoteColonizer";
 const ROLE_ZEALOT = "zealot";
 const ROLE_STALKER = "stalker";
@@ -225,7 +225,7 @@ const ROLE_LORRY$1 = "lorry";
 const ROLE_REMOTE_MINER$1 = "remoteMiner";
 const ROLE_REMOTE_HARVESTER$1 = "remoteHarvester";
 const ROLE_REMOTE_RESERVER$1 = "remoteReserver";
-const ROLE_CLAIMER$2 = "claimer";
+const ROLE_CLAIMER$1 = "claimer";
 const ROLE_COLONIZER$1 = "remoteColonizer";
 // Attack Flag Constants
 const ZEALOT_SOLO$1 = 1;
@@ -561,6 +561,8 @@ class RoomHelper {
      * @param room The room to check the remoteRooms of
      */
     static numRemoteSources(room) {
+        // TODO: Fix this to use remote room name memory which contains the actual source reference
+        // TODO: remove sources and structures from the remote room dependent memory itself
         const remoteRooms = Memory.rooms[room.name].remoteRooms;
         let numSources = 0;
         _.forEach(remoteRooms, (rr) => {
@@ -2023,10 +2025,10 @@ class SpawnApi {
                 remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
                 remoteLimits[ROLE_REMOTE_RESERVER] =
                     numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER$1);
+                remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                remoteLimits[ROLE_CLAIMER$1] =
-                    numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER$1);
+                remoteLimits[ROLE_CLAIMER] =
+                    numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 break;
         }
         return remoteLimits;
@@ -2265,7 +2267,7 @@ class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterOptions(roomState);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerOptions(roomState);
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 return SpawnHelper.generateClaimerOptions(roomState);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderOptions(roomState);
@@ -2307,7 +2309,7 @@ class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterBody(tier);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerBody(tier);
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 return SpawnHelper.generateClaimerBody(tier);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderBody(tier);
@@ -2474,7 +2476,7 @@ class SpawnApi {
         switch (roleConst) {
             // Colonizing creeps going to their claim rooms
             case ROLE_COLONIZER:
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
                 break;
             // Remote creeps going to their remote rooms
@@ -3937,7 +3939,7 @@ class SpawnHelper {
     static getLimitPerClaimRoomForRole(roleConst) {
         let creepNum = 0;
         switch (roleConst) {
-            case ROLE_CLAIMER || ROLE_COLONIZER:
+            case ROLE_CLAIMER:
                 creepNum = 1;
                 break;
         }
@@ -4105,11 +4107,11 @@ class MemoryApi {
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    static initRoomMemory(roomName) {
+    static initRoomMemory(roomName, isOwnedRoom) {
         // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
         // We want it to be reformed
         // Make sure jobs exist
-        if (!Memory.rooms[roomName].jobs) {
+        if (Memory.rooms[roomName] && !Memory.rooms[roomName].jobs && isOwnedRoom) {
             Memory.rooms[roomName].jobs = {};
         }
         // Abort if Memory already exists
@@ -4118,25 +4120,39 @@ class MemoryApi {
         }
         // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
-        Memory.rooms[roomName] = {
-            attackRooms: [],
-            claimRooms: [],
-            constructionSites: { data: null, cache: null },
-            creepLimit: {},
-            creeps: { data: null, cache: null },
-            defcon: -1,
-            hostiles: { data: null, cache: null },
-            remoteRooms: [],
-            roomState: ROOM_STATE_INTRO,
-            sources: { data: null, cache: null },
-            minerals: { data: null, cache: null },
-            tombstones: { data: null, cache: null },
-            droppedResources: { data: null, cache: null },
-            jobs: {},
-            structures: { data: null, cache: null },
-            upgradeLink: ""
-        };
-        // Only fill out the memory structure if we have vision of the room
+        if (isOwnedRoom) {
+            Memory.rooms[roomName] = {
+                attackRooms: [],
+                claimRooms: [],
+                constructionSites: { data: null, cache: null },
+                creepLimit: {},
+                creeps: { data: null, cache: null },
+                defcon: -1,
+                hostiles: { data: null, cache: null },
+                remoteRooms: [],
+                roomState: ROOM_STATE_INTRO,
+                sources: { data: null, cache: null },
+                minerals: { data: null, cache: null },
+                tombstones: { data: null, cache: null },
+                droppedResources: { data: null, cache: null },
+                jobs: {},
+                structures: { data: null, cache: null },
+                upgradeLink: ""
+            };
+        }
+        else {
+            Memory.rooms[roomName] = {
+                structures: { data: null, cache: null },
+                sources: { data: null, cache: null },
+                minerals: { data: null, cache: null },
+                tombstones: { data: null, cache: null },
+                droppedResources: { data: null, cache: null },
+                constructionSites: { data: null, cache: null },
+                defcon: -1,
+                hostiles: { data: null, cache: null },
+            };
+        }
+        // Only populate out the memory structure if we have vision of the room
         if (Game.rooms[roomName]) {
             this.getRoomMemory(Game.rooms[roomName], true);
         }
@@ -5391,7 +5407,9 @@ class Empire {
             // Set up the memory for the room if it doesn't already exist
             const roomName = flag.pos.roomName;
             if (!Memory.rooms[roomName]) {
-                MemoryApi.initRoomMemory(roomName);
+                const isOwnedRoom = false;
+                console.log("Initializing Room Memory for Dependent Room [" + roomName + "].");
+                MemoryApi.initRoomMemory(roomName, isOwnedRoom);
             }
         }
     }
@@ -5493,7 +5511,8 @@ class MemoryManager {
         MemoryApi.garbageCollection();
         const ownedRooms = MemoryApi.getOwnedRooms();
         _.forEach(ownedRooms, (room) => {
-            MemoryApi.initRoomMemory(room.name);
+            const isOwnedRoom = true;
+            MemoryApi.initRoomMemory(room.name, isOwnedRoom);
             MemoryApi.cleanDependentRoomMemory(room);
         });
     }
@@ -8164,7 +8183,7 @@ class RoomVisualApi {
             remoteMiner: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_MINER$1).length,
             remoteReserver: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_RESERVER$1).length,
             remoteHarvester: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_HARVESTER$1).length,
-            claimer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_CLAIMER$2).length,
+            claimer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_CLAIMER$1).length,
             colonizer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_COLONIZER$1).length
         };
         const spawningCreep = _.filter(MemoryApi.getMyCreeps(room.name), (c) => c.spawning);
@@ -8213,7 +8232,7 @@ class RoomVisualApi {
                 lines.push("Remote Colonizers:    " + roles[ROLE_COLONIZER$1] + " / " + creepLimits.remoteLimits.remoteColonizer);
             }
             if (creepLimits.remoteLimits.claimer > 0) {
-                lines.push("Claimers:       " + roles[ROLE_CLAIMER$2] + " / " + creepLimits.remoteLimits.claimer);
+                lines.push("Claimers:       " + roles[ROLE_CLAIMER$1] + " / " + creepLimits.remoteLimits.claimer);
             }
         }
         lines.push("");
@@ -10236,7 +10255,7 @@ class CreepManager {
             case ROLE_COLONIZER:
                 RemoteColonizerCreepManager.runCreepRole(creep);
                 break;
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 ClaimerCreepManager.runCreepRole(creep);
                 break;
             case ROLE_REMOTE_DEFENDER:

@@ -16,15 +16,12 @@
  * ~~ NEW FEATURES ~~
  * ~~~~~~~~~~~~~~~~~~
  *
- * 1. Set up remote room memory.
- * Remote/Claim/Attack rooms should all have their own structures in Memory.rooms
- * Set them each up with default values when they are added to a room
- * Delete them from Memory.rooms 1500 ticks after they are removed from memory rooms
- * This is because we want creeps there to finish their job at least, but removing the flag will
- * cut off all spawning, so best of both worlds
- * Idea for this is in the processing for the flag, set the memory for the room up
- * Let garbage collection delete it tho (we should consider suiciding or sending to new rooms the creeps to prevent memory issues)
- * Change garbage collection for memory.rooms to also check for dependent rooms as a result of this
+ * 1. Solve issue on remote room memory
+ * Garbage collection will clean up any remote rooms with no flag, as it should, however this presents a problem
+ * with surviving  remote creeps. they will try to access undefined memory unless we
+ * A) move them to another room or have them suicide by storage
+ * B) keep the room memory for a certain amount of ticks after the flag is removed
+ * possibly make a memory on it that says delete timer and keep it null, but if its defined the garbage collection checks if its === 0, but not null and deletes it in once it hits 0
  *
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
