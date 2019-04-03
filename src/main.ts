@@ -119,6 +119,9 @@
  * and the defcon level will go down. This is most likely related to how we are getting the defcon level
  * because towers won't even attempt to target anything if the defcon level is 0
  * So start by looking in how we're getting defcon and make sure we keep it that level until every creep is dead
+ *
+ * 8. Even worse, just had an invasion and my targets didn't even fire once. Either defcon isn't getting set properly or they aren't finding their target properly.
+ * Not sure how to recreate, as they seem to respond to invasions, but it happens frequently enough where i lost 200 creep parts in last 24 hours
  */
 
 
