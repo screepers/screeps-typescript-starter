@@ -16,13 +16,6 @@
  * ~~ NEW FEATURES ~~
  * ~~~~~~~~~~~~~~~~~~
  *
- * 1. Solve issue on remote room memory
- * Garbage collection will clean up any remote rooms with no flag, as it should, however this presents a problem
- * with surviving  remote creeps. they will try to access undefined memory unless we
- * A) move them to another room or have them suicide by storage
- * B) keep the room memory for a certain amount of ticks after the flag is removed
- * possibly make a memory on it that says delete timer and keep it null, but if its defined the garbage collection checks if its === 0, but not null and deletes it in once it hits 0
- *
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
  * We should also give remote miners 7 work parts imo. 6 wasn't enough to keep the container repaired and it was slow on building it

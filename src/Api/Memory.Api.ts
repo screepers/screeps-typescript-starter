@@ -46,8 +46,9 @@ export default class MemoryApi {
         for (const roomName in Memory.rooms) {
             if (
                 !(roomName in Game.rooms) &&
-                !MemoryHelper.dependentRoomExists(roomName
-                )) {
+                !MemoryHelper.dependentRoomExists(roomName) &&
+                !_.some(Game.creeps, (creep: Creep) => creep.memory.targetRoom === roomName)
+            ) {
                 delete Memory.rooms[roomName];
             }
         }

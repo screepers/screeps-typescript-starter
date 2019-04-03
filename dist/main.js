@@ -4036,7 +4036,8 @@ class MemoryApi {
         // Remove all dead rooms from memory
         for (const roomName in Memory.rooms) {
             if (!(roomName in Game.rooms) &&
-                !MemoryHelper.dependentRoomExists(roomName)) {
+                !MemoryHelper.dependentRoomExists(roomName) &&
+                !_.some(Game.creeps, (creep) => creep.memory.targetRoom === roomName)) {
                 delete Memory.rooms[roomName];
             }
         }
