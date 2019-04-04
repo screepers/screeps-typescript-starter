@@ -10276,7 +10276,12 @@ class CreepManager {
      */
     static runCreepManager() {
         for (const creep in Game.creeps) {
-            this.runSingleCreepManager(Game.creeps[creep]);
+            try {
+                this.runSingleCreepManager(Game.creeps[creep]);
+            }
+            catch (e) {
+                UtilHelper.printError(e);
+            }
         }
     }
     /**
@@ -10285,60 +10290,55 @@ class CreepManager {
      */
     static runSingleCreepManager(creep) {
         const role = creep.memory.role;
-        try {
-            // Call the correct helper function based on creep role
-            switch (role) {
-                case ROLE_MINER:
-                    MinerCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_HARVESTER:
-                    HarvesterCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_WORKER:
-                    WorkerCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_LORRY:
-                    LorryCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_POWER_UPGRADER:
-                    PowerUpgraderCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_REMOTE_MINER:
-                    RemoteMinerCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_REMOTE_HARVESTER:
-                    RemoteHarvesterCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_COLONIZER:
-                    RemoteColonizerCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_CLAIMER$1:
-                    ClaimerCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_REMOTE_DEFENDER:
-                    RemoteDefenderCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_REMOTE_RESERVER:
-                    RemoteReserverCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_ZEALOT:
-                    ZealotCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_MEDIC:
-                    MedicCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_STALKER:
-                    StalkerCreepManager.runCreepRole(creep);
-                    break;
-                case ROLE_DOMESTIC_DEFENDER:
-                    DomesticDefenderCreepManager.runCreepRole(creep);
-                    break;
-                default:
-                    throw new UserException("Invalid role for runSingleCreepManager.", 'The role "' + role + '" was invalid for running a creep role.', ERROR_ERROR$1);
-            }
-        }
-        catch (e) {
-            UtilHelper.printError(e);
+        // Call the correct helper function based on creep role
+        switch (role) {
+            case ROLE_MINER:
+                MinerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_HARVESTER:
+                HarvesterCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_WORKER:
+                WorkerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_LORRY:
+                LorryCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_POWER_UPGRADER:
+                PowerUpgraderCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_MINER:
+                RemoteMinerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_HARVESTER:
+                RemoteHarvesterCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_COLONIZER:
+                RemoteColonizerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_CLAIMER$1:
+                ClaimerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_DEFENDER:
+                RemoteDefenderCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_REMOTE_RESERVER:
+                RemoteReserverCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_ZEALOT:
+                ZealotCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_MEDIC:
+                MedicCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_STALKER:
+                StalkerCreepManager.runCreepRole(creep);
+                break;
+            case ROLE_DOMESTIC_DEFENDER:
+                DomesticDefenderCreepManager.runCreepRole(creep);
+                break;
+            default:
+                throw new UserException("Invalid role for runSingleCreepManager.", 'The role "' + role + '" was invalid for running a creep role.', ERROR_ERROR$1);
         }
     }
 }
