@@ -29,7 +29,7 @@ export default class MinerCreepManager {
             }
 
             // Set supplementary.moveTarget to container if one exists and isn't already taken
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
 
         if (creep.memory.job) {
@@ -62,17 +62,14 @@ export default class MinerCreepManager {
 
                     // Get sources from suitableJobs if any, else get regular sourceJob instead
                     if (suitableJobs.length > 0) {
-                        sourceIDs = MemoryHelper.getOnlyObjectsFromIDs(
-                            _.map(suitableJobs, (job: GetEnergyJob) => job.targetID)
-                        );
+                        sourceIDs = _.map(suitableJobs, (job: GetEnergyJob) => job.targetID);
                     } else {
-                        sourceIDs = MemoryHelper.getOnlyObjectsFromIDs(
-                            _.map(sourceJobs, (job: GetEnergyJob) => job.targetID)
-                        );
+                        sourceIDs = _.map(sourceJobs, (job: GetEnergyJob) => job.targetID);
                     }
 
                     // Find the closest source
                     const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+
                     const closestAvailableSource: Source = creep.pos.findClosestByRange(sourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
 
                     // return the job that corresponds with the closest source
@@ -96,7 +93,10 @@ export default class MinerCreepManager {
     /**
      * Handle initalizing a new job
      */
-    public static handleNewJob(creep: Creep): void {
+    public static handleNewJob(creep: Creep, room: Room): void {
+        // Update room memory to reflect the new job
+        MemoryApi.updateJobMemory(creep, room);
+
         const miningContainer = CreepHelper.getMiningContainer(
             creep.memory.job as GetEnergyJob,
             Game.rooms[creep.memory.homeRoom]

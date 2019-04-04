@@ -50,7 +50,7 @@ export default class CarryPartJobs {
      * @param room The room to get the jobs for
      */
     public static createStoreJobs(room: Room): CarryPartJob[] {
-        const storeJobs = [];
+        const storeJobs: CarryPartJob[] = [];
 
         if (room.storage !== undefined) {
             const storageJob: CarryPartJob = {

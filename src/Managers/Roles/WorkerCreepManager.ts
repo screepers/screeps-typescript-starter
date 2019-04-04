@@ -170,6 +170,8 @@ export default class WorkerCreepManager {
      * Handles new job initializing
      */
     public static handleNewJob(creep: Creep, room: Room) {
+        MemoryApi.updateJobMemory(creep, room);
+
         switch (creep.memory.job!.jobType) {
             case "getEnergyJob":
                 break;

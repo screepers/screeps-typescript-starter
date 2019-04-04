@@ -27,7 +27,11 @@ import {
     STORE_JOB_CACHE_TTL,
     FILL_JOB_CACHE_TTL,
     PICKUP_JOB_CACHE_TTL,
-    ALL_STRUCTURE_TYPES
+    ALL_STRUCTURE_TYPES,
+    ERROR_ERROR,
+    ERROR_FATAL,
+    ERROR_INFO,
+    ERROR_WARN
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import CarryPartJobs from "Jobs/CarryPartJobs";
@@ -1410,7 +1414,7 @@ export default class MemoryApi {
         }
 
         if (roomJob === undefined && jobListing.sourceJobs) {
-            roomJob = _.find(jobListing.containerJobs!.data, (sJob: GetEnergyJob) => sJob.targetID === job.targetID);
+            roomJob = _.find(jobListing.sourceJobs!.data, (sJob: GetEnergyJob) => sJob.targetID === job.targetID);
         }
 
         if (roomJob === undefined && jobListing.pickupJobs) {

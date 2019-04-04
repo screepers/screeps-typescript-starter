@@ -21,7 +21,7 @@ export default class HarvesterCreepManager {
                 return; // idle for a tick
             }
 
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
 
         if (creep.memory.job) {
@@ -104,7 +104,11 @@ export default class HarvesterCreepManager {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillTower || creepOptions.fillSpawn) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== 'link', true);
+            const fillJobs = MemoryApi.getFillJobs(
+                room,
+                (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link",
+                true
+            );
 
             if (fillJobs.length > 0) {
                 return fillJobs[0];
@@ -142,7 +146,6 @@ export default class HarvesterCreepManager {
             if (buildJobs.length > 0) {
                 return buildJobs[0];
             }
-
         }
 
         return undefined;
@@ -151,14 +154,7 @@ export default class HarvesterCreepManager {
     /**
      * Handles setup for a new job
      */
-    public static handleNewJob(creep: Creep): void {
-        if (creep.memory.job!.jobType === "getEnergyJob") {
-            // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
-            return;
-        }
-        else if (creep.memory.job!.jobType === "carryPartJob") {
-            // Find the reference to the job we currently have and mark it as taken
-            return;
-        }
+    public static handleNewJob(creep: Creep, room: Room): void {
+        MemoryApi.updateJobMemory(creep, room);
     }
 }
