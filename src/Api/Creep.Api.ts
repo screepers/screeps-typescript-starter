@@ -106,11 +106,8 @@ export default class CreepApi {
         let target;
 
         target = Game.getObjectById(job.targetID);
-        if (!target) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+
+        this.nullCheck_target(creep, target);
 
         let returnCode: number;
         let deleteOnSuccess: boolean = false;
@@ -151,11 +148,7 @@ export default class CreepApi {
     public static doWork_WorkPartJob(creep: Creep, job: WorkPartJob) {
         const target = Game.getObjectById(job.targetID);
 
-        if (!target) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+        this.nullCheck_target(creep, target);
 
         let returnCode: number;
         let deleteOnSuccess: boolean = false;
@@ -210,11 +203,7 @@ export default class CreepApi {
     public static doWork_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
         const target = Game.getObjectById(job.targetID);
 
-        if (!target) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+        this.nullCheck_target(creep, target);
 
         let returnCode: number;
 
@@ -289,11 +278,7 @@ export default class CreepApi {
     public static travelTo_CarryPartJob(creep: Creep, job: CarryPartJob) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
 
-        if (!moveTarget) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+        this.nullCheck_target(creep, moveTarget);
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
@@ -369,6 +354,9 @@ export default class CreepApi {
      */
     public static nullCheck_target(creep: Creep, target: object | null) {
         if (target === null) {
+            delete creep.memory.job;
+            creep.memory.working = false;
+
             throw new UserException(
                 "Null Job Target",
                 "Null Job Target for creep: " + creep.name + "\n The error occurred in: ",
