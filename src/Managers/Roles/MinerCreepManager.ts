@@ -10,7 +10,6 @@ export default class MinerCreepManager {
      * @param creep The creep to run
      */
     public static runCreepRole(creep: Creep): void {
-
         if (creep.spawning) {
             return; // Don't do anything until you've spawned
         }
@@ -48,27 +47,29 @@ export default class MinerCreepManager {
             const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
             if (sourceJobs.length > 0) {
                 // Select the source with the lowest TTL miner on it (or no miner at all)
-                const sources: Array<Source | null> = _.map(sourceJobs, (job: GetEnergyJob) => Game.getObjectById(job.targetID));
+                const sources: Array<Source | null> = _.map(sourceJobs, (job: GetEnergyJob) =>
+                    Game.getObjectById(job.targetID)
+                );
                 let selectedId: string | undefined;
                 for (const source of sources) {
                     if (!source) {
                         continue;
                     }
-                    const minersOnSource: Creep[] = source.pos.findInRange(FIND_MY_CREEPS, 1, { filter: (c: Creep) => c.memory.role === ROLE_MINER });
+                    const minersOnSource: Creep[] = source.pos.findInRange(FIND_MY_CREEPS, 1, {
+                        filter: (c: Creep) => c.memory.role === ROLE_MINER
+                    });
                     // If there is a miner, the one with the lower TTL
                     if (minersOnSource.length === 0) {
                         selectedId = source.id;
                         break;
-                    }
-                    else {
+                    } else {
                         let lowestTTL: number | undefined;
                         for (const miner of minersOnSource) {
                             if (!selectedId || !lowestTTL) {
                                 selectedId = source.id;
                                 lowestTTL = miner.ticksToLive;
                                 continue;
-                            }
-                            else {
+                            } else {
                                 if (miner.spawning) {
                                     continue;
                                 }
@@ -102,11 +103,13 @@ export default class MinerCreepManager {
             return; // We don't need to do anything else if the container doesn't exist
         }
 
+        // Check for any creeps on the miningContainer
         const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
 
         if (creepsOnContainer.length > 0) {
+            // If the creep on the container is a miner (and not some random creep that's in the way)
             if (creepsOnContainer[0].memory.role === ROLE_MINER) {
-                return; // If there is already a miner creep on the container, then we don't target it
+                return; // Don't target it
             }
         }
 

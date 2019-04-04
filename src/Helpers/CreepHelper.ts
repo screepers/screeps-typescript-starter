@@ -15,7 +15,7 @@ export default class CreepHelper {
         if (!job) {
             throw new UserException(
                 "Job is undefined",
-                "Job is undefined for creep " + room.name + ", can't move to mining container.",
+                "Job is undefined for room " + room.name + ". Can't get the mining container of an undefined job.",
                 ERROR_WARN
             );
         }
@@ -30,7 +30,9 @@ export default class CreepHelper {
             room,
             STRUCTURE_CONTAINER
         ) as StructureContainer[];
+
         const closestContainer = source.pos.findClosestByRange(containers);
+
         if (!closestContainer) {
             return undefined;
         } else {

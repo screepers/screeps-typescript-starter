@@ -1,9 +1,6 @@
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
-import {
-    DEFAULT_MOVE_OPTS, ERROR_ERROR,
-    ROOM_STATE_BEGINNER, ROOM_STATE_INTRO, ROLE_MINER
-} from "utils/constants";
+import { DEFAULT_MOVE_OPTS, ERROR_ERROR, ROOM_STATE_BEGINNER, ROOM_STATE_INTRO, ROLE_MINER } from "utils/constants";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -262,12 +259,7 @@ export default class CreepApi {
     public static travelTo_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
 
-        // temp fix for harvesters getting null job, need to find a perm fix for this soon
-        if (!moveTarget) {
-            creep.memory.working = false;
-            delete creep.memory.job;
-        }
-        // this.nullCheck_target(creep, moveTarget);
+        this.nullCheck_target(creep, moveTarget);
 
         // Move options target
         const moveOpts: MoveToOpts = DEFAULT_MOVE_OPTS;
@@ -275,20 +267,12 @@ export default class CreepApi {
         // In this case all actions are complete with a range of 1, but keeping for structure
         if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
             moveOpts.range = 1;
+        } else if (job.actionType === "harvest" && moveTarget instanceof StructureContainer) {
+            moveOpts.range = 0;
         } else if (job.actionType === "withdraw" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
             moveOpts.range = 1;
         } else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
             moveOpts.range = 1;
-        }
-
-        if (
-            job.actionType === "harvest" &&
-            creep.memory.role === ROLE_MINER &&
-            creep.room.memory.roomState !== ROOM_STATE_INTRO &&
-            creep.room.memory.roomState !== ROOM_STATE_BEGINNER) {
-            // This case implies container mining is available, and miner was stopping 1 tile before the container
-            // If you can find a better way to do this, please do lol
-            moveOpts.range = 0;
         }
 
         if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
@@ -358,12 +342,7 @@ export default class CreepApi {
     public static travelTo_WorkPartJob(creep: Creep, job: WorkPartJob) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
 
-        // Same bandaid fix
-        if (!moveTarget) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, moveTarget);
+        this.nullCheck_target(creep, moveTarget);
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
@@ -405,12 +384,10 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-            creep.name +
-            "] for function [" +
-            // this.caller +
-            "]" +
-            "\n Job: " +
-            JSON.stringify(job),
+                creep.name +
+                "]" +
+                "\n Job: " +
+                JSON.stringify(job),
             ERROR_ERROR
         );
     }
