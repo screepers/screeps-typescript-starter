@@ -2,7 +2,8 @@ import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import { ROLE_MINER } from "utils/constants";
 import CreepHelper from "Helpers/CreepHelper";
-import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import MemoryHelper from "Helpers/MemoryHelper";
+import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
 
 // Manager for the miner creep role
 export default class MinerCreepManager {
@@ -11,7 +12,6 @@ export default class MinerCreepManager {
      * @param creep The creep to run
      */
     public static runCreepRole(creep: Creep): void {
-
         if (creep.spawning) {
             return; // Don't do anything until you've spawned
         }
@@ -26,7 +26,7 @@ export default class MinerCreepManager {
             }
 
             // Set supplementary.moveTarget to container if one exists and isn't already taken
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
 
         if (creep.memory.job) {
@@ -39,27 +39,61 @@ export default class MinerCreepManager {
         }
     }
 
-    /**
-     * Find a job for the creep
-     */
     public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
-        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        const creepOptions = creep.memory.options as CreepOptionsCiv;
+
         if (creepOptions.harvestSources) {
-            // TODO change this to check creep options to filter jobs --
-            // e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-            // Force update to make sure creeps don't travel to a taken source
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken, true);
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken);
+
             if (sourceJobs.length > 0) {
-                return sourceJobs[0];
+                // Filter out jobs that have too little energy -
+                // The energy in the StoreDefinition is the amount of energy per 300 ticks left
+                const suitableJobs = _.filter(
+                    sourceJobs,
+                    (sJob: GetEnergyJob) => sJob.resources.energy >= creep.getActiveBodyparts(WORK) * 2 * 300 //  (Workparts * 2 * 300 = effective mining capacity)
+                );
+
+                // If config allows getting closest source
+                if (MINERS_GET_CLOSEST_SOURCE) {
+                    let sourceIDs: string[];
+
+                    // Get sources from suitableJobs if any, else get regular sourceJob instead
+                    if (suitableJobs.length > 0) {
+                        sourceIDs = _.map(suitableJobs, (job: GetEnergyJob) => job.targetID);
+                    } else {
+                        sourceIDs = _.map(sourceJobs, (job: GetEnergyJob) => job.targetID);
+                    }
+
+                    // Find the closest source
+                    const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+
+                    const closestAvailableSource: Source = creep.pos.findClosestByRange(sourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
+
+                    // return the job that corresponds with the closest source
+                    return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === closestAvailableSource.id);
+                } else {
+                    // Return the first suitableJob if any
+                    // if none, return first sourceJob.
+                    if (suitableJobs.length > 0) {
+                        return suitableJobs[0];
+                    } else {
+                        return sourceJobs[0];
+                    }
+                }
             }
-        }
+        } // End harvestSources option
+
+        // no available jobs
         return undefined;
     }
 
     /**
      * Handle initalizing a new job
      */
-    public static handleNewJob(creep: Creep): void {
+    public static handleNewJob(creep: Creep, room: Room): void {
+        // Update room memory to reflect the new job
+        MemoryApi.updateJobMemory(creep, room);
+
         const miningContainer = CreepHelper.getMiningContainer(
             creep.memory.job as GetEnergyJob,
             Game.rooms[creep.memory.homeRoom]
@@ -71,11 +105,13 @@ export default class MinerCreepManager {
             return;
         }
 
+        // Check for any creeps on the miningContainer
         const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
 
         if (creepsOnContainer.length > 0) {
+            // If the creep on the container is a miner (and not some random creep that's in the way)
             if (creepsOnContainer[0].memory.role === ROLE_MINER) {
-                return; // If there is already a miner creep on the container, then we don't target it
+                return; // Don't target it
             }
         }
 

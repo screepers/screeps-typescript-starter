@@ -27,7 +27,14 @@ import {
     STORE_JOB_CACHE_TTL,
     FILL_JOB_CACHE_TTL,
     PICKUP_JOB_CACHE_TTL,
+    ALL_STRUCTURE_TYPES,
+    ERROR_ERROR,
+    ERROR_FATAL,
+    ERROR_INFO,
+    ERROR_WARN
 } from "utils/Constants";
+import UserException from "utils/UserException";
+import CarryPartJobs from "Jobs/CarryPartJobs";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -244,7 +251,11 @@ export default class MemoryApi {
      * @param forceUpdate [Optional] Invalidate Cache by force
      * @returns Creep[ ] -- An array of owned creeps, empty if there are none
      */
-    public static getMyCreeps(roomName: string, filterFunction?: (object: Creep) => boolean, forceUpdate?: boolean): Creep[] {
+    public static getMyCreeps(
+        roomName: string,
+        filterFunction?: (object: Creep) => boolean,
+        forceUpdate?: boolean
+    ): Creep[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -708,7 +719,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -1224,7 +1235,6 @@ export default class MemoryApi {
      * @param squadUUID the id for the squad
      */
     public static getCreepsInSquad(roomName: string, squadUUID: number): Creep[] | null {
-
         return MemoryApi.getMyCreeps(roomName, (creep: Creep) => {
             const currentCreepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
             if (!currentCreepOptions.squadUUID) {
@@ -1232,5 +1242,324 @@ export default class MemoryApi {
             }
             return currentCreepOptions.squadUUID === squadUUID;
         });
+    }
+
+    /**
+     * Updates the job value in memory to deprecate resources or mark the job as taken
+     */
+    public static updateJobMemory(creep: Creep, room: Room): void {
+        // make sure creep has a job
+        if (creep.memory.job === undefined) {
+            throw new UserException(
+                "Error in updateJobMemory",
+                "Attempted to updateJobMemory using a creep with no job.",
+                ERROR_ERROR
+            );
+        }
+        // make sure room has a jobs property
+        if (room.memory.jobs === undefined) {
+            throw new UserException(
+                "Error in updateJobMemory",
+                "The room memory to update does not have a jobs property",
+                ERROR_ERROR
+            );
+        }
+
+        const creepJob: BaseJob = creep.memory.job!;
+        let roomJob: BaseJob | undefined;
+
+        // Assign room job to the room in memory
+        switch (creepJob!.jobType) {
+            case "carryPartJob":
+                roomJob = this.searchCarryPartJobs(creepJob as CarryPartJob, room);
+                break;
+            case "claimPartJob":
+                roomJob = this.searchClaimPartJobs(creepJob as ClaimPartJob, room);
+                break;
+            case "getEnergyJob":
+                roomJob = this.searchGetEnergyJobs(creepJob as GetEnergyJob, room);
+                break;
+            case "workPartJob":
+                roomJob = this.searchWorkPartJobs(creepJob as WorkPartJob, room);
+                break;
+            default:
+                throw new UserException(
+                    "Error in updateJobMemory",
+                    "Creep has a job with an undefined jobType",
+                    ERROR_ERROR
+                );
+        }
+
+        if (roomJob === undefined) {
+            throw new UserException(
+                "Error in updateJobMemory",
+                "Could not find the job in room memory to update.",
+                ERROR_ERROR
+            );
+        }
+
+        // We have the roomJob location in memory
+        // now we just need to update the value based on the type of job
+
+        switch (creepJob!.jobType) {
+            case "carryPartJob":
+                this.updateCarryPartJob(roomJob as CarryPartJob, creep);
+                break;
+            case "claimPartJob":
+                this.updateClaimPartJob(roomJob as ClaimPartJob, creep);
+                break;
+            case "getEnergyJob":
+                this.updateGetEnergyJob(roomJob as GetEnergyJob, creep);
+                break;
+            case "workPartJob":
+                this.updateWorkPartJob(roomJob as WorkPartJob, creep);
+                break;
+            default:
+                throw new UserException(
+                    "Error in updateJobMemory",
+                    "Creep has a job with an undefined jobType",
+                    ERROR_ERROR
+                );
+        }
+    }
+
+    /**
+     * Searches through claimPartJobs to find a specified job
+     * @param job THe job to serach for
+     * @param room The room to search in
+     */
+    public static searchClaimPartJobs(job: ClaimPartJob, room: Room): ClaimPartJob | undefined {
+        if (room.memory.jobs!.claimPartJobs === undefined) {
+            throw new UserException(
+                "Error in searchClaimPartJobs",
+                "The room memory does not have a claimPartJobs property",
+                ERROR_ERROR
+            );
+        }
+
+        const jobListing = room.memory.jobs!.claimPartJobs!;
+
+        let roomJob: ClaimPartJob | undefined;
+
+        if (jobListing.claimJobs) {
+            roomJob = _.find(jobListing.claimJobs.data, (claimJob: ClaimPartJob) => job.targetID === claimJob.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.reserveJobs) {
+            roomJob = _.find(
+                jobListing.reserveJobs.data,
+                (reserveJob: ClaimPartJob) => job.targetID === reserveJob.targetID
+            );
+        }
+
+        if (roomJob === undefined && jobListing.signJobs) {
+            roomJob = _.find(jobListing.signJobs.data, (signJob: ClaimPartJob) => job.targetID === signJob.targetID);
+        }
+
+        return roomJob;
+    }
+
+    /**
+     * Searches through carryPartJobs to find a specified job
+     * @param job The job to search for
+     * @param room The room to search in
+     */
+    public static searchCarryPartJobs(job: CarryPartJob, room: Room): CarryPartJob | undefined {
+        if (room.memory.jobs!.carryPartJobs === undefined) {
+            throw new UserException(
+                "Error in searchCarryPartJobs",
+                "The room memory does not have a carryPartJobs property",
+                ERROR_ERROR
+            );
+        }
+
+        const jobListing = room.memory.jobs!.carryPartJobs!;
+
+        let roomJob: CarryPartJob | undefined;
+
+        if (jobListing.fillJobs) {
+            roomJob = _.find(jobListing.fillJobs.data, (fillJob: CarryPartJob) => job.targetID === fillJob.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.storeJobs) {
+            roomJob = _.find(jobListing.storeJobs.data, (storeJob: CarryPartJob) => job.targetID === storeJob.targetID);
+        }
+
+        return roomJob;
+    }
+
+    /**
+     * Searches through workPartJobs to find a specified job
+     * @param job The job to search for
+     * @param room The room to search in
+     */
+    public static searchWorkPartJobs(job: WorkPartJob, room: Room): WorkPartJob | undefined {
+        if (room.memory.jobs!.workPartJobs === undefined) {
+            throw new UserException(
+                "Error in workPartJobs",
+                "THe room memory does not have a workPartJobs property",
+                ERROR_ERROR
+            );
+        }
+
+        const jobListing = room.memory.jobs!.workPartJobs!;
+
+        let roomJob: WorkPartJob | undefined;
+
+        if (jobListing.upgradeJobs) {
+            roomJob = _.find(jobListing.upgradeJobs.data, (uJob: WorkPartJob) => job.targetID === uJob.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.buildJobs) {
+            roomJob = _.find(jobListing.buildJobs.data, (buildJob: WorkPartJob) => job.targetID === buildJob.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.repairJobs) {
+            roomJob = _.find(jobListing.repairJobs.data, (rJob: WorkPartJob) => job.targetID === rJob.targetID);
+        }
+
+        return roomJob;
+    }
+
+    /**
+     * Searches through getEnergyJobs to find a specified job
+     * @param job THe job to search for
+     * @param room THe room to search in
+     */
+    public static searchGetEnergyJobs(job: GetEnergyJob, room: Room): GetEnergyJob | undefined {
+        if (room.memory.jobs!.getEnergyJobs === undefined) {
+            throw new UserException(
+                "Error in searchGetEnergyJobs",
+                "The room memory does not have a getEnergyJobs property",
+                ERROR_ERROR
+            );
+        }
+
+        const jobListing = room.memory.jobs!.getEnergyJobs!;
+
+        let roomJob: GetEnergyJob | undefined;
+
+        if (jobListing.containerJobs) {
+            roomJob = _.find(jobListing.containerJobs.data, (cJob: GetEnergyJob) => cJob.targetID === job.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.sourceJobs) {
+            roomJob = _.find(jobListing.sourceJobs!.data, (sJob: GetEnergyJob) => sJob.targetID === job.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.pickupJobs) {
+            roomJob = _.find(jobListing.pickupJobs!.data, (pJob: GetEnergyJob) => pJob.targetID === job.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.backupStructures) {
+            roomJob = _.find(jobListing.backupStructures!.data, (sJob: GetEnergyJob) => sJob.targetID === job.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.linkJobs) {
+            roomJob = _.find(jobListing.linkJobs!.data, (lJob: GetEnergyJob) => lJob.targetID === job.targetID);
+        }
+
+        if (roomJob === undefined && jobListing.tombstoneJobs) {
+            roomJob = _.find(jobListing.tombstoneJobs!.data, (tJob: GetEnergyJob) => tJob.targetID === job.targetID);
+        }
+
+        return roomJob;
+    }
+
+    /**
+     * Updates the CarryPartJob
+     * @param job The Job to update
+     */
+    public static updateCarryPartJob(job: CarryPartJob, creep: Creep): void {
+        if (job.actionType === "transfer") {
+            job.remaining -= creep.carry.energy;
+
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+        }
+
+        return;
+    }
+
+    /**
+     * Updates the ClaimPartJob
+     * @param job The Job to update
+     */
+    public static updateClaimPartJob(job: ClaimPartJob, creep: Creep): void {
+        if (job.targetType === "controller") {
+            job.isTaken = true;
+
+            return;
+        }
+    }
+    /**
+     * Updates the getEnergyJob
+     * @param job The Job to update
+     */
+    public static updateGetEnergyJob(job: GetEnergyJob, creep: Creep): void {
+        if (job.targetType === "source") {
+            // Subtract creep effective mining capacity from resources
+            job.resources.energy -= creep.getActiveBodyparts(WORK) * 2 * 300;
+
+            if (job.resources.energy <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
+
+        if (
+            job.targetType === "droppedResource" ||
+            job.targetType === "link" ||
+            job.targetType === "container" ||
+            job.targetType === "storage" ||
+            job.targetType === "terminal"
+        ) {
+            // Subtract creep carry from resources
+            job.resources.energy -= creep.carryCapacity;
+
+            if (job.resources.energy <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
+    }
+
+    /**
+     * Updates the workPartJob
+     * @param job The job to update
+     */
+    public static updateWorkPartJob(job: WorkPartJob, creep: Creep): void {
+        if (job.targetType === "constructionSite") {
+            // Creep builds 5 points/part/tick at 1 energy/point
+            job.remaining -= creep.carry.energy; // 1 to 1 ratio of energy to points built
+
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
+
+        if (job.targetType === STRUCTURE_CONTROLLER) {
+            // Upgrade at a 1 to 1 ratio
+            job.remaining -= creep.carry.energy;
+            // * Do nothing really - Job will never be taken
+            // Could optionally mark something on the job to show that we have 1 worker upgrading already
+            return;
+        }
+
+        if (job.targetType in ALL_STRUCTURE_TYPES) {
+            // Repair 20 hits/part/tick at .1 energy/hit rounded up to nearest whole number
+            job.remaining -= Math.ceil(creep.carry.energy * 0.1);
+
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
     }
 }

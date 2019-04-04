@@ -206,6 +206,7 @@ const FILL_JOB_CACHE_TTL = 10; // Fill Jobs
 const STORE_JOB_CACHE_TTL = 50; // Store Jobs
 const ERROR_ERROR$1 = 2; // Regular error - Creep/Room ruining
 const ERROR_WARN$1 = 1; // Small error - Something went wrong, but doesn't ruin anything
+//# sourceMappingURL=Constants.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO$1 = 0;
@@ -264,6 +265,7 @@ const DEFAULT_MOVE_OPTS$1 = {
     // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
     visualizePathStyle: {} // Empty object for now, just uses default visualization
 };
+//# sourceMappingURL=Constants.js.map
 
 /**
  * Custom error class
@@ -280,6 +282,7 @@ class UserException extends Error {
         this.bodyColor = useBodyColor !== undefined ? useBodyColor : "#ff1113";
     }
 }
+//# sourceMappingURL=UserException.js.map
 
 // helper functions for rooms
 class RoomHelper {
@@ -1249,6 +1252,7 @@ class ClaimPartJobs {
         return attackJobs;
     }
 }
+//# sourceMappingURL=ClaimPartJobs.js.map
 
 class WorkPartJobs {
     /**
@@ -5500,6 +5504,7 @@ class EmpireManager {
         // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
     }
 }
+//# sourceMappingURL=EmpireManager.js.map
 
 // @ts-ignore
 // manager for the memory of the empire
@@ -5580,6 +5585,7 @@ class RoomManager {
         }
     }
 }
+//# sourceMappingURL=RoomManager.js.map
 
 // handles spawning for every room
 class SpawnManager {
@@ -7961,6 +7967,7 @@ class ErrorMapper {
 }
 // Cache previously mapped traces to improve performance
 ErrorMapper.cache = {};
+//# sourceMappingURL=ErrorMapper.js.map
 
 class UtilHelper {
     /**
@@ -7978,6 +7985,7 @@ class UtilHelper {
         }
     }
 }
+//# sourceMappingURL=UtilHelper.js.map
 
 const textColor = '#bab8ba';
 const textSize = .8;
@@ -8572,6 +8580,7 @@ class RoomVisualManager$1 {
         endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
     }
 }
+//# sourceMappingURL=RoomVisualManager.js.map
 
 class Normalize {
     /**
@@ -8636,6 +8645,7 @@ class Normalize {
         return obj;
     }
 }
+//# sourceMappingURL=Normalize.js.map
 
 // helper function for creeps
 class CreepHelper {
@@ -9468,6 +9478,7 @@ class LorryCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=LorryCreepManager.js.map
 
 // Manager for the miner creep role
 class PowerUpgraderCreepManager {
@@ -9612,6 +9623,7 @@ class RemoteMinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
+//# sourceMappingURL=RemoteMinerCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteHarvesterCreepManager {
@@ -9713,6 +9725,7 @@ class RemoteHarvesterCreepManager {
         }
     }
 }
+//# sourceMappingURL=RemoteHarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteColonizerCreepManager {
@@ -9723,6 +9736,7 @@ class RemoteColonizerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteColonizerCreepManager.js.map
 
 // Manager for the miner creep role
 class ClaimerCreepManager {
@@ -9733,6 +9747,7 @@ class ClaimerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=ClaimerCreepManager.js.map
 
 // Api for military creep's
 class CreepMili {
@@ -10062,6 +10077,7 @@ class RemoteReserverCreepManager {
         // set is taken to true
     }
 }
+//# sourceMappingURL=RemoteReserverCreepManager.js.map
 
 // Manager for the miner creep role
 class ZealotCreepManager {
@@ -10094,6 +10110,7 @@ class ZealotCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=ZealotCreepManager.js.map
 
 // Manager for the miner creep role
 class MedicCreepManager {
@@ -10146,6 +10163,7 @@ class MedicCreepManager {
         }
     }
 }
+//# sourceMappingURL=MedicCreepManager.js.map
 
 // Manager for the miner creep role
 class StalkerCreepManager {
@@ -10178,6 +10196,7 @@ class StalkerCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=StalkerCreepManager.js.map
 
 // Manager for the Domestic Defender Creep Role
 class DomesticDefenderCreepManager {
@@ -10213,6 +10232,7 @@ class DomesticDefenderCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=DomesticDefenderCreepManager.js.map
 
 // Call the creep manager for each role
 class CreepManager {
@@ -10375,6 +10395,7 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
     // check if we have enough energy to send the resource
     // send the resources
 };
+//# sourceMappingURL=ConsoleCommands.js.map
 
 /*
   Kung Fu Klan's Screeps Code
@@ -10389,7 +10410,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         ConsoleCommands.init();
     }
     // run the empire
-    if (Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
         try {
             EmpireManager.runEmpireManager();
         }
@@ -10398,7 +10419,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run rooms
-    if (Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) {
         try {
             RoomManager.runRoomManager();
         }
@@ -10407,7 +10428,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run spawning
-    if (Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) {
         try {
             SpawnManager.runSpawnManager();
         }
@@ -10416,7 +10437,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run creeps
-    if (Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
         try {
             CreepManager.runCreepManager();
         }
@@ -10425,7 +10446,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // clean up memory
-    if (Game.cpu['bucket'] > MEMORY_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > MEMORY_MANAGER_BUCKET_LIMIT) {
         try {
             MemoryManager.runMemoryManager();
         }
@@ -10434,7 +10455,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // Display room visuals if we have a fat enough bucket and config option allows it
-    if (Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
         try {
             RoomVisualManager$1.runRoomVisualManager();
         }

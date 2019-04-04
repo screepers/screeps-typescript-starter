@@ -429,6 +429,10 @@ interface WorkPartJob extends BaseJob {
      * The action to perform on the target object
      */
     actionType: WorkPart_ValidActions;
+    /**
+     * The progress (% to next level, % hp, % to construction) of the target
+     */
+    remaining: number;
 }
 
 /**
@@ -457,6 +461,10 @@ interface CarryPartJob extends BaseJob {
      * The action to perform on the target object
      */
     actionType: CarryPart_ValidActions;
+    /**
+     * The amount of energy to be filled
+     */
+    remaining: number;
 }
 
 /**

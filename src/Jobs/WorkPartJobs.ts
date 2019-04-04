@@ -21,6 +21,7 @@ export default class WorkPartJobs {
                 targetID: structure.id,
                 targetType: <BuildableStructureConstant>structure.structureType,
                 actionType: "repair",
+                remaining: structure.hitsMax - structure.hits,
                 isTaken: false
             };
 
@@ -49,6 +50,7 @@ export default class WorkPartJobs {
                 targetID: cs.id,
                 targetType: "constructionSite",
                 actionType: "build",
+                remaining: cs.progressTotal - cs.progress,
                 isTaken: false
             };
 
@@ -74,6 +76,7 @@ export default class WorkPartJobs {
                 targetID: room.controller.id,
                 targetType: "controller",
                 actionType: "upgrade",
+                remaining: room.controller.progressTotal - room.controller.progress,
                 isTaken: false
             };
             upgradeJobs.push(controllerJob);

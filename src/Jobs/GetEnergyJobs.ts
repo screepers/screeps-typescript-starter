@@ -1,6 +1,10 @@
 import RoomApi from "Api/Room.Api";
 import { CONTAINER_MINIMUM_ENERGY } from "utils/config";
 import MemoryApi from "Api/Memory.Api";
+import CreepHelper from "Helpers/CreepHelper";
+import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import SpawnApi from "Api/Spawn.Api";
+import { ROLE_MINER } from "utils/Constants";
 
 // TODO Create jobs for tombstones and dropped resources if wanted
 export default class GetEnergyJobs {
@@ -19,8 +23,28 @@ export default class GetEnergyJobs {
         const sourceJobList: GetEnergyJob[] = [];
 
         _.forEach(openSources, (source: Source) => {
+            // Get all miners that are targeting this source
+            const miners = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                if (creep.memory.role === ROLE_MINER) {
+                    if (creep.memory.job && creep.memory.job.targetID === source.id) {
+                        // ! Can optionally add another statement here that checks
+                        // ! if creep.ticksToLive > however many ticks it takes to spawn a creep
+                        // ! so that creeps that are about to die are not considered as using a part of the job.
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            // The Number of work parts those miners have
+            const numWorkParts = _.sum(miners, (creep: Creep) => creep.getActiveBodyparts(WORK));
+
+            // 2 energy per part per tick * 300 ticks to regen a source = effective mining capacity
+            const sourceEnergyRemaining = source.energyCapacity - 2 * numWorkParts * 300;
+
             // Create the StoreDefinition for the source
-            const sourceResources: StoreDefinition = { energy: source.energy };
+            const sourceResources: StoreDefinition = { energy: sourceEnergyRemaining };
+
             // Create the GetEnergyJob object for the source
             const sourceJob: GetEnergyJob = {
                 jobType: "getEnergyJob",
@@ -30,6 +54,12 @@ export default class GetEnergyJobs {
                 resources: sourceResources,
                 isTaken: false
             };
+
+            // Mark the job as taken if there is no energy remaining
+            if (sourceEnergyRemaining <= 0) {
+                sourceJob.isTaken = true;
+            }
+
             // Append the GetEnergyJob to the main array
             sourceJobList.push(sourceJob);
         });
@@ -76,7 +106,6 @@ export default class GetEnergyJobs {
      * @param room The room to create the job list for
      */
     public static createLinkJobs(room: Room): GetEnergyJob[] {
-
         const linkJobList: GetEnergyJob[] = [];
         if (linkJobList.length === 0) {
             return [];

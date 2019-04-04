@@ -15,7 +15,7 @@ export default class CreepHelper {
         if (!job) {
             throw new UserException(
                 "Job is undefined",
-                "Job is undefined for creep " + room.name + ", can't move to mining container.",
+                "Job is undefined for room " + room.name + ". Can't get the mining container of an undefined job.",
                 ERROR_WARN
             );
         }
@@ -30,7 +30,9 @@ export default class CreepHelper {
             room,
             STRUCTURE_CONTAINER
         ) as StructureContainer[];
+
         const closestContainer = source.pos.findClosestByRange(containers);
+
         if (!closestContainer) {
             return undefined;
         } else {
@@ -71,10 +73,10 @@ export default class CreepHelper {
             throw new UserException(
                 "Error in targetIsCurrentDestination",
                 "Creep [" +
-                creep.name +
-                "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
-                JSON.stringify(target) +
-                "]",
+                    creep.name +
+                    "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
+                    JSON.stringify(target) +
+                    "]",
                 ERROR_ERROR
             );
         }
@@ -98,7 +100,6 @@ export default class CreepHelper {
      * Gets creep.memory.supplementary.moveTargetID, or falls back to creep.memory.job.
      */
     public static getMoveTarget(creep: Creep, job: BaseJob): RoomObject | null {
-
         // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
         if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
             return Game.getObjectById(creep.memory.supplementary.moveTargetID);
