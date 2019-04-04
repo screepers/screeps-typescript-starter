@@ -19,6 +19,7 @@
     "prefer-for-of": false,
     "only-arrow-functions": false,
     "no-var-requires": false,
+    "no-shadowed-variable": false,
     "variable-name": [
       true,
       "ban-keywords",

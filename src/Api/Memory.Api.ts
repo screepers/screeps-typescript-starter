@@ -1341,7 +1341,7 @@ export default class MemoryApi {
             );
         }
 
-        const jobListing = room.memory.jobs!.workPartJobs;
+        const jobListing = room.memory.jobs!.workPartJobs!;
 
         let roomJob: WorkPartJob | undefined;
 
@@ -1374,7 +1374,7 @@ export default class MemoryApi {
             );
         }
 
-        const jobListing = room.memory.jobs!.getEnergyJobs;
+        const jobListing = room.memory.jobs!.getEnergyJobs!;
 
         let roomJob: GetEnergyJob | undefined;
 

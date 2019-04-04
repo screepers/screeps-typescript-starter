@@ -2,6 +2,11 @@ import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import { ROLE_MINER } from "utils/constants";
 import CreepHelper from "Helpers/CreepHelper";
+import RoomApi from "Api/Room.Api";
+import UtilHelper from "Helpers/UtilHelper";
+import Normalize from "Helpers/Normalize";
+import MemoryHelper from "Helpers/MemoryHelper";
+import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
 
 // Manager for the miner creep role
 export default class MinerCreepManager {
@@ -37,56 +42,54 @@ export default class MinerCreepManager {
         }
     }
 
-    /**
-     * Find a job for the creep
-     */
     public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
-        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        const creepOptions = creep.memory.options as CreepOptionsCiv;
+
         if (creepOptions.harvestSources) {
-            // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken);
+
             if (sourceJobs.length > 0) {
-                // Select the source with the lowest TTL miner on it (or no miner at all)
-                const sources: Array<Source | null> = _.map(sourceJobs, (job: GetEnergyJob) =>
-                    Game.getObjectById(job.targetID)
+                // Filter out jobs that have too little energy -
+                // The energy in the StoreDefinition is the amount of energy per 300 ticks left
+                const suitableJobs = _.filter(
+                    sourceJobs,
+                    (sJob: GetEnergyJob) => sJob.resources.energy >= creep.getActiveBodyparts(WORK) * 2 * 300 //  (Workparts * 2 * 300 = effective mining capacity)
                 );
-                let selectedId: string | undefined;
-                for (const source of sources) {
-                    if (!source) {
-                        continue;
-                    }
-                    const minersOnSource: Creep[] = source.pos.findInRange(FIND_MY_CREEPS, 1, {
-                        filter: (c: Creep) => c.memory.role === ROLE_MINER
-                    });
-                    // If there is a miner, the one with the lower TTL
-                    if (minersOnSource.length === 0) {
-                        selectedId = source.id;
-                        break;
+
+                // If config allows getting closest source
+                if (MINERS_GET_CLOSEST_SOURCE) {
+                    let sourceIDs: string[];
+
+                    // Get sources from suitableJobs if any, else get regular sourceJob instead
+                    if (suitableJobs.length > 0) {
+                        sourceIDs = MemoryHelper.getOnlyObjectsFromIDs(
+                            _.map(suitableJobs, (job: GetEnergyJob) => job.targetID)
+                        );
                     } else {
-                        let lowestTTL: number | undefined;
-                        for (const miner of minersOnSource) {
-                            if (!selectedId || !lowestTTL) {
-                                selectedId = source.id;
-                                lowestTTL = miner.ticksToLive;
-                                continue;
-                            } else {
-                                if (miner.spawning) {
-                                    continue;
-                                }
-                                if (miner.ticksToLive! < lowestTTL) {
-                                    selectedId = source.id;
-                                    lowestTTL = miner.ticksToLive;
-                                }
-                            }
-                        }
+                        sourceIDs = MemoryHelper.getOnlyObjectsFromIDs(
+                            _.map(sourceJobs, (job: GetEnergyJob) => job.targetID)
+                        );
+                    }
+
+                    // Find the closest source
+                    const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+                    const closestAvailableSource: Source = creep.pos.findClosestByRange(sourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
+
+                    // return the job that corresponds with the closest source
+                    return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === closestAvailableSource.id);
+                } else {
+                    // Return the first suitableJob if any
+                    // if none, return first sourceJob.
+                    if (suitableJobs.length > 0) {
+                        return suitableJobs[0];
+                    } else {
+                        return sourceJobs[0];
                     }
                 }
-                if (selectedId) {
-                    return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === selectedId);
-                }
-                return sourceJobs[0];
             }
-        }
+        } // End harvestSources option
+
+        // no available jobs
         return undefined;
     }
 

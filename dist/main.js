@@ -64,7 +64,7 @@ const ROOM_STATE_SEIGE = 5;
 const ROOM_STATE_STIMULATE = 6;
 const ROOM_STATE_NUKE_INBOUND = 7;
 // Role Constants
-const ROLE_MINER = "miner";
+const ROLE_MINER$1 = "miner";
 const ROLE_HARVESTER = "harvester";
 const ROLE_WORKER = "worker";
 const ROLE_POWER_UPGRADER = "powerUpgrader";
@@ -102,7 +102,7 @@ const COLLATED = "collated";
 // Role Priority List
 // * Keep this list ordered by spawn priority
 const domesticRolePriority = [
-    ROLE_MINER,
+    ROLE_MINER$1,
     ROLE_HARVESTER,
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
@@ -191,7 +191,7 @@ const ROOM_STATE_SEIGE$1 = 5;
 const ROOM_STATE_STIMULATE$1 = 6;
 const ROOM_STATE_NUKE_INBOUND$1 = 7;
 // Role Constants
-const ROLE_MINER$1 = "miner";
+const ROLE_MINER$2 = "miner";
 const ROLE_HARVESTER$1 = "harvester";
 const ROLE_WORKER$1 = "worker";
 const ROLE_POWER_UPGRADER$1 = "powerUpgrader";
@@ -846,7 +846,7 @@ class RoomApi {
         const sources = MemoryApi.getSources(room);
         // ? this assumes that we are only using this for domestic rooms
         // ? if we use it on domestic rooms then I'll need to distinguish between ROLE_REMOTE_MINER
-        const miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER$1);
+        const miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER$2);
         const lowSources = _.filter(sources, (source) => {
             let totalWorkParts = 0;
             // Count the number of work parts targeting the source
@@ -970,8 +970,24 @@ class GetEnergyJobs {
         }
         const sourceJobList = [];
         _.forEach(openSources, (source) => {
+            // Get all miners that are targeting this source
+            const miners = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.role === ROLE_MINER) {
+                    if (creep.memory.job && creep.memory.job.targetID === source.id) {
+                        // ! Can optionally add another statement here that checks
+                        // ! if creep.ticksToLive > however many ticks it takes to spawn a creep
+                        // ! so that creeps that are about to die are not considered as using a part of the job.
+                        return true;
+                    }
+                }
+                return false;
+            });
+            // The Number of work parts those miners have
+            const numWorkParts = _.sum(miners, (creep) => creep.getActiveBodyparts(WORK));
+            // 2 energy per part per tick * 300 ticks to regen a source = effective mining capacity
+            const sourceEnergyRemaining = source.energyCapacity - (2 * numWorkParts * 300);
             // Create the StoreDefinition for the source
-            const sourceResources = { energy: source.energy };
+            const sourceResources = { energy: sourceEnergyRemaining };
             // Create the GetEnergyJob object for the source
             const sourceJob = {
                 jobType: "getEnergyJob",
@@ -981,6 +997,10 @@ class GetEnergyJobs {
                 resources: sourceResources,
                 isTaken: false
             };
+            // Mark the job as taken if there is no energy remaining
+            if (sourceEnergyRemaining === 0) {
+                sourceJob.isTaken = true;
+            }
             // Append the GetEnergyJob to the main array
             sourceJobList.push(sourceJob);
         });
@@ -1863,7 +1883,7 @@ class SpawnApi {
             // Intro
             case ROOM_STATE_INTRO:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 1;
+                domesticLimits[ROLE_MINER$1] = 1;
                 domesticLimits[ROLE_HARVESTER] = 1;
                 domesticLimits[ROLE_WORKER] = 1;
                 break;
@@ -1874,21 +1894,21 @@ class SpawnApi {
                     const numAccessTilesToSource = SpawnHelper.getNumAccessTilesToSources(room);
                     minerLimits = numAccessTilesToSource < 4 ? numAccessTilesToSource : 4;
                 }
-                domesticLimits[ROLE_MINER] = minerLimits;
+                domesticLimits[ROLE_MINER$1] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 4;
                 domesticLimits[ROLE_WORKER] = 4;
                 break;
             // Intermediate
             case ROOM_STATE_INTER:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
+                domesticLimits[ROLE_MINER$1] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 5;
                 break;
             // Advanced
             case ROOM_STATE_ADVANCED:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
+                domesticLimits[ROLE_MINER$1] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 4;
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
@@ -1897,7 +1917,7 @@ class SpawnApi {
             // Upgrader
             case ROOM_STATE_UPGRADER:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
+                domesticLimits[ROLE_MINER$1] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
                 domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_POWER_UPGRADER] = 1;
@@ -1906,7 +1926,7 @@ class SpawnApi {
             // Stimulate
             case ROOM_STATE_STIMULATE:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
+                domesticLimits[ROLE_MINER$1] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 3;
                 domesticLimits[ROLE_POWER_UPGRADER] = 2;
@@ -1915,7 +1935,7 @@ class SpawnApi {
             // Seige
             case ROOM_STATE_SEIGE:
                 // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
+                domesticLimits[ROLE_MINER$1] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_LORRY] = numLorries;
@@ -2186,7 +2206,7 @@ class SpawnApi {
         }
         // Call the correct helper function based on creep role
         switch (role) {
-            case ROLE_MINER:
+            case ROLE_MINER$1:
                 return SpawnHelper.generateMinerOptions(roomState);
             case ROLE_HARVESTER:
                 return SpawnHelper.generateHarvesterOptions(roomState);
@@ -2228,7 +2248,7 @@ class SpawnApi {
     static generateCreepBody(tier, role) {
         // Call the correct helper function based on creep role
         switch (role) {
-            case ROLE_MINER:
+            case ROLE_MINER$1:
                 return SpawnHelper.generateMinerBody(tier);
             case ROLE_HARVESTER:
                 return SpawnHelper.generateHarvesterBody(tier);
@@ -2431,7 +2451,7 @@ class SpawnApi {
             // Domestic creeps keep their target room as their home room
             // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)
             // If an non-existing role then an error will occur here
-            case ROLE_MINER:
+            case ROLE_MINER$1:
             case ROLE_HARVESTER:
             case ROLE_WORKER:
             case ROLE_LORRY:
@@ -3739,7 +3759,7 @@ class SpawnHelper {
      * @param room the room we are checking in
      */
     static getActiveMiners(room) {
-        let miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER);
+        let miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER$1);
         miners = _.filter(miners, (creep) => {
             // False if miner is spawning or has less than 50 ticks to live
             return !creep.spawning && creep.ticksToLive > 50;
@@ -4358,7 +4378,7 @@ class MemoryApi {
     static getCreepCount(room, creepConst) {
         const filterFunction = creepConst === undefined ? undefined : (c) => c.memory.role === creepConst;
         // Use get active mienrs instead specifically for miners to get them out early before they die
-        if (creepConst === ROLE_MINER) {
+        if (creepConst === ROLE_MINER$1) {
             return SpawnHelper.getActiveMiners(room);
         }
         else {
@@ -4735,6 +4755,135 @@ class MemoryApi {
             }
             return currentCreepOptions.squadUUID === squadUUID;
         });
+    }
+    /**
+     * Updates the job value in memory to deprecate resources or mark the job as taken
+     */
+    static updateJobMemory(creep, room) {
+        // make sure creep has a job
+        if (creep.memory.job === undefined) {
+            throw new UserException("Error in updateJobMemory", "Attempted to updateJobMemory using a creep with no job.", ERROR_ERROR);
+        }
+        // make sure room has a jobs property
+        if (room.memory.jobs === undefined) {
+            throw new UserException("Error in updateJobMemory", "The room memory to update does not have a jobs property", ERROR_ERROR);
+        }
+        const creepJob = creep.memory.job;
+        let roomJob;
+        // Assign room job to the room in memory
+        switch (creepJob.jobType) {
+            case "carryPartJob":
+                roomJob = this.searchCarryPartJobs(creepJob, room);
+                break;
+            case "claimPartJob":
+                roomJob = this.searchClaimPartJobs(creepJob, room);
+                break;
+            case "getEnergyJob":
+                roomJob = this.searchGetEnergyJobs(creepJob, room);
+                break;
+            case "workPartJob":
+                roomJob = this.searchWorkPartJobs(creepJob, room);
+                break;
+            default:
+                throw new UserException("Error in updateJobMemory", "Creep has a job with an undefined jobType", ERROR_ERROR);
+        }
+        if (roomJob === undefined) {
+            throw new UserException("Error in updateJobMemory", "Could not find the job in room memory to update.", ERROR_ERROR);
+        }
+    }
+    /**
+     * Searches through claimPartJobs to find a specified job
+     * @param job THe job to serach for
+     * @param room The room to search in
+     */
+    static searchClaimPartJobs(job, room) {
+        if (room.memory.jobs.claimPartJobs === undefined) {
+            throw new UserException("Error in searchClaimPartJobs", "The room memory does not have a claimPartJobs property", ERROR_ERROR);
+        }
+        const jobListing = room.memory.jobs.claimPartJobs;
+        let roomJob;
+        if (jobListing.claimJobs) {
+            roomJob = _.find(jobListing.claimJobs.data, (claimJob) => job.targetID === claimJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.reserveJobs) {
+            roomJob = _.find(jobListing.reserveJobs.data, (reserveJob) => job.targetID === reserveJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.signJobs) {
+            roomJob = _.find(jobListing.signJobs.data, (signJob) => job.targetID === signJob.targetID);
+        }
+        return roomJob;
+    }
+    /**
+     * Searches through carryPartJobs to find a specified job
+     * @param job The job to search for
+     * @param room The room to search in
+     */
+    static searchCarryPartJobs(job, room) {
+        if (room.memory.jobs.carryPartJobs === undefined) {
+            throw new UserException("Error in searchCarryPartJobs", "The room memory does not have a carryPartJobs property", ERROR_ERROR);
+        }
+        const jobListing = room.memory.jobs.carryPartJobs;
+        let roomJob;
+        if (jobListing.fillJobs) {
+            roomJob = _.find(jobListing.fillJobs.data, (fillJob) => job.targetID === fillJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.storeJobs) {
+            roomJob = _.find(jobListing.storeJobs.data, (storeJob) => job.targetID === storeJob.targetID);
+        }
+        return roomJob;
+    }
+    /**
+     * Searches through workPartJobs to find a specified job
+     * @param job The job to search for
+     * @param room The room to search in
+     */
+    static searchWorkPartJobs(job, room) {
+        if (room.memory.jobs.workPartJobs === undefined) {
+            throw new UserException("Error in workPartJobs", "THe room memory does not have a workPartJobs property", ERROR_ERROR);
+        }
+        const jobListing = room.memory.jobs.workPartJobs;
+        let roomJob;
+        if (jobListing.upgradeJobs) {
+            roomJob = _.find(jobListing.upgradeJobs.data, (uJob) => job.targetID === uJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.buildJobs) {
+            roomJob = _.find(jobListing.buildJobs.data, (buildJob) => job.targetID === buildJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.repairJobs) {
+            roomJob = _.find(jobListing.repairJobs.data, (rJob) => job.targetID === rJob.targetID);
+        }
+        return roomJob;
+    }
+    /**
+     * Searches through getEnergyJobs to find a specified job
+     * @param job THe job to search for
+     * @param room THe room to search in
+     */
+    static searchGetEnergyJobs(job, room) {
+        if (room.memory.jobs.getEnergyJobs === undefined) {
+            throw new UserException("Error in searchGetEnergyJobs", "The room memory does not have a getEnergyJobs property", ERROR_ERROR);
+        }
+        const jobListing = room.memory.jobs.getEnergyJobs;
+        let roomJob;
+        if (jobListing.containerJobs) {
+            roomJob = _.find(jobListing.containerJobs.data, (cJob) => cJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.sourceJobs) {
+            roomJob = _.find(jobListing.containerJobs.data, (sJob) => sJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.pickupJobs) {
+            roomJob = _.find(jobListing.pickupJobs.data, (pJob) => pJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.backupStructures) {
+            roomJob = _.find(jobListing.backupStructures.data, (sJob) => sJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.linkJobs) {
+            roomJob = _.find(jobListing.linkJobs.data, (lJob) => lJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.tombstoneJobs) {
+            roomJob = _.find(jobListing.tombstoneJobs.data, (tJob) => tJob.targetID === job.targetID);
+        }
+        return roomJob;
     }
 }
 
@@ -8030,7 +8179,7 @@ class RoomVisualApi {
         const creepsInRoom = MemoryApi.getMyCreeps(room.name);
         const creepLimits = MemoryApi.getCreepLimits(room);
         const roles = {
-            miner: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_MINER$1).length,
+            miner: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_MINER$2).length,
             harvester: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_HARVESTER$1).length,
             worker: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_WORKER$1).length,
             lorry: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_LORRY$1).length,
@@ -8049,7 +8198,7 @@ class RoomVisualApi {
         if (creepLimits['domesticLimits']) {
             // Add creeps to the lines array
             if (creepLimits.domesticLimits.miner > 0) {
-                lines.push("Miners:     " + roles[ROLE_MINER$1] + " / " + creepLimits.domesticLimits.miner);
+                lines.push("Miners:     " + roles[ROLE_MINER$2] + " / " + creepLimits.domesticLimits.miner);
             }
             if (creepLimits.domesticLimits.harvester > 0) {
                 lines.push("Harvesters:     " + roles[ROLE_HARVESTER$1] + " / " + creepLimits.domesticLimits.harvester);
@@ -8447,7 +8596,7 @@ class CreepHelper {
      */
     static getMiningContainer(job, room) {
         if (!job) {
-            throw new UserException("Job is undefined", "Job is undefined for creep " + room.name + ", can't move to mining container.", ERROR_WARN$2);
+            throw new UserException("Job is undefined", "Job is undefined for room " + room.name + ". Can't get the mining container of an undefined job.", ERROR_WARN$2);
         }
         const source = Game.getObjectById(job.targetID);
         if (!source) {
@@ -8756,31 +8905,21 @@ class CreepApi {
      */
     static travelTo_GetEnergyJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
-        // temp fix for harvesters getting null job, need to find a perm fix for this soon
-        if (!moveTarget) {
-            creep.memory.working = false;
-            delete creep.memory.job;
-        }
-        // this.nullCheck_target(creep, moveTarget);
+        this.nullCheck_target(creep, moveTarget);
         // Move options target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
         // In this case all actions are complete with a range of 1, but keeping for structure
         if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
             moveOpts.range = 1;
         }
+        else if (job.actionType === "harvest" && moveTarget instanceof StructureContainer) {
+            moveOpts.range = 0;
+        }
         else if (job.actionType === "withdraw" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
             moveOpts.range = 1;
         }
         else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
             moveOpts.range = 1;
-        }
-        if (job.actionType === "harvest" &&
-            creep.memory.role === ROLE_MINER$1 &&
-            creep.room.memory.roomState !== ROOM_STATE_INTRO$1 &&
-            creep.room.memory.roomState !== ROOM_STATE_BEGINNER$1) {
-            // This case implies container mining is available, and miner was stopping 1 tile before the container
-            // If you can find a better way to do this, please do lol
-            moveOpts.range = 0;
         }
         if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
             creep.memory.working = true;
@@ -8834,12 +8973,7 @@ class CreepApi {
      */
     static travelTo_WorkPartJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
-        // Same bandaid fix
-        if (!moveTarget) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, moveTarget);
+        this.nullCheck_target(creep, moveTarget);
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
@@ -8872,8 +9006,6 @@ class CreepApi {
     static badTarget_Error(creep, job) {
         return new UserException("Invalid Job actionType or targetType", "An invalid actionType or structureType has been provided by creep [" +
             creep.name +
-            "] for function [" +
-            // this.caller +
             "]" +
             "\n Job: " +
             JSON.stringify(job), ERROR_ERROR$2);
@@ -8934,54 +9066,34 @@ class MinerCreepManager {
             CreepApi.travelTo(creep, creep.memory.job);
         }
     }
-    /**
-     * Find a job for the creep
-     */
     static getNewSourceJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.harvestSources) {
-            // TODO change this to check creep options to filter jobs -- e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken);
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob) => !sJob.isTaken);
             if (sourceJobs.length > 0) {
-                // Select the source with the lowest TTL miner on it (or no miner at all)
-                const sources = _.map(sourceJobs, (job) => Game.getObjectById(job.targetID));
-                let selectedId;
-                for (const source of sources) {
-                    if (!source) {
-                        continue;
-                    }
-                    const minersOnSource = source.pos.findInRange(FIND_MY_CREEPS, 1, { filter: (c) => c.memory.role === ROLE_MINER$1 });
-                    // If there is a miner, the one with the lower TTL
-                    if (minersOnSource.length === 0) {
-                        selectedId = source.id;
-                        break;
+                // Filter out jobs that have too little energy -
+                // The energy in the StoreDefinition is the amount of energy per 300 ticks left
+                const suitableJobs = _.filter(sourceJobs, (sJob) => sJob.resources.energy >= creep.getActiveBodyparts(WORK) * 2 * 300 //  (Workparts * 2 * 300 = effective mining capacity)
+                );
+                // If config allows getting closest source
+                {
+                    let sourceIDs;
+                    // Get sources from suitableJobs if any, else get regular sourceJob instead
+                    if (suitableJobs.length > 0) {
+                        sourceIDs = MemoryHelper.getOnlyObjectsFromIDs(_.map(suitableJobs, (job) => job.targetID));
                     }
                     else {
-                        let lowestTTL;
-                        for (const miner of minersOnSource) {
-                            if (!selectedId || !lowestTTL) {
-                                selectedId = source.id;
-                                lowestTTL = miner.ticksToLive;
-                                continue;
-                            }
-                            else {
-                                if (miner.spawning) {
-                                    continue;
-                                }
-                                if (miner.ticksToLive < lowestTTL) {
-                                    selectedId = source.id;
-                                    lowestTTL = miner.ticksToLive;
-                                }
-                            }
-                        }
+                        sourceIDs = MemoryHelper.getOnlyObjectsFromIDs(_.map(sourceJobs, (job) => job.targetID));
                     }
+                    // Find the closest source
+                    const sourceObjects = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+                    const closestAvailableSource = creep.pos.findClosestByRange(sourceObjects); // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
+                    // return the job that corresponds with the closest source
+                    return _.find(sourceJobs, (job) => job.targetID === closestAvailableSource.id);
                 }
-                if (selectedId) {
-                    return _.find(sourceJobs, (job) => job.targetID === selectedId);
-                }
-                return sourceJobs[0];
             }
-        }
+        } // End harvestSources option
+        // no available jobs
         return undefined;
     }
     /**
@@ -8992,10 +9104,12 @@ class MinerCreepManager {
         if (miningContainer === undefined) {
             return; // We don't need to do anything else if the container doesn't exist
         }
+        // Check for any creeps on the miningContainer
         const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
         if (creepsOnContainer.length > 0) {
-            if (creepsOnContainer[0].memory.role === ROLE_MINER$1) {
-                return; // If there is already a miner creep on the container, then we don't target it
+            // If the creep on the container is a miner (and not some random creep that's in the way)
+            if (creepsOnContainer[0].memory.role === ROLE_MINER$2) {
+                return; // Don't target it
             }
         }
         if (creep.memory.supplementary === undefined) {
@@ -9206,7 +9320,7 @@ class WorkerCreepManager {
     static newWorkPartJob(creep, room) {
         const creepOptions = creep.memory.options;
         const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
-        const isCurrentUpgrader = _.some(MemoryApi.getMyCreeps(room.name), (c) => c.memory.job && c.memory.job.actionType === 'upgrade');
+        const isCurrentUpgrader = _.some(MemoryApi.getMyCreeps(room.name), (c) => c.memory.job && c.memory.job.actionType === "upgrade");
         // Assign upgrade job is one isn't currently being worked
         if (creepOptions.upgrade && !isCurrentUpgrader) {
             if (upgradeJobs.length > 0) {
@@ -9238,7 +9352,7 @@ class WorkerCreepManager {
     static newCarryPartJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.fillSpawn || creepOptions.fillTower) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== "link");
             if (fillJobs.length > 0) {
                 return fillJobs[0];
             }
@@ -10040,7 +10154,7 @@ class CreepManager {
         const role = creep.memory.role;
         // Call the correct helper function based on creep role
         switch (role) {
-            case ROLE_MINER:
+            case ROLE_MINER$1:
                 MinerCreepManager.runCreepRole(creep);
                 break;
             case ROLE_HARVESTER:

@@ -41,6 +41,11 @@ export const ROOM_OVERLAY_GRAPH_ON = true;
 export const CONTROLLER_SIGNING_TEXT = "get signed on boy";
 
 /**
+ * Allow miners to find the closest source instead of just the first one
+ */
+export const MINERS_GET_CLOSEST_SOURCE = true;
+
+/**
  * Constants for Tick Timers - Number of ticks between running the specified constant this is deciding
  */
 export const RUN_TOWER_TIMER = 1;
