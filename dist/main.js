@@ -9117,6 +9117,9 @@ class CreepApi {
         if (target === null) {
             delete creep.memory.job;
             creep.memory.working = false;
+            if (creep.memory.supplementary && creep.memory.supplementary.moveTarget) {
+                delete creep.memory.supplementary.moveTarget;
+            }
             throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\n The error occurred in: ", ERROR_ERROR$2);
         }
     }
@@ -9529,7 +9532,7 @@ class PowerUpgraderCreepManager {
             if (creep.memory.job === undefined) {
                 return; // idle for a tick
             }
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
         if (creep.memory.job) {
             if (creep.memory.working) {
@@ -9581,18 +9584,8 @@ class PowerUpgraderCreepManager {
     /**
      * Handles setup for a new job
      */
-    static handleNewJob(creep) {
-        const creepOptions = creep.memory.options;
-        if (creepOptions.getFromLink) {
-            if (creep.memory.job.jobType === "getEnergyJob") {
-                // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
-                return;
-            }
-            else if (creep.memory.job.jobType === "workPartJob") {
-                // TODO Mark the job we chose as taken
-                return;
-            }
-        }
+    static handleNewJob(creep, room) {
+        MemoryApi.updateJobMemory(creep, room);
     }
 }
 //# sourceMappingURL=PowerUpgraderCreepManager.js.map
@@ -10342,6 +10335,7 @@ class CreepManager {
         }
     }
 }
+//# sourceMappingURL=CreepManager.js.map
 
 class ConsoleCommands {
     static init() {

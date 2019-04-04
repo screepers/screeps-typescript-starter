@@ -357,6 +357,10 @@ export default class CreepApi {
             delete creep.memory.job;
             creep.memory.working = false;
 
+            if (creep.memory.supplementary && creep.memory.supplementary.moveTarget) {
+                delete creep.memory.supplementary.moveTarget;
+            }
+
             throw new UserException(
                 "Null Job Target",
                 "Null Job Target for creep: " + creep.name + "\n The error occurred in: ",

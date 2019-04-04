@@ -21,7 +21,7 @@ export default class PowerUpgraderCreepManager {
                 return; // idle for a tick
             }
 
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
 
         if (creep.memory.job) {
@@ -82,16 +82,7 @@ export default class PowerUpgraderCreepManager {
     /**
      * Handles setup for a new job
      */
-    public static handleNewJob(creep: Creep): void {
-        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
-        if (creepOptions.getFromLink) {
-            if (creep.memory.job!.jobType === "getEnergyJob") {
-                // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
-                return;
-            } else if (creep.memory.job!.jobType === "workPartJob") {
-                // TODO Mark the job we chose as taken
-                return;
-            }
-        }
+    public static handleNewJob(creep: Creep, room: Room): void {
+        MemoryApi.updateJobMemory(creep, room);
     }
 }
