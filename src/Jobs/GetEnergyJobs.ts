@@ -56,7 +56,7 @@ export default class GetEnergyJobs {
             };
 
             // Mark the job as taken if there is no energy remaining
-            if (sourceEnergyRemaining === 0 ) {
+            if (sourceEnergyRemaining <= 0 ) {
                 sourceJob.isTaken = true;
             }
 

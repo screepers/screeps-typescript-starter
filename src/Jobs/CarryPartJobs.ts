@@ -22,6 +22,7 @@ export default class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
+                remaining: structure.energyCapacity - structure.energy,
                 actionType: "transfer",
                 isTaken: false
             };
@@ -33,6 +34,7 @@ export default class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
+                remaining: structure.energyCapacity - structure.energy,
                 actionType: "transfer",
                 isTaken: false
             };
@@ -55,6 +57,7 @@ export default class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: room.storage.id,
                 targetType: STRUCTURE_STORAGE,
+                remaining: room.storage.storeCapacity - _.sum(room.storage.store),
                 actionType: "transfer",
                 isTaken: false
             };
@@ -67,6 +70,7 @@ export default class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: room.terminal.id,
                 targetType: STRUCTURE_TERMINAL,
+                remaining: room.terminal.storeCapacity - _.sum(room.terminal.store),
                 actionType: "transfer",
                 isTaken: false
             };
@@ -75,21 +79,27 @@ export default class CarryPartJobs {
         }
 
         const upgraderLink: StructureLink | null = MemoryApi.getUpgraderLink(room);
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK) && upgraderLink) {
-            const nonUpgraderLinks: StructureLink[] = MemoryApi.getStructureOfType(room, STRUCTURE_LINK,
-                (link: StructureLink) => link.id !== upgraderLink!.id && link.energy < link.energyCapacity) as StructureLink[];
 
-            const fillLinkJob: CarryPartJob = {
-                jobType: "carryPartJob",
-                targetID: nonUpgraderLinks[0].id,
-                targetType: STRUCTURE_LINK,
-                actionType: "transfer",
-                isTaken: false
-            };
+        if (upgraderLink) {
+            const nonUpgraderLinks: StructureLink[] = MemoryApi.getStructureOfType(
+                room,
+                STRUCTURE_LINK,
+                (link: StructureLink) => link.id !== upgraderLink!.id && link.energy < link.energyCapacity
+            ) as StructureLink[];
 
-            storeJobs.push(fillLinkJob);
+            _.forEach(nonUpgraderLinks, (link: StructureLink) => {
+                const fillLinkJob: CarryPartJob = {
+                    jobType: "carryPartJob",
+                    targetID: link.id,
+                    targetType: STRUCTURE_LINK,
+                    remaining: link.energyCapacity - link.energy,
+                    actionType: "transfer",
+                    isTaken: false
+                };
+
+                storeJobs.push(fillLinkJob);
+            });
         }
-
         return storeJobs;
     }
 }

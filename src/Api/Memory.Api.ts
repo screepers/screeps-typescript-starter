@@ -26,7 +26,8 @@ import {
     UPGRADE_JOB_CACHE_TTL,
     STORE_JOB_CACHE_TTL,
     FILL_JOB_CACHE_TTL,
-    PICKUP_JOB_CACHE_TTL
+    PICKUP_JOB_CACHE_TTL,
+    ALL_STRUCTURE_TYPES
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import CarryPartJobs from "Jobs/CarryPartJobs";
@@ -1255,11 +1256,37 @@ export default class MemoryApi {
                 );
         }
 
-        if(roomJob === undefined) {
-            throw new UserException("Error in updateJobMemory", "Could not find the job in room memory to update.", ERROR_ERROR);
+        if (roomJob === undefined) {
+            throw new UserException(
+                "Error in updateJobMemory",
+                "Could not find the job in room memory to update.",
+                ERROR_ERROR
+            );
         }
 
-        
+        // We have the roomJob location in memory
+        // now we just need to update the value based on the type of job
+
+        switch (creepJob!.jobType) {
+            case "carryPartJob":
+                this.updateCarryPartJob(roomJob as CarryPartJob, creep);
+                break;
+            case "claimPartJob":
+                this.updateClaimPartJob(roomJob as ClaimPartJob, creep);
+                break;
+            case "getEnergyJob":
+                this.updateGetEnergyJob(roomJob as GetEnergyJob, creep);
+                break;
+            case "workPartJob":
+                this.updateWorkPartJob(roomJob as WorkPartJob, creep);
+                break;
+            default:
+                throw new UserException(
+                    "Error in updateJobMemory",
+                    "Creep has a job with an undefined jobType",
+                    ERROR_ERROR
+                );
+        }
     }
 
     /**
@@ -1378,30 +1405,127 @@ export default class MemoryApi {
 
         let roomJob: GetEnergyJob | undefined;
 
-        if(jobListing.containerJobs) {
+        if (jobListing.containerJobs) {
             roomJob = _.find(jobListing.containerJobs.data, (cJob: GetEnergyJob) => cJob.targetID === job.targetID);
         }
 
-        if(roomJob === undefined && jobListing.sourceJobs) {
+        if (roomJob === undefined && jobListing.sourceJobs) {
             roomJob = _.find(jobListing.containerJobs!.data, (sJob: GetEnergyJob) => sJob.targetID === job.targetID);
         }
 
-        if(roomJob === undefined && jobListing.pickupJobs) {
+        if (roomJob === undefined && jobListing.pickupJobs) {
             roomJob = _.find(jobListing.pickupJobs!.data, (pJob: GetEnergyJob) => pJob.targetID === job.targetID);
         }
 
-        if(roomJob === undefined && jobListing.backupStructures) {
+        if (roomJob === undefined && jobListing.backupStructures) {
             roomJob = _.find(jobListing.backupStructures!.data, (sJob: GetEnergyJob) => sJob.targetID === job.targetID);
         }
 
-        if(roomJob === undefined && jobListing.linkJobs) {
+        if (roomJob === undefined && jobListing.linkJobs) {
             roomJob = _.find(jobListing.linkJobs!.data, (lJob: GetEnergyJob) => lJob.targetID === job.targetID);
         }
 
-        if(roomJob === undefined && jobListing.tombstoneJobs) {
+        if (roomJob === undefined && jobListing.tombstoneJobs) {
             roomJob = _.find(jobListing.tombstoneJobs!.data, (tJob: GetEnergyJob) => tJob.targetID === job.targetID);
         }
 
         return roomJob;
+    }
+
+    /**
+     * Updates the CarryPartJob
+     * @param job The Job to update
+     */
+    public static updateCarryPartJob(job: CarryPartJob, creep: Creep): void {
+        if (job.actionType === "transfer") {
+            job.remaining -= creep.carry.energy;
+
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+        }
+
+        return;
+    }
+
+    /**
+     * Updates the ClaimPartJob
+     * @param job The Job to update
+     */
+    public static updateClaimPartJob(job: ClaimPartJob, creep: Creep): void {
+        if (job.targetType === "controller") {
+            job.isTaken = true;
+
+            return;
+        }
+    }
+    /**
+     * Updates the getEnergyJob
+     * @param job The Job to update
+     */
+    public static updateGetEnergyJob(job: GetEnergyJob, creep: Creep): void {
+        if (job.targetType === "source") {
+            // Subtract creep effective mining capacity from resources
+            job.resources.energy -= creep.getActiveBodyparts(WORK) * 2 * 300;
+
+            if (job.resources.energy <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
+
+        if (
+            job.targetType === "droppedResource" ||
+            job.targetType === "link" ||
+            job.targetType === "container" ||
+            job.targetType === "storage" ||
+            job.targetType === "terminal"
+        ) {
+            // Subtract creep carry from resources
+            job.resources.energy -= creep.carryCapacity;
+
+            if (job.resources.energy <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
+    }
+
+    /**
+     * Updates the workPartJob
+     * @param job The job to update
+     */
+    public static updateWorkPartJob(job: WorkPartJob, creep: Creep): void {
+        if (job.targetType === "constructionSite") {
+            // Creep builds 5 points/part/tick at 1 energy/point
+            job.remaining -= creep.carry.energy; // 1 to 1 ratio of energy to points built
+
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
+
+        if (job.targetType === STRUCTURE_CONTROLLER) {
+            // Upgrade at a 1 to 1 ratio
+            job.remaining -= creep.carry.energy;
+            // * Do nothing really - Job will never be taken
+            // Could optionally mark something on the job to show that we have 1 worker upgrading already
+            return;
+        }
+
+        if (job.targetType in ALL_STRUCTURE_TYPES) {
+            // Repair 20 hits/part/tick at .1 energy/hit rounded up to nearest whole number
+            job.remaining -= Math.ceil(creep.carry.energy * 0.1);
+
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+
+            return;
+        }
     }
 }
