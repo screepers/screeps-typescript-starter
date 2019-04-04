@@ -1,6 +1,13 @@
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
-import { DEFAULT_MOVE_OPTS, ERROR_ERROR, ROOM_STATE_BEGINNER, ROOM_STATE_INTRO, ROLE_MINER } from "utils/constants";
+import {
+    DEFAULT_MOVE_OPTS,
+    ERROR_ERROR,
+    ROOM_STATE_BEGINNER,
+    ROOM_STATE_INTRO,
+    ROLE_MINER,
+    ERROR_WARN
+} from "utils/constants";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
