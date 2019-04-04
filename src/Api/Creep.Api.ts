@@ -355,6 +355,9 @@ export default class CreepApi {
      */
     public static nullCheck_target(creep: Creep, target: object | null) {
         if (target === null) {
+            // preserve for the error message
+            const jobAsString: string = JSON.stringify(creep.memory.job);
+
             delete creep.memory.job;
             creep.memory.working = false;
 
@@ -364,8 +367,8 @@ export default class CreepApi {
 
             throw new UserException(
                 "Null Job Target",
-                "Null Job Target for creep: " + creep.name + "\n The error occurred in: ",
-                ERROR_ERROR
+                "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString,
+                ERROR_WARN
             );
         }
     }
