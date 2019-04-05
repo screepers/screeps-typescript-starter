@@ -35,6 +35,7 @@ import {
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import CarryPartJobs from "Jobs/CarryPartJobs";
+import UtilHelper from "Helpers/UtilHelper";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -188,6 +189,7 @@ export default class MemoryApi {
 
 
         // Only populate out the memory structure if we have vision of the room
+        // Extra saftey provided at each helper function, but make sure only visible rooms are being sent anyway
         if (Game.rooms[roomName]) {
             this.getRoomMemory(Game.rooms[roomName], true);
         }
@@ -256,6 +258,11 @@ export default class MemoryApi {
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
     ): Creep[] {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -290,6 +297,11 @@ export default class MemoryApi {
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
     ): Creep[] {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -324,6 +336,11 @@ export default class MemoryApi {
         filterFunction?: (object: Structure) => boolean,
         forceUpdate?: boolean
     ): Structure[] {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -369,6 +386,11 @@ export default class MemoryApi {
         filterFunction?: (object: any) => boolean,
         forceUpdate?: boolean
     ): Structure[] {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -404,6 +426,12 @@ export default class MemoryApi {
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
     ): ConstructionSite[] {
+
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
@@ -504,6 +532,11 @@ export default class MemoryApi {
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
     ): Source[] {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
+
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||

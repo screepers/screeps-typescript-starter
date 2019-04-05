@@ -59,9 +59,14 @@ export default class MemoryHelper_Room {
      * @param room The Room to update
      */
     public static updateHostileCreeps(roomName: string): void {
-        Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
 
+        Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
         const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
+
         // Sort creeps into categories
         _.forEach(enemies, (enemy: Creep) => {
             // * Check for boosted creeps and put them at the front of the if else stack
@@ -84,6 +89,11 @@ export default class MemoryHelper_Room {
      * @param room The Room we are checking in
      */
     public static updateMyCreeps(roomName: string): void {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+
         Memory.rooms[roomName].creeps = { data: null, cache: null };
 
         // Changed this because it wouldn't catch remote squads for example
@@ -101,6 +111,11 @@ export default class MemoryHelper_Room {
      * @param room The Room we are checking in
      */
     public static updateConstructionSites(roomName: string): void {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+
         Memory.rooms[roomName].constructionSites = { data: null, cache: null };
 
         const constructionSites: ConstructionSite[] = Game.rooms[roomName].find(FIND_MY_CONSTRUCTION_SITES);
@@ -116,6 +131,11 @@ export default class MemoryHelper_Room {
      * @param room The Room we are checking in
      */
     public static updateStructures(roomName: string): void {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+
         Memory.rooms[roomName].structures = { data: {}, cache: null };
 
         const allStructures: Structure[] = Game.rooms[roomName].find(FIND_STRUCTURES);
@@ -139,6 +159,11 @@ export default class MemoryHelper_Room {
      * @param room The room to check in
      */
     public static updateSources(roomName: string): void {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+
         Memory.rooms[roomName].sources = { data: {}, cache: null };
 
         const sources = Game.rooms[roomName].find(FIND_SOURCES);
