@@ -170,25 +170,8 @@ export class SpawnHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
                     harvestSources: true, //
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
                     fillContainer: true, //
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -252,23 +235,11 @@ export class SpawnHelper {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
                     fillLink: false,
                     fillSpawn: true,    //
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: false,
                     getFromContainer: false,
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -279,22 +250,9 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
                     fillSpawn: true,    //
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -302,24 +260,13 @@ export class SpawnHelper {
             case ROOM_STATE_ADVANCED:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true, //
                     fillContainer: false,
-                    fillLink: false,
                     fillSpawn: true,    //
                     fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
 
@@ -331,24 +278,11 @@ export class SpawnHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true, //
-                    fillContainer: false,
-                    fillLink: false,
                     fillSpawn: true,
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true, //
-                    getFromContainer: false,
                     getDroppedEnergy: true, //
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
 
@@ -412,22 +346,10 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
                     fillStorage: false, //
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -438,22 +360,10 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -465,20 +375,10 @@ export class SpawnHelper {
                     upgrade: true, //
                     repair: true, //
                     claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true, //
-                    getFromContainer: false,
                     getDroppedEnergy: true, //
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
 
@@ -493,21 +393,12 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
                     fillStorage: true, //
-                    fillContainer: false,
                     fillLink: true, //
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true, //
-                    getFromContainer: false,
                     getDroppedEnergy: true, //
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
 
@@ -573,24 +464,15 @@ export class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
                     fillTower: true, //
                     fillStorage: true, //
                     fillContainer: true, //
                     fillLink: true, //
-                    fillSpawn: false,
                     fillTerminal: true, //
                     fillLab: true, //
                     getFromStorage: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
 
@@ -643,25 +525,8 @@ export class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
-                    build: false,
                     upgrade: true, //
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
                     getFromLink: true, //
-                    getFromTerminal: false
                 };
 
                 break;
@@ -714,24 +579,8 @@ export class SpawnHelper {
             case ROOM_STATE_INTER:
                 creepOptions = {
                     build: true, //
-                    upgrade: false,
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
                     fillContainer: true, //
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -789,46 +638,20 @@ export class SpawnHelper {
                     upgrade: true, //
                     repair: true, //
                     claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true, //
                     fillTower: true, //
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
 
             case ROOM_STATE_ADVANCED:
                 creepOptions = {
-                    build: false,
-                    upgrade: false,
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true, //
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -838,25 +661,12 @@ export class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
-                    build: false,
-                    upgrade: false,
                     repair: true, //
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true, //
                     fillContainer: false,
                     fillLink: true, //
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -905,27 +715,7 @@ export class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 // Remote reservers don't really have options perse, so just leave as defaults
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
+                creepOptions = {};
 
                 break;
         }
@@ -982,22 +772,10 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    claim: false,
                     harvestSources: true,
-                    harvestMinerals: false,
                     wallRepair: true, //
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
 
                 break;
@@ -1022,27 +800,7 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
+                creepOptions = {};
 
                 break;
         }
@@ -1129,12 +887,8 @@ export class SpawnHelper {
                     squadUUID: null,
                     rallyLocation: null,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
                     healer: true,
-                    attacker: false,
                     defender: true,
-                    flee: false
                 };
 
                 break;
@@ -1215,12 +969,7 @@ export class SpawnHelper {
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
                     attacker: true,
-                    defender: false,
-                    flee: false
                 };
 
                 break;
@@ -1296,11 +1045,7 @@ export class SpawnHelper {
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
                     healer: true,
-                    attacker: false,
-                    defender: false,
                     flee: true
                 };
 
@@ -1380,12 +1125,6 @@ export class SpawnHelper {
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
-                    attacker: false,
-                    defender: false,
-                    flee: false
                 };
 
                 break;
@@ -1455,13 +1194,7 @@ export class SpawnHelper {
                     squadSize: 0,
                     squadUUID: null,
                     rallyLocation: null,
-                    rallyDone: false,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
-                    attacker: false,
                     defender: true,
-                    flee: false
                 };
 
                 break;
@@ -1475,27 +1208,7 @@ export class SpawnHelper {
      * returns a set of creep options with all default values
      */
     public static getDefaultCreepOptionsCiv(): CreepOptionsCiv {
-        return {
-            build: false,
-            upgrade: false,
-            repair: false,
-            claim: false,
-            harvestSources: false,
-            harvestMinerals: false,
-            wallRepair: false,
-            fillTower: false,
-            fillStorage: false,
-            fillContainer: false,
-            fillLink: false,
-            fillSpawn: false,
-            fillTerminal: false,
-            fillLab: false,
-            getFromStorage: false,
-            getFromContainer: false,
-            getDroppedEnergy: false,
-            getFromLink: false,
-            getFromTerminal: false
-        };
+        return {};
     }
 
     /**
@@ -1504,15 +1217,6 @@ export class SpawnHelper {
     public static getDefaultCreepOptionsMili(): CreepOptionsMili {
         return {
             squadSize: 0,
-            squadUUID: null,
-            rallyLocation: null,
-            rallyDone: false,
-            seige: false,
-            dismantler: false,
-            healer: false,
-            attacker: false,
-            defender: false,
-            flee: false
         };
     }
 
