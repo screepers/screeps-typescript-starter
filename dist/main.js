@@ -8194,11 +8194,12 @@ class RoomVisualApi {
         lines.push("Creep Info");
         lines.push("");
         if (spawningCreep.length === 0) {
-            lines.push("Spawning:       " + "None");
+            lines.push("Spawn Currently Idle");
         }
         for (const creep of spawningCreep) {
             spawningRole = creep.memory.role;
-            lines.push("Spawning:       " + spawningRole);
+            const spawningRoleDisplay = spawningRole.charAt(0).toUpperCase() + spawningRole.slice(1);
+            lines.push("[Spawning]:       " + spawningRoleDisplay);
         }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
         if (creepLimits['domesticLimits']) {
@@ -10389,7 +10390,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         ConsoleCommands.init();
     }
     // run the empire
-    if (Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
         try {
             EmpireManager.runEmpireManager();
         }
@@ -10398,7 +10399,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run rooms
-    if (Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) {
         try {
             RoomManager.runRoomManager();
         }
@@ -10407,7 +10408,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run spawning
-    if (Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) {
         try {
             SpawnManager.runSpawnManager();
         }
@@ -10416,7 +10417,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run creeps
-    if (Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
         try {
             CreepManager.runCreepManager();
         }
@@ -10425,7 +10426,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // clean up memory
-    if (Game.cpu['bucket'] > MEMORY_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > MEMORY_MANAGER_BUCKET_LIMIT) {
         try {
             MemoryManager.runMemoryManager();
         }
@@ -10434,7 +10435,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // Display room visuals if we have a fat enough bucket and config option allows it
-    if (Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
+    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
         try {
             RoomVisualManager$1.runRoomVisualManager();
         }

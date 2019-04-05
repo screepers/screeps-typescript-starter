@@ -12,8 +12,10 @@ import {
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
     OVERRIDE_D_ROOM_FLAG,
-    STIMULATE_FLAG
+    STIMULATE_FLAG,
+
 } from "utils/constants";
+import { ROOM_OVERLAY_RCL_RAW_VAL } from "utils/config";
 
 // Api for room visuals
 export default class RoomVisualApi {
@@ -92,11 +94,12 @@ export default class RoomVisualApi {
         lines.push("Creep Info");
         lines.push("");
         if (spawningCreep.length === 0) {
-            lines.push("Spawning:       " + "None");
+            lines.push("Spawn Currently Idle");
         }
         for (const creep of spawningCreep) {
             spawningRole = creep.memory.role;
-            lines.push("Spawning:       " + spawningRole);
+            const spawningRoleDisplay: string = spawningRole.charAt(0).toUpperCase() + spawningRole.slice(1);
+            lines.push("[Spawning]:       " + spawningRoleDisplay);
         }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
 
@@ -176,7 +179,7 @@ export default class RoomVisualApi {
         lines.push("");
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
-        lines.push("Progress:         " + controllerPercent + "%");
+        ROOM_OVERLAY_RCL_RAW_VAL === true ? lines.push("Progress:         " + controllerPercent + "%") : lines.push("Progress:         " + RoomVisualHelper.convertRangeToDisplayVal(controllerProgress));
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
             lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
