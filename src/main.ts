@@ -72,12 +72,6 @@
  * Still do not target solo healers (maybe consider it if we calculate our damage (we have a function for that, thanks bonzai)
  * and find that we can out damage the amount of healing on a creep and those around it)
  *
- * 15. Mark jobs as taken
- * In the handleNewJob methods of many civilian creeps, we should mark that job as taken in the cases where we need to
- * Most relevant on get energy jobs, as we don't want 4 creeps going for the same source of 200 energy
- * this should cut down on cpu use in more idle heavy times, and make jobs targeting overall smarter
- * This is also needed on claim jobs, so if we have 5 claimers to claim 5 rooms they don't all go to the same one
- *
  *
  * ~~~~~~~~~~~~~~~~
  * ~~ BUG FIXES ~~
@@ -93,9 +87,6 @@
  * 4. Attack flags are registering, but they are not raising the limits of military creeps
  * Find out why, are fix this (most likey somewhere in raiseMiliCreepLimitsByDelta),
  * possibly bad reference to memory so it doesn't save the changes
- *
- * 5. Find a way to speed up job aquisition. Creeps seem to have 1-4 tick delay between performing some actions
- * No advice to recreate, just watch creeps over time and you will notice it
  *
  * 6. Option flags throw an error regardless if they are processed or not
  * Place an option flag to recreate
