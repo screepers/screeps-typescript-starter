@@ -103,8 +103,9 @@ export default class WorkerCreepManager {
     public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
         const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
-        const isCurrentUpgrader: boolean = _.some(MemoryApi.getMyCreeps(room.name), (c: Creep) =>
-            c.memory.job && c.memory.job!.actionType === 'upgrade'
+        const isCurrentUpgrader: boolean = _.some(
+            MemoryApi.getMyCreeps(room.name),
+            (c: Creep) => c.memory.job && c.memory.job!.actionType === "upgrade"
         );
 
         // Assign upgrade job is one isn't currently being worked
@@ -119,7 +120,6 @@ export default class WorkerCreepManager {
             if (buildJobs.length > 0) {
                 return buildJobs[0];
             }
-
         }
 
         if (creepOptions.repair) {
@@ -145,7 +145,10 @@ export default class WorkerCreepManager {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillSpawn || creepOptions.fillTower) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            const fillJobs = MemoryApi.getFillJobs(
+                room,
+                (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link"
+            );
 
             if (fillJobs.length > 0) {
                 return fillJobs[0];
@@ -167,6 +170,8 @@ export default class WorkerCreepManager {
      * Handles new job initializing
      */
     public static handleNewJob(creep: Creep, room: Room) {
+        MemoryApi.updateJobMemory(creep, room);
+
         switch (creep.memory.job!.jobType) {
             case "getEnergyJob":
                 break;

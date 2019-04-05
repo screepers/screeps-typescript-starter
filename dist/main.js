@@ -79,6 +79,7 @@ class MemoryHelper {
         }
     }
 }
+//# sourceMappingURL=MemoryHelper.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO = 0;
@@ -206,6 +207,7 @@ const FILL_JOB_CACHE_TTL = 10; // Fill Jobs
 const STORE_JOB_CACHE_TTL = 50; // Store Jobs
 const ERROR_ERROR$1 = 2; // Regular error - Creep/Room ruining
 const ERROR_WARN$1 = 1; // Small error - Something went wrong, but doesn't ruin anything
+//# sourceMappingURL=Constants.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO$1 = 0;
@@ -264,6 +266,7 @@ const DEFAULT_MOVE_OPTS$1 = {
     // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
     visualizePathStyle: {} // Empty object for now, just uses default visualization
 };
+//# sourceMappingURL=Constants.js.map
 
 /**
  * Custom error class
@@ -280,6 +283,7 @@ class UserException extends Error {
         this.bodyColor = useBodyColor !== undefined ? useBodyColor : "#ff1113";
     }
 }
+//# sourceMappingURL=UserException.js.map
 
 // helper functions for rooms
 class RoomHelper {
@@ -619,6 +623,7 @@ class RoomHelper {
         return sum;
     }
 }
+//# sourceMappingURL=RoomHelper.js.map
 
 /**
  * Disallow the caching of all memory
@@ -683,6 +688,7 @@ const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 const ROOM_MANAGER_BUCKET_LIMIT = 500;
 const MEMORY_MANAGER_BUCKET_LIMIT = 1;
+//# sourceMappingURL=config.js.map
 
 // an api used for functions related to the room
 class RoomApi {
@@ -1015,6 +1021,7 @@ class RoomApi {
         // i have no idea yet lol
     }
 }
+//# sourceMappingURL=Room.Api.js.map
 
 // TODO Create jobs for tombstones and dropped resources if wanted
 class GetEnergyJobs {
@@ -1030,8 +1037,24 @@ class GetEnergyJobs {
         }
         const sourceJobList = [];
         _.forEach(openSources, (source) => {
+            // Get all miners that are targeting this source
+            const miners = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.role === ROLE_MINER) {
+                    if (creep.memory.job && creep.memory.job.targetID === source.id) {
+                        // ! Can optionally add another statement here that checks
+                        // ! if creep.ticksToLive > however many ticks it takes to spawn a creep
+                        // ! so that creeps that are about to die are not considered as using a part of the job.
+                        return true;
+                    }
+                }
+                return false;
+            });
+            // The Number of work parts those miners have
+            const numWorkParts = _.sum(miners, (creep) => creep.getActiveBodyparts(WORK));
+            // 2 energy per part per tick * 300 ticks to regen a source = effective mining capacity
+            const sourceEnergyRemaining = source.energyCapacity - 2 * numWorkParts * 300;
             // Create the StoreDefinition for the source
-            const sourceResources = { energy: source.energy };
+            const sourceResources = { energy: sourceEnergyRemaining };
             // Create the GetEnergyJob object for the source
             const sourceJob = {
                 jobType: "getEnergyJob",
@@ -1041,6 +1064,10 @@ class GetEnergyJobs {
                 resources: sourceResources,
                 isTaken: false
             };
+            // Mark the job as taken if there is no energy remaining
+            if (sourceEnergyRemaining <= 0) {
+                sourceJob.isTaken = true;
+            }
             // Append the GetEnergyJob to the main array
             sourceJobList.push(sourceJob);
         });
@@ -1154,6 +1181,7 @@ class GetEnergyJobs {
         return dropJobList;
     }
 }
+//# sourceMappingURL=GetEnergyJobs.js.map
 
 class ClaimPartJobs {
     /**
@@ -1249,6 +1277,7 @@ class ClaimPartJobs {
         return attackJobs;
     }
 }
+//# sourceMappingURL=ClaimPartJobs.js.map
 
 class WorkPartJobs {
     /**
@@ -1267,6 +1296,7 @@ class WorkPartJobs {
                 targetID: structure.id,
                 targetType: structure.structureType,
                 actionType: "repair",
+                remaining: structure.hitsMax - structure.hits,
                 isTaken: false
             };
             repairJobs.push(repairJob);
@@ -1289,6 +1319,7 @@ class WorkPartJobs {
                 targetID: cs.id,
                 targetType: "constructionSite",
                 actionType: "build",
+                remaining: cs.progressTotal - cs.progress,
                 isTaken: false
             };
             buildJobs.push(buildJob);
@@ -1309,6 +1340,7 @@ class WorkPartJobs {
                 targetID: room.controller.id,
                 targetType: "controller",
                 actionType: "upgrade",
+                remaining: room.controller.progressTotal - room.controller.progress,
                 isTaken: false
             };
             upgradeJobs.push(controllerJob);
@@ -1316,6 +1348,7 @@ class WorkPartJobs {
         return upgradeJobs;
     }
 }
+//# sourceMappingURL=WorkPartJobs.js.map
 
 class CarryPartJobs {
     /**
@@ -1334,6 +1367,7 @@ class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
+                remaining: structure.energyCapacity - structure.energy,
                 actionType: "transfer",
                 isTaken: false
             };
@@ -1344,6 +1378,7 @@ class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
+                remaining: structure.energyCapacity - structure.energy,
                 actionType: "transfer",
                 isTaken: false
             };
@@ -1362,6 +1397,7 @@ class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: room.storage.id,
                 targetType: STRUCTURE_STORAGE,
+                remaining: room.storage.storeCapacity - _.sum(room.storage.store),
                 actionType: "transfer",
                 isTaken: false
             };
@@ -1372,26 +1408,31 @@ class CarryPartJobs {
                 jobType: "carryPartJob",
                 targetID: room.terminal.id,
                 targetType: STRUCTURE_TERMINAL,
+                remaining: room.terminal.storeCapacity - _.sum(room.terminal.store),
                 actionType: "transfer",
                 isTaken: false
             };
             storeJobs.push(terminalJob);
         }
         const upgraderLink = MemoryApi.getUpgraderLink(room);
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK) && upgraderLink) {
+        if (upgraderLink) {
             const nonUpgraderLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link) => link.id !== upgraderLink.id && link.energy < link.energyCapacity);
-            const fillLinkJob = {
-                jobType: "carryPartJob",
-                targetID: nonUpgraderLinks[0].id,
-                targetType: STRUCTURE_LINK,
-                actionType: "transfer",
-                isTaken: false
-            };
-            storeJobs.push(fillLinkJob);
+            _.forEach(nonUpgraderLinks, (link) => {
+                const fillLinkJob = {
+                    jobType: "carryPartJob",
+                    targetID: link.id,
+                    targetType: STRUCTURE_LINK,
+                    remaining: link.energyCapacity - link.energy,
+                    actionType: "transfer",
+                    isTaken: false
+                };
+                storeJobs.push(fillLinkJob);
+            });
         }
         return storeJobs;
     }
 }
+//# sourceMappingURL=CarryPartJobs.js.map
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -1899,6 +1940,7 @@ class MemoryHelper_Room {
         Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
     }
 }
+//# sourceMappingURL=MemoryHelper_Room.js.map
 
 /**
  * The API used by the spawn manager
@@ -2517,6 +2559,7 @@ class SpawnApi {
         return room.name;
     }
 }
+//# sourceMappingURL=Spawn.Api.js.map
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -4020,6 +4063,7 @@ class SpawnHelper {
         return accesssibleTiles;
     }
 }
+//# sourceMappingURL=SpawnHelper.js.map
 
 // the api for the memory class
 class MemoryApi {
@@ -4868,7 +4912,233 @@ class MemoryApi {
             return currentCreepOptions.squadUUID === squadUUID;
         });
     }
+    /**
+     * Updates the job value in memory to deprecate resources or mark the job as taken
+     */
+    static updateJobMemory(creep, room) {
+        // make sure creep has a job
+        if (creep.memory.job === undefined) {
+            throw new UserException("Error in updateJobMemory", "Attempted to updateJobMemory using a creep with no job.", ERROR_ERROR$1);
+        }
+        // make sure room has a jobs property
+        if (room.memory.jobs === undefined) {
+            throw new UserException("Error in updateJobMemory", "The room memory to update does not have a jobs property", ERROR_ERROR$1);
+        }
+        const creepJob = creep.memory.job;
+        let roomJob;
+        // Assign room job to the room in memory
+        switch (creepJob.jobType) {
+            case "carryPartJob":
+                roomJob = this.searchCarryPartJobs(creepJob, room);
+                break;
+            case "claimPartJob":
+                roomJob = this.searchClaimPartJobs(creepJob, room);
+                break;
+            case "getEnergyJob":
+                roomJob = this.searchGetEnergyJobs(creepJob, room);
+                break;
+            case "workPartJob":
+                roomJob = this.searchWorkPartJobs(creepJob, room);
+                break;
+            default:
+                throw new UserException("Error in updateJobMemory", "Creep has a job with an undefined jobType", ERROR_ERROR$1);
+        }
+        if (roomJob === undefined) {
+            throw new UserException("Error in updateJobMemory", "Could not find the job in room memory to update.", ERROR_ERROR$1);
+        }
+        // We have the roomJob location in memory
+        // now we just need to update the value based on the type of job
+        switch (creepJob.jobType) {
+            case "carryPartJob":
+                this.updateCarryPartJob(roomJob, creep);
+                break;
+            case "claimPartJob":
+                this.updateClaimPartJob(roomJob, creep);
+                break;
+            case "getEnergyJob":
+                this.updateGetEnergyJob(roomJob, creep);
+                break;
+            case "workPartJob":
+                this.updateWorkPartJob(roomJob, creep);
+                break;
+            default:
+                throw new UserException("Error in updateJobMemory", "Creep has a job with an undefined jobType", ERROR_ERROR$1);
+        }
+    }
+    /**
+     * Searches through claimPartJobs to find a specified job
+     * @param job THe job to serach for
+     * @param room The room to search in
+     */
+    static searchClaimPartJobs(job, room) {
+        if (room.memory.jobs.claimPartJobs === undefined) {
+            throw new UserException("Error in searchClaimPartJobs", "The room memory does not have a claimPartJobs property", ERROR_ERROR$1);
+        }
+        const jobListing = room.memory.jobs.claimPartJobs;
+        let roomJob;
+        if (jobListing.claimJobs) {
+            roomJob = _.find(jobListing.claimJobs.data, (claimJob) => job.targetID === claimJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.reserveJobs) {
+            roomJob = _.find(jobListing.reserveJobs.data, (reserveJob) => job.targetID === reserveJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.signJobs) {
+            roomJob = _.find(jobListing.signJobs.data, (signJob) => job.targetID === signJob.targetID);
+        }
+        return roomJob;
+    }
+    /**
+     * Searches through carryPartJobs to find a specified job
+     * @param job The job to search for
+     * @param room The room to search in
+     */
+    static searchCarryPartJobs(job, room) {
+        if (room.memory.jobs.carryPartJobs === undefined) {
+            throw new UserException("Error in searchCarryPartJobs", "The room memory does not have a carryPartJobs property", ERROR_ERROR$1);
+        }
+        const jobListing = room.memory.jobs.carryPartJobs;
+        let roomJob;
+        if (jobListing.fillJobs) {
+            roomJob = _.find(jobListing.fillJobs.data, (fillJob) => job.targetID === fillJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.storeJobs) {
+            roomJob = _.find(jobListing.storeJobs.data, (storeJob) => job.targetID === storeJob.targetID);
+        }
+        return roomJob;
+    }
+    /**
+     * Searches through workPartJobs to find a specified job
+     * @param job The job to search for
+     * @param room The room to search in
+     */
+    static searchWorkPartJobs(job, room) {
+        if (room.memory.jobs.workPartJobs === undefined) {
+            throw new UserException("Error in workPartJobs", "THe room memory does not have a workPartJobs property", ERROR_ERROR$1);
+        }
+        const jobListing = room.memory.jobs.workPartJobs;
+        let roomJob;
+        if (jobListing.upgradeJobs) {
+            roomJob = _.find(jobListing.upgradeJobs.data, (uJob) => job.targetID === uJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.buildJobs) {
+            roomJob = _.find(jobListing.buildJobs.data, (buildJob) => job.targetID === buildJob.targetID);
+        }
+        if (roomJob === undefined && jobListing.repairJobs) {
+            roomJob = _.find(jobListing.repairJobs.data, (rJob) => job.targetID === rJob.targetID);
+        }
+        return roomJob;
+    }
+    /**
+     * Searches through getEnergyJobs to find a specified job
+     * @param job THe job to search for
+     * @param room THe room to search in
+     */
+    static searchGetEnergyJobs(job, room) {
+        if (room.memory.jobs.getEnergyJobs === undefined) {
+            throw new UserException("Error in searchGetEnergyJobs", "The room memory does not have a getEnergyJobs property", ERROR_ERROR$1);
+        }
+        const jobListing = room.memory.jobs.getEnergyJobs;
+        let roomJob;
+        if (jobListing.containerJobs) {
+            roomJob = _.find(jobListing.containerJobs.data, (cJob) => cJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.sourceJobs) {
+            roomJob = _.find(jobListing.sourceJobs.data, (sJob) => sJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.pickupJobs) {
+            roomJob = _.find(jobListing.pickupJobs.data, (pJob) => pJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.backupStructures) {
+            roomJob = _.find(jobListing.backupStructures.data, (sJob) => sJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.linkJobs) {
+            roomJob = _.find(jobListing.linkJobs.data, (lJob) => lJob.targetID === job.targetID);
+        }
+        if (roomJob === undefined && jobListing.tombstoneJobs) {
+            roomJob = _.find(jobListing.tombstoneJobs.data, (tJob) => tJob.targetID === job.targetID);
+        }
+        return roomJob;
+    }
+    /**
+     * Updates the CarryPartJob
+     * @param job The Job to update
+     */
+    static updateCarryPartJob(job, creep) {
+        if (job.actionType === "transfer") {
+            job.remaining -= creep.carry.energy;
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+        }
+        return;
+    }
+    /**
+     * Updates the ClaimPartJob
+     * @param job The Job to update
+     */
+    static updateClaimPartJob(job, creep) {
+        if (job.targetType === "controller") {
+            job.isTaken = true;
+            return;
+        }
+    }
+    /**
+     * Updates the getEnergyJob
+     * @param job The Job to update
+     */
+    static updateGetEnergyJob(job, creep) {
+        if (job.targetType === "source") {
+            // Subtract creep effective mining capacity from resources
+            job.resources.energy -= creep.getActiveBodyparts(WORK) * 2 * 300;
+            if (job.resources.energy <= 0) {
+                job.isTaken = true;
+            }
+            return;
+        }
+        if (job.targetType === "droppedResource" ||
+            job.targetType === "link" ||
+            job.targetType === "container" ||
+            job.targetType === "storage" ||
+            job.targetType === "terminal") {
+            // Subtract creep carry from resources
+            job.resources.energy -= creep.carryCapacity;
+            if (job.resources.energy <= 0) {
+                job.isTaken = true;
+            }
+            return;
+        }
+    }
+    /**
+     * Updates the workPartJob
+     * @param job The job to update
+     */
+    static updateWorkPartJob(job, creep) {
+        if (job.targetType === "constructionSite") {
+            // Creep builds 5 points/part/tick at 1 energy/point
+            job.remaining -= creep.carry.energy; // 1 to 1 ratio of energy to points built
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+            return;
+        }
+        if (job.targetType === STRUCTURE_CONTROLLER) {
+            // Upgrade at a 1 to 1 ratio
+            job.remaining -= creep.carry.energy;
+            // * Do nothing really - Job will never be taken
+            // Could optionally mark something on the job to show that we have 1 worker upgrading already
+            return;
+        }
+        if (job.targetType in ALL_STRUCTURE_TYPES) {
+            // Repair 20 hits/part/tick at .1 energy/hit rounded up to nearest whole number
+            job.remaining -= Math.ceil(creep.carry.energy * 0.1);
+            if (job.remaining <= 0) {
+                job.isTaken = true;
+            }
+            return;
+        }
+    }
 }
+//# sourceMappingURL=Memory.Api.js.map
 
 class EmpireHelper {
     /**
@@ -5346,6 +5616,7 @@ class EmpireHelper {
         return attackFlagMemory;
     }
 }
+//# sourceMappingURL=EmpireHelper.js.map
 
 class Empire {
     /**
@@ -5479,6 +5750,7 @@ class Empire {
         }
     }
 }
+//# sourceMappingURL=Empire.Api.js.map
 
 // empire-wide manager
 class EmpireManager {
@@ -5500,6 +5772,7 @@ class EmpireManager {
         // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
     }
 }
+//# sourceMappingURL=EmpireManager.js.map
 
 // @ts-ignore
 // manager for the memory of the empire
@@ -5532,6 +5805,7 @@ class MemoryManager {
         }
     }
 }
+//# sourceMappingURL=MemoryManagement.js.map
 
 // room-wide manager
 class RoomManager {
@@ -5580,6 +5854,7 @@ class RoomManager {
         }
     }
 }
+//# sourceMappingURL=RoomManager.js.map
 
 // handles spawning for every room
 class SpawnManager {
@@ -5627,6 +5902,7 @@ class SpawnManager {
         }
     }
 }
+//# sourceMappingURL=SpawnManager.js.map
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
@@ -7961,6 +8237,7 @@ class ErrorMapper {
 }
 // Cache previously mapped traces to improve performance
 ErrorMapper.cache = {};
+//# sourceMappingURL=ErrorMapper.js.map
 
 class UtilHelper {
     /**
@@ -7978,6 +8255,7 @@ class UtilHelper {
         }
     }
 }
+//# sourceMappingURL=UtilHelper.js.map
 
 const textColor = '#bab8ba';
 const textSize = .8;
@@ -8124,6 +8402,7 @@ class RoomVisualManager {
         return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
     }
 }
+//# sourceMappingURL=RoomVisualHelper.js.map
 
 // Api for room visuals
 class RoomVisualApi {
@@ -8526,6 +8805,7 @@ class RoomVisualApi {
         }
     }
 }
+//# sourceMappingURL=RoomVisual.Api.js.map
 
 // Manager for room visuals
 class RoomVisualManager$1 {
@@ -8573,6 +8853,7 @@ class RoomVisualManager$1 {
         endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
     }
 }
+//# sourceMappingURL=RoomVisualManager.js.map
 
 class Normalize {
     /**
@@ -8637,6 +8918,7 @@ class Normalize {
         return obj;
     }
 }
+//# sourceMappingURL=Normalize.js.map
 
 // helper function for creeps
 class CreepHelper {
@@ -8647,7 +8929,7 @@ class CreepHelper {
      */
     static getMiningContainer(job, room) {
         if (!job) {
-            throw new UserException("Job is undefined", "Job is undefined for creep " + room.name + ", can't move to mining container.", ERROR_WARN$2);
+            throw new UserException("Job is undefined", "Job is undefined for room " + room.name + ". Can't get the mining container of an undefined job.", ERROR_WARN$2);
         }
         const source = Game.getObjectById(job.targetID);
         if (!source) {
@@ -8720,6 +9002,7 @@ class CreepHelper {
         }
     }
 }
+//# sourceMappingURL=CreepHelper.js.map
 
 // Api for all types of creeps (more general stuff here)
 class CreepApi {
@@ -8813,11 +9096,7 @@ class CreepApi {
     static doWork_CarryPartJob(creep, job) {
         let target;
         target = Game.getObjectById(job.targetID);
-        if (!target) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+        this.nullCheck_target(creep, target);
         let returnCode;
         let deleteOnSuccess = false;
         if (job.actionType === "transfer" && (target instanceof Structure || target instanceof Creep)) {
@@ -8855,11 +9134,7 @@ class CreepApi {
      */
     static doWork_WorkPartJob(creep, job) {
         const target = Game.getObjectById(job.targetID);
-        if (!target) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+        this.nullCheck_target(creep, target);
         let returnCode;
         let deleteOnSuccess = false;
         if (job.actionType === "build" && target instanceof ConstructionSite) {
@@ -8912,11 +9187,7 @@ class CreepApi {
      */
     static doWork_GetEnergyJob(creep, job) {
         const target = Game.getObjectById(job.targetID);
-        if (!target) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+        this.nullCheck_target(creep, target);
         let returnCode;
         if (job.actionType === "harvest" && (target instanceof Source || target instanceof Mineral)) {
             returnCode = creep.harvest(target);
@@ -8959,31 +9230,21 @@ class CreepApi {
      */
     static travelTo_GetEnergyJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
-        // temp fix for harvesters getting null job, need to find a perm fix for this soon
-        if (!moveTarget) {
-            creep.memory.working = false;
-            delete creep.memory.job;
-        }
-        // this.nullCheck_target(creep, moveTarget);
+        this.nullCheck_target(creep, moveTarget);
         // Move options target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
         // In this case all actions are complete with a range of 1, but keeping for structure
         if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
             moveOpts.range = 1;
         }
+        else if (job.actionType === "harvest" && moveTarget instanceof StructureContainer) {
+            moveOpts.range = 0;
+        }
         else if (job.actionType === "withdraw" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
             moveOpts.range = 1;
         }
         else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
             moveOpts.range = 1;
-        }
-        if (job.actionType === "harvest" &&
-            creep.memory.role === ROLE_MINER$1 &&
-            creep.room.memory.roomState !== ROOM_STATE_INTRO$1 &&
-            creep.room.memory.roomState !== ROOM_STATE_BEGINNER$1) {
-            // This case implies container mining is available, and miner was stopping 1 tile before the container
-            // If you can find a better way to do this, please do lol
-            moveOpts.range = 0;
         }
         if (creep.pos.getRangeTo(moveTarget) <= moveOpts.range) {
             creep.memory.working = true;
@@ -8996,11 +9257,7 @@ class CreepApi {
      */
     static travelTo_CarryPartJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
-        if (!moveTarget) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, target);
+        this.nullCheck_target(creep, moveTarget);
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
         if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
@@ -9037,12 +9294,7 @@ class CreepApi {
      */
     static travelTo_WorkPartJob(creep, job) {
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
-        // Same bandaid fix
-        if (!moveTarget) {
-            delete creep.memory.job;
-            creep.memory.working = false;
-        }
-        // this.nullCheck_target(creep, moveTarget);
+        this.nullCheck_target(creep, moveTarget);
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS$1;
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
@@ -9066,7 +9318,14 @@ class CreepApi {
      */
     static nullCheck_target(creep, target) {
         if (target === null) {
-            throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\n The error occurred in: ", ERROR_ERROR$2);
+            // preserve for the error message
+            const jobAsString = JSON.stringify(creep.memory.job);
+            delete creep.memory.job;
+            creep.memory.working = false;
+            if (creep.memory.supplementary && creep.memory.supplementary.moveTarget) {
+                delete creep.memory.supplementary.moveTarget;
+            }
+            throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString, ERROR_WARN);
         }
     }
     /**
@@ -9075,8 +9334,6 @@ class CreepApi {
     static badTarget_Error(creep, job) {
         return new UserException("Invalid Job actionType or targetType", "An invalid actionType or structureType has been provided by creep [" +
             creep.name +
-            "] for function [" +
-            // this.caller +
             "]" +
             "\n Job: " +
             JSON.stringify(job), ERROR_ERROR$2);
@@ -9127,7 +9384,7 @@ class MinerCreepManager {
                 return; // idle for a tick
             }
             // Set supplementary.moveTarget to container if one exists and isn't already taken
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
         if (creep.memory.job) {
             if (creep.memory.working) {
@@ -9137,36 +9394,54 @@ class MinerCreepManager {
             CreepApi.travelTo(creep, creep.memory.job);
         }
     }
-    /**
-     * Find a job for the creep
-     */
     static getNewSourceJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.harvestSources) {
-            // TODO change this to check creep options to filter jobs --
-            // e.g. If creep.options.harvestSources = true then we can get jobs where actionType = "harvest" and targetType = "source"
-            // Force update to make sure creeps don't travel to a taken source
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob) => !sjob.isTaken, true);
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob) => !sJob.isTaken);
             if (sourceJobs.length > 0) {
-                return sourceJobs[0];
+                // Filter out jobs that have too little energy -
+                // The energy in the StoreDefinition is the amount of energy per 300 ticks left
+                const suitableJobs = _.filter(sourceJobs, (sJob) => sJob.resources.energy >= creep.getActiveBodyparts(WORK) * 2 * 300 //  (Workparts * 2 * 300 = effective mining capacity)
+                );
+                // If config allows getting closest source
+                {
+                    let sourceIDs;
+                    // Get sources from suitableJobs if any, else get regular sourceJob instead
+                    if (suitableJobs.length > 0) {
+                        sourceIDs = _.map(suitableJobs, (job) => job.targetID);
+                    }
+                    else {
+                        sourceIDs = _.map(sourceJobs, (job) => job.targetID);
+                    }
+                    // Find the closest source
+                    const sourceObjects = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+                    const closestAvailableSource = creep.pos.findClosestByRange(sourceObjects); // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
+                    // return the job that corresponds with the closest source
+                    return _.find(sourceJobs, (job) => job.targetID === closestAvailableSource.id);
+                }
             }
-        }
+        } // End harvestSources option
+        // no available jobs
         return undefined;
     }
     /**
      * Handle initalizing a new job
      */
-    static handleNewJob(creep) {
+    static handleNewJob(creep, room) {
+        // Update room memory to reflect the new job
+        MemoryApi.updateJobMemory(creep, room);
         const miningContainer = CreepHelper.getMiningContainer(creep.memory.job, Game.rooms[creep.memory.homeRoom]);
         if (miningContainer === undefined) {
             // Returning here to prevent supplementary id from being formed,
             // so in that case creep will just walk up to the source
             return;
         }
+        // Check for any creeps on the miningContainer
         const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
         if (creepsOnContainer.length > 0) {
+            // If the creep on the container is a miner (and not some random creep that's in the way)
             if (creepsOnContainer[0].memory.role === ROLE_MINER$1) {
-                return; // If there is already a miner creep on the container, then we don't target it
+                return; // Don't target it
             }
         }
         if (creep.memory.supplementary === undefined) {
@@ -9175,6 +9450,7 @@ class MinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
+//# sourceMappingURL=MinerCreepManager.js.map
 
 // Manager for the miner creep role
 class HarvesterCreepManager {
@@ -9192,7 +9468,7 @@ class HarvesterCreepManager {
             if (creep.memory.job === undefined) {
                 return; // idle for a tick
             }
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
         // I think i know how to fix creeps idling for a tick between traveling and doing the job
         // Travel to checks if they're there and returns, problem is we call it after do work
@@ -9258,7 +9534,7 @@ class HarvesterCreepManager {
     static newCarryPartJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.fillTower || creepOptions.fillSpawn) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link', true);
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== "link", true);
             if (fillJobs.length > 0) {
                 return fillJobs[0];
             }
@@ -9310,17 +9586,11 @@ class HarvesterCreepManager {
     /**
      * Handles setup for a new job
      */
-    static handleNewJob(creep) {
-        if (creep.memory.job.jobType === "getEnergyJob") {
-            // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
-            return;
-        }
-        else if (creep.memory.job.jobType === "carryPartJob") {
-            // Find the reference to the job we currently have and mark it as taken
-            return;
-        }
+    static handleNewJob(creep, room) {
+        MemoryApi.updateJobMemory(creep, room);
     }
 }
+//# sourceMappingURL=HarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class WorkerCreepManager {
@@ -9398,7 +9668,7 @@ class WorkerCreepManager {
     static newWorkPartJob(creep, room) {
         const creepOptions = creep.memory.options;
         const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job) => !job.isTaken);
-        const isCurrentUpgrader = _.some(MemoryApi.getMyCreeps(room.name), (c) => c.memory.job && c.memory.job.actionType === 'upgrade');
+        const isCurrentUpgrader = _.some(MemoryApi.getMyCreeps(room.name), (c) => c.memory.job && c.memory.job.actionType === "upgrade");
         // Assign upgrade job is one isn't currently being worked
         if (creepOptions.upgrade && !isCurrentUpgrader) {
             if (upgradeJobs.length > 0) {
@@ -9430,7 +9700,7 @@ class WorkerCreepManager {
     static newCarryPartJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.fillSpawn || creepOptions.fillTower) {
-            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== 'link');
+            const fillJobs = MemoryApi.getFillJobs(room, (fJob) => !fJob.isTaken && fJob.targetType !== "link");
             if (fillJobs.length > 0) {
                 return fillJobs[0];
             }
@@ -9447,6 +9717,7 @@ class WorkerCreepManager {
      * Handles new job initializing
      */
     static handleNewJob(creep, room) {
+        MemoryApi.updateJobMemory(creep, room);
         switch (creep.memory.job.jobType) {
             case "getEnergyJob":
                 break;
@@ -9459,6 +9730,7 @@ class WorkerCreepManager {
         }
     }
 }
+//# sourceMappingURL=WorkerCreepManager.js.map
 
 // Manager for the miner creep role
 class LorryCreepManager {
@@ -9469,6 +9741,7 @@ class LorryCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=LorryCreepManager.js.map
 
 // Manager for the miner creep role
 class PowerUpgraderCreepManager {
@@ -9486,7 +9759,7 @@ class PowerUpgraderCreepManager {
             if (creep.memory.job === undefined) {
                 return; // idle for a tick
             }
-            this.handleNewJob(creep);
+            this.handleNewJob(creep, homeRoom);
         }
         if (creep.memory.job) {
             if (creep.memory.working) {
@@ -9538,20 +9811,11 @@ class PowerUpgraderCreepManager {
     /**
      * Handles setup for a new job
      */
-    static handleNewJob(creep) {
-        const creepOptions = creep.memory.options;
-        if (creepOptions.getFromLink) {
-            if (creep.memory.job.jobType === "getEnergyJob") {
-                // TODO Decrement the energy available in room.memory.job.xxx.yyy by creep.carryCapacity
-                return;
-            }
-            else if (creep.memory.job.jobType === "workPartJob") {
-                // TODO Mark the job we chose as taken
-                return;
-            }
-        }
+    static handleNewJob(creep, room) {
+        MemoryApi.updateJobMemory(creep, room);
     }
 }
+//# sourceMappingURL=PowerUpgraderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteMinerCreepManager {
@@ -9613,6 +9877,7 @@ class RemoteMinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
+//# sourceMappingURL=RemoteMinerCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteHarvesterCreepManager {
@@ -9714,6 +9979,7 @@ class RemoteHarvesterCreepManager {
         }
     }
 }
+//# sourceMappingURL=RemoteHarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteColonizerCreepManager {
@@ -9724,6 +9990,7 @@ class RemoteColonizerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteColonizerCreepManager.js.map
 
 // Manager for the miner creep role
 class ClaimerCreepManager {
@@ -9734,6 +10001,7 @@ class ClaimerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=ClaimerCreepManager.js.map
 
 // Api for military creep's
 class CreepMili {
@@ -9982,6 +10250,7 @@ class CreepMili {
         return false;
     }
 }
+//# sourceMappingURL=CreepMili.Api.js.map
 
 // Manager for the miner creep role
 class RemoteDefenderCreepManager {
@@ -10017,6 +10286,7 @@ class RemoteDefenderCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=RemoteDefenderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteReserverCreepManager {
@@ -10063,6 +10333,7 @@ class RemoteReserverCreepManager {
         // set is taken to true
     }
 }
+//# sourceMappingURL=RemoteReserverCreepManager.js.map
 
 // Manager for the miner creep role
 class ZealotCreepManager {
@@ -10095,6 +10366,7 @@ class ZealotCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=ZealotCreepManager.js.map
 
 // Manager for the miner creep role
 class MedicCreepManager {
@@ -10147,6 +10419,7 @@ class MedicCreepManager {
         }
     }
 }
+//# sourceMappingURL=MedicCreepManager.js.map
 
 // Manager for the miner creep role
 class StalkerCreepManager {
@@ -10179,6 +10452,7 @@ class StalkerCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=StalkerCreepManager.js.map
 
 // Manager for the Domestic Defender Creep Role
 class DomesticDefenderCreepManager {
@@ -10214,6 +10488,7 @@ class DomesticDefenderCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=DomesticDefenderCreepManager.js.map
 
 // Call the creep manager for each role
 class CreepManager {
@@ -10222,7 +10497,12 @@ class CreepManager {
      */
     static runCreepManager() {
         for (const creep in Game.creeps) {
-            this.runSingleCreepManager(Game.creeps[creep]);
+            try {
+                this.runSingleCreepManager(Game.creeps[creep]);
+            }
+            catch (e) {
+                UtilHelper.printError(e);
+            }
         }
     }
     /**
@@ -10279,10 +10559,11 @@ class CreepManager {
                 DomesticDefenderCreepManager.runCreepRole(creep);
                 break;
             default:
-                throw new UserException("Creep body failed generating.", 'The role "' + role + '" was invalid for generating the creep body.', ERROR_ERROR$1);
+                throw new UserException("Invalid role for runSingleCreepManager.", 'The role "' + role + '" was invalid for running a creep role.', ERROR_ERROR$1);
         }
     }
 }
+//# sourceMappingURL=CreepManager.js.map
 
 class ConsoleCommands {
     static init() {
@@ -10376,6 +10657,7 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
     // check if we have enough energy to send the resource
     // send the resources
 };
+//# sourceMappingURL=ConsoleCommands.js.map
 
 /*
   Kung Fu Klan's Screeps Code
@@ -10386,11 +10668,13 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
   Starting Jan 2019
 */
 const loop = ErrorMapper.wrapLoop(() => {
+    // Init console commands
+    ConsoleCommands.init();
     if (RoomHelper.excecuteEveryTicks(1000)) {
         ConsoleCommands.init();
     }
     // run the empire
-    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > EMPIRE_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > EMPIRE_MANAGER_BUCKET_LIMIT) {
         try {
             EmpireManager.runEmpireManager();
         }
@@ -10399,7 +10683,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run rooms
-    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > ROOM_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > ROOM_MANAGER_BUCKET_LIMIT) {
         try {
             RoomManager.runRoomManager();
         }
@@ -10408,7 +10692,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run spawning
-    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > SPAWN_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > SPAWN_MANAGER_BUCKET_LIMIT) {
         try {
             SpawnManager.runSpawnManager();
         }
@@ -10417,7 +10701,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run creeps
-    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > CREEP_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > CREEP_MANAGER_BUCKET_LIMIT) {
         try {
             CreepManager.runCreepManager();
         }
@@ -10426,7 +10710,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // clean up memory
-    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > MEMORY_MANAGER_BUCKET_LIMIT) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > MEMORY_MANAGER_BUCKET_LIMIT) {
         try {
             MemoryManager.runMemoryManager();
         }
@@ -10435,7 +10719,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // Display room visuals if we have a fat enough bucket and config option allows it
-    if (!Game.cpu['bucket'] || Game.cpu['bucket'] > 2000 && ROOM_OVERLAY_ON) {
+    if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > 2000 && ROOM_OVERLAY_ON)) {
         try {
             RoomVisualManager$1.runRoomVisualManager();
         }
@@ -10445,6 +10729,7 @@ const loop = ErrorMapper.wrapLoop(() => {
     }
     // -------- end managers --------
 });
+//# sourceMappingURL=main.js.map
 
 exports.loop = loop;
 //# sourceMappingURL=main.js.map

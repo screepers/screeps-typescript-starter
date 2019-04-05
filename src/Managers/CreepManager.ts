@@ -30,19 +30,22 @@ import {
     ROLE_STALKER,
     ROLE_WORKER,
     ROLE_ZEALOT,
-    ERROR_ERROR,
+    ERROR_ERROR
 } from "utils/Constants";
+import UtilHelper from "Helpers/UtilHelper";
 
 // Call the creep manager for each role
 export default class CreepManager {
-
     /**
      * loop over all creeps and call single creep manager for it
      */
     public static runCreepManager(): void {
-
         for (const creep in Game.creeps) {
-            this.runSingleCreepManager(Game.creeps[creep]);
+            try {
+                this.runSingleCreepManager(Game.creeps[creep]);
+            } catch (e) {
+                UtilHelper.printError(e);
+            }
         }
     }
 
@@ -51,7 +54,6 @@ export default class CreepManager {
      * @param creep the creep we are calling the manager for
      */
     public static runSingleCreepManager(creep: Creep): void {
-
         const role = creep.memory.role;
 
         // Call the correct helper function based on creep role
@@ -103,8 +105,8 @@ export default class CreepManager {
                 break;
             default:
                 throw new UserException(
-                    "Creep body failed generating.",
-                    'The role "' + role + '" was invalid for generating the creep body.',
+                    "Invalid role for runSingleCreepManager.",
+                    'The role "' + role + '" was invalid for running a creep role.',
                     ERROR_ERROR
                 );
         }

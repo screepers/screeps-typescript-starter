@@ -1,11 +1,8 @@
-import {
-    DEFAULT_MOVE_OPTS
-} from "utils/constants";
+import { DEFAULT_MOVE_OPTS } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";
 
 // Manager for the miner creep role
 export default class RemoteDefenderCreepManager {
-
     /**
      * run the remote defender creep
      * @param creep the creep we are running
@@ -24,7 +21,11 @@ export default class RemoteDefenderCreepManager {
         }
 
         // Find a target for the creep
-        const target: Creep | Structure<StructureConstant> | undefined = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const target: Creep | Structure<StructureConstant> | undefined = MiliApi.getAttackTarget(
+            creep,
+            creepOptions,
+            CREEP_RANGE
+        );
         const isMelee: boolean = false;
         if (!target) {
             return; // idle if no current target
@@ -33,9 +34,8 @@ export default class RemoteDefenderCreepManager {
         if (!MiliApi.isInAttackRange(creep, target.pos, isMelee)) {
             creep.moveTo(target, DEFAULT_MOVE_OPTS);
             return;
-        }
-        else {
-            MiliApi.kiteEnemyCreep(creep)
+        } else {
+            MiliApi.kiteEnemyCreep(creep);
         }
 
         // We are in attack range and healthy, attack the target

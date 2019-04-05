@@ -237,6 +237,7 @@ export default class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
+        
         // What to do if the jobs already exist
         // ! Deletes existing jobs
         // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?
