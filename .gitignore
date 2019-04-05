@@ -19,6 +19,9 @@ screeps.json
 # ScreepsServer data from integration tests
 /server
 
+# Ignore Javascript files
+#.js
+
 # Numerous always-ignore extensions
 *.diff
 *.err
