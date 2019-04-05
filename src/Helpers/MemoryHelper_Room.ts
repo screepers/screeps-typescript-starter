@@ -17,13 +17,13 @@ export default class MemoryHelper_Room {
      */
     public static updateRoomMemory(room: Room): void {
         // Update All Creeps
-        this.updateHostileCreeps(room);
+        this.updateHostileCreeps(room.name);
         this.updateMyCreeps(room.name);
         // Update structures/construction sites
-        this.updateConstructionSites(room);
-        this.updateStructures(room);
+        this.updateConstructionSites(room.name);
+        this.updateStructures(room.name);
         // Update sources, minerals, dropped resources, tombstones
-        this.updateSources(room);
+        this.updateSources(room.name);
         this.updateMinerals(room);
         this.updateDroppedResources(room);
         this.updateTombstones(room);
@@ -58,23 +58,23 @@ export default class MemoryHelper_Room {
      * [Cached] Room.memory.hostiles
      * @param room The Room to update
      */
-    public static updateHostileCreeps(room: Room): void {
-        Memory.rooms[room.name].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
+    public static updateHostileCreeps(roomName: string): void {
+        Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
 
-        const enemies = room.find(FIND_HOSTILE_CREEPS);
+        const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
         // Sort creeps into categories
         _.forEach(enemies, (enemy: Creep) => {
             // * Check for boosted creeps and put them at the front of the if else stack
             if (enemy.getActiveBodyparts(HEAL) > 0) {
-                Memory.rooms[room.name].hostiles.data.heal.push(enemy.id);
+                Memory.rooms[roomName].hostiles.data.heal.push(enemy.id);
             } else if (enemy.getActiveBodyparts(RANGED_ATTACK) > 0) {
-                Memory.rooms[room.name].hostiles.data.ranged.push(enemy.id);
+                Memory.rooms[roomName].hostiles.data.ranged.push(enemy.id);
             } else if (enemy.getActiveBodyparts(ATTACK) > 0) {
-                Memory.rooms[room.name].hostiles.data.melee.push(enemy.id);
+                Memory.rooms[roomName].hostiles.data.melee.push(enemy.id);
             }
         });
 
-        Memory.rooms[room.name].hostiles.cache = Game.time;
+        Memory.rooms[roomName].hostiles.cache = Game.time;
     }
 
     /**
@@ -100,13 +100,13 @@ export default class MemoryHelper_Room {
      * [Cached] Room.memory.constructionSites
      * @param room The Room we are checking in
      */
-    public static updateConstructionSites(room: Room): void {
-        Memory.rooms[room.name].constructionSites = { data: null, cache: null };
+    public static updateConstructionSites(roomName: string): void {
+        Memory.rooms[roomName].constructionSites = { data: null, cache: null };
 
-        const constructionSites: ConstructionSite[] = room.find(FIND_MY_CONSTRUCTION_SITES);
+        const constructionSites: ConstructionSite[] = Game.rooms[roomName].find(FIND_MY_CONSTRUCTION_SITES);
 
-        Memory.rooms[room.name].constructionSites.data = _.map(constructionSites, (c: ConstructionSite) => c.id);
-        Memory.rooms[room.name].constructionSites.cache = Game.time;
+        Memory.rooms[roomName].constructionSites.data = _.map(constructionSites, (c: ConstructionSite) => c.id);
+        Memory.rooms[roomName].constructionSites.cache = Game.time;
     }
 
     /**
@@ -115,10 +115,10 @@ export default class MemoryHelper_Room {
      * [Cached] Room.memory.structures
      * @param room The Room we are checking in
      */
-    public static updateStructures(room: Room): void {
-        Memory.rooms[room.name].structures = { data: {}, cache: null };
+    public static updateStructures(roomName: string): void {
+        Memory.rooms[roomName].structures = { data: {}, cache: null };
 
-        const allStructures: Structure[] = room.find(FIND_STRUCTURES);
+        const allStructures: Structure[] = Game.rooms[roomName].find(FIND_STRUCTURES);
         const sortedStructureIDs: StringMap = {};
         // For each structureType, remove the structures from allStructures and map them to ids in the memory object.
         _.forEach(ALL_STRUCTURE_TYPES, (type: StructureConstant) => {
@@ -128,8 +128,8 @@ export default class MemoryHelper_Room {
             );
         });
 
-        Memory.rooms[room.name].structures.data = sortedStructureIDs;
-        Memory.rooms[room.name].structures.cache = Game.time;
+        Memory.rooms[roomName].structures.data = sortedStructureIDs;
+        Memory.rooms[roomName].structures.cache = Game.time;
     }
 
     /**
@@ -138,13 +138,13 @@ export default class MemoryHelper_Room {
      * [Cached] Room.memory.sources
      * @param room The room to check in
      */
-    public static updateSources(room: Room): void {
-        Memory.rooms[room.name].sources = { data: {}, cache: null };
+    public static updateSources(roomName: string): void {
+        Memory.rooms[roomName].sources = { data: {}, cache: null };
 
-        const sources = room.find(FIND_SOURCES);
+        const sources = Game.rooms[roomName].find(FIND_SOURCES);
 
-        Memory.rooms[room.name].sources.data = _.map(sources, (source: Source) => source.id);
-        Memory.rooms[room.name].sources.cache = Game.time;
+        Memory.rooms[roomName].sources.data = _.map(sources, (source: Source) => source.id);
+        Memory.rooms[roomName].sources.cache = Game.time;
     }
 
     /**
@@ -237,7 +237,7 @@ export default class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
-        
+
         // What to do if the jobs already exist
         // ! Deletes existing jobs
         // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?

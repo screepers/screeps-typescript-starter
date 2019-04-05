@@ -1475,7 +1475,7 @@ export class SpawnHelper {
      * @param room the room we are checking for
      */
     public static getNumAccessTilesToSources(room: Room): number {
-        const sources: Source[] = MemoryApi.getSources(room);
+        const sources: Source[] = MemoryApi.getSources(room.name);
         let accesssibleTiles: number = 0;
         const roomTerrian: RoomTerrain = new Room.Terrain(room.name)
         _.forEach(sources, (source: Source) => {

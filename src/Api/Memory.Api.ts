@@ -202,11 +202,11 @@ export default class MemoryApi {
      * @param forceUpdate [Optional] Force all room memory to update
      */
     public static getRoomMemory(room: Room, forceUpdate?: boolean): void {
-        this.getConstructionSites(room, undefined, forceUpdate);
+        this.getConstructionSites(room.name, undefined, forceUpdate);
         this.getMyCreeps(room.name, undefined, forceUpdate);
-        this.getHostileCreeps(room, undefined, forceUpdate);
-        this.getSources(room, undefined, forceUpdate);
-        this.getStructures(room, undefined, forceUpdate);
+        this.getHostileCreeps(room.name, undefined, forceUpdate);
+        this.getSources(room.name, undefined, forceUpdate);
+        this.getStructures(room.name, undefined, forceUpdate);
         this.getAllGetEnergyJobs(room, undefined, forceUpdate);
         this.getAllClaimPartJobs(room, undefined, forceUpdate);
         this.getAllWorkPartJobs(room, undefined, forceUpdate);
@@ -286,20 +286,20 @@ export default class MemoryApi {
      * @returns Creep[ ]  -- An array of hostile creeps, empty if none
      */
     public static getHostileCreeps(
-        room: Room,
+        roomName: string,
         filterFunction?: (object: Creep) => boolean,
         forceUpdate?: boolean
     ): Creep[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].hostiles ||
-            Memory.rooms[room.name].creeps!.cache < Game.time - HCREEP_CACHE_TTL
+            !Memory.rooms[roomName].hostiles ||
+            Memory.rooms[roomName].creeps!.cache < Game.time - HCREEP_CACHE_TTL
         ) {
-            MemoryHelper_Room.updateHostileCreeps(room);
+            MemoryHelper_Room.updateHostileCreeps(roomName);
         }
 
-        const creepIDs: string[] = Memory.rooms[room.name].hostiles.data;
+        const creepIDs: string[] = Memory.rooms[roomName].hostiles.data;
 
         let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
 
@@ -320,23 +320,23 @@ export default class MemoryApi {
      * @returns Array<Structure> -- An array of structures
      */
     public static getStructures(
-        room: Room,
+        roomName: string,
         filterFunction?: (object: Structure) => boolean,
         forceUpdate?: boolean
     ): Structure[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL
+            Memory.rooms[roomName].structures === undefined ||
+            Memory.rooms[roomName].structures.cache < Game.time - STRUCT_CACHE_TTL
         ) {
-            MemoryHelper_Room.updateStructures(room);
+            MemoryHelper_Room.updateStructures(roomName);
         }
 
         const structureIDs: string[] = [];
         // Flatten the object into an array of IDs
-        for (const type in Memory.rooms[room.name].structures.data) {
-            const IDs = Memory.rooms[room.name].structures.data[type];
+        for (const type in Memory.rooms[roomName].structures.data) {
+            const IDs = Memory.rooms[roomName].structures.data[type];
             for (const singleID of IDs) {
                 if (singleID) {
                     structureIDs.push(singleID);
@@ -364,7 +364,7 @@ export default class MemoryApi {
      * @returns Structure[] An array of structures of a single type
      */
     public static getStructureOfType(
-        room: Room,
+        roomName: string,
         type: StructureConstant,
         filterFunction?: (object: any) => boolean,
         forceUpdate?: boolean
@@ -372,14 +372,14 @@ export default class MemoryApi {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.data[type] === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL
+            Memory.rooms[roomName].structures === undefined ||
+            Memory.rooms[roomName].structures.data[type] === undefined ||
+            Memory.rooms[roomName].structures.cache < Game.time - STRUCT_CACHE_TTL
         ) {
-            MemoryHelper_Room.updateStructures(room);
+            MemoryHelper_Room.updateStructures(roomName);
         }
 
-        const structureIDs: string[] = Memory.rooms[room.name].structures.data[type];
+        const structureIDs: string[] = Memory.rooms[roomName].structures.data[type];
 
         let structures: Structure[] = MemoryHelper.getOnlyObjectsFromIDs<Structure>(structureIDs);
 
@@ -400,20 +400,20 @@ export default class MemoryApi {
      * @returns Array<ConstructionSite> -- An array of ConstructionSites
      */
     public static getConstructionSites(
-        room: Room,
+        roomName: string,
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
     ): ConstructionSite[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            !Memory.rooms[room.name].constructionSites ||
-            Memory.rooms[room.name].constructionSites.cache < Game.time - CONSTR_CACHE_TTL
+            !Memory.rooms[roomName].constructionSites ||
+            Memory.rooms[roomName].constructionSites.cache < Game.time - CONSTR_CACHE_TTL
         ) {
-            MemoryHelper_Room.updateConstructionSites(room);
+            MemoryHelper_Room.updateConstructionSites(roomName);
         }
 
-        const constructionSiteIDs: string[] = Memory.rooms[room.name].constructionSites.data;
+        const constructionSiteIDs: string[] = Memory.rooms[roomName].constructionSites.data;
 
         let constructionSites: ConstructionSite[] = MemoryHelper.getOnlyObjectsFromIDs<ConstructionSite>(
             constructionSiteIDs
@@ -500,20 +500,20 @@ export default class MemoryApi {
      * @returns Source[]  An array of sources, if there are any
      */
     public static getSources(
-        room: Room,
+        roomName: string,
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
     ): Source[] {
         if (
             NO_CACHING_MEMORY ||
             forceUpdate ||
-            Memory.rooms[room.name].sources === undefined ||
-            Memory.rooms[room.name].sources.cache < Game.time - SOURCE_CACHE_TTL
+            Memory.rooms[roomName].sources === undefined ||
+            Memory.rooms[roomName].sources.cache < Game.time - SOURCE_CACHE_TTL
         ) {
-            MemoryHelper_Room.updateSources(room);
+            MemoryHelper_Room.updateSources(roomName);
         }
 
-        const sourceIDs = Memory.rooms[room.name].sources.data;
+        const sourceIDs = Memory.rooms[roomName].sources.data;
 
         let sources: Source[] = MemoryHelper.getOnlyObjectsFromIDs<Source>(sourceIDs);
 
@@ -719,7 +719,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
             return Game.flags[flagIndex];
         });
 
