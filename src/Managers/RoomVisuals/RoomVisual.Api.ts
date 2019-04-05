@@ -427,6 +427,7 @@ export default class RoomVisualApi {
         const maxVal: number = _.max(Memory.visual.avgControlPointsPerHourArray);
         const minRange: number = minVal * .75;
         const maxRange: number = maxVal * 1.25;
+        const currentVal: number = Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1];
         const getY2Coord = (raw: number) => {
             const range: number = maxRange - minRange;
             const offset: number = raw - minRange;
@@ -437,6 +438,7 @@ export default class RoomVisualApi {
         // Get the scale for the graph
         const displayMinRange: string = RoomVisualHelper.convertRangeToDisplayVal(minRange).toString();
         const displayMaxRange: string = RoomVisualHelper.convertRangeToDisplayVal(maxRange).toString();
+        const displayLastVal: string = RoomVisualHelper.convertRangeToDisplayVal(currentVal).toString();
 
         // Draw the graph outline and the scale text
         new RoomVisual(room.name)
@@ -453,6 +455,12 @@ export default class RoomVisualApi {
                 font: ' .7 Trebuchet MS'
             })
             .text(displayMinRange, x - 2.2, y, {
+                align: 'left',
+                color: textColor,
+                opacity: .8,
+                font: ' .7 Trebuchet MS'
+            })
+            .text(displayLastVal, x - 2.2, y - getY2Coord(currentVal), {
                 align: 'left',
                 color: textColor,
                 opacity: .8,
