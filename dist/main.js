@@ -8260,7 +8260,6 @@ class RoomVisualApi {
         const level = room.controller.level;
         const controllerProgress = room.controller.progress;
         const controllerTotal = room.controller.progressTotal;
-        const controllerPercent = Math.floor((controllerProgress / controllerTotal * 100) * 10) / 10;
         const defconLevel = room.memory.defcon;
         // Draw the text
         const lines = [];
@@ -8269,7 +8268,8 @@ class RoomVisualApi {
         lines.push("");
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
-        lines.push("Progress:         " + controllerPercent + "%");
+        // @ts-ignore
+        lines.push("Progress:         " + RoomVisualManager.convertRangeToDisplayVal(controllerProgress));
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
             lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));

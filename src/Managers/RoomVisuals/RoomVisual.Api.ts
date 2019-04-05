@@ -179,7 +179,9 @@ export default class RoomVisualApi {
         lines.push("");
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
-        ROOM_OVERLAY_RCL_RAW_VAL === true ? lines.push("Progress:         " + controllerPercent + "%") : lines.push("Progress:         " + RoomVisualHelper.convertRangeToDisplayVal(controllerProgress));
+        // @ts-ignore
+        ROOM_OVERLAY_RCL_RAW_VAL === false ? lines.push("Progress:         " + controllerPercent + "%") :
+            lines.push("Progress:         " + RoomVisualHelper.convertRangeToDisplayVal(controllerProgress));
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
             lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
