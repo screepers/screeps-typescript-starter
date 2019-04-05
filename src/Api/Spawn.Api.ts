@@ -64,7 +64,7 @@ export default class SpawnApi {
         };
 
         const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState!);
-        let minerLimits: number = MemoryApi.getSources(room).length;
+        let minerLimits: number = MemoryApi.getSources(room.name).length;
         let numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
         // To prevent dropping to 2 workers if we don't have remote rooms
         if (numRemoteRooms === 0) {
@@ -316,7 +316,7 @@ export default class SpawnApi {
     public static getOpenSpawn(room: Room): any {
         // Get all openSpawns, and return the first
         const openSpawns = MemoryApi.getStructureOfType(
-            room,
+            room.name,
             STRUCTURE_SPAWN,
             (spawn: StructureSpawn) => !spawn.spawning
         );

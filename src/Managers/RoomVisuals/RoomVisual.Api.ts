@@ -12,8 +12,10 @@ import {
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
     OVERRIDE_D_ROOM_FLAG,
-    STIMULATE_FLAG
+    STIMULATE_FLAG,
+
 } from "utils/constants";
+import { ROOM_OVERLAY_RCL_RAW_VAL } from "utils/config";
 
 // Api for room visuals
 export default class RoomVisualApi {
@@ -92,11 +94,12 @@ export default class RoomVisualApi {
         lines.push("Creep Info");
         lines.push("");
         if (spawningCreep.length === 0) {
-            lines.push("Spawning:       " + "None");
+            lines.push("Spawn Currently Idle");
         }
         for (const creep of spawningCreep) {
             spawningRole = creep.memory.role;
-            lines.push("Spawning:       " + spawningRole);
+            const spawningRoleDisplay: string = spawningRole.charAt(0).toUpperCase() + spawningRole.slice(1);
+            lines.push("[Spawning]:       " + spawningRoleDisplay);
         }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
 
@@ -176,7 +179,9 @@ export default class RoomVisualApi {
         lines.push("");
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
-        lines.push("Progress:         " + controllerPercent + "%");
+        // @ts-ignore
+        ROOM_OVERLAY_RCL_RAW_VAL === false ? lines.push("Progress:         " + controllerPercent + "%") :
+            lines.push("Progress:         " + RoomVisualHelper.convertRangeToDisplayVal(controllerProgress));
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
             lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
@@ -422,6 +427,7 @@ export default class RoomVisualApi {
         const maxVal: number = _.max(Memory.visual.avgControlPointsPerHourArray);
         const minRange: number = minVal * .75;
         const maxRange: number = maxVal * 1.25;
+        const currentVal: number = Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1];
         const getY2Coord = (raw: number) => {
             const range: number = maxRange - minRange;
             const offset: number = raw - minRange;
@@ -432,6 +438,7 @@ export default class RoomVisualApi {
         // Get the scale for the graph
         const displayMinRange: string = RoomVisualHelper.convertRangeToDisplayVal(minRange).toString();
         const displayMaxRange: string = RoomVisualHelper.convertRangeToDisplayVal(maxRange).toString();
+        const displayLastVal: string = RoomVisualHelper.convertRangeToDisplayVal(currentVal).toString();
 
         // Draw the graph outline and the scale text
         new RoomVisual(room.name)
@@ -448,6 +455,12 @@ export default class RoomVisualApi {
                 font: ' .7 Trebuchet MS'
             })
             .text(displayMinRange, x - 2.2, y, {
+                align: 'left',
+                color: textColor,
+                opacity: .8,
+                font: ' .7 Trebuchet MS'
+            })
+            .text(displayLastVal, x - 2.2, y - getY2Coord(currentVal), {
                 align: 'left',
                 color: textColor,
                 opacity: .8,
