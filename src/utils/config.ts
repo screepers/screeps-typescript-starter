@@ -36,6 +36,11 @@ export const ROOM_OVERLAY_ON = true;
 export const ROOM_OVERLAY_GRAPH_ON = true;
 
 /**
+ * display % or raw value on your rcl progress
+ */
+export const ROOM_OVERLAY_RCL_RAW_VAL = true;
+
+/**
  * The text to sign controllers with
  */
 export const CONTROLLER_SIGNING_TEXT = [

@@ -27,7 +27,7 @@ export default class CreepHelper {
 
         // Get containers and find the closest one to the source
         const containers: StructureContainer[] = MemoryApi.getStructureOfType(
-            room,
+            room.name,
             STRUCTURE_CONTAINER
         ) as StructureContainer[];
 
@@ -73,10 +73,10 @@ export default class CreepHelper {
             throw new UserException(
                 "Error in targetIsCurrentDestination",
                 "Creep [" +
-                    creep.name +
-                    "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
-                    JSON.stringify(target) +
-                    "]",
+                creep.name +
+                "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
+                JSON.stringify(target) +
+                "]",
                 ERROR_ERROR
             );
         }

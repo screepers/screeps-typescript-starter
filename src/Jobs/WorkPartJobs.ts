@@ -36,7 +36,7 @@ export default class WorkPartJobs {
      * @param room The room to get jobs for
      */
     public static createBuildJobs(room: Room): WorkPartJob[] {
-        const constructionSites = MemoryApi.getConstructionSites(room);
+        const constructionSites = MemoryApi.getConstructionSites(room.name);
 
         if (constructionSites.length === 0) {
             return [];

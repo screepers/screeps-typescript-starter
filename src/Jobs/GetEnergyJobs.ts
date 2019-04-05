@@ -74,7 +74,7 @@ export default class GetEnergyJobs {
     public static createContainerJobs(room: Room): GetEnergyJob[] {
         // List of all containers with >= CONTAINER_MINIMUM_ENERGY (from config.ts)
         const containers = MemoryApi.getStructureOfType(
-            room,
+            room.name,
             STRUCTURE_CONTAINER,
             (container: StructureContainer) => container.store.energy > CONTAINER_MINIMUM_ENERGY
         );

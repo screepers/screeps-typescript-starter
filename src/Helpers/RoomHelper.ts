@@ -81,7 +81,7 @@ export default class RoomHelper {
      * @param objectConst the object we want to check for
      */
     public static isExistInRoom(room: Room, objectConst: StructureConstant): boolean {
-        return MemoryApi.getStructures(room, s => s.structureType === objectConst).length > 0;
+        return MemoryApi.getStructures(room.name, s => s.structureType === objectConst).length > 0;
     }
 
     /**
@@ -190,7 +190,7 @@ export default class RoomHelper {
                 ERROR_WARN);
         }
 
-        const links: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
+        const links: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(room.name, STRUCTURE_LINK);
         const controller: StructureController | undefined = room.controller;
 
         // Break early if we don't have 3 links yet
@@ -258,7 +258,7 @@ export default class RoomHelper {
      */
     public static chooseTowerTarget(room: Room): Creep | null | undefined {
         // get the creep we will do the most damage to
-        const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room);
+        const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room.name);
         const isHealers: boolean = _.some(hostileCreeps, (c: Creep) =>
             _.some(c.body, (b: BodyPartDefinition) => b.type === "heal"));
         const isAttackers: boolean = _.some(hostileCreeps, (c: Creep) =>
@@ -306,7 +306,7 @@ export default class RoomHelper {
      * @param room The room to check
      */
     public static numHostileCreeps(room: Room): number {
-        const hostiles = MemoryApi.getHostileCreeps(room);
+        const hostiles = MemoryApi.getHostileCreeps(room.name);
         return hostiles.length;
     }
     /**
