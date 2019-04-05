@@ -170,8 +170,17 @@ export default class RoomVisualManager {
     /**
      * converts the value into something shorter so it can be displayed by the graph
      * ex converts 22,000 -> 22k
+     * @param rangeVal the value we are converting
      */
     public static convertRangeToDisplayVal(rangeVal: number): string | number {
         return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+    }
+
+    /**
+     * gets the estimated time in days, hours, minutes to the next rcl based on current average
+     * @param room the room we are gettign this value for
+     */
+    public static getEstimatedTimeToNextLevel(room: Room): string {
+        return "";
     }
 }
