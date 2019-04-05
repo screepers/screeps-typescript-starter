@@ -1,6 +1,16 @@
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
-import { DEFAULT_MOVE_OPTS, ERROR_ERROR, ROOM_STATE_BEGINNER, ROOM_STATE_INTRO, ROLE_MINER } from "utils/constants";
+import {
+    DEFAULT_MOVE_OPTS,
+    ERROR_ERROR,
+    ROOM_STATE_BEGINNER,
+    ROOM_STATE_INTRO,
+    ROLE_MINER,
+    ERROR_WARN
+} from "utils/constants";
+import MemoryApi from "./Memory.Api";
+import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
+import MemoryHelper from "Helpers/MemoryHelper";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -133,6 +143,7 @@ export default class CreepApi {
                 break;
             case ERR_NOT_FOUND:
                 break;
+            case ERR_NOT_ENOUGH_ENERGY:
             case ERR_FULL:
                 delete creep.memory.job;
                 creep.memory.working = false;
@@ -354,6 +365,9 @@ export default class CreepApi {
      */
     public static nullCheck_target(creep: Creep, target: object | null) {
         if (target === null) {
+            // preserve for the error message
+            const jobAsString: string = JSON.stringify(creep.memory.job);
+
             delete creep.memory.job;
             creep.memory.working = false;
 
@@ -363,8 +377,8 @@ export default class CreepApi {
 
             throw new UserException(
                 "Null Job Target",
-                "Null Job Target for creep: " + creep.name + "\n The error occurred in: ",
-                ERROR_ERROR
+                "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString,
+                ERROR_WARN
             );
         }
     }
@@ -412,5 +426,55 @@ export default class CreepApi {
 
         // Creep is not on exit tile
         return false;
+    }
+
+    /**********************************************************/
+    /*        GET NEW JOB SECTION                           ***/
+    /**********************************************************/
+    public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
+        const creepOptions = creep.memory.options as CreepOptionsCiv;
+
+        if (creepOptions.harvestSources) {
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken);
+
+            if (sourceJobs.length > 0) {
+                // Filter out jobs that have too little energy -
+                // The energy in the StoreDefinition is the amount of energy per 300 ticks left
+                const suitableJobs = _.filter(
+                    sourceJobs,
+                    (sJob: GetEnergyJob) => sJob.resources.energy >= creep.getActiveBodyparts(WORK) * 2 * 300 //  (Workparts * 2 * 300 = effective mining capacity)
+                );
+
+                // If config allows getting closest source
+                if (MINERS_GET_CLOSEST_SOURCE) {
+                    let sourceIDs: string[];
+
+                    // Get sources from suitableJobs if any, else get regular sourceJob instead
+                    if (suitableJobs.length > 0) {
+                        sourceIDs = _.map(suitableJobs, (job: GetEnergyJob) => job.targetID);
+                    } else {
+                        sourceIDs = _.map(sourceJobs, (job: GetEnergyJob) => job.targetID);
+                    }
+
+                    // Find the closest source
+                    const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+
+                    const closestAvailableSource: Source = creep.pos.findClosestByRange(sourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
+
+                    // return the job that corresponds with the closest source
+                    return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === closestAvailableSource.id);
+                } else {
+                    // Return the first suitableJob if any
+                    // if none, return first sourceJob.
+                    if (suitableJobs.length > 0) {
+                        return suitableJobs[0];
+                    } else {
+                        return sourceJobs[0];
+                    }
+                }
+            }
+        }
+
+        return undefined;
     }
 }

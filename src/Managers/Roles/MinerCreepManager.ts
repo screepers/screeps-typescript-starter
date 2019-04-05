@@ -22,7 +22,7 @@ export default class MinerCreepManager {
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
 
         if (creep.memory.job === undefined) {
-            creep.memory.job = this.getNewSourceJob(creep, homeRoom);
+            creep.memory.job = CreepApi.getNewSourceJob(creep, homeRoom);
 
             if (creep.memory.job === undefined) {
                 return; // idle for a tick
@@ -40,54 +40,6 @@ export default class MinerCreepManager {
 
             CreepApi.travelTo(creep, creep.memory.job);
         }
-    }
-
-    public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
-        const creepOptions = creep.memory.options as CreepOptionsCiv;
-
-        if (creepOptions.harvestSources) {
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken);
-
-            if (sourceJobs.length > 0) {
-                // Filter out jobs that have too little energy -
-                // The energy in the StoreDefinition is the amount of energy per 300 ticks left
-                const suitableJobs = _.filter(
-                    sourceJobs,
-                    (sJob: GetEnergyJob) => sJob.resources.energy >= creep.getActiveBodyparts(WORK) * 2 * 300 //  (Workparts * 2 * 300 = effective mining capacity)
-                );
-
-                // If config allows getting closest source
-                if (MINERS_GET_CLOSEST_SOURCE) {
-                    let sourceIDs: string[];
-
-                    // Get sources from suitableJobs if any, else get regular sourceJob instead
-                    if (suitableJobs.length > 0) {
-                        sourceIDs = _.map(suitableJobs, (job: GetEnergyJob) => job.targetID);
-                    } else {
-                        sourceIDs = _.map(sourceJobs, (job: GetEnergyJob) => job.targetID);
-                    }
-
-                    // Find the closest source
-                    const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
-
-                    const closestAvailableSource: Source = creep.pos.findClosestByRange(sourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
-
-                    // return the job that corresponds with the closest source
-                    return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === closestAvailableSource.id);
-                } else {
-                    // Return the first suitableJob if any
-                    // if none, return first sourceJob.
-                    if (suitableJobs.length > 0) {
-                        return suitableJobs[0];
-                    } else {
-                        return sourceJobs[0];
-                    }
-                }
-            }
-        } // End harvestSources option
-
-        // no available jobs
-        return undefined;
     }
 
     /**
