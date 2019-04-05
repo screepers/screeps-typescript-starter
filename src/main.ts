@@ -86,10 +86,6 @@
  * 1. Harvesters fill themselves on storage and put it right back again, same issue as last code base, and they were doing it while energy was in the containers
  * Need to expand rules for when they should use storage in their get energy jobs method
  *
- * 2. Creeps currently are not registering ramparts as construction sites
- * Find out why in create construction sites, honestly im not sure why,
- * make sure to try to recreate the bug first because it could have been a one off
- *
  * 3. Ramparts are being left to decay as their job is too low on the totem pole
  * Need to raise them up, the idea from Brock was structures under 25% get precedence over construction
  * Good idea in general and easy to do with how our jobs are structured
