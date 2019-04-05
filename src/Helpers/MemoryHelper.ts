@@ -16,6 +16,38 @@ export default class MemoryHelper {
     }
 
     /**
+     * check if the room name exists as a dependent room
+     * @param roomName the name of the room we are cheking for
+     */
+    public static dependentRoomExists(roomName: string): boolean {
+        const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
+
+        // Loop over d-rooms within each room looking for the parameter room name
+        for (const room of ownedRooms) {
+
+            for (const rr of room.memory.remoteRooms!) {
+                if (rr && roomName === rr.roomName) {
+                    return true;
+                }
+            }
+
+            for (const cr of room.memory.claimRooms!) {
+                if (cr && roomName === cr.roomName) {
+                    return true;
+                }
+            }
+
+            for (const ar of room.memory.attackRooms!) {
+                if (ar && roomName === ar.roomName) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Performs the length checks and null checks for all getXXX functions that use IDs to get the objects
      * @param idArray An array of ids to check
      */

@@ -21,7 +21,6 @@ export default class SpawnManager {
      */
     public static runSpawnForRoom(room: Room): void {
         const openSpawn: StructureSpawn | null = SpawnApi.getOpenSpawn(room);
-        // get tier
 
         // if we don't have an open spawn, return early
         if (openSpawn === null) {
@@ -44,7 +43,7 @@ export default class SpawnManager {
             // Check if we even have enough energy to even spawn this potential monstrosity
             if (energyAvailable >= bodyEnergyCost) {
                 // Get all the information we will need to spawn the next creep
-                const roomState: RoomStateConstant = room.memory.roomState;
+                const roomState: RoomStateConstant = room.memory.roomState!;
                 const targetRoom: string = SpawnApi.getCreepTargetRoom(room, nextCreepRole);
                 const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room, targetRoom, nextCreepRole);
                 const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole, targetRoom);

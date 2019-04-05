@@ -19,6 +19,9 @@ screeps.json
 # ScreepsServer data from integration tests
 /server
 
+# Ignore Javascript files
+#.js
+
 # Numerous always-ignore extensions
 *.diff
 *.err
@@ -88,3 +91,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+dist/main.js
+dist/main.js.map.js

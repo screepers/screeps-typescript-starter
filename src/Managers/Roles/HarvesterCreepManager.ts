@@ -24,6 +24,11 @@ export default class HarvesterCreepManager {
             this.handleNewJob(creep, homeRoom);
         }
 
+        // I think i know how to fix creeps idling for a tick between traveling and doing the job
+        // Travel to checks if they're there and returns, problem is we call it after do work
+        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
+        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
+        // ticks spent filling up spawn alone
         if (creep.memory.job) {
             if (creep.memory.working) {
                 CreepApi.doWork(creep, creep.memory.job);
@@ -119,7 +124,24 @@ export default class HarvesterCreepManager {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob: CarryPartJob) => !bsJob.isTaken);
 
             if (storeJobs.length > 0) {
-                return storeJobs[0];
+                // Find the closeest job to the creep currently
+                // ! - I'm 90% confident theres a better way to do this, feel free
+                const jobObjects: Array<any | null> = _.map(storeJobs, (storeJob: CarryPartJob) => Game.getObjectById(storeJob.targetID));
+                const jobObjectPos: RoomPosition[] = [];
+                for (const jo of jobObjects) {
+                    if (!jo) {
+                        continue;
+                    }
+                    jobObjectPos.push(jo.pos);
+                }
+                const closestTarget: RoomPosition = creep.pos.findClosestByPath(jobObjectPos) as RoomPosition;
+                const closestJob: CarryPartJob | undefined = _.find(storeJobs,
+                    (j: CarryPartJob) => {
+                        const roomObj: any = Game.getObjectById(j.targetID);
+                        const roomPos: RoomPosition = roomObj.pos as RoomPosition;
+                        return closestTarget === roomPos;
+                    });
+                return closestJob;
             }
 
             return undefined;

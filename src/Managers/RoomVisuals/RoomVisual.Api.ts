@@ -85,11 +85,19 @@ export default class RoomVisualApi {
             claimer: _.filter(creepsInRoom, (c: Creep) => c.memory.role === ROLE_CLAIMER).length,
             colonizer: _.filter(creepsInRoom, (c: Creep) => c.memory.role === ROLE_COLONIZER).length
         };
-
+        const spawningCreep: Creep[] = _.filter(MemoryApi.getMyCreeps(room.name), (c: Creep) => c.spawning);
+        let spawningRole: string;
         const lines: string[] = [];
         lines.push("");
-        lines.push("Creep Info")
+        lines.push("Creep Info");
         lines.push("");
+        if (spawningCreep.length === 0) {
+            lines.push("Spawning:       " + "None");
+        }
+        for (const creep of spawningCreep) {
+            spawningRole = creep.memory.role;
+            lines.push("Spawning:       " + spawningRole);
+        }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
 
         if (creepLimits['domesticLimits']) {
@@ -154,7 +162,7 @@ export default class RoomVisualApi {
     public static createRoomInfoVisual(room: Room, x: number, y: number): number {
 
         // Get the info we need
-        const roomState: string = RoomVisualHelper.convertRoomStateToString(room.memory.roomState);
+        const roomState: string = RoomVisualHelper.convertRoomStateToString(room.memory.roomState!);
         const level: number = room.controller!.level;
         const controllerProgress: number = room.controller!.progress;
         const controllerTotal: number = room.controller!.progressTotal;
@@ -170,6 +178,9 @@ export default class RoomVisualApi {
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
         lines.push("DEFCON:         " + defconLevel);
+        if (room.storage) {
+            lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+        }
         lines.push("");
         RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 
@@ -376,21 +387,20 @@ export default class RoomVisualApi {
      */
     public static createUpgradeGraphVisual(room: Room, x: number, y: number): void {
 
-        const X_VALS = { '1': x + 3, '2': x + 6, '3': x + 9, '4': x + 12, '5': x + 15 };
+        const textColor = '#bab8ba';
+        const X_VALS: GraphTickMarkMemory[] = [
+            { 'start': x, 'end': x + 3 },       // 0
+            { 'start': x + 3, 'end': x + 6 },   // 1
+            { 'start': x + 6, 'end': x + 9 },   // 2
+            { 'start': x + 9, 'end': x + 12 },  // 3
+            { 'start': x + 12, 'end': x + 15 }, // 4
+        ];
+        const Y_SCALE = 7.5;
+        const X_SCALE = 15;
         const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick();
         const ticksPerHour: number = Math.floor(3600 / secondsPerTick);
-        const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(10, room);
+        const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(25, room);
         const controlPointsPerHourEstimate: number = avgControlPointsPerTick * ticksPerHour;
-
-        // Draw the Graph Lines
-        new RoomVisual(room.name)
-            .line(x, y, x, y - 7.5)    // bottom line
-            .line(x, y, x + 15, y)   // left line
-            .line(X_VALS['1'], y - .25, X_VALS['1'], y + .25) // tick marks
-            .line(X_VALS['2'], y - .25, X_VALS['2'], y + .25)
-            .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
-            .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25)
-
 
         // Update the control points per hour estimate array
         if (!Memory.visual!.avgControlPointsPerHourArray) {
@@ -407,14 +417,58 @@ export default class RoomVisualApi {
             Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
         }
 
-        // Get the current scale
-        const maxVal: number = _.max(Memory.visual.avgControlPointsPerHourArray);
+        // Collect values and functions needed to draw the lines on the graph
         const minVal: number = _.min(Memory.visual.avgControlPointsPerHourArray);
-        // Draw current scale on left side of graph
-        // Delete the first line of the array
-        // Move everything back one value, leaving the 5th slot open
-        // Put the new value in the 5th slot
-        // Adjust all Y values based on current scale
-        // Draw all lines on graph
+        const maxVal: number = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minRange: number = minVal * .75;
+        const maxRange: number = maxVal * 1.25;
+        const getY2Coord = (raw: number) => {
+            const range: number = maxRange - minRange;
+            const offset: number = raw - minRange;
+            const percentage: number = offset / range;
+            return percentage * Y_SCALE;
+        };
+
+        // Get the scale for the graph
+        const displayMinRange: string = RoomVisualHelper.convertRangeToDisplayVal(minRange).toString();
+        const displayMaxRange: string = RoomVisualHelper.convertRangeToDisplayVal(maxRange).toString();
+
+        // Draw the graph outline and the scale text
+        new RoomVisual(room.name)
+            .line(x, y, x, y - Y_SCALE)    // bottom line
+            .line(x, y, x + X_SCALE, y)   // left line
+            .line(X_VALS[1].start, y - .25, X_VALS[1].start, y + .25) // tick marks
+            .line(X_VALS[2].start, y - .25, X_VALS[2].start, y + .25)
+            .line(X_VALS[3].start, y - .25, X_VALS[3].start, y + .25)
+            .line(X_VALS[4].start, y - .25, X_VALS[4].start, y + .25)
+            .text(displayMaxRange, x - 2.2, y - Y_SCALE + .5, {
+                align: 'left',
+                color: textColor,
+                opacity: .8,
+                font: ' .7 Trebuchet MS'
+            })
+            .text(displayMinRange, x - 2.2, y, {
+                align: 'left',
+                color: textColor,
+                opacity: .8,
+                font: ' .7 Trebuchet MS'
+            });
+
+        // Draw the lines for the graph
+        let startCoord: number = 0;
+        let endCoord: number = 0;
+        for (let i = 0; i < avgControlPointsPerHourSize; ++i) {
+            // Set the initial previous and next coordinate (first line will always be flat)
+            if (i === 0) {
+                startCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+                endCoord = startCoord;
+            }
+            endCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+            new RoomVisual(room.name)
+                .line(X_VALS[i].start, y - startCoord, X_VALS[i].end, y - endCoord)
+                .circle(X_VALS[i].end, y - endCoord);
+
+            startCoord = endCoord;
+        }
     }
 }

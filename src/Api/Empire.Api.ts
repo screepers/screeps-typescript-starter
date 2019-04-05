@@ -77,6 +77,14 @@ export default class Empire {
                     flag.memory.processed = true;
                     break;
             }
+
+            // Set up the memory for the room if it doesn't already exist
+            const roomName = flag.pos.roomName;
+            if (!Memory.rooms[roomName]) {
+                const isOwnedRoom: boolean = false;
+                console.log("Initializing Room Memory for Dependent Room [" + roomName + "].");
+                MemoryApi.initRoomMemory(roomName, isOwnedRoom);
+            }
         }
     }
 

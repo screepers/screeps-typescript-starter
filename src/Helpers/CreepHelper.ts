@@ -48,9 +48,11 @@ export default class CreepHelper {
      * Get the text to sign a controller with
      */
     public static getSigningText(): string {
-        // TODO Implement some kind of options interface that allows for customizing signing text
-        // * for now we just use a constant from config to sign
-        return CONTROLLER_SIGNING_TEXT;
+        // Find a random index in the array of messages and choose that
+        const MIN = 0;
+        const MAX = CONTROLLER_SIGNING_TEXT.length - 1;
+        const numberOfMessages: number = Math.floor(Math.random() * (+MAX - +MIN)) + +MIN;
+        return CONTROLLER_SIGNING_TEXT[numberOfMessages];
     }
 
     /**

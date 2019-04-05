@@ -63,8 +63,13 @@ export default class SpawnApi {
             lorry: 0
         };
 
-        const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
+        const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState!);
         let minerLimits: number = MemoryApi.getSources(room).length;
+        let numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
+        // To prevent dropping to 2 workers if we don't have remote rooms
+        if (numRemoteRooms === 0) {
+            numRemoteRooms = 1;
+        }
 
         // check what room state we are in
         switch (room.memory.roomState) {
@@ -105,7 +110,7 @@ export default class SpawnApi {
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 4;
+                domesticLimits[ROLE_WORKER] = 3 + (numRemoteRooms - 1);
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
                 domesticLimits[ROLE_LORRY] = numLorries;
 

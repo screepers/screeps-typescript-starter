@@ -2,9 +2,6 @@ import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import { ROLE_MINER } from "utils/constants";
 import CreepHelper from "Helpers/CreepHelper";
-import RoomApi from "Api/Room.Api";
-import UtilHelper from "Helpers/UtilHelper";
-import Normalize from "Helpers/Normalize";
 import MemoryHelper from "Helpers/MemoryHelper";
 import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
 
@@ -55,7 +52,9 @@ export default class MinerCreepManager {
         );
 
         if (miningContainer === undefined) {
-            return; // We don't need to do anything else if the container doesn't exist
+            // Returning here to prevent supplementary id from being formed,
+            // so in that case creep will just walk up to the source
+            return;
         }
 
         // Check for any creeps on the miningContainer

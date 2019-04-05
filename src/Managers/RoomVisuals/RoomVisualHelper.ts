@@ -166,4 +166,12 @@ export default class RoomVisualManager {
 
         return Math.floor(progressSum / progressSampleSize);
     }
+
+    /**
+     * converts the value into something shorter so it can be displayed by the graph
+     * ex converts 22,000 -> 22k
+     */
+    public static convertRangeToDisplayVal(rangeVal: number): string | number {
+        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+    }
 }

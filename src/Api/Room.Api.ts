@@ -58,6 +58,13 @@ export default class RoomApi {
         }
         // ----------
 
+        // check if we are in intro room state
+        // 3 or less creeps so we need to (re)start the room
+        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room.name);
+        if (creeps.length < 3) {
+            MemoryApi.updateRoomState(ROOM_STATE_INTRO, room);
+            return;
+        }
 
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high
@@ -103,7 +110,7 @@ export default class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
                     return;
                 }
-                console.log("how");
+
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED, room);
                 return;
@@ -125,17 +132,11 @@ export default class RoomApi {
 
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
-        const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room.name);
         if (creeps.length >= 3) {
             MemoryApi.updateRoomState(ROOM_STATE_BEGINNER, room);
             return;
         }
         // ----------
-
-
-        // check if we are in intro room state
-        // 3 or less creeps so we need to (re)start the room
-        MemoryApi.updateRoomState(ROOM_STATE_INTRO, room);
     }
 
     /**
@@ -210,14 +211,21 @@ export default class RoomApi {
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): Array<Structure<StructureConstant>> {
-        const repairStructures = MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
+        const repairStructures: Array<Structure<StructureConstant>> = MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
             if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
                 return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
             }
-            else {
-                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
-            }
+            return false;
         });
+
+        if (repairStructures.length === 0) {
+            return MemoryApi.getStructures(room, (struct: Structure<StructureConstant>) => {
+                if (struct.structureType === STRUCTURE_RAMPART || struct.structureType === STRUCTURE_WALL) {
+                    return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+                }
+                return false;
+            });
+        }
         return repairStructures
     }
 

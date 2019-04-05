@@ -348,7 +348,9 @@ export default class RoomHelper {
      * @param room The room to check the remoteRooms of
      */
     public static numRemoteSources(room: Room): number {
-        const remoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
+        // TODO: Fix this to use remote room name memory which contains the actual source reference
+        // TODO: remove sources and structures from the remote room dependent memory itself
+        const remoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms!;
         let numSources: number = 0;
 
         _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {
@@ -368,7 +370,7 @@ export default class RoomHelper {
      * @param room The room to check the dependencies of
      */
     public static numRemoteDefenders(room: Room): number {
-        const remoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms;
+        const remoteRooms: RemoteRoomMemory[] = Memory.rooms[room.name].remoteRooms!;
         let numRemoteDefenders: number = 0;
 
         _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {

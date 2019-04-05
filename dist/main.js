@@ -16,6 +16,32 @@ class MemoryHelper {
         return creepsOfRole;
     }
     /**
+     * check if the room name exists as a dependent room
+     * @param roomName the name of the room we are cheking for
+     */
+    static dependentRoomExists(roomName) {
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        // Loop over d-rooms within each room looking for the parameter room name
+        for (const room of ownedRooms) {
+            for (const rr of room.memory.remoteRooms) {
+                if (rr && roomName === rr.roomName) {
+                    return true;
+                }
+            }
+            for (const cr of room.memory.claimRooms) {
+                if (cr && roomName === cr.roomName) {
+                    return true;
+                }
+            }
+            for (const ar of room.memory.attackRooms) {
+                if (ar && roomName === ar.roomName) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    /**
      * Performs the length checks and null checks for all getXXX functions that use IDs to get the objects
      * @param idArray An array of ids to check
      */
@@ -74,7 +100,7 @@ const ROLE_REMOTE_MINER = "remoteMiner";
 const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 const ROLE_REMOTE_RESERVER = "remoteReserver";
 const ROLE_REMOTE_DEFENDER = "remoteDefender";
-const ROLE_CLAIMER$1 = "claimer";
+const ROLE_CLAIMER = "claimer";
 const ROLE_COLONIZER = "remoteColonizer";
 const ROLE_ZEALOT = "zealot";
 const ROLE_STALKER = "stalker";
@@ -201,7 +227,7 @@ const ROLE_LORRY$1 = "lorry";
 const ROLE_REMOTE_MINER$1 = "remoteMiner";
 const ROLE_REMOTE_HARVESTER$1 = "remoteHarvester";
 const ROLE_REMOTE_RESERVER$1 = "remoteReserver";
-const ROLE_CLAIMER$2 = "claimer";
+const ROLE_CLAIMER$1 = "claimer";
 const ROLE_COLONIZER$1 = "remoteColonizer";
 // Attack Flag Constants
 const ZEALOT_SOLO$1 = 1;
@@ -539,6 +565,8 @@ class RoomHelper {
      * @param room The room to check the remoteRooms of
      */
     static numRemoteSources(room) {
+        // TODO: Fix this to use remote room name memory which contains the actual source reference
+        // TODO: remove sources and structures from the remote room dependent memory itself
         const remoteRooms = Memory.rooms[room.name].remoteRooms;
         let numSources = 0;
         _.forEach(remoteRooms, (rr) => {
@@ -618,7 +646,30 @@ const ROOM_OVERLAY_ON = true;
 /**
  * The text to sign controllers with
  */
-const CONTROLLER_SIGNING_TEXT = "get signed on boy";
+const CONTROLLER_SIGNING_TEXT = [
+    "home of the dallas cowboys and the oklahoma city thunder",
+    "7j2Music on spotify",
+    "like taking candy from a baby",
+    "terminating process goldenstatewarriors.exe",
+    "durant is my aunt",
+    "typescript master race",
+    "static type gang",
+    "resource hogs",
+    "PRESCOTT/ELLIOT 2020",
+    "WESTBROOK/PAUL GEORGE 2024",
+    "KANYE 2024",
+    "you just activated my fap card",
+    ">be me\n>sign controller",
+    "braces go on the same line",
+    "camelCaseMasterRace",
+    "++i > i++",
+    "baker mayfield: american hero",
+    "don't be a creep, free-think",
+    "down to die for my rooms",
+    "blueface baby",
+    "dear family, my sanity, go down when my cash grow up",
+    ""
+];
 /**
  * Constants for Tick Timers - Number of ticks between running the specified constant this is deciding
  */
@@ -636,6 +687,7 @@ const CREEP_MANAGER_BUCKET_LIMIT = 1000;
 const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 const ROOM_MANAGER_BUCKET_LIMIT = 500;
+const MEMORY_MANAGER_BUCKET_LIMIT = 1;
 //# sourceMappingURL=config.js.map
 
 // an api used for functions related to the room
@@ -671,6 +723,13 @@ class RoomApi {
             }
         }
         // ----------
+        // check if we are in intro room state
+        // 3 or less creeps so we need to (re)start the room
+        const creeps = MemoryApi.getMyCreeps(room.name);
+        if (creeps.length < 3) {
+            MemoryApi.updateRoomState(ROOM_STATE_INTRO$1, room);
+            return;
+        }
         // check if we are siege room state
         // defcon is level 3+ and hostiles activity in the room is high
         const defconLevel = MemoryApi.getDefconLevel(room);
@@ -707,7 +766,6 @@ class RoomApi {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE$1, room);
                     return;
                 }
-                console.log("how");
                 // otherwise, just advanced room state
                 MemoryApi.updateRoomState(ROOM_STATE_ADVANCED$1, room);
                 return;
@@ -725,15 +783,11 @@ class RoomApi {
         // ----------
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
-        const creeps = MemoryApi.getMyCreeps(room.name);
         if (creeps.length >= 3) {
             MemoryApi.updateRoomState(ROOM_STATE_BEGINNER$1, room);
             return;
         }
         // ----------
-        // check if we are in intro room state
-        // 3 or less creeps so we need to (re)start the room
-        MemoryApi.updateRoomState(ROOM_STATE_INTRO$1, room);
     }
     /**
      * run the towers in the room
@@ -800,10 +854,16 @@ class RoomApi {
             if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
                 return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
             }
-            else {
-                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
-            }
+            return false;
         });
+        if (repairStructures.length === 0) {
+            return MemoryApi.getStructures(room, (struct) => {
+                if (struct.structureType === STRUCTURE_RAMPART || struct.structureType === STRUCTURE_WALL) {
+                    return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
+                }
+                return false;
+            });
+        }
         return repairStructures;
     }
     /**
@@ -1900,6 +1960,11 @@ class SpawnApi {
         };
         const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
         let minerLimits = MemoryApi.getSources(room).length;
+        let numRemoteRooms = RoomHelper.numRemoteRooms(room);
+        // To prevent dropping to 2 workers if we don't have remote rooms
+        if (numRemoteRooms === 0) {
+            numRemoteRooms = 1;
+        }
         // check what room state we are in
         switch (room.memory.roomState) {
             // Intro
@@ -1932,7 +1997,7 @@ class SpawnApi {
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 4;
+                domesticLimits[ROLE_WORKER] = 3 + (numRemoteRooms - 1);
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
                 domesticLimits[ROLE_LORRY] = numLorries;
                 break;
@@ -2002,10 +2067,10 @@ class SpawnApi {
                 remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
                 remoteLimits[ROLE_REMOTE_RESERVER] =
                     numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER$1);
+                remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                remoteLimits[ROLE_CLAIMER$1] =
-                    numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER$1);
+                remoteLimits[ROLE_CLAIMER] =
+                    numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 break;
         }
         return remoteLimits;
@@ -2244,7 +2309,7 @@ class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterOptions(roomState);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerOptions(roomState);
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 return SpawnHelper.generateClaimerOptions(roomState);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderOptions(roomState);
@@ -2286,7 +2351,7 @@ class SpawnApi {
                 return SpawnHelper.generateRemoteHarvesterBody(tier);
             case ROLE_COLONIZER:
                 return SpawnHelper.generateRemoteColonizerBody(tier);
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 return SpawnHelper.generateClaimerBody(tier);
             case ROLE_REMOTE_DEFENDER:
                 return SpawnHelper.generateRemoteDefenderBody(tier);
@@ -2453,7 +2518,7 @@ class SpawnApi {
         switch (roleConst) {
             // Colonizing creeps going to their claim rooms
             case ROLE_COLONIZER:
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
                 break;
             // Remote creeps going to their remote rooms
@@ -2581,7 +2646,7 @@ class SpawnHelper {
      * @param tier The tier of the room
      */
     static generateMinerBody(tier) {
-        let body = { work: 0, move: 0 };
+        let body = { work: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 2 Work, 2 Move - Total Cost: 300
@@ -2591,6 +2656,11 @@ class SpawnHelper {
             case TIER_2: // 5 Work, 1 Move - Total Cost: 550
                 body = { work: 5, move: 1 };
                 break;
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
+            case TIER_4:
             case TIER_3: // 5 Work, 2 Move - Total Cost: 600
                 body = { work: 5, move: 2 };
                 break;
@@ -2645,7 +2715,7 @@ class SpawnHelper {
      */
     static generateHarvesterBody(tier) {
         // Default Values for harvester
-        let body = { work: 0, move: 0 };
+        let body = { work: 1, carry: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
@@ -2660,10 +2730,12 @@ class SpawnHelper {
             case TIER_4: // 2 Work, 11 Carry, 11 Move - Total Cost: 1300
                 body = { work: 2, carry: 11, move: 11 };
                 break;
+            case TIER_6:
             case TIER_5: // 2 Work, 16 Carry, 16 Move - Total Cost: 1800
                 body = { work: 2, carry: 16, move: 16 };
                 break;
-            case TIER_6: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
+            case TIER_8:
+            case TIER_7: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
                 body = { work: 2, carry: 20, move: 20 };
                 break;
         }
@@ -2786,7 +2858,7 @@ class SpawnHelper {
      */
     static generateWorkerBody(tier) {
         // Default Values for Worker
-        let body = { work: 0, move: 0 };
+        let body = { work: 1, carry: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Work, 2 Carry, 2 Move - Total Cost: 300
@@ -2798,10 +2870,14 @@ class SpawnHelper {
             case TIER_3: // 4 Work, 4 Carry, 4 Move - Total Cost: 800
                 body = { work: 4, carry: 4, move: 4 };
                 break;
+            case TIER_6:
+            case TIER_5:
             case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
                 body = { work: 7, carry: 6, move: 6 };
                 break;
-            case TIER_5: // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
+            case TIER_8:
+            case TIER_7:
+                // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
                 body = { work: 10, carry: 8, move: 8 };
                 break;
         }
@@ -2924,7 +3000,7 @@ class SpawnHelper {
      */
     static generateLorryBody(tier) {
         // Default Values for Lorry
-        let body = { work: 0, move: 0 };
+        let body = { carry: 3, move: 3 };
         const opts = { mixType: GROUPED };
         // There are currently no plans to use lorry before terminal becomes available
         switch (tier) {
@@ -2937,9 +3013,12 @@ class SpawnHelper {
             case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
                 body = { carry: 8, move: 8 };
                 break;
+            case TIER_5:
             case TIER_4: // 10 Carry, 10 Move - Total Cost: 1000
                 body = { carry: 10, move: 10 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
                 body = { carry: 20, move: 20 };
                 break;
@@ -2993,7 +3072,7 @@ class SpawnHelper {
      */
     static generatePowerUpgraderBody(tier) {
         // Default Values for Power Upgrader
-        let body = { work: 0, move: 0 };
+        let body = { work: 18, carry: 8, move: 4 };
         const opts = { mixType: GROUPED };
         // There are currently no plans to use power upgraders before links become available
         // Need to experiment with work parts here and find out whats keeps up with the links
@@ -3057,13 +3136,17 @@ class SpawnHelper {
      */
     static generateRemoteMinerBody(tier) {
         // Default Values for Remote Miner
-        let body = { work: 0, move: 0 };
+        let body = { work: 6, carry: 1, move: 3 };
         const opts = { mixType: GROUPED };
         // Cap the remote miner at 6 work parts (6 so they finish mining early and can build/repair their container)
         switch (tier) {
             case TIER_3: // 6 Work, 1 Carry, 3 Move - Total Cost: 800
                 body = { work: 6, carry: 1, move: 3 };
                 break;
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
             case TIER_4: // 6 Work, 1 Carry, 4 Move - Total Cost: 850
                 body = { work: 6, carry: 1, move: 4 };
                 break;
@@ -3112,7 +3195,7 @@ class SpawnHelper {
      */
     static generateRemoteHarvesterBody(tier) {
         // Default Values for Remote Harvester
-        let body = { work: 0, move: 0 };
+        let body = { carry: 8, move: 8 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
@@ -3124,6 +3207,8 @@ class SpawnHelper {
             case TIER_5: // 16 Carry, 16 Move - Total Cost: 1600
                 body = { carry: 16, move: 16 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
                 body = { carry: 20, move: 20 };
                 break;
@@ -3221,9 +3306,13 @@ class SpawnHelper {
      */
     static generateRemoteReserverBody(tier) {
         // Default Values for Remote Reserver
-        let body = { work: 0, move: 0 };
+        let body = { claim: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
             case TIER_4: // 2 Claim, 2 Move - Total Cost: 800
                 body = { claim: 2, move: 2 };
                 break;
@@ -3278,7 +3367,7 @@ class SpawnHelper {
      */
     static generateRemoteColonizerBody(tier) {
         // Default Values for Remote Colonizer
-        let body = { work: 0, move: 0 };
+        let body = { work: 7, carry: 5, move: 6 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_4: // 7 Work, 5 Carry, 5 Move - Total Cost: 1300
@@ -3287,6 +3376,8 @@ class SpawnHelper {
             case TIER_5: // 9 Work, 8 Carry, 10 Move - Total Cost: 1800
                 body = { work: 9, carry: 8, move: 10 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 12 Work, 10 Carry, 10 Move - Total Cost: 2300
                 body = { work: 12, carry: 10, move: 12 };
                 break;
@@ -3380,9 +3471,15 @@ class SpawnHelper {
      */
     static generateClaimerBody(tier) {
         // Default Values for Claimer
-        let body = { work: 0, move: 0 };
+        let body = { claim: 1, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
+            case TIER_8:
+            case TIER_7:
+            case TIER_6:
+            case TIER_5:
+            case TIER_4:
+            case TIER_3:
             case TIER_2: // 1 Claim, 2 Move, Total Cost: 400
                 body = { claim: 1, move: 2 };
                 break;
@@ -3396,7 +3493,7 @@ class SpawnHelper {
      */
     static generateRemoteDefenderBody(tier) {
         // Default Values for Remote Defender
-        let body = { work: 0, move: 0 };
+        let body = { attack: 5, move: 5 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_3: // 5 Attack, 5 Move - Total Cost: 550
@@ -3408,6 +3505,8 @@ class SpawnHelper {
             case TIER_5: // 8 Ranged Attack, 7 Move, 1 Heal - Total Cost: 1800
                 body = { ranged_attack: 8, move: 7, heal: 1 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 8 Ranged Attack, 10 Move, 2 Heal
                 body = { ranged_attack: 8, move: 10, heal: 2 };
                 break;
@@ -3472,6 +3571,8 @@ class SpawnHelper {
             case TIER_5: // 15 Attack, 12 Move - Total Cost: 1800
                 body = { attack: 15, move: 12 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 20 Attack, 14 Move - Total Cost: 2300
                 body = { attack: 20, move: 14 };
                 break;
@@ -3519,7 +3620,7 @@ class SpawnHelper {
      */
     static generateMedicBody(tier) {
         // Default Values for Medic
-        let body = { work: 0, move: 0 };
+        let body = { heal: 1, move: 1 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Heal, 1 Move - Total Cost: 300
@@ -3537,6 +3638,8 @@ class SpawnHelper {
             case TIER_5: // 6 Heal, 6 Move - Total Cost: 1800
                 body = { heal: 6, move: 6 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 8 Heal, 6 Move - Total Cost: 2300
                 body = { heal: 8, move: 6 };
                 break;
@@ -3581,7 +3684,7 @@ class SpawnHelper {
      */
     static generateStalkerBody(tier) {
         // Default Values for Stalker
-        let body = { work: 0, move: 0 };
+        let body = { ranged_attack: 1, move: 1 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 1 Ranged Attack, 2 Move - Total Cost: 200
@@ -3599,6 +3702,8 @@ class SpawnHelper {
             case TIER_5: // 8 Ranged Attack, 8 Move - Total Cost: 1600
                 body = { ranged_attack: 8, move: 8 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 12 Ranged Attack, 10 Move - Total Cost: 2300
                 body = { ranged_attack: 12, move: 10 };
                 break;
@@ -3639,7 +3744,7 @@ class SpawnHelper {
      */
     static generateDomesticDefenderBody(tier) {
         // Default Values for Stalker
-        let body = { work: 0, move: 0 };
+        let body = { attack: 2, move: 2 };
         const opts = { mixType: GROUPED };
         switch (tier) {
             case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
@@ -3657,6 +3762,8 @@ class SpawnHelper {
             case TIER_5: // 10 Attack, 10 Move - Total Cost: 1300
                 body = { attack: 10, move: 10 };
                 break;
+            case TIER_8:
+            case TIER_7:
             case TIER_6: // 15 Attack, 15 Move - Total Cost: 1950
                 body = { attack: 15, move: 15 };
                 break;
@@ -3875,7 +3982,7 @@ class SpawnHelper {
     static getLimitPerClaimRoomForRole(roleConst) {
         let creepNum = 0;
         switch (roleConst) {
-            case ROLE_CLAIMER || ROLE_COLONIZER:
+            case ROLE_CLAIMER:
                 creepNum = 1;
                 break;
         }
@@ -3972,7 +4079,9 @@ class MemoryApi {
         }
         // Remove all dead rooms from memory
         for (const roomName in Memory.rooms) {
-            if (!(roomName in Game.rooms)) {
+            if (!(roomName in Game.rooms) &&
+                !MemoryHelper.dependentRoomExists(roomName) &&
+                !_.some(Game.creeps, (creep) => creep.memory.targetRoom === roomName)) {
                 delete Memory.rooms[roomName];
             }
         }
@@ -4043,32 +4152,55 @@ class MemoryApi {
      * Initialize the Memory object for a new room, and perform all one-time updates
      * @param room The room to initialize the memory of.
      */
-    static initRoomMemory(room) {
+    static initRoomMemory(roomName, isOwnedRoom) {
+        // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
+        // We want it to be reformed
+        // Make sure jobs exist
+        if (Memory.rooms[roomName] && !Memory.rooms[roomName].jobs && isOwnedRoom) {
+            Memory.rooms[roomName].jobs = {};
+        }
         // Abort if Memory already exists
-        if (Memory.rooms[room.name]) {
+        if (Memory.rooms[roomName]) {
             return;
         }
         // Initialize Memory - Typescript requires it be done this way
         //                    unless we define a constructor for RoomMemory.
-        Memory.rooms[room.name] = {
-            attackRooms: [],
-            claimRooms: [],
-            constructionSites: { data: null, cache: null },
-            creepLimit: {},
-            creeps: { data: null, cache: null },
-            defcon: -1,
-            hostiles: { data: null, cache: null },
-            remoteRooms: [],
-            roomState: ROOM_STATE_INTRO,
-            sources: { data: null, cache: null },
-            minerals: { data: null, cache: null },
-            tombstones: { data: null, cache: null },
-            droppedResources: { data: null, cache: null },
-            jobs: {},
-            structures: { data: null, cache: null },
-            upgradeLink: ""
-        };
-        this.getRoomMemory(room, true);
+        if (isOwnedRoom) {
+            Memory.rooms[roomName] = {
+                attackRooms: [],
+                claimRooms: [],
+                constructionSites: { data: null, cache: null },
+                creepLimit: {},
+                creeps: { data: null, cache: null },
+                defcon: -1,
+                hostiles: { data: null, cache: null },
+                remoteRooms: [],
+                roomState: ROOM_STATE_INTRO,
+                sources: { data: null, cache: null },
+                minerals: { data: null, cache: null },
+                tombstones: { data: null, cache: null },
+                droppedResources: { data: null, cache: null },
+                jobs: {},
+                structures: { data: null, cache: null },
+                upgradeLink: ""
+            };
+        }
+        else {
+            Memory.rooms[roomName] = {
+                structures: { data: null, cache: null },
+                sources: { data: null, cache: null },
+                minerals: { data: null, cache: null },
+                tombstones: { data: null, cache: null },
+                droppedResources: { data: null, cache: null },
+                constructionSites: { data: null, cache: null },
+                defcon: -1,
+                hostiles: { data: null, cache: null },
+            };
+        }
+        // Only populate out the memory structure if we have vision of the room
+        if (Game.rooms[roomName]) {
+            this.getRoomMemory(Game.rooms[roomName], true);
+        }
     }
     /**
      * Validates Room Memory and calls update function as needed
@@ -5544,6 +5676,13 @@ class Empire {
                     flag.memory.processed = true;
                     break;
             }
+            // Set up the memory for the room if it doesn't already exist
+            const roomName = flag.pos.roomName;
+            if (!Memory.rooms[roomName]) {
+                const isOwnedRoom = false;
+                console.log("Initializing Room Memory for Dependent Room [" + roomName + "].");
+                MemoryApi.initRoomMemory(roomName, isOwnedRoom);
+            }
         }
     }
     /**
@@ -5646,7 +5785,8 @@ class MemoryManager {
         MemoryApi.garbageCollection();
         const ownedRooms = MemoryApi.getOwnedRooms();
         _.forEach(ownedRooms, (room) => {
-            MemoryApi.initRoomMemory(room);
+            const isOwnedRoom = true;
+            MemoryApi.initRoomMemory(room.name, isOwnedRoom);
             MemoryApi.cleanDependentRoomMemory(room);
         });
     }
@@ -5734,7 +5874,6 @@ class SpawnManager {
      */
     static runSpawnForRoom(room) {
         const openSpawn = SpawnApi.getOpenSpawn(room);
-        // get tier
         // if we don't have an open spawn, return early
         if (openSpawn === null) {
             return;
@@ -8255,6 +8394,13 @@ class RoomVisualManager {
         }
         return Math.floor(progressSum / progressSampleSize);
     }
+    /**
+     * converts the value into something shorter so it can be displayed by the graph
+     * ex converts 22,000 -> 22k
+     */
+    static convertRangeToDisplayVal(rangeVal) {
+        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+    }
 }
 //# sourceMappingURL=RoomVisualHelper.js.map
 
@@ -8317,13 +8463,22 @@ class RoomVisualApi {
             remoteMiner: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_MINER$1).length,
             remoteReserver: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_RESERVER$1).length,
             remoteHarvester: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_REMOTE_HARVESTER$1).length,
-            claimer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_CLAIMER$2).length,
+            claimer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_CLAIMER$1).length,
             colonizer: _.filter(creepsInRoom, (c) => c.memory.role === ROLE_COLONIZER$1).length
         };
+        const spawningCreep = _.filter(MemoryApi.getMyCreeps(room.name), (c) => c.spawning);
+        let spawningRole;
         const lines = [];
         lines.push("");
         lines.push("Creep Info");
         lines.push("");
+        if (spawningCreep.length === 0) {
+            lines.push("Spawning:       " + "None");
+        }
+        for (const creep of spawningCreep) {
+            spawningRole = creep.memory.role;
+            lines.push("Spawning:       " + spawningRole);
+        }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
         if (creepLimits['domesticLimits']) {
             // Add creeps to the lines array
@@ -8357,7 +8512,7 @@ class RoomVisualApi {
                 lines.push("Remote Colonizers:    " + roles[ROLE_COLONIZER$1] + " / " + creepLimits.remoteLimits.remoteColonizer);
             }
             if (creepLimits.remoteLimits.claimer > 0) {
-                lines.push("Claimers:       " + roles[ROLE_CLAIMER$2] + " / " + creepLimits.remoteLimits.claimer);
+                lines.push("Claimers:       " + roles[ROLE_CLAIMER$1] + " / " + creepLimits.remoteLimits.claimer);
             }
         }
         lines.push("");
@@ -8394,6 +8549,9 @@ class RoomVisualApi {
         lines.push("Room Level:     " + level);
         lines.push("Progress:         " + controllerPercent + "%");
         lines.push("DEFCON:         " + defconLevel);
+        if (room.storage) {
+            lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+        }
         lines.push("");
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
         // Draw a box around the text
@@ -8567,19 +8725,20 @@ class RoomVisualApi {
      * @param y the y value for the starting point of the graph
      */
     static createUpgradeGraphVisual(room, x, y) {
-        const X_VALS = { '1': x + 3, '2': x + 6, '3': x + 9, '4': x + 12, '5': x + 15 };
+        const textColor = '#bab8ba';
+        const X_VALS = [
+            { 'start': x, 'end': x + 3 },
+            { 'start': x + 3, 'end': x + 6 },
+            { 'start': x + 6, 'end': x + 9 },
+            { 'start': x + 9, 'end': x + 12 },
+            { 'start': x + 12, 'end': x + 15 },
+        ];
+        const Y_SCALE = 7.5;
+        const X_SCALE = 15;
         const secondsPerTick = RoomVisualManager.getSecondsPerTick();
         const ticksPerHour = Math.floor(3600 / secondsPerTick);
-        const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(10, room);
+        const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(25, room);
         const controlPointsPerHourEstimate = avgControlPointsPerTick * ticksPerHour;
-        // Draw the Graph Lines
-        new RoomVisual(room.name)
-            .line(x, y, x, y - 7.5) // bottom line
-            .line(x, y, x + 15, y) // left line
-            .line(X_VALS['1'], y - .25, X_VALS['1'], y + .25) // tick marks
-            .line(X_VALS['2'], y - .25, X_VALS['2'], y + .25)
-            .line(X_VALS['3'], y - .25, X_VALS['3'], y + .25)
-            .line(X_VALS['4'], y - .25, X_VALS['4'], y + .25);
         // Update the control points per hour estimate array
         if (!Memory.visual.avgControlPointsPerHourArray) {
             Memory.visual.avgControlPointsPerHourArray = [];
@@ -8594,15 +8753,55 @@ class RoomVisualApi {
             }
             Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
         }
-        // Get the current scale
-        const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
+        // Collect values and functions needed to draw the lines on the graph
         const minVal = _.min(Memory.visual.avgControlPointsPerHourArray);
-        // Draw current scale on left side of graph
-        // Delete the first line of the array
-        // Move everything back one value, leaving the 5th slot open
-        // Put the new value in the 5th slot
-        // Adjust all Y values based on current scale
-        // Draw all lines on graph
+        const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minRange = minVal * .75;
+        const maxRange = maxVal * 1.25;
+        const getY2Coord = (raw) => {
+            const range = maxRange - minRange;
+            const offset = raw - minRange;
+            const percentage = offset / range;
+            return percentage * Y_SCALE;
+        };
+        // Get the scale for the graph
+        const displayMinRange = RoomVisualManager.convertRangeToDisplayVal(minRange).toString();
+        const displayMaxRange = RoomVisualManager.convertRangeToDisplayVal(maxRange).toString();
+        // Draw the graph outline and the scale text
+        new RoomVisual(room.name)
+            .line(x, y, x, y - Y_SCALE) // bottom line
+            .line(x, y, x + X_SCALE, y) // left line
+            .line(X_VALS[1].start, y - .25, X_VALS[1].start, y + .25) // tick marks
+            .line(X_VALS[2].start, y - .25, X_VALS[2].start, y + .25)
+            .line(X_VALS[3].start, y - .25, X_VALS[3].start, y + .25)
+            .line(X_VALS[4].start, y - .25, X_VALS[4].start, y + .25)
+            .text(displayMaxRange, x - 2.2, y - Y_SCALE + .5, {
+            align: 'left',
+            color: textColor,
+            opacity: .8,
+            font: ' .7 Trebuchet MS'
+        })
+            .text(displayMinRange, x - 2.2, y, {
+            align: 'left',
+            color: textColor,
+            opacity: .8,
+            font: ' .7 Trebuchet MS'
+        });
+        // Draw the lines for the graph
+        let startCoord = 0;
+        let endCoord = 0;
+        for (let i = 0; i < avgControlPointsPerHourSize; ++i) {
+            // Set the initial previous and next coordinate (first line will always be flat)
+            if (i === 0) {
+                startCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+                endCoord = startCoord;
+            }
+            endCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+            new RoomVisual(room.name)
+                .line(X_VALS[i].start, y - startCoord, X_VALS[i].end, y - endCoord)
+                .circle(X_VALS[i].end, y - endCoord);
+            startCoord = endCoord;
+        }
     }
 }
 //# sourceMappingURL=RoomVisual.Api.js.map
@@ -8753,9 +8952,11 @@ class CreepHelper {
      * Get the text to sign a controller with
      */
     static getSigningText() {
-        // TODO Implement some kind of options interface that allows for customizing signing text
-        // * for now we just use a constant from config to sign
-        return CONTROLLER_SIGNING_TEXT;
+        // Find a random index in the array of messages and choose that
+        const MIN = 0;
+        const MAX = CONTROLLER_SIGNING_TEXT.length - 1;
+        const numberOfMessages = Math.floor(Math.random() * (+MAX - +MIN)) + +MIN;
+        return CONTROLLER_SIGNING_TEXT[numberOfMessages];
     }
     /**
      * Check if the targetPosition is the destination of the creep's current move target
@@ -8918,6 +9119,7 @@ class CreepApi {
                 break;
             case ERR_NOT_FOUND:
                 break;
+            case ERR_NOT_ENOUGH_ENERGY:
             case ERR_FULL:
                 delete creep.memory.job;
                 creep.memory.working = false;
@@ -9115,12 +9317,14 @@ class CreepApi {
      */
     static nullCheck_target(creep, target) {
         if (target === null) {
+            // preserve for the error message
+            const jobAsString = JSON.stringify(creep.memory.job);
             delete creep.memory.job;
             creep.memory.working = false;
             if (creep.memory.supplementary && creep.memory.supplementary.moveTarget) {
                 delete creep.memory.supplementary.moveTarget;
             }
-            throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\n The error occurred in: ", ERROR_ERROR$2);
+            throw new UserException("Null Job Target", "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString, ERROR_WARN);
         }
     }
     /**
@@ -9161,7 +9365,6 @@ class CreepApi {
         return false;
     }
 }
-//# sourceMappingURL=Creep.Api.js.map
 
 // Manager for the miner creep role
 class MinerCreepManager {
@@ -9228,7 +9431,9 @@ class MinerCreepManager {
         MemoryApi.updateJobMemory(creep, room);
         const miningContainer = CreepHelper.getMiningContainer(creep.memory.job, Game.rooms[creep.memory.homeRoom]);
         if (miningContainer === undefined) {
-            return; // We don't need to do anything else if the container doesn't exist
+            // Returning here to prevent supplementary id from being formed,
+            // so in that case creep will just walk up to the source
+            return;
         }
         // Check for any creeps on the miningContainer
         const creepsOnContainer = miningContainer.pos.lookFor(LOOK_CREEPS);
@@ -9264,6 +9469,11 @@ class HarvesterCreepManager {
             }
             this.handleNewJob(creep, homeRoom);
         }
+        // I think i know how to fix creeps idling for a tick between traveling and doing the job
+        // Travel to checks if they're there and returns, problem is we call it after do work
+        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
+        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
+        // ticks spent filling up spawn alone
         if (creep.memory.job) {
             if (creep.memory.working) {
                 CreepApi.doWork(creep, creep.memory.job);
@@ -9331,7 +9541,23 @@ class HarvesterCreepManager {
         if (creepOptions.fillStorage || creepOptions.fillContainer) {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
             if (storeJobs.length > 0) {
-                return storeJobs[0];
+                // Find the closeest job to the creep currently
+                // ! - I'm 90% confident theres a better way to do this, feel free
+                const jobObjects = _.map(storeJobs, (storeJob) => Game.getObjectById(storeJob.targetID));
+                const jobObjectPos = [];
+                for (const jo of jobObjects) {
+                    if (!jo) {
+                        continue;
+                    }
+                    jobObjectPos.push(jo.pos);
+                }
+                const closestTarget = creep.pos.findClosestByPath(jobObjectPos);
+                const closestJob = _.find(storeJobs, (j) => {
+                    const roomObj = Game.getObjectById(j.targetID);
+                    const roomPos = roomObj.pos;
+                    return closestTarget === roomPos;
+                });
+                return closestJob;
             }
             return undefined;
         }
@@ -9995,6 +10221,7 @@ class CreepMili {
      */
     static checkMilitaryCreepBasics(creep, creepOptions) {
         const targetRoom = creep.memory.targetRoom;
+        // I love tenary operators
         const fleeLocation = creepOptions.rallyLocation ? creepOptions.rallyLocation.roomName : creep.memory.homeRoom;
         // Check if we need to flee
         if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
@@ -10309,7 +10536,7 @@ class CreepManager {
             case ROLE_COLONIZER:
                 RemoteColonizerCreepManager.runCreepRole(creep);
                 break;
-            case ROLE_CLAIMER$1:
+            case ROLE_CLAIMER:
                 ClaimerCreepManager.runCreepRole(creep);
                 break;
             case ROLE_REMOTE_DEFENDER:
@@ -10442,8 +10669,11 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
 const loop = ErrorMapper.wrapLoop(() => {
     // Init console commands
     ConsoleCommands.init();
-    // run the empire and get all relevant info from that into memory
-    if (Game.cpu["bucket"] > EMPIRE_MANAGER_BUCKET_LIMIT || "sim" in Game.rooms) {
+    if (RoomHelper.excecuteEveryTicks(1000)) {
+        ConsoleCommands.init();
+    }
+    // run the empire
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > EMPIRE_MANAGER_BUCKET_LIMIT) {
         try {
             EmpireManager.runEmpireManager();
         }
@@ -10452,7 +10682,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run rooms
-    if (Game.cpu["bucket"] > ROOM_MANAGER_BUCKET_LIMIT || "sim" in Game.rooms) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > ROOM_MANAGER_BUCKET_LIMIT) {
         try {
             RoomManager.runRoomManager();
         }
@@ -10461,7 +10691,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run spawning
-    if (Game.cpu["bucket"] > SPAWN_MANAGER_BUCKET_LIMIT || "sim" in Game.rooms) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > SPAWN_MANAGER_BUCKET_LIMIT) {
         try {
             SpawnManager.runSpawnManager();
         }
@@ -10470,7 +10700,7 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // run creeps
-    if (Game.cpu["bucket"] > CREEP_MANAGER_BUCKET_LIMIT || "sim" in Game.rooms) {
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > CREEP_MANAGER_BUCKET_LIMIT) {
         try {
             CreepManager.runCreepManager();
         }
@@ -10479,14 +10709,16 @@ const loop = ErrorMapper.wrapLoop(() => {
         }
     }
     // clean up memory
-    try {
-        MemoryManager.runMemoryManager();
-    }
-    catch (e) {
-        UtilHelper.printError(e);
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > MEMORY_MANAGER_BUCKET_LIMIT) {
+        try {
+            MemoryManager.runMemoryManager();
+        }
+        catch (e) {
+            UtilHelper.printError(e);
+        }
     }
     // Display room visuals if we have a fat enough bucket and config option allows it
-    if ((Game.cpu["bucket"] > 2000 && ROOM_OVERLAY_ON) || "sim" in Game.rooms) {
+    if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > 2000 && ROOM_OVERLAY_ON)) {
         try {
             RoomVisualManager$1.runRoomVisualManager();
         }
