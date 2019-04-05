@@ -235,10 +235,7 @@ export class SpawnHelper {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
-                    fillLink: false,
                     fillSpawn: true,    //
-                    getFromStorage: false,
-                    getFromContainer: false,
                     getDroppedEnergy: true, //
                 };
 
@@ -261,9 +258,7 @@ export class SpawnHelper {
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     fillStorage: true, //
-                    fillContainer: false,
                     fillSpawn: true,    //
-                    fillTerminal: false,
                     getFromStorage: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
@@ -348,7 +343,6 @@ export class SpawnHelper {
                     repair: true, //
                     wallRepair: true, //
                     fillTower: true, //
-                    fillStorage: false, //
                     getDroppedEnergy: true, //
                 };
 
@@ -374,7 +368,6 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    claim: false,
                     wallRepair: true, //
                     fillTower: true, //
                     getFromStorage: true, //
@@ -637,7 +630,6 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    claim: false,
                     wallRepair: true, //
                     fillTower: true, //
                     getFromContainer: true, //
@@ -663,7 +655,6 @@ export class SpawnHelper {
                 creepOptions = {
                     repair: true, //
                     fillStorage: true, //
-                    fillContainer: false,
                     fillLink: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
