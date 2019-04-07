@@ -351,7 +351,7 @@ class RoomHelper {
      * @param objectConst the object we want to check for
      */
     static isExistInRoom(room, objectConst) {
-        return MemoryApi.getStructures(room, s => s.structureType === objectConst).length > 0;
+        return MemoryApi.getStructures(room.name, s => s.structureType === objectConst).length > 0;
     }
     /**
      * get the stored amount from the target
@@ -437,7 +437,7 @@ class RoomHelper {
         if (!this.isOwnedRoom(room)) {
             throw new UserException("Stimulate flag check on non-owned room", "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]", ERROR_WARN$1);
         }
-        const links = MemoryApi.getStructureOfType(room, STRUCTURE_LINK);
+        const links = MemoryApi.getStructureOfType(room.name, STRUCTURE_LINK);
         const controller = room.controller;
         // Break early if we don't have 3 links yet
         if (links.length < 3) {
@@ -487,7 +487,7 @@ class RoomHelper {
      */
     static chooseTowerTarget(room) {
         // get the creep we will do the most damage to
-        const hostileCreeps = MemoryApi.getHostileCreeps(room);
+        const hostileCreeps = MemoryApi.getHostileCreeps(room.name);
         const isHealers = _.some(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "heal"));
         const isAttackers = _.some(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "attack" || b.type === "ranged_attack"));
         const isWorkers = _.some(hostileCreeps, (c) => _.some(c.body, (b) => b.type === "work"));
@@ -522,7 +522,7 @@ class RoomHelper {
      * @param room The room to check
      */
     static numHostileCreeps(room) {
-        const hostiles = MemoryApi.getHostileCreeps(room);
+        const hostiles = MemoryApi.getHostileCreeps(room.name);
         return hostiles.length;
     }
     /**
@@ -691,7 +691,7 @@ class RoomApi {
      * @param room the room we are checking
      */
     static isHostilesInRoom(room) {
-        const hostilesInRoom = MemoryApi.getHostileCreeps(room);
+        const hostilesInRoom = MemoryApi.getHostileCreeps(room.name);
         return hostilesInRoom.length > 0;
     }
     /**
@@ -733,8 +733,8 @@ class RoomApi {
         }
         // ----------
         const storage = room.storage;
-        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
-        const sources = MemoryApi.getSources(room);
+        const containers = MemoryApi.getStructureOfType(room.name, STRUCTURE_CONTAINER);
+        const sources = MemoryApi.getSources(room.name);
         if (room.controller.level >= 6) {
             // check if we are in upgrader room state
             // container mining and storage set up, and we got links online
@@ -788,7 +788,7 @@ class RoomApi {
      * @param room the room we are defending
      */
     static runTowers(room) {
-        const towers = MemoryApi.getStructureOfType(room, STRUCTURE_TOWER);
+        const towers = MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER);
         // choose the most ideal target and have every tower attack it
         const idealTarget = RoomHelper.chooseTowerTarget(room);
         // have each tower attack this target
@@ -803,7 +803,7 @@ class RoomApi {
      * @param room the room we are setting defcon for
      */
     static setDefconLevel(room) {
-        const hostileCreeps = MemoryApi.getHostileCreeps(room);
+        const hostileCreeps = MemoryApi.getHostileCreeps(room.name);
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
@@ -844,14 +844,14 @@ class RoomApi {
      * @param room the room we are checking for repair targets
      */
     static getRepairTargets(room) {
-        const repairStructures = MemoryApi.getStructures(room, (struct) => {
+        const repairStructures = MemoryApi.getStructures(room.name, (struct) => {
             if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
                 return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
             }
             return false;
         });
         if (repairStructures.length === 0) {
-            return MemoryApi.getStructures(room, (struct) => {
+            return MemoryApi.getStructures(room.name, (struct) => {
                 if (struct.structureType === STRUCTURE_RAMPART || struct.structureType === STRUCTURE_WALL) {
                     return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
                 }
@@ -865,10 +865,10 @@ class RoomApi {
      * @param room the room we are getting spawns/extensions to be filled from
      */
     static getLowSpawnAndExtensions(room) {
-        const extensionsNeedFilled = MemoryApi.getStructureOfType(room, STRUCTURE_EXTENSION, (e) => {
+        const extensionsNeedFilled = MemoryApi.getStructureOfType(room.name, STRUCTURE_EXTENSION, (e) => {
             return e.energy < e.energyCapacity;
         });
-        const spawnsNeedFilled = MemoryApi.getStructureOfType(room, STRUCTURE_SPAWN, (e) => {
+        const spawnsNeedFilled = MemoryApi.getStructureOfType(room.name, STRUCTURE_SPAWN, (e) => {
             return e.energy < e.energyCapacity;
         });
         const extensionsAndSpawns = [];
@@ -883,7 +883,7 @@ class RoomApi {
      */
     static getTowersNeedFilled(room) {
         const TOWER_THRESHOLD = 0.85;
-        return MemoryApi.getStructureOfType(room, STRUCTURE_TOWER, (t) => {
+        return MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER, (t) => {
             return t.energy < t.energyCapacity * TOWER_THRESHOLD;
         });
     }
@@ -894,8 +894,8 @@ class RoomApi {
     static getWallRepairTargets(room) {
         // returns all walls and ramparts under the current wall/rampart limit
         const hpLimit = this.getWallHpLimit(room);
-        const walls = MemoryApi.getStructureOfType(room, STRUCTURE_WALL, (s) => s.hits < hpLimit);
-        const ramparts = MemoryApi.getStructureOfType(room, STRUCTURE_RAMPART, (s) => s.hits < hpLimit);
+        const walls = MemoryApi.getStructureOfType(room.name, STRUCTURE_WALL, (s) => s.hits < hpLimit);
+        const ramparts = MemoryApi.getStructureOfType(room.name, STRUCTURE_RAMPART, (s) => s.hits < hpLimit);
         return walls.concat(ramparts);
     }
     /**
@@ -903,7 +903,7 @@ class RoomApi {
      * @param room the room we are checking
      */
     static getOpenSources(room) {
-        const sources = MemoryApi.getSources(room);
+        const sources = MemoryApi.getSources(room.name);
         // ? this assumes that we are only using this for domestic rooms
         // ? if we use it on domestic rooms then I'll need to distinguish between ROLE_REMOTE_MINER
         const miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER$1);
@@ -932,7 +932,7 @@ class RoomApi {
      * @param source the source we are considering
      */
     static getMiningContainer(room, source) {
-        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
+        const containers = MemoryApi.getStructureOfType(room.name, STRUCTURE_CONTAINER);
         return _.find(containers, (c) => Math.abs(c.pos.x - source.pos.x) <= 1 && Math.abs(c.pos.y - source.pos.y) <= 1);
     }
     /**
@@ -981,7 +981,7 @@ class RoomApi {
             return;
         }
         // Get non-upgrader links above 100 energy to fill the upgrader link
-        const nonUpgraderLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link) => link.id !== upgraderLink.id && link.energy >= 100);
+        const nonUpgraderLinks = MemoryApi.getStructureOfType(room.name, STRUCTURE_LINK, (link) => link.id !== upgraderLink.id && link.energy >= 100);
         for (const link of nonUpgraderLinks) {
             if (link.cooldown > 0) {
                 continue;
@@ -1072,7 +1072,7 @@ class GetEnergyJobs {
      */
     static createContainerJobs(room) {
         // List of all containers with >= CONTAINER_MINIMUM_ENERGY (from config.ts)
-        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER, (container) => container.store.energy > CONTAINER_MINIMUM_ENERGY);
+        const containers = MemoryApi.getStructureOfType(room.name, STRUCTURE_CONTAINER, (container) => container.store.energy > CONTAINER_MINIMUM_ENERGY);
         if (containers.length === 0) {
             return [];
         }
@@ -1299,7 +1299,7 @@ class WorkPartJobs {
      * @param room The room to get jobs for
      */
     static createBuildJobs(room) {
-        const constructionSites = MemoryApi.getConstructionSites(room);
+        const constructionSites = MemoryApi.getConstructionSites(room.name);
         if (constructionSites.length === 0) {
             return [];
         }
@@ -1406,7 +1406,7 @@ class CarryPartJobs {
         }
         const upgraderLink = MemoryApi.getUpgraderLink(room);
         if (upgraderLink) {
-            const nonUpgraderLinks = MemoryApi.getStructureOfType(room, STRUCTURE_LINK, (link) => link.id !== upgraderLink.id && link.energy < link.energyCapacity);
+            const nonUpgraderLinks = MemoryApi.getStructureOfType(room.name, STRUCTURE_LINK, (link) => link.id !== upgraderLink.id && link.energy < link.energyCapacity);
             _.forEach(nonUpgraderLinks, (link) => {
                 const fillLinkJob = {
                     jobType: "carryPartJob",
@@ -1435,13 +1435,13 @@ class MemoryHelper_Room {
      */
     static updateRoomMemory(room) {
         // Update All Creeps
-        this.updateHostileCreeps(room);
+        this.updateHostileCreeps(room.name);
         this.updateMyCreeps(room.name);
         // Update structures/construction sites
-        this.updateConstructionSites(room);
-        this.updateStructures(room);
+        this.updateConstructionSites(room.name);
+        this.updateStructures(room.name);
         // Update sources, minerals, dropped resources, tombstones
-        this.updateSources(room);
+        this.updateSources(room.name);
         this.updateMinerals(room);
         this.updateDroppedResources(room);
         this.updateTombstones(room);
@@ -1475,23 +1475,27 @@ class MemoryHelper_Room {
      * [Cached] Room.memory.hostiles
      * @param room The Room to update
      */
-    static updateHostileCreeps(room) {
-        Memory.rooms[room.name].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
-        const enemies = room.find(FIND_HOSTILE_CREEPS);
+    static updateHostileCreeps(roomName) {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+        Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
+        const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
         // Sort creeps into categories
         _.forEach(enemies, (enemy) => {
             // * Check for boosted creeps and put them at the front of the if else stack
             if (enemy.getActiveBodyparts(HEAL) > 0) {
-                Memory.rooms[room.name].hostiles.data.heal.push(enemy.id);
+                Memory.rooms[roomName].hostiles.data.heal.push(enemy.id);
             }
             else if (enemy.getActiveBodyparts(RANGED_ATTACK) > 0) {
-                Memory.rooms[room.name].hostiles.data.ranged.push(enemy.id);
+                Memory.rooms[roomName].hostiles.data.ranged.push(enemy.id);
             }
             else if (enemy.getActiveBodyparts(ATTACK) > 0) {
-                Memory.rooms[room.name].hostiles.data.melee.push(enemy.id);
+                Memory.rooms[roomName].hostiles.data.melee.push(enemy.id);
             }
         });
-        Memory.rooms[room.name].hostiles.cache = Game.time;
+        Memory.rooms[roomName].hostiles.cache = Game.time;
     }
     /**
      * Find all owned creeps in room
@@ -1500,6 +1504,10 @@ class MemoryHelper_Room {
      * @param room The Room we are checking in
      */
     static updateMyCreeps(roomName) {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
         Memory.rooms[roomName].creeps = { data: null, cache: null };
         // Changed this because it wouldn't catch remote squads for example
         // as they aren't actually in the room all the time (had this problem with my last solo code base)
@@ -1513,11 +1521,15 @@ class MemoryHelper_Room {
      * [Cached] Room.memory.constructionSites
      * @param room The Room we are checking in
      */
-    static updateConstructionSites(room) {
-        Memory.rooms[room.name].constructionSites = { data: null, cache: null };
-        const constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);
-        Memory.rooms[room.name].constructionSites.data = _.map(constructionSites, (c) => c.id);
-        Memory.rooms[room.name].constructionSites.cache = Game.time;
+    static updateConstructionSites(roomName) {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+        Memory.rooms[roomName].constructionSites = { data: null, cache: null };
+        const constructionSites = Game.rooms[roomName].find(FIND_MY_CONSTRUCTION_SITES);
+        Memory.rooms[roomName].constructionSites.data = _.map(constructionSites, (c) => c.id);
+        Memory.rooms[roomName].constructionSites.cache = Game.time;
     }
     /**
      * Find all structures in room
@@ -1525,16 +1537,20 @@ class MemoryHelper_Room {
      * [Cached] Room.memory.structures
      * @param room The Room we are checking in
      */
-    static updateStructures(room) {
-        Memory.rooms[room.name].structures = { data: {}, cache: null };
-        const allStructures = room.find(FIND_STRUCTURES);
+    static updateStructures(roomName) {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+        Memory.rooms[roomName].structures = { data: {}, cache: null };
+        const allStructures = Game.rooms[roomName].find(FIND_STRUCTURES);
         const sortedStructureIDs = {};
         // For each structureType, remove the structures from allStructures and map them to ids in the memory object.
         _.forEach(ALL_STRUCTURE_TYPES, (type) => {
             sortedStructureIDs[type] = _.map(_.remove(allStructures, (struct) => struct.structureType === type), (struct) => struct.id);
         });
-        Memory.rooms[room.name].structures.data = sortedStructureIDs;
-        Memory.rooms[room.name].structures.cache = Game.time;
+        Memory.rooms[roomName].structures.data = sortedStructureIDs;
+        Memory.rooms[roomName].structures.cache = Game.time;
     }
     /**
      * Find all sources in room
@@ -1542,11 +1558,15 @@ class MemoryHelper_Room {
      * [Cached] Room.memory.sources
      * @param room The room to check in
      */
-    static updateSources(room) {
-        Memory.rooms[room.name].sources = { data: {}, cache: null };
-        const sources = room.find(FIND_SOURCES);
-        Memory.rooms[room.name].sources.data = _.map(sources, (source) => source.id);
-        Memory.rooms[room.name].sources.cache = Game.time;
+    static updateSources(roomName) {
+        // If we have no vision of the room, return
+        if (!Memory.rooms[roomName]) {
+            return;
+        }
+        Memory.rooms[roomName].sources = { data: {}, cache: null };
+        const sources = Game.rooms[roomName].find(FIND_SOURCES);
+        Memory.rooms[roomName].sources.data = _.map(sources, (source) => source.id);
+        Memory.rooms[roomName].sources.cache = Game.time;
     }
     /**
      * Find all sources in room
@@ -1947,7 +1967,7 @@ class SpawnApi {
             lorry: 0
         };
         const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
-        let minerLimits = MemoryApi.getSources(room).length;
+        let minerLimits = MemoryApi.getSources(room.name).length;
         let numRemoteRooms = RoomHelper.numRemoteRooms(room);
         // To prevent dropping to 2 workers if we don't have remote rooms
         if (numRemoteRooms === 0) {
@@ -2068,36 +2088,15 @@ class SpawnApi {
      * @param room the room we want limits for
      */
     static generateMilitaryCreepLimits(room) {
+        // Get the active flag associated with this room (should only be one active attack flag, so finding first one is extra saftey)
         const militaryLimits = {
             zealot: 0,
             stalker: 0,
             medic: 0,
             domesticDefender: 0
         };
-        // Get the active flag associated with this room (should only be one active attack flag, so finding first one is extra saftey)
         const targetRoomMemoryArray = MemoryApi.getAttackRooms(room);
-        let activeAttackRoomFlag;
-        for (const attackRoom of targetRoomMemoryArray) {
-            if (!attackRoom) {
-                continue;
-            }
-            activeAttackRoomFlag = _.find(attackRoom["flags"], flagMem => {
-                if (!flagMem) {
-                    return false;
-                }
-                return flagMem.active;
-            });
-            if (activeAttackRoomFlag) {
-                break;
-            }
-        }
-        // Riase the miltary limits according to the active attack room flag
-        this.raiseMilitaryCreepLimits(activeAttackRoomFlag, room);
-        // Check if we need domestic defenders and adjust accordingly
-        const defcon = MemoryApi.getDefconLevel(room);
-        if (defcon >= 2) {
-            this.raiseDomesticDefenderCreepLimits(room, defcon);
-        }
+        // TODO - major flaws with how i was doing military limits, needs to be reworked somehow
         return militaryLimits;
     }
     /**
@@ -2112,15 +2111,15 @@ class SpawnApi {
         }
         switch (flagMemory.flagType) {
             case ZEALOT_SOLO:
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "zealot", 1);
                 break;
             case STALKER_SOLO:
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "stalker", 1);
                 break;
             case STANDARD_SQUAD:
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "medic", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "zealot", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "stalker", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "medic", 1);
                 break;
         }
     }
@@ -2132,7 +2131,7 @@ class SpawnApi {
     static raiseDomesticDefenderCreepLimits(room, defcon) {
         // For now, just raise by one, later we can decide what certain defcons means for what we want to spawn
         // just wanted it in a function so we have the foundation for that in place
-        MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 1);
+        MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 1);
     }
     /**
      * set creep limits for the room
@@ -2152,7 +2151,7 @@ class SpawnApi {
      */
     static getOpenSpawn(room) {
         // Get all openSpawns, and return the first
-        const openSpawns = MemoryApi.getStructureOfType(room, STRUCTURE_SPAWN, (spawn) => !spawn.spawning);
+        const openSpawns = MemoryApi.getStructureOfType(room.name, STRUCTURE_SPAWN, (spawn) => !spawn.spawning);
         if (openSpawns.length === 0) {
             return null;
         }
@@ -2672,25 +2671,8 @@ class SpawnHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
                     harvestSources: true,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
                     fillContainer: true,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
         }
@@ -2742,23 +2724,8 @@ class SpawnHelper {
                     // Options marked with // are overriding the defaults
                     build: true,
                     upgrade: true,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
                     fillSpawn: true,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
             case ROOM_STATE_INTER:
@@ -2767,45 +2734,19 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
                     fillSpawn: true,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
             case ROOM_STATE_ADVANCED:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true,
-                    fillContainer: false,
-                    fillLink: false,
                     fillSpawn: true,
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
                 break;
@@ -2815,24 +2756,11 @@ class SpawnHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
-                    build: false,
-                    upgrade: false,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true,
-                    fillContainer: false,
-                    fillLink: false,
                     fillSpawn: true,
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true,
-                    getFromContainer: false,
                     getDroppedEnergy: true,
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
                 break;
@@ -2885,22 +2813,9 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true,
                     fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
             case ROOM_STATE_INTER:
@@ -2909,22 +2824,10 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true,
                     fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
             case ROOM_STATE_ADVANCED:
@@ -2933,21 +2836,10 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true,
                     fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true,
-                    getFromContainer: false,
                     getDroppedEnergy: true,
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
                 break;
@@ -2960,21 +2852,12 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true,
                     fillTower: true,
                     fillStorage: true,
-                    fillContainer: false,
                     fillLink: true,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
                     getFromStorage: true,
-                    getFromContainer: false,
                     getDroppedEnergy: true,
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
                 break;
@@ -3029,24 +2912,15 @@ class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
                     fillTower: true,
                     fillStorage: true,
                     fillContainer: true,
                     fillLink: true,
-                    fillSpawn: false,
                     fillTerminal: true,
                     fillLab: true,
                     getFromStorage: true,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
                     getFromTerminal: true //
                 };
                 break;
@@ -3090,25 +2964,8 @@ class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
-                    build: false,
                     upgrade: true,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
                     getFromLink: true,
-                    getFromTerminal: false
                 };
                 break;
         }
@@ -3153,24 +3010,8 @@ class SpawnHelper {
             case ROOM_STATE_INTER:
                 creepOptions = {
                     build: true,
-                    upgrade: false,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
                     fillContainer: true,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
         }
@@ -3217,45 +3058,18 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
                     wallRepair: true,
                     fillTower: true,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
             case ROOM_STATE_ADVANCED:
                 creepOptions = {
-                    build: false,
-                    upgrade: false,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
             case ROOM_STATE_UPGRADER:
@@ -3263,25 +3077,11 @@ class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
-                    build: false,
-                    upgrade: false,
                     repair: true,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
                     fillStorage: true,
-                    fillContainer: false,
                     fillLink: true,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
         }
@@ -3323,27 +3123,7 @@ class SpawnHelper {
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 // Remote reservers don't really have options perse, so just leave as defaults
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
+                creepOptions = {};
                 break;
         }
         return creepOptions;
@@ -3391,22 +3171,10 @@ class SpawnHelper {
                     build: true,
                     upgrade: true,
                     repair: true,
-                    claim: false,
                     harvestSources: true,
-                    harvestMinerals: false,
                     wallRepair: true,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
                     getFromContainer: true,
                     getDroppedEnergy: true,
-                    getFromLink: false,
-                    getFromTerminal: false
                 };
                 break;
         }
@@ -3427,27 +3195,7 @@ class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
-                creepOptions = {
-                    build: false,
-                    upgrade: false,
-                    repair: false,
-                    claim: false,
-                    harvestSources: false,
-                    harvestMinerals: false,
-                    wallRepair: false,
-                    fillTower: false,
-                    fillStorage: false,
-                    fillContainer: false,
-                    fillLink: false,
-                    fillSpawn: false,
-                    fillTerminal: false,
-                    fillLab: false,
-                    getFromStorage: false,
-                    getFromContainer: false,
-                    getDroppedEnergy: false,
-                    getFromLink: false,
-                    getFromTerminal: false
-                };
+                creepOptions = {};
                 break;
         }
         return creepOptions;
@@ -3521,12 +3269,8 @@ class SpawnHelper {
                     squadUUID: null,
                     rallyLocation: null,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
                     healer: true,
-                    attacker: false,
                     defender: true,
-                    flee: false
                 };
                 break;
         }
@@ -3590,12 +3334,7 @@ class SpawnHelper {
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
                     attacker: true,
-                    defender: false,
-                    flee: false
                 };
                 break;
         }
@@ -3654,11 +3393,7 @@ class SpawnHelper {
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
                     healer: true,
-                    attacker: false,
-                    defender: false,
                     flee: true
                 };
                 break;
@@ -3714,12 +3449,6 @@ class SpawnHelper {
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
                     rallyDone: false,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
-                    attacker: false,
-                    defender: false,
-                    flee: false
                 };
                 break;
         }
@@ -3777,13 +3506,7 @@ class SpawnHelper {
                     squadSize: 0,
                     squadUUID: null,
                     rallyLocation: null,
-                    rallyDone: false,
-                    seige: false,
-                    dismantler: false,
-                    healer: false,
-                    attacker: false,
                     defender: true,
-                    flee: false
                 };
                 break;
         }
@@ -3794,27 +3517,7 @@ class SpawnHelper {
      * returns a set of creep options with all default values
      */
     static getDefaultCreepOptionsCiv() {
-        return {
-            build: false,
-            upgrade: false,
-            repair: false,
-            claim: false,
-            harvestSources: false,
-            harvestMinerals: false,
-            wallRepair: false,
-            fillTower: false,
-            fillStorage: false,
-            fillContainer: false,
-            fillLink: false,
-            fillSpawn: false,
-            fillTerminal: false,
-            fillLab: false,
-            getFromStorage: false,
-            getFromContainer: false,
-            getDroppedEnergy: false,
-            getFromLink: false,
-            getFromTerminal: false
-        };
+        return {};
     }
     /**
      * returns set of mili creep options with all default values
@@ -3822,15 +3525,6 @@ class SpawnHelper {
     static getDefaultCreepOptionsMili() {
         return {
             squadSize: 0,
-            squadUUID: null,
-            rallyLocation: null,
-            rallyDone: false,
-            seige: false,
-            dismantler: false,
-            healer: false,
-            attacker: false,
-            defender: false,
-            flee: false
         };
     }
     /**
@@ -4032,7 +3726,7 @@ class SpawnHelper {
      * @param room the room we are checking for
      */
     static getNumAccessTilesToSources(room) {
-        const sources = MemoryApi.getSources(room);
+        const sources = MemoryApi.getSources(room.name);
         let accesssibleTiles = 0;
         const roomTerrian = new Room.Terrain(room.name);
         _.forEach(sources, (source) => {
@@ -4184,6 +3878,7 @@ class MemoryApi {
             };
         }
         // Only populate out the memory structure if we have vision of the room
+        // Extra saftey provided at each helper function, but make sure only visible rooms are being sent anyway
         if (Game.rooms[roomName]) {
             this.getRoomMemory(Game.rooms[roomName], true);
         }
@@ -4197,11 +3892,11 @@ class MemoryApi {
      * @param forceUpdate [Optional] Force all room memory to update
      */
     static getRoomMemory(room, forceUpdate) {
-        this.getConstructionSites(room, undefined, forceUpdate);
+        this.getConstructionSites(room.name, undefined, forceUpdate);
         this.getMyCreeps(room.name, undefined, forceUpdate);
-        this.getHostileCreeps(room, undefined, forceUpdate);
-        this.getSources(room, undefined, forceUpdate);
-        this.getStructures(room, undefined, forceUpdate);
+        this.getHostileCreeps(room.name, undefined, forceUpdate);
+        this.getSources(room.name, undefined, forceUpdate);
+        this.getStructures(room.name, undefined, forceUpdate);
         this.getAllGetEnergyJobs(room, undefined, forceUpdate);
         this.getAllClaimPartJobs(room, undefined, forceUpdate);
         this.getAllWorkPartJobs(room, undefined, forceUpdate);
@@ -4238,6 +3933,10 @@ class MemoryApi {
      * @returns Creep[ ] -- An array of owned creeps, empty if there are none
      */
     static getMyCreeps(roomName, filterFunction, forceUpdate) {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
         if (forceUpdate ||
             !Memory.rooms[roomName].creeps ||
             Memory.rooms[roomName].creeps.cache < Game.time - FCREEP_CACHE_TTL) {
@@ -4259,13 +3958,17 @@ class MemoryApi {
      * @param forceUpdate [Optional] Invalidate Cache by force
      * @returns Creep[ ]  -- An array of hostile creeps, empty if none
      */
-    static getHostileCreeps(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            !Memory.rooms[room.name].hostiles ||
-            Memory.rooms[room.name].creeps.cache < Game.time - HCREEP_CACHE_TTL) {
-            MemoryHelper_Room.updateHostileCreeps(room);
+    static getHostileCreeps(roomName, filterFunction, forceUpdate) {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
         }
-        const creepIDs = Memory.rooms[room.name].hostiles.data;
+        if (forceUpdate ||
+            !Memory.rooms[roomName].hostiles ||
+            Memory.rooms[roomName].creeps.cache < Game.time - HCREEP_CACHE_TTL) {
+            MemoryHelper_Room.updateHostileCreeps(roomName);
+        }
+        const creepIDs = Memory.rooms[roomName].hostiles.data;
         let creeps = MemoryHelper.getOnlyObjectsFromIDs(creepIDs);
         if (filterFunction !== undefined) {
             creeps = _.filter(creeps, filterFunction);
@@ -4281,16 +3984,20 @@ class MemoryApi {
      * @param forceUpdate [Optional] Invalidate Cache by force
      * @returns Array<Structure> -- An array of structures
      */
-    static getStructures(room, filterFunction, forceUpdate) {
+    static getStructures(roomName, filterFunction, forceUpdate) {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
         if (forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL) {
-            MemoryHelper_Room.updateStructures(room);
+            Memory.rooms[roomName].structures === undefined ||
+            Memory.rooms[roomName].structures.cache < Game.time - STRUCT_CACHE_TTL) {
+            MemoryHelper_Room.updateStructures(roomName);
         }
         const structureIDs = [];
         // Flatten the object into an array of IDs
-        for (const type in Memory.rooms[room.name].structures.data) {
-            const IDs = Memory.rooms[room.name].structures.data[type];
+        for (const type in Memory.rooms[roomName].structures.data) {
+            const IDs = Memory.rooms[roomName].structures.data[type];
             for (const singleID of IDs) {
                 if (singleID) {
                     structureIDs.push(singleID);
@@ -4313,14 +4020,18 @@ class MemoryApi {
      * @param forceUpdate [Optional] Force structures memory to be updated
      * @returns Structure[] An array of structures of a single type
      */
-    static getStructureOfType(room, type, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].structures === undefined ||
-            Memory.rooms[room.name].structures.data[type] === undefined ||
-            Memory.rooms[room.name].structures.cache < Game.time - STRUCT_CACHE_TTL) {
-            MemoryHelper_Room.updateStructures(room);
+    static getStructureOfType(roomName, type, filterFunction, forceUpdate) {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
         }
-        const structureIDs = Memory.rooms[room.name].structures.data[type];
+        if (forceUpdate ||
+            Memory.rooms[roomName].structures === undefined ||
+            Memory.rooms[roomName].structures.data[type] === undefined ||
+            Memory.rooms[roomName].structures.cache < Game.time - STRUCT_CACHE_TTL) {
+            MemoryHelper_Room.updateStructures(roomName);
+        }
+        const structureIDs = Memory.rooms[roomName].structures.data[type];
         let structures = MemoryHelper.getOnlyObjectsFromIDs(structureIDs);
         if (filterFunction !== undefined) {
             structures = _.filter(structures, filterFunction);
@@ -4336,13 +4047,17 @@ class MemoryApi {
      * @param forceUpdate [Optional] Invalidate Cache by force
      * @returns Array<ConstructionSite> -- An array of ConstructionSites
      */
-    static getConstructionSites(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            !Memory.rooms[room.name].constructionSites ||
-            Memory.rooms[room.name].constructionSites.cache < Game.time - CONSTR_CACHE_TTL) {
-            MemoryHelper_Room.updateConstructionSites(room);
+    static getConstructionSites(roomName, filterFunction, forceUpdate) {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
         }
-        const constructionSiteIDs = Memory.rooms[room.name].constructionSites.data;
+        if (forceUpdate ||
+            !Memory.rooms[roomName].constructionSites ||
+            Memory.rooms[roomName].constructionSites.cache < Game.time - CONSTR_CACHE_TTL) {
+            MemoryHelper_Room.updateConstructionSites(roomName);
+        }
+        const constructionSiteIDs = Memory.rooms[roomName].constructionSites.data;
         let constructionSites = MemoryHelper.getOnlyObjectsFromIDs(constructionSiteIDs);
         if (filterFunction !== undefined) {
             constructionSites = _.filter(constructionSites, filterFunction);
@@ -4398,13 +4113,17 @@ class MemoryApi {
      * @param forceUpdate [Optional] Invalidate cache by force
      * @returns Source[]  An array of sources, if there are any
      */
-    static getSources(room, filterFunction, forceUpdate) {
-        if (forceUpdate ||
-            Memory.rooms[room.name].sources === undefined ||
-            Memory.rooms[room.name].sources.cache < Game.time - SOURCE_CACHE_TTL) {
-            MemoryHelper_Room.updateSources(room);
+    static getSources(roomName, filterFunction, forceUpdate) {
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
         }
-        const sourceIDs = Memory.rooms[room.name].sources.data;
+        if (forceUpdate ||
+            Memory.rooms[roomName].sources === undefined ||
+            Memory.rooms[roomName].sources.cache < Game.time - SOURCE_CACHE_TTL) {
+            MemoryHelper_Room.updateSources(roomName);
+        }
+        const sourceIDs = Memory.rooms[roomName].sources.data;
         let sources = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
         if (filterFunction !== undefined) {
             sources = _.filter(sources, filterFunction);
@@ -4502,7 +4221,7 @@ class MemoryApi {
      * @param roleConst the actual role we are adjusting
      * @param delta the change we are applying to the limit
      */
-    static adjustCreepLimitByDelta(room, limitType, role, delta) {
+    static adjustCreepLimitsByDelta(room, limitType, role, delta) {
         Memory.rooms[room.name].creepLimit[limitType][role] += delta;
     }
     /**
@@ -5602,6 +5321,20 @@ class EmpireHelper {
     }
 }
 
+// Config file for memory related actions
+/**
+ * set a zealot flag to one time use
+ */
+const ZEALOT_FLAG_ONE_TIME_USE = true;
+/**
+ * set a stalker flag to one time use
+ */
+const STALKER_FLAG_ONE_TIME_USE = true;
+/**
+ * set a standard squad flag to one time use
+ */
+const STANDARD_SQUAD_FLAG_ONE_TIME_USE = true;
+
 class Empire {
     /**
      * get new flags that need to be processed
@@ -5703,8 +5436,17 @@ class Empire {
      * get if the flag is considered a one time use flag
      */
     static isAttackFlagOneTimeUse(flagMemory) {
-        // Currently all flags are one time use, add the flag constant here if its like a tower draining for example
-        return true;
+        // Reference config file to decide what flag is considered 1 time use, assume yes by default
+        switch (flagMemory.flagType) {
+            case ZEALOT_SOLO:
+                return ZEALOT_FLAG_ONE_TIME_USE;
+            case STALKER_SOLO:
+                return STALKER_FLAG_ONE_TIME_USE;
+            case STANDARD_SQUAD:
+                return STANDARD_SQUAD_FLAG_ONE_TIME_USE;
+            default:
+                return true;
+        }
     }
     /**
      * if there are no active attack flags for a specific room, active one
@@ -8374,9 +8116,17 @@ class RoomVisualManager {
     /**
      * converts the value into something shorter so it can be displayed by the graph
      * ex converts 22,000 -> 22k
+     * @param rangeVal the value we are converting
      */
     static convertRangeToDisplayVal(rangeVal) {
         return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+    }
+    /**
+     * gets the estimated time in days, hours, minutes to the next rcl based on current average
+     * @param room the room we are gettign this value for
+     */
+    static getEstimatedTimeToNextLevel(room) {
+        return "";
     }
 }
 
@@ -8449,12 +8199,11 @@ class RoomVisualApi {
         lines.push("Creep Info");
         lines.push("");
         if (spawningCreep.length === 0) {
-            lines.push("Spawn Currently Idle");
+            lines.push("Spawning:       " + "None");
         }
         for (const creep of spawningCreep) {
             spawningRole = creep.memory.role;
-            const spawningRoleDisplay = spawningRole.charAt(0).toUpperCase() + spawningRole.slice(1);
-            lines.push("[Spawning]:       " + spawningRoleDisplay);
+            lines.push("Spawning:       " + spawningRole);
         }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
         if (creepLimits['domesticLimits']) {
@@ -8515,6 +8264,7 @@ class RoomVisualApi {
         const level = room.controller.level;
         const controllerProgress = room.controller.progress;
         const controllerTotal = room.controller.progressTotal;
+        const controllerPercent = Math.floor((controllerProgress / controllerTotal * 100) * 10) / 10;
         const defconLevel = room.memory.defcon;
         // Draw the text
         const lines = [];
@@ -8523,11 +8273,15 @@ class RoomVisualApi {
         lines.push("");
         lines.push("Room State:     " + roomState);
         lines.push("Room Level:     " + level);
-        // @ts-ignore
-        lines.push("Progress:         " + RoomVisualManager.convertRangeToDisplayVal(controllerProgress));
+        lines.push("Progress:         " + controllerPercent + "%");
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
             lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+        }
+        // Adding this disclaimer, beacuse some of the information you need is actually calculated in the graph function
+        // Consider decoupling these so you could use them independently
+        {
+            lines.push("Est TTL:        " + RoomVisualManager.getEstimatedTimeToNextLevel(room));
         }
         lines.push("");
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
@@ -8735,7 +8489,6 @@ class RoomVisualApi {
         const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
         const minRange = minVal * .75;
         const maxRange = maxVal * 1.25;
-        const currentVal = Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1];
         const getY2Coord = (raw) => {
             const range = maxRange - minRange;
             const offset = raw - minRange;
@@ -8745,7 +8498,6 @@ class RoomVisualApi {
         // Get the scale for the graph
         const displayMinRange = RoomVisualManager.convertRangeToDisplayVal(minRange).toString();
         const displayMaxRange = RoomVisualManager.convertRangeToDisplayVal(maxRange).toString();
-        const displayLastVal = RoomVisualManager.convertRangeToDisplayVal(currentVal).toString();
         // Draw the graph outline and the scale text
         new RoomVisual(room.name)
             .line(x, y, x, y - Y_SCALE) // bottom line
@@ -8761,12 +8513,6 @@ class RoomVisualApi {
             font: ' .7 Trebuchet MS'
         })
             .text(displayMinRange, x - 2.2, y, {
-            align: 'left',
-            color: textColor,
-            opacity: .8,
-            font: ' .7 Trebuchet MS'
-        })
-            .text(displayLastVal, x - 2.2, y - getY2Coord(currentVal), {
             align: 'left',
             color: textColor,
             opacity: .8,
@@ -8917,7 +8663,7 @@ class CreepHelper {
             throw new UserException("Source null in getMiningContainer", "room: " + room.name, ERROR_WARN$2);
         }
         // Get containers and find the closest one to the source
-        const containers = MemoryApi.getStructureOfType(room, STRUCTURE_CONTAINER);
+        const containers = MemoryApi.getStructureOfType(room.name, STRUCTURE_CONTAINER);
         const closestContainer = source.pos.findClosestByRange(containers);
         if (!closestContainer) {
             return undefined;
@@ -10062,7 +9808,7 @@ class CreepMili {
         };
         // Check for a straight path to one of the preferred targets
         // Enemy Creeps
-        const hostileCreeps = MemoryApi.getHostileCreeps(creep.room);
+        const hostileCreeps = MemoryApi.getHostileCreeps(creep.room.name, undefined, true);
         const closestCreep = _.first(hostileCreeps);
         if (closestCreep) {
             goal.pos = closestCreep.pos;
@@ -10120,7 +9866,7 @@ class CreepMili {
      * @param creepOptions the options for the defender creep
      */
     static getDomesticDefenseAttackTarget(creep, creepOptions, CREEP_RANGE) {
-        const hostileCreeps = MemoryApi.getHostileCreeps(creep.room);
+        const hostileCreeps = MemoryApi.getHostileCreeps(creep.room.name);
         if (hostileCreeps.length > 0) {
             return creep.pos.findClosestByPath(hostileCreeps);
         }
@@ -10170,7 +9916,7 @@ class CreepMili {
      * moves the creep away from the target
      */
     static kiteEnemyCreep(creep) {
-        const hostileCreep = creep.pos.findClosestByPath(MemoryApi.getHostileCreeps(creep.room));
+        const hostileCreep = creep.pos.findClosestByPath(MemoryApi.getHostileCreeps(creep.room.name));
         const CREEP_RANGE = 3;
         if (!hostileCreep) {
             return false;

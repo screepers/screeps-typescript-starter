@@ -215,40 +215,17 @@ export default class SpawnApi {
      * @param room the room we want limits for
      */
     public static generateMilitaryCreepLimits(room: Room): MilitaryCreepLimits {
+
+        // Get the active flag associated with this room (should only be one active attack flag, so finding first one is extra saftey)
         const militaryLimits: MilitaryCreepLimits = {
             zealot: 0,
             stalker: 0,
             medic: 0,
             domesticDefender: 0
         };
-
-        // Get the active flag associated with this room (should only be one active attack flag, so finding first one is extra saftey)
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
-        let activeAttackRoomFlag: ParentFlagMemory | undefined;
-        for (const attackRoom of targetRoomMemoryArray) {
-            if (!attackRoom) {
-                continue;
-            }
-            activeAttackRoomFlag = _.find(attackRoom!["flags"], flagMem => {
-                if (!flagMem) {
-                    return false;
-                }
-                return flagMem.active;
-            });
-            if (activeAttackRoomFlag) {
-                break;
-            }
-        }
-
-        // Riase the miltary limits according to the active attack room flag
-        this.raiseMilitaryCreepLimits(activeAttackRoomFlag as AttackFlagMemory, room);
-
-        // Check if we need domestic defenders and adjust accordingly
-        const defcon: number = MemoryApi.getDefconLevel(room);
-        if (defcon >= 2) {
-            this.raiseDomesticDefenderCreepLimits(room, defcon);
-        }
-
+        const activeAttackRoomFlag: ParentFlagMemory | undefined = undefined;
+        // TODO - major flaws with how i was doing military limits, needs to be reworked somehow
         return militaryLimits;
     }
 
@@ -265,19 +242,19 @@ export default class SpawnApi {
 
         switch (flagMemory!.flagType) {
             case ZEALOT_SOLO:
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "zealot", 1);
 
                 break;
 
             case STALKER_SOLO:
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "stalker", 1);
 
                 break;
 
             case STANDARD_SQUAD:
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "zealot", 1);
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "stalker", 1);
-                MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", "medic", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "zealot", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "stalker", 1);
+                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "medic", 1);
 
                 break;
         }
@@ -291,7 +268,7 @@ export default class SpawnApi {
     public static raiseDomesticDefenderCreepLimits(room: Room, defcon: number): void {
         // For now, just raise by one, later we can decide what certain defcons means for what we want to spawn
         // just wanted it in a function so we have the foundation for that in place
-        MemoryApi.adjustCreepLimitByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 1);
+        MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 1);
     }
 
     /**

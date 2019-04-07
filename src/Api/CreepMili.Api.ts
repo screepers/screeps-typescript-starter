@@ -110,7 +110,7 @@ export default class CreepMili {
 
         // Check for a straight path to one of the preferred targets
         // Enemy Creeps
-        const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room.name);
+        const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room.name, undefined, true);
         const closestCreep: Creep | null = _.first(hostileCreeps);
         if (closestCreep) {
             goal.pos = closestCreep.pos;

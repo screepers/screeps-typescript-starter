@@ -691,7 +691,7 @@ export default class MemoryApi {
      * @param roleConst the actual role we are adjusting
      * @param delta the change we are applying to the limit
      */
-    public static adjustCreepLimitByDelta(room: Room, limitType: string, role: string, delta: number): void {
+    public static adjustCreepLimitsByDelta(room: Room, limitType: string, role: string, delta: number): void {
         Memory.rooms[room.name].creepLimit![limitType][role] += delta;
     }
 

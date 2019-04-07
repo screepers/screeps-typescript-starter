@@ -1,6 +1,11 @@
 import EmpireHelper from "../Helpers/EmpireHelper";
 import MemoryApi from "./Memory.Api";
-import { } from "utils/Constants";
+import { ZEALOT_SOLO, STALKER_SOLO, STANDARD_SQUAD } from "utils/Constants";
+import {
+    ZEALOT_FLAG_ONE_TIME_USE,
+    STALKER_FLAG_ONE_TIME_USE,
+    STANDARD_SQUAD_FLAG_ONE_TIME_USE
+} from "utils/militaryConfig"
 
 export default class Empire {
 
@@ -132,9 +137,18 @@ export default class Empire {
     /**
      * get if the flag is considered a one time use flag
      */
-    public static isAttackFlagOneTimeUse(flagMemory: AttackFlagMemory) {
-        // Currently all flags are one time use, add the flag constant here if its like a tower draining for example
-        return true;
+    public static isAttackFlagOneTimeUse(flagMemory: AttackFlagMemory): boolean {
+        // Reference config file to decide what flag is considered 1 time use, assume yes by default
+        switch (flagMemory.flagType) {
+            case ZEALOT_SOLO:
+                return ZEALOT_FLAG_ONE_TIME_USE;
+            case STALKER_SOLO:
+                return STALKER_FLAG_ONE_TIME_USE;
+            case STANDARD_SQUAD:
+                return STANDARD_SQUAD_FLAG_ONE_TIME_USE;
+            default:
+                return true;
+        }
     }
 
     /**
