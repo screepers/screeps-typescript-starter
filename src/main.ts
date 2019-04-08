@@ -72,6 +72,18 @@
  * Still do not target solo healers (maybe consider it if we calculate our damage (we have a function for that, thanks bonzai)
  * and find that we can out damage the amount of healing on a creep and those around it)
  *
+ * The only job list that updates from old values atm is sourceJobs.
+ * I need to update every other queue to refresh in one of two ways
+ *
+ * 1) Jobs that are amount sensitive, such as filling extensions, spawns, turrets etc need to be handled in a precise way
+ *  -- I need to loop through each creep in the room and check if they are targetting that structure and have the appropriate job type in memory
+ * -- essentially I loop through and recreate the effects of updateJobMemory (I might be able to even just call updateJobMemory if I do it right)
+ *
+ * 2) Jobs that are not amount sensitive, e.g. upgrading controller, constructing a building
+ * -- I need to basically create a new job and compare it to the old job
+ *  - If old job has a higher number (e.g. more hits remaining to completely being built) than new job, I use the new job completely.
+ * -- If new job has a higher number than old job, I use old job completely
+ *
  *
  * ~~~~~~~~~~~~~~~~
  * ~~ BUG FIXES ~~
