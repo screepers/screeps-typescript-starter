@@ -2088,6 +2088,12 @@ class SpawnApi {
      * @param room the room we want limits for
      */
     static generateMilitaryCreepLimits(room) {
+        const defaultMilitaryLimits = {
+            zealot: 0,
+            stalker: 0,
+            medic: 0,
+            domesticDefender: 0
+        };
         // For extra saftey, find first active flag (only 1 should be active at a time)
         const targetRoomMemoryArray = MemoryApi.getAttackRooms(room);
         let activeAttackRoomFlag;
@@ -2105,12 +2111,22 @@ class SpawnApi {
                 break;
             }
         }
-        // Set the limits in memory based on the flag type
-        this.adjustMilitaryCreepLimits(activeAttackRoomFlag, room);
+        if (activeAttackRoomFlag) {
+            // Set the limits in memory based on the flag type
+            this.adjustMilitaryCreepLimits(activeAttackRoomFlag, room);
+        }
+        else {
+            // If we don't have active attack rooms, reset spawn back to 0
+            room.memory.creepLimit.militaryLimits = defaultMilitaryLimits;
+        }
         // Check if we need domestic defenders and adjust accordingly
         const defcon = MemoryApi.getDefconLevel(room);
         if (defcon >= 2) {
             this.adjustDomesticDefenderCreepLimits(room, defcon);
+        }
+        else {
+            // if we don't need, make sure spawn gets set to 0
+            MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 0);
         }
     }
     /**
@@ -2487,14 +2503,11 @@ class SpawnApi {
             }
         }
         // If we didn't find a squad based flag return the default squad options
-        console.log("sfm: " + selectedFlagMemory);
         if (selectedFlagMemory === undefined) {
             return squadOptions;
         }
         else {
             // if this flag has met its requirements, deactivate it
-            console.log("as: " + selectedFlagActiveSquadMembers);
-            console.log("ss: " + selectedFlagMemory.squadSize);
             if (selectedFlagActiveSquadMembers >= selectedFlagMemory.squadSize) {
                 selectedFlagMemory.active = false;
                 // If its a one time use, complete it as well
@@ -3310,7 +3323,9 @@ class SpawnHelper {
         let body = { work: 0, move: 0 };
         const opts = { mixType: GROUPED };
         switch (tier) {
-            case TIER_6:
+            // case TIER_6: // this is just for quick and dirty purposes, i don't reccomend using it, but replace tier with your current tier and make a custom attack zealot
+            //     body = { attack: 1, move: 10, tough: 39 };
+            //     break;
             case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
                 body = { attack: 2, move: 2 };
                 break;
@@ -3328,7 +3343,7 @@ class SpawnHelper {
                 break;
             case TIER_8:
             case TIER_7:
-                // 20 Attack, 14 Move - Total Cost: 2300
+            case TIER_6: // 20 Attack, 14 Move - Total Cost: 2300
                 body = { attack: 20, move: 14 };
                 break;
         }

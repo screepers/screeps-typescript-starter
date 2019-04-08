@@ -900,6 +900,9 @@ export class SpawnHelper {
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
+            // case TIER_6: // this is just for quick and dirty purposes, i don't reccomend using it, but replace tier with your current tier and make a custom attack zealot
+            //     body = { attack: 1, move: 10, tough: 39 };
+            //     break;
             case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
                 body = { attack: 2, move: 2 };
                 break;

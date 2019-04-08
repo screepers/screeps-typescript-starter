@@ -216,6 +216,12 @@ export default class SpawnApi {
      */
     public static generateMilitaryCreepLimits(room: Room): void {
 
+        const defaultMilitaryLimits: MilitaryCreepLimits = {
+            zealot: 0,
+            stalker: 0,
+            medic: 0,
+            domesticDefender: 0
+        };
         // For extra saftey, find first active flag (only 1 should be active at a time)
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
         let activeAttackRoomFlag: ParentFlagMemory | undefined;
@@ -233,13 +239,25 @@ export default class SpawnApi {
                 break;
             }
         }
-        // Set the limits in memory based on the flag type
-        this.adjustMilitaryCreepLimits(activeAttackRoomFlag as AttackFlagMemory, room);
+
+        if (activeAttackRoomFlag) {
+            // Set the limits in memory based on the flag type
+            this.adjustMilitaryCreepLimits(activeAttackRoomFlag as AttackFlagMemory, room);
+        }
+        else {
+            // If we don't have active attack rooms, reset spawn back to 0
+            room.memory.creepLimit!.militaryLimits = defaultMilitaryLimits;
+        }
+
 
         // Check if we need domestic defenders and adjust accordingly
         const defcon: number = MemoryApi.getDefconLevel(room);
         if (defcon >= 2) {
             this.adjustDomesticDefenderCreepLimits(room, defcon);
+        }
+        else {
+            // if we don't need, make sure spawn gets set to 0
+            MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 0);
         }
     }
 
