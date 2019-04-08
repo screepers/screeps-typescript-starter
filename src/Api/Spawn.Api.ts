@@ -706,14 +706,10 @@ export default class SpawnApi {
         }
 
         // If we didn't find a squad based flag return the default squad options
-        console.log("sfm: " + selectedFlagMemory);
         if (selectedFlagMemory === undefined) {
             return squadOptions;
         } else {
             // if this flag has met its requirements, deactivate it
-            console.log("as: " + selectedFlagActiveSquadMembers);
-            console.log("ss: " + selectedFlagMemory.squadSize);
-
             if (selectedFlagActiveSquadMembers >= selectedFlagMemory.squadSize) {
                 selectedFlagMemory.active = false;
                 // If its a one time use, complete it as well
