@@ -8,7 +8,6 @@ import {
     ROOM_STATE_INTER,
     ROOM_STATE_ADVANCED,
     ROOM_STATE_NUKE_INBOUND,
-    ROOM_STATE_SEIGE,
     ROOM_STATE_STIMULATE,
     ROOM_STATE_UPGRADER,
     WALL_LIMIT,
@@ -63,14 +62,6 @@ export default class RoomApi {
         const creeps: Array<Creep | null> = MemoryApi.getMyCreeps(room.name);
         if (creeps.length < 3) {
             MemoryApi.updateRoomState(ROOM_STATE_INTRO, room);
-            return;
-        }
-
-        // check if we are siege room state
-        // defcon is level 3+ and hostiles activity in the room is high
-        const defconLevel: number = MemoryApi.getDefconLevel(room);
-        if (defconLevel >= 3) {
-            MemoryApi.updateRoomState(ROOM_STATE_SEIGE, room);
             return;
         }
         // ----------

@@ -4,7 +4,6 @@ import {
     ROOM_STATE_INTER,
     ROOM_STATE_ADVANCED,
     ROOM_STATE_NUKE_INBOUND,
-    ROOM_STATE_SEIGE,
     ROOM_STATE_STIMULATE,
     ROOM_STATE_UPGRADER,
     STANDARD_SQUAD,
@@ -76,8 +75,6 @@ export default class RoomVisualManager {
                 return "Advanced";
             case ROOM_STATE_NUKE_INBOUND:
                 return "Nuke Incoming!";
-            case ROOM_STATE_SEIGE:
-                return "Seige!";
             case ROOM_STATE_STIMULATE:
                 return "Stimulate";
             case ROOM_STATE_UPGRADER:

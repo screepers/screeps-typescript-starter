@@ -96,13 +96,6 @@
  * Need to raise them up, the idea from Brock was structures under 25% get precedence over construction
  * Good idea in general and easy to do with how our jobs are structured
  *
- * 4. Rework how we are getting military limits to fit how the other ones work
- *    We need a way to make sure a flag only effects the limits while its active,
- *    so we need to get all active attack flags (should only be 1 at a time tho)
- *    and set the limits accordingly all in the same method then return that to do the adjusting
- *
- * 5. Zealot spawned with no target room, need to figure out why getTargetRoom for creep memory set up is going wrong
- *
  * 6. Option flags throw an error regardless if they are processed or not
  * Place an option flag to recreate
  *

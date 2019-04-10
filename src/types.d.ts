@@ -30,7 +30,6 @@ declare const ROOM_STATE_BEGINNER = 1;
 declare const ROOM_STATE_INTER = 2;
 declare const ROOM_STATE_ADVANCED = 3;
 declare const ROOM_STATE_UPGRADER = 4;
-declare const ROOM_STATE_SEIGE = 5;
 declare const ROOM_STATE_STIMULATE = 6;
 declare const ROOM_STATE_NUKE_INBOUND = 7;
 
@@ -40,7 +39,6 @@ type RoomStateConstant =
     | ROOM_STATE_INTER
     | ROOM_STATE_ADVANCED
     | ROOM_STATE_UPGRADER
-    | ROOM_STATE_SEIGE
     | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
@@ -64,10 +62,6 @@ type ROOM_STATE_ADVANCED = 3;
  * once we have power upgrader based economy
  */
 type ROOM_STATE_UPGRADER = 4;
-/**
- * if we are under seige and must defend the room/only do basic functions
- */
-type ROOM_STATE_SEIGE = 5;
 /**
  * if the room has been flagged and is receiving heavy external assistance to upgrade quickly
  */
