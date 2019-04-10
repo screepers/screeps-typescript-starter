@@ -44,11 +44,8 @@
  * Currently harvesters are kinda going from place to place when they could be filling up multiple on the way
  * to other extensions
  *
- * 8. Rework room state seige
- * Possibly just remove it and let defcon handle all seige related stuff
- * It doesn't allow us to hold the actual progress of the room during a seige, we could be
- * on power upgraders, or at a point of intro, better to let defcon make the changes it needs to
- * make to properly defend a room
+ * 8. Create a dismantler class, for example theres a room above me with 10m on ramparts, but its a dead room, and storage
+ * has 1 mil in it. At this level I can make a 20 work, 6 move creep that could slice through the ramparts at a decent rate
  *
  * 9. Have some creeps possibly consider tombstones so we can pick up energy from invaders or allies
  * Def want this for remote harvesters, but possibly for workers too
