@@ -110,7 +110,7 @@ export default class CreepMili {
 
         // Check for a straight path to one of the preferred targets
         // Enemy Creeps
-        const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room);
+        const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room.name, undefined, true);
         const closestCreep: Creep | null = _.first(hostileCreeps);
         if (closestCreep) {
             goal.pos = closestCreep.pos;
@@ -182,7 +182,7 @@ export default class CreepMili {
      */
     public static getDomesticDefenseAttackTarget(creep: Creep, creepOptions: CreepOptionsMili, CREEP_RANGE: number): Creep | null {
 
-        const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room);
+        const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room.name);
 
         if (hostileCreeps.length > 0) {
             return creep.pos.findClosestByPath(hostileCreeps);
@@ -244,7 +244,7 @@ export default class CreepMili {
      * moves the creep away from the target
      */
     public static kiteEnemyCreep(creep: Creep): boolean {
-        const hostileCreep: Creep | null = creep.pos.findClosestByPath(MemoryApi.getHostileCreeps(creep.room));
+        const hostileCreep: Creep | null = creep.pos.findClosestByPath(MemoryApi.getHostileCreeps(creep.room.name));
         const CREEP_RANGE: number = 3;
         if (!hostileCreep) {
             return false;

@@ -82,7 +82,7 @@ export default class CarryPartJobs {
 
         if (upgraderLink) {
             const nonUpgraderLinks: StructureLink[] = MemoryApi.getStructureOfType(
-                room,
+                room.name,
                 STRUCTURE_LINK,
                 (link: StructureLink) => link.id !== upgraderLink!.id && link.energy < link.energyCapacity
             ) as StructureLink[];

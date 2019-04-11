@@ -14,6 +14,7 @@ import {
     OVERRIDE_D_ROOM_FLAG,
     STIMULATE_FLAG
 } from "utils/constants";
+import { ROOM_OVERLAY_GRAPH_ON } from "utils/config";
 
 // Api for room visuals
 export default class RoomVisualApi {
@@ -180,6 +181,11 @@ export default class RoomVisualApi {
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
             lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+        }
+        // Adding this disclaimer, beacuse some of the information you need is actually calculated in the graph function
+        // Consider decoupling these so you could use them independently
+        if (ROOM_OVERLAY_GRAPH_ON) {
+            lines.push("Est TTL:        " + RoomVisualHelper.getEstimatedTimeToNextLevel(room));
         }
         lines.push("");
         RoomVisualHelper.multiLineText(lines, x, y, room.name, true);

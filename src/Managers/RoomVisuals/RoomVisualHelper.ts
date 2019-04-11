@@ -4,7 +4,6 @@ import {
     ROOM_STATE_INTER,
     ROOM_STATE_ADVANCED,
     ROOM_STATE_NUKE_INBOUND,
-    ROOM_STATE_SEIGE,
     ROOM_STATE_STIMULATE,
     ROOM_STATE_UPGRADER,
     STANDARD_SQUAD,
@@ -76,8 +75,6 @@ export default class RoomVisualManager {
                 return "Advanced";
             case ROOM_STATE_NUKE_INBOUND:
                 return "Nuke Incoming!";
-            case ROOM_STATE_SEIGE:
-                return "Seige!";
             case ROOM_STATE_STIMULATE:
                 return "Stimulate";
             case ROOM_STATE_UPGRADER:
@@ -170,8 +167,17 @@ export default class RoomVisualManager {
     /**
      * converts the value into something shorter so it can be displayed by the graph
      * ex converts 22,000 -> 22k
+     * @param rangeVal the value we are converting
      */
     public static convertRangeToDisplayVal(rangeVal: number): string | number {
         return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+    }
+
+    /**
+     * gets the estimated time in days, hours, minutes to the next rcl based on current average
+     * @param room the room we are gettign this value for
+     */
+    public static getEstimatedTimeToNextLevel(room: Room): string {
+        return "";
     }
 }

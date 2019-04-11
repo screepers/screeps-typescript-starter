@@ -44,11 +44,8 @@
  * Currently harvesters are kinda going from place to place when they could be filling up multiple on the way
  * to other extensions
  *
- * 8. Rework room state seige
- * Possibly just remove it and let defcon handle all seige related stuff
- * It doesn't allow us to hold the actual progress of the room during a seige, we could be
- * on power upgraders, or at a point of intro, better to let defcon make the changes it needs to
- * make to properly defend a room
+ * 8. Create a dismantler class, for example theres a room above me with 10m on ramparts, but its a dead room, and storage
+ * has 1 mil in it. At this level I can make a 20 work, 6 move creep that could slice through the ramparts at a decent rate
  *
  * 9. Have some creeps possibly consider tombstones so we can pick up energy from invaders or allies
  * Def want this for remote harvesters, but possibly for workers too
@@ -72,11 +69,17 @@
  * Still do not target solo healers (maybe consider it if we calculate our damage (we have a function for that, thanks bonzai)
  * and find that we can out damage the amount of healing on a creep and those around it)
  *
- * 15. Mark jobs as taken
- * In the handleNewJob methods of many civilian creeps, we should mark that job as taken in the cases where we need to
- * Most relevant on get energy jobs, as we don't want 4 creeps going for the same source of 200 energy
- * this should cut down on cpu use in more idle heavy times, and make jobs targeting overall smarter
- * This is also needed on claim jobs, so if we have 5 claimers to claim 5 rooms they don't all go to the same one
+ * The only job list that updates from old values atm is sourceJobs.
+ * I need to update every other queue to refresh in one of two ways
+ *
+ * 1) Jobs that are amount sensitive, such as filling extensions, spawns, turrets etc need to be handled in a precise way
+ *  -- I need to loop through each creep in the room and check if they are targetting that structure and have the appropriate job type in memory
+ * -- essentially I loop through and recreate the effects of updateJobMemory (I might be able to even just call updateJobMemory if I do it right)
+ *
+ * 2) Jobs that are not amount sensitive, e.g. upgrading controller, constructing a building
+ * -- I need to basically create a new job and compare it to the old job
+ *  - If old job has a higher number (e.g. more hits remaining to completely being built) than new job, I use the new job completely.
+ * -- If new job has a higher number than old job, I use old job completely
  *
  *
  * ~~~~~~~~~~~~~~~~
@@ -86,20 +89,9 @@
  * 1. Harvesters fill themselves on storage and put it right back again, same issue as last code base, and they were doing it while energy was in the containers
  * Need to expand rules for when they should use storage in their get energy jobs method
  *
- * 2. Creeps currently are not registering ramparts as construction sites
- * Find out why in create construction sites, honestly im not sure why,
- * make sure to try to recreate the bug first because it could have been a one off
- *
  * 3. Ramparts are being left to decay as their job is too low on the totem pole
  * Need to raise them up, the idea from Brock was structures under 25% get precedence over construction
  * Good idea in general and easy to do with how our jobs are structured
- *
- * 4. Attack flags are registering, but they are not raising the limits of military creeps
- * Find out why, are fix this (most likey somewhere in raiseMiliCreepLimitsByDelta),
- * possibly bad reference to memory so it doesn't save the changes
- *
- * 5. Find a way to speed up job aquisition. Creeps seem to have 1-4 tick delay between performing some actions
- * No advice to recreate, just watch creeps over time and you will notice it
  *
  * 6. Option flags throw an error regardless if they are processed or not
  * Place an option flag to recreate

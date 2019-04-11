@@ -30,7 +30,6 @@ declare const ROOM_STATE_BEGINNER = 1;
 declare const ROOM_STATE_INTER = 2;
 declare const ROOM_STATE_ADVANCED = 3;
 declare const ROOM_STATE_UPGRADER = 4;
-declare const ROOM_STATE_SEIGE = 5;
 declare const ROOM_STATE_STIMULATE = 6;
 declare const ROOM_STATE_NUKE_INBOUND = 7;
 
@@ -40,7 +39,6 @@ type RoomStateConstant =
     | ROOM_STATE_INTER
     | ROOM_STATE_ADVANCED
     | ROOM_STATE_UPGRADER
-    | ROOM_STATE_SEIGE
     | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
@@ -64,10 +62,6 @@ type ROOM_STATE_ADVANCED = 3;
  * once we have power upgrader based economy
  */
 type ROOM_STATE_UPGRADER = 4;
-/**
- * if we are under seige and must defend the room/only do basic functions
- */
-type ROOM_STATE_SEIGE = 5;
 /**
  * if the room has been flagged and is receiving heavy external assistance to upgrade quickly
  */
@@ -626,79 +620,79 @@ interface CreepOptionsCiv {
     /**
      * if the creep can build construction sites
      */
-    build: boolean;
+    build?: boolean;
     /**
      * if the creep can upgrade the controller
      */
-    upgrade: boolean;
+    upgrade?: boolean;
     /**
      * if the creep can repair containers/roads, etc
      */
-    repair: boolean;
+    repair?: boolean;
     /**
      * claim or reserve
      */
-    claim: boolean;
+    claim?: boolean;
     /**
      * if the creep can harvest sources
      */
-    harvestSources: boolean;
+    harvestSources?: boolean;
     /**
      * if the creep can harvest minerals
      */
-    harvestMinerals: boolean;
+    harvestMinerals?: boolean;
     /**
      * if the creep can repair walls and ramparts
      */
-    wallRepair: boolean;
+    wallRepair?: boolean;
     /**
      * if the creep can fill towers
      */
-    fillTower: boolean;
+    fillTower?: boolean;
     /**
      * if the creep can fill storage
      */
-    fillStorage: boolean;
+    fillStorage?: boolean;
     /**
      * if the creep can fill containers
      */
-    fillContainer: boolean;
+    fillContainer?: boolean;
     /**
      * if the creep can fill links
      */
-    fillLink: boolean;
+    fillLink?: boolean;
     /**
      * fill spawn/extensions
      */
-    fillSpawn: boolean;
+    fillSpawn?: boolean;
     /**
      * if the creep can fill the terminal
      */
-    fillTerminal: boolean;
+    fillTerminal?: boolean;
     /**
      * if the creep can fill a lab
      */
-    fillLab: boolean;
+    fillLab?: boolean;
     /**
      * if the creep can pull from storage
      */
-    getFromStorage: boolean;
+    getFromStorage?: boolean;
     /**
      * if the creep can pull from a container
      */
-    getFromContainer: boolean;
+    getFromContainer?: boolean;
     /**
      * if the creep can seek out dropped energy
      */
-    getDroppedEnergy: boolean;
+    getDroppedEnergy?: boolean;
     /**
      * if the creep can pull from a link
      */
-    getFromLink: boolean;
+    getFromLink?: boolean;
     /**
      * if the creep can pull from the terminal
      */
-    getFromTerminal: boolean;
+    getFromTerminal?: boolean;
 }
 
 /**
@@ -708,43 +702,43 @@ interface CreepOptionsMili {
     /**
      * the number of other creeps in this creep's squad
      */
-    squadSize: number | null;
+    squadSize?: number | null;
     /**
      * the generated token that ties members of this squad together
      */
-    squadUUID: number | null;
+    squadUUID?: number | null;
     /**
      * the area the squad is going to meet
      */
-    rallyLocation: RoomPosition | null;
+    rallyLocation?: RoomPosition | null;
     /**
      * if the rally conditions have already been met
      */
-    rallyDone: boolean;
+    rallyDone?: boolean;
     /**
      * if the creep is meant to seige the room to attrition (tower drain, etc)
      */
-    seige: boolean;
+    seige?: boolean;
     /**
      * if the creep is meant to dismantle walls and structures
      */
-    dismantler: boolean;
+    dismantler?: boolean;
     /**
      * if the creep is meant to heal other creeps/itself
      */
-    healer: boolean;
+    healer?: boolean;
     /**
      * if the creep is meant to seek out enemy creeps
      */
-    attacker: boolean;
+    attacker?: boolean;
     /**
      * if the creep is meant to defend a room from invaders
      */
-    defender: boolean;
+    defender?: boolean;
     /**
      * if the creep values it's life and flees at low health
      */
-    flee: boolean;
+    flee?: boolean;
 }
 
 /**
