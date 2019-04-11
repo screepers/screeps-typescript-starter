@@ -1043,12 +1043,8 @@ class GetEnergyJobs {
                 targetType: "source",
                 actionType: "harvest",
                 resources: sourceResources,
-                isTaken: false
+                isTaken: sourceEnergyRemaining <= 0 // Taken if no energy remaining
             };
-            // Mark the job as taken if there is no energy remaining
-            if (sourceEnergyRemaining <= 0) {
-                sourceJob.isTaken = true;
-            }
             // Append the GetEnergyJob to the main array
             sourceJobList.push(sourceJob);
         });
@@ -1089,7 +1085,7 @@ class GetEnergyJobs {
                 targetType: STRUCTURE_CONTAINER,
                 actionType: "withdraw",
                 resources: adjustedContainerStore,
-                isTaken: false
+                isTaken: _.sum(adjustedContainerStore) <= 0 // Taken if empty
             };
             // Append to the main array
             containerJobList.push(containerJob);
@@ -1145,6 +1141,7 @@ class GetEnergyJobs {
                     const newValue = storageJob.resources[type] === undefined ? 0 : storageJob.resources[type];
                     storageJob.resources[type] = oldValue > newValue ? newValue : oldValue;
                 });
+                storageJob.isTaken = _.sum(storageJob.resources) <= 0;
             }
             backupJobList.push(storageJob);
         }
@@ -1166,6 +1163,7 @@ class GetEnergyJobs {
                     const newValue = terminalJob.resources[type] === undefined ? 0 : terminalJob.resources[type];
                     terminalJob.resources[type] = oldValue > newValue ? newValue : oldValue;
                 });
+                terminalJob.isTaken = _.sum(terminalJob.resources) <= 0;
             }
             backupJobList.push(terminalJob);
         }
@@ -1309,6 +1307,7 @@ class WorkPartJobs {
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for
+     * [Estimate-Restore] Chooses the lower of two values
      */
     static createRepairJobs(room) {
         const repairTargets = RoomApi.getRepairTargets(room);
@@ -1325,6 +1324,11 @@ class WorkPartJobs {
                 remaining: structure.hitsMax - structure.hits,
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchWorkPartJobs(repairJob, room);
+            if (oldJob !== undefined) {
+                repairJob.remaining = oldJob.remaining > repairJob.remaining ? repairJob.remaining : oldJob.remaining;
+                repairJob.isTaken = repairJob.remaining <= 0;
+            }
             repairJobs.push(repairJob);
         });
         return repairJobs;
@@ -1332,6 +1336,7 @@ class WorkPartJobs {
     /**
      * Gets a list of buildJobs for the room
      * @param room The room to get jobs for
+     * [Estimate-Restore] Chooses the lower of two values
      */
     static createBuildJobs(room) {
         const constructionSites = MemoryApi.getConstructionSites(room.name);
@@ -1348,13 +1353,19 @@ class WorkPartJobs {
                 remaining: cs.progressTotal - cs.progress,
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchWorkPartJobs(buildJob, room);
+            if (oldJob !== undefined) {
+                buildJob.remaining = buildJob.remaining > oldJob.remaining ? oldJob.remaining : buildJob.remaining;
+                buildJob.isTaken = buildJob.remaining <= 0;
+            }
             buildJobs.push(buildJob);
         });
         return buildJobs;
     }
     /**
      * Gets a list of upgradeJobs for the room
-     * @param room The room to get jobs for
+     * @param room The room to get jobs
+     * [No-Restore] Create a fresh job every time
      */
     static createUpgradeJobs(room) {
         // Just returning a single upgrade controller job for now
@@ -1379,6 +1390,7 @@ class CarryPartJobs {
     /**
      * Gets a list of fill jobs for the room
      * @param room The room to get the jobs for
+     * [Accurate-Restore]
      */
     static createFillJobs(room) {
         const lowSpawnsAndExtensions = RoomApi.getLowSpawnAndExtensions(room);
@@ -1388,24 +1400,44 @@ class CarryPartJobs {
         }
         const fillJobs = [];
         _.forEach(lowSpawnsAndExtensions, (structure) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer") {
+                    return true;
+                }
+                return false;
+            });
+            const creepCapacity = _.sum(creepsUsing, (creep) => creep.carryCapacity - _.sum(creep.carry));
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
             const fillJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
             fillJobs.push(fillJob);
         });
         _.forEach(lowTowers, (structure) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer") {
+                    return true;
+                }
+                return false;
+            });
+            const creepCapacity = _.sum(creepsUsing, (creep) => creep.carryCapacity - _.sum(creep.carry));
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
             const fillJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
             fillJobs.push(fillJob);
         });
@@ -1414,6 +1446,7 @@ class CarryPartJobs {
     /**
      * Gets a list of store jobs for the room
      * @param room The room to get the jobs for
+     * [Estimate-Restore]
      */
     static createStoreJobs(room) {
         const storeJobs = [];
@@ -1426,6 +1459,12 @@ class CarryPartJobs {
                 actionType: "transfer",
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchCarryPartJobs(storageJob, room);
+            if (oldJob !== undefined) {
+                storageJob.remaining =
+                    storageJob.remaining > oldJob.remaining ? oldJob.remaining : storageJob.remaining;
+                storageJob.isTaken = storageJob.remaining >= room.storage.storeCapacity;
+            }
             storeJobs.push(storageJob);
         }
         if (room.terminal !== undefined) {
@@ -1437,6 +1476,12 @@ class CarryPartJobs {
                 actionType: "transfer",
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchCarryPartJobs(terminalJob, room);
+            if (oldJob !== undefined) {
+                terminalJob.remaining =
+                    terminalJob.remaining > oldJob.remaining ? oldJob.remaining : terminalJob.remaining;
+                terminalJob.isTaken = terminalJob.remaining >= room.terminal.storeCapacity;
+            }
             storeJobs.push(terminalJob);
         }
         const upgraderLink = MemoryApi.getUpgraderLink(room);
@@ -1451,6 +1496,12 @@ class CarryPartJobs {
                     actionType: "transfer",
                     isTaken: false
                 };
+                const oldJob = MemoryApi.searchCarryPartJobs(fillLinkJob, room);
+                if (oldJob !== undefined) {
+                    fillLinkJob.remaining =
+                        fillLinkJob.remaining > oldJob.remaining ? oldJob.remaining : fillLinkJob.remaining;
+                    fillLinkJob.isTaken = fillLinkJob.remaining <= 0;
+                }
                 storeJobs.push(fillLinkJob);
             });
         }
@@ -9176,17 +9227,12 @@ class HarvesterCreepManager {
             }
             this.handleNewJob(creep, homeRoom);
         }
-        // I think i know how to fix creeps idling for a tick between traveling and doing the job
-        // Travel to checks if they're there and returns, problem is we call it after do work
-        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
-        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
-        // ticks spent filling up spawn alone
-        if (creep.memory.job) {
-            if (creep.memory.working) {
-                CreepApi.doWork(creep, creep.memory.job);
-                return;
-            }
+        if (!creep.memory.working) {
             CreepApi.travelTo(creep, creep.memory.job);
+        }
+        if (creep.memory.working) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
         }
     }
     /**
@@ -9248,22 +9294,16 @@ class HarvesterCreepManager {
         if (creepOptions.fillStorage || creepOptions.fillContainer) {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
             if (storeJobs.length > 0) {
-                // Find the closeest job to the creep currently
-                // ! - I'm 90% confident theres a better way to do this, feel free
-                const jobObjects = _.map(storeJobs, (storeJob) => Game.getObjectById(storeJob.targetID));
-                const jobObjectPos = [];
-                for (const jo of jobObjects) {
-                    if (!jo) {
-                        continue;
-                    }
-                    jobObjectPos.push(jo.pos);
+                const jobObjects = MemoryHelper.getOnlyObjectsFromIDs(_.map(storeJobs, job => job.targetID));
+                const closestTarget = creep.pos.findClosestByRange(jobObjects);
+                let closestJob;
+                if (closestTarget !== null) {
+                    closestJob = _.find(storeJobs, (job) => job.targetID === closestTarget.id);
                 }
-                const closestTarget = creep.pos.findClosestByPath(jobObjectPos);
-                const closestJob = _.find(storeJobs, (j) => {
-                    const roomObj = Game.getObjectById(j.targetID);
-                    const roomPos = roomObj.pos;
-                    return closestTarget === roomPos;
-                });
+                else {
+                    // if findCLosest nulls out, just choose first
+                    closestJob = storeJobs[0];
+                }
                 return closestJob;
             }
             return undefined;
