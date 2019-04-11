@@ -6,6 +6,7 @@ export default class CarryPartJobs {
     /**
      * Gets a list of fill jobs for the room
      * @param room The room to get the jobs for
+     * [Accurate-Restore]
      */
     public static createFillJobs(room: Room): CarryPartJob[] {
         const lowSpawnsAndExtensions = RoomApi.getLowSpawnAndExtensions(room);
@@ -18,25 +19,55 @@ export default class CarryPartJobs {
         const fillJobs: CarryPartJob[] = [];
 
         _.forEach(lowSpawnsAndExtensions, (structure: StructureSpawn | StructureExtension) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                if (
+                    creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer"
+                ) {
+                    return true;
+                }
+                return false;
+            });
+
+            const creepCapacity = _.sum(creepsUsing, (creep: Creep) => creep.carryCapacity - _.sum(creep.carry));
+
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
+
             const fillJob: CarryPartJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
 
             fillJobs.push(fillJob);
         });
         _.forEach(lowTowers, (structure: StructureTower) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                if (
+                    creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer"
+                ) {
+                    return true;
+                }
+                return false;
+            });
+
+            const creepCapacity = _.sum(creepsUsing, (creep: Creep) => creep.carryCapacity - _.sum(creep.carry));
+
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
+
             const fillJob: CarryPartJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
 
             fillJobs.push(fillJob);
@@ -48,6 +79,7 @@ export default class CarryPartJobs {
     /**
      * Gets a list of store jobs for the room
      * @param room The room to get the jobs for
+     * [Estimate-Restore]
      */
     public static createStoreJobs(room: Room): CarryPartJob[] {
         const storeJobs: CarryPartJob[] = [];
@@ -62,6 +94,14 @@ export default class CarryPartJobs {
                 isTaken: false
             };
 
+            const oldJob = MemoryApi.searchCarryPartJobs(storageJob, room);
+
+            if (oldJob !== undefined) {
+                storageJob.remaining =
+                    storageJob.remaining > oldJob.remaining ? oldJob.remaining : storageJob.remaining;
+
+                storageJob.isTaken = storageJob.remaining >= room.storage.storeCapacity;
+            }
             storeJobs.push(storageJob);
         }
 
@@ -75,6 +115,14 @@ export default class CarryPartJobs {
                 isTaken: false
             };
 
+            const oldJob = MemoryApi.searchCarryPartJobs(terminalJob, room);
+
+            if (oldJob !== undefined) {
+                terminalJob.remaining =
+                    terminalJob.remaining > oldJob.remaining ? oldJob.remaining : terminalJob.remaining;
+
+                terminalJob.isTaken = terminalJob.remaining >= room.terminal.storeCapacity;
+            }
             storeJobs.push(terminalJob);
         }
 
@@ -96,6 +144,15 @@ export default class CarryPartJobs {
                     actionType: "transfer",
                     isTaken: false
                 };
+
+                const oldJob = MemoryApi.searchCarryPartJobs(fillLinkJob, room);
+
+                if (oldJob !== undefined) {
+                    fillLinkJob.remaining =
+                        fillLinkJob.remaining > oldJob.remaining ? oldJob.remaining : fillLinkJob.remaining;
+
+                    fillLinkJob.isTaken = fillLinkJob.remaining <= 0;
+                }
 
                 storeJobs.push(fillLinkJob);
             });

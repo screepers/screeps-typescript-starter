@@ -5,6 +5,7 @@ export default class WorkPartJobs {
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for
+     * [Estimate-Restore] Chooses the lower of two values
      */
     public static createRepairJobs(room: Room): WorkPartJob[] {
         const repairTargets = RoomApi.getRepairTargets(room);
@@ -25,6 +26,14 @@ export default class WorkPartJobs {
                 isTaken: false
             };
 
+            const oldJob = MemoryApi.searchWorkPartJobs(repairJob, room);
+
+            if (oldJob !== undefined) {
+                repairJob.remaining = oldJob.remaining > repairJob.remaining ? repairJob.remaining : oldJob.remaining;
+
+                repairJob.isTaken = repairJob.remaining <= 0;
+            }
+
             repairJobs.push(repairJob);
         });
 
@@ -34,6 +43,7 @@ export default class WorkPartJobs {
     /**
      * Gets a list of buildJobs for the room
      * @param room The room to get jobs for
+     * [Estimate-Restore] Chooses the lower of two values
      */
     public static createBuildJobs(room: Room): WorkPartJob[] {
         const constructionSites = MemoryApi.getConstructionSites(room.name);
@@ -54,6 +64,12 @@ export default class WorkPartJobs {
                 isTaken: false
             };
 
+            const oldJob = MemoryApi.searchWorkPartJobs(buildJob, room);
+
+            if (oldJob !== undefined) {
+                buildJob.remaining = buildJob.remaining > oldJob.remaining ? oldJob.remaining : buildJob.remaining;
+                buildJob.isTaken = buildJob.remaining <= 0;
+            }
             buildJobs.push(buildJob);
         });
 
@@ -62,7 +78,8 @@ export default class WorkPartJobs {
 
     /**
      * Gets a list of upgradeJobs for the room
-     * @param room The room to get jobs for
+     * @param room The room to get jobs
+     * [No-Restore] Create a fresh job every time
      */
     public static createUpgradeJobs(room: Room): WorkPartJob[] {
         // Just returning a single upgrade controller job for now

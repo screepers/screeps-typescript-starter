@@ -86,7 +86,6 @@ const ROOM_STATE_BEGINNER = 1;
 const ROOM_STATE_INTER = 2;
 const ROOM_STATE_ADVANCED = 3;
 const ROOM_STATE_UPGRADER = 4;
-const ROOM_STATE_SEIGE = 5;
 const ROOM_STATE_STIMULATE = 6;
 const ROOM_STATE_NUKE_INBOUND = 7;
 // Role Constants
@@ -213,7 +212,6 @@ const ROOM_STATE_BEGINNER$1 = 1;
 const ROOM_STATE_INTER$1 = 2;
 const ROOM_STATE_ADVANCED$1 = 3;
 const ROOM_STATE_UPGRADER$1 = 4;
-const ROOM_STATE_SEIGE$1 = 5;
 const ROOM_STATE_STIMULATE$1 = 6;
 const ROOM_STATE_NUKE_INBOUND$1 = 7;
 // Role Constants
@@ -724,13 +722,6 @@ class RoomApi {
             MemoryApi.updateRoomState(ROOM_STATE_INTRO$1, room);
             return;
         }
-        // check if we are siege room state
-        // defcon is level 3+ and hostiles activity in the room is high
-        const defconLevel = MemoryApi.getDefconLevel(room);
-        if (defconLevel >= 3) {
-            MemoryApi.updateRoomState(ROOM_STATE_SEIGE$1, room);
-            return;
-        }
         // ----------
         const storage = room.storage;
         const containers = MemoryApi.getStructureOfType(room.name, STRUCTURE_CONTAINER);
@@ -1021,6 +1012,7 @@ class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the sources of a room
      * @param room The room to create the job list for
+     * [Accurate-Restore] Adjusts for creeps targeting it
      */
     static createSourceJobs(room) {
         // List of all sources that are under optimal work capacity
@@ -1032,13 +1024,9 @@ class GetEnergyJobs {
         _.forEach(openSources, (source) => {
             // Get all miners that are targeting this source
             const miners = MemoryApi.getMyCreeps(room.name, (creep) => {
-                if (creep.memory.role === ROLE_MINER) {
-                    if (creep.memory.job && creep.memory.job.targetID === source.id) {
-                        // ! Can optionally add another statement here that checks
-                        // ! if creep.ticksToLive > however many ticks it takes to spawn a creep
-                        // ! so that creeps that are about to die are not considered as using a part of the job.
-                        return true;
-                    }
+                if (creep.memory.role === ROLE_MINER && creep.memory.job && creep.memory.job.targetID === source.id) {
+                    // * Can optionally add another statement here that checks if creep has enough life to be considered part of the job
+                    return true;
                 }
                 return false;
             });
@@ -1055,12 +1043,8 @@ class GetEnergyJobs {
                 targetType: "source",
                 actionType: "harvest",
                 resources: sourceResources,
-                isTaken: false
+                isTaken: sourceEnergyRemaining <= 0 // Taken if no energy remaining
             };
-            // Mark the job as taken if there is no energy remaining
-            if (sourceEnergyRemaining <= 0) {
-                sourceJob.isTaken = true;
-            }
             // Append the GetEnergyJob to the main array
             sourceJobList.push(sourceJob);
         });
@@ -1069,6 +1053,7 @@ class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the containers of a room
      * @param room The room to create the job list for
+     * [Accurate-Restore] Adjusts for creeps currently targeting it
      */
     static createContainerJobs(room) {
         // List of all containers with >= CONTAINER_MINIMUM_ENERGY (from config.ts)
@@ -1078,13 +1063,29 @@ class GetEnergyJobs {
         }
         const containerJobList = [];
         _.forEach(containers, (container) => {
+            // Get all creeps that are targeting this container to withdraw from it
+            const creepsUsingContainer = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === container.id &&
+                    creep.memory.job.actionType === "withdraw") {
+                    return true;
+                }
+                return false;
+            });
+            // The container.store we will use instead of the true value
+            const adjustedContainerStore = container.store;
+            // Subtract the empty carry of creeps targeting this container to withdraw
+            _.forEach(creepsUsingContainer, (creep) => {
+                adjustedContainerStore.energy -= creep.carryCapacity - creep.carry.energy;
+            });
+            // Create the containerJob
             const containerJob = {
                 jobType: "getEnergyJob",
                 targetID: container.id,
                 targetType: STRUCTURE_CONTAINER,
                 actionType: "withdraw",
-                resources: container.store,
-                isTaken: false
+                resources: adjustedContainerStore,
+                isTaken: _.sum(adjustedContainerStore) <= 0 // Taken if empty
             };
             // Append to the main array
             containerJobList.push(containerJob);
@@ -1117,7 +1118,8 @@ class GetEnergyJobs {
     }
     /**
      * Gets a list of GetEnergyJobs for the backup structures of a room (terminal, storage)
-     * @param room  The room to create the job list for
+     * @param room  The room to create the job list
+     * [Estimate-Restore] Uses the worst-case of old and new values to estimate storage
      */
     static createBackupStructuresJobs(room) {
         const backupJobList = [];
@@ -1131,6 +1133,16 @@ class GetEnergyJobs {
                 resources: room.storage.store,
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchGetEnergyJobs(storageJob, room);
+            // Choose the lowest of oldJob vs storageJob for each resource
+            if (oldJob !== undefined) {
+                _.forEach(Object.keys(storageJob.resources), (type) => {
+                    const oldValue = oldJob.resources[type] === undefined ? 0 : oldJob.resources[type];
+                    const newValue = storageJob.resources[type] === undefined ? 0 : storageJob.resources[type];
+                    storageJob.resources[type] = oldValue > newValue ? newValue : oldValue;
+                });
+                storageJob.isTaken = _.sum(storageJob.resources) <= 0;
+            }
             backupJobList.push(storageJob);
         }
         // Create the terminal job if active
@@ -1143,6 +1155,16 @@ class GetEnergyJobs {
                 resources: room.terminal.store,
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchGetEnergyJobs(terminalJob, room);
+            // Choose the lowest of oldJob vs storageJob for each resource
+            if (oldJob !== undefined) {
+                _.forEach(Object.keys(terminalJob.resources), (type) => {
+                    const oldValue = oldJob.resources[type] === undefined ? 0 : oldJob.resources[type];
+                    const newValue = terminalJob.resources[type] === undefined ? 0 : terminalJob.resources[type];
+                    terminalJob.resources[type] = oldValue > newValue ? newValue : oldValue;
+                });
+                terminalJob.isTaken = _.sum(terminalJob.resources) <= 0;
+            }
             backupJobList.push(terminalJob);
         }
         return backupJobList;
@@ -1150,6 +1172,7 @@ class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the dropped resources of a room
      * @param room The room to create the job for
+     * [Accurate-Restore] Adjusts for creeps targeting it
      */
     static createPickupJobs(room) {
         // All dropped energy in the room
@@ -1161,6 +1184,16 @@ class GetEnergyJobs {
         _.forEach(drops, (drop) => {
             const dropStore = { energy: 0 };
             dropStore[drop.resourceType] = drop.amount;
+            const creepsUsingDrop = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === drop.id &&
+                    creep.memory.job.actionType === "pickup") {
+                    return true;
+                }
+                return false;
+            });
+            // Subtract creep's carryspace from drop amount
+            dropStore[drop.resourceType] -= _.sum(creepsUsingDrop, creep => creep.carryCapacity - _.sum(creep.carry));
             const dropJob = {
                 jobType: "getEnergyJob",
                 targetID: drop.id,
@@ -1274,6 +1307,7 @@ class WorkPartJobs {
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for
+     * [Estimate-Restore] Chooses the lower of two values
      */
     static createRepairJobs(room) {
         const repairTargets = RoomApi.getRepairTargets(room);
@@ -1290,6 +1324,11 @@ class WorkPartJobs {
                 remaining: structure.hitsMax - structure.hits,
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchWorkPartJobs(repairJob, room);
+            if (oldJob !== undefined) {
+                repairJob.remaining = oldJob.remaining > repairJob.remaining ? repairJob.remaining : oldJob.remaining;
+                repairJob.isTaken = repairJob.remaining <= 0;
+            }
             repairJobs.push(repairJob);
         });
         return repairJobs;
@@ -1297,6 +1336,7 @@ class WorkPartJobs {
     /**
      * Gets a list of buildJobs for the room
      * @param room The room to get jobs for
+     * [Estimate-Restore] Chooses the lower of two values
      */
     static createBuildJobs(room) {
         const constructionSites = MemoryApi.getConstructionSites(room.name);
@@ -1313,13 +1353,19 @@ class WorkPartJobs {
                 remaining: cs.progressTotal - cs.progress,
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchWorkPartJobs(buildJob, room);
+            if (oldJob !== undefined) {
+                buildJob.remaining = buildJob.remaining > oldJob.remaining ? oldJob.remaining : buildJob.remaining;
+                buildJob.isTaken = buildJob.remaining <= 0;
+            }
             buildJobs.push(buildJob);
         });
         return buildJobs;
     }
     /**
      * Gets a list of upgradeJobs for the room
-     * @param room The room to get jobs for
+     * @param room The room to get jobs
+     * [No-Restore] Create a fresh job every time
      */
     static createUpgradeJobs(room) {
         // Just returning a single upgrade controller job for now
@@ -1344,6 +1390,7 @@ class CarryPartJobs {
     /**
      * Gets a list of fill jobs for the room
      * @param room The room to get the jobs for
+     * [Accurate-Restore]
      */
     static createFillJobs(room) {
         const lowSpawnsAndExtensions = RoomApi.getLowSpawnAndExtensions(room);
@@ -1353,24 +1400,44 @@ class CarryPartJobs {
         }
         const fillJobs = [];
         _.forEach(lowSpawnsAndExtensions, (structure) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer") {
+                    return true;
+                }
+                return false;
+            });
+            const creepCapacity = _.sum(creepsUsing, (creep) => creep.carryCapacity - _.sum(creep.carry));
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
             const fillJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
             fillJobs.push(fillJob);
         });
         _.forEach(lowTowers, (structure) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer") {
+                    return true;
+                }
+                return false;
+            });
+            const creepCapacity = _.sum(creepsUsing, (creep) => creep.carryCapacity - _.sum(creep.carry));
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
             const fillJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
             fillJobs.push(fillJob);
         });
@@ -1379,6 +1446,7 @@ class CarryPartJobs {
     /**
      * Gets a list of store jobs for the room
      * @param room The room to get the jobs for
+     * [Estimate-Restore]
      */
     static createStoreJobs(room) {
         const storeJobs = [];
@@ -1391,6 +1459,12 @@ class CarryPartJobs {
                 actionType: "transfer",
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchCarryPartJobs(storageJob, room);
+            if (oldJob !== undefined) {
+                storageJob.remaining =
+                    storageJob.remaining > oldJob.remaining ? oldJob.remaining : storageJob.remaining;
+                storageJob.isTaken = storageJob.remaining >= room.storage.storeCapacity;
+            }
             storeJobs.push(storageJob);
         }
         if (room.terminal !== undefined) {
@@ -1402,6 +1476,12 @@ class CarryPartJobs {
                 actionType: "transfer",
                 isTaken: false
             };
+            const oldJob = MemoryApi.searchCarryPartJobs(terminalJob, room);
+            if (oldJob !== undefined) {
+                terminalJob.remaining =
+                    terminalJob.remaining > oldJob.remaining ? oldJob.remaining : terminalJob.remaining;
+                terminalJob.isTaken = terminalJob.remaining >= room.terminal.storeCapacity;
+            }
             storeJobs.push(terminalJob);
         }
         const upgraderLink = MemoryApi.getUpgraderLink(room);
@@ -1416,6 +1496,12 @@ class CarryPartJobs {
                     actionType: "transfer",
                     isTaken: false
                 };
+                const oldJob = MemoryApi.searchCarryPartJobs(fillLinkJob, room);
+                if (oldJob !== undefined) {
+                    fillLinkJob.remaining =
+                        fillLinkJob.remaining > oldJob.remaining ? oldJob.remaining : fillLinkJob.remaining;
+                    fillLinkJob.isTaken = fillLinkJob.remaining <= 0;
+                }
                 storeJobs.push(fillLinkJob);
             });
         }
@@ -1626,10 +1712,6 @@ class MemoryHelper_Room {
      * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
      */
     static updateGetEnergy_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs;
-        }
         this.updateGetEnergy_sourceJobs(room);
         this.updateGetEnergy_containerJobs(room);
         this.updateGetEnergy_linkJobs(room);
@@ -1645,13 +1727,6 @@ class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
         }
-        // What to do if the jobs already exist
-        // ! Deletes existing jobs
-        // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?
-        // ? Or should we just set it up so that each time the Job objects are updated they start fresh? (might require mining creep memory for changes to the job status, or accepting inaccuracy)
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs;
-        }
         Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs = {
             data: GetEnergyJobs.createSourceJobs(room),
             cache: Game.time
@@ -1664,9 +1739,6 @@ class MemoryHelper_Room {
     static updateGetEnergy_containerJobs(room) {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
-        }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs;
         }
         Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs = {
             data: GetEnergyJobs.createContainerJobs(room),
@@ -1681,9 +1753,6 @@ class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
         }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs;
-        }
         Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs = {
             data: GetEnergyJobs.createLinkJobs(room),
             cache: Game.time
@@ -1696,9 +1765,6 @@ class MemoryHelper_Room {
     static updateGetEnergy_backupStructuresJobs(room) {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
-        }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures;
         }
         Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures = {
             data: GetEnergyJobs.createBackupStructuresJobs(room),
@@ -1713,9 +1779,6 @@ class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
         }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs;
-        }
         Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs = {
             data: GetEnergyJobs.createPickupJobs(room),
             cache: Game.time
@@ -1727,10 +1790,6 @@ class MemoryHelper_Room {
      * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
      */
     static updateClaimPart_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs;
-        }
         this.updateClaimPart_claimJobs(room);
         this.updateClaimPart_reserveJobs(room);
         this.updateClaimPart_signJobs(room);
@@ -1738,16 +1797,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_claimJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_claimJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.claimJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.claimJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.claimJobs = {
             data: ClaimPartJobs.createClaimJobs(room),
@@ -1756,16 +1810,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_reserveJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_reserveJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs = {
             data: ClaimPartJobs.createReserveJobs(room),
@@ -1774,16 +1823,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_signJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_signJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.signJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.signJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.signJobs = {
             data: ClaimPartJobs.createSignJobs(room),
@@ -1792,16 +1836,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_attackJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_controllerAttackJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.attackJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.attackJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.attackJobs = {
             data: ClaimPartJobs.createAttackJobs(room),
@@ -1813,26 +1852,17 @@ class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     static updateWorkPart_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.workPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs;
-        }
         this.updateWorkPart_repairJobs(room);
         this.updateWorkPart_buildJobs(room);
         this.updateWorkPart_upgradeJobs(room);
     }
     /**
      * Update the room's WorkPartJobListing_repairJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateWorkPart_repairJobs(room) {
         if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs.repairJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs.repairJobs;
         }
         Memory.rooms[room.name].jobs.workPartJobs.repairJobs = {
             data: WorkPartJobs.createRepairJobs(room),
@@ -1841,16 +1871,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's WorkPartJobListing_buildJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateWorkPart_buildJobs(room) {
         if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs.buildJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs.buildJobs;
         }
         Memory.rooms[room.name].jobs.workPartJobs.buildJobs = {
             data: WorkPartJobs.createBuildJobs(room),
@@ -1859,16 +1884,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's WorkPartJobListing_upgradeJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateWorkPart_upgradeJobs(room) {
         if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs;
         }
         Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs = {
             data: WorkPartJobs.createUpgradeJobs(room),
@@ -1880,10 +1900,6 @@ class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     static updateCarryPart_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.carryPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs;
-        }
         this.updateCarryPart_fillJobs(room);
         this.updateCarryPart_storeJobs(room);
     }
@@ -1894,10 +1910,6 @@ class MemoryHelper_Room {
     static updateCarryPart_fillJobs(room) {
         if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
             Memory.rooms[room.name].jobs.carryPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.carryPartJobs.fillJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs.fillJobs;
         }
         Memory.rooms[room.name].jobs.carryPartJobs.fillJobs = {
             data: CarryPartJobs.createFillJobs(room),
@@ -1911,10 +1923,6 @@ class MemoryHelper_Room {
     static updateCarryPart_storeJobs(room) {
         if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
             Memory.rooms[room.name].jobs.carryPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.carryPartJobs.storeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs.storeJobs;
         }
         Memory.rooms[room.name].jobs.carryPartJobs.storeJobs = {
             data: CarryPartJobs.createStoreJobs(room),
@@ -2025,14 +2033,6 @@ class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 3;
                 domesticLimits[ROLE_POWER_UPGRADER] = 2;
-                domesticLimits[ROLE_LORRY] = numLorries;
-                break;
-            // Seige
-            case ROOM_STATE_SEIGE:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_LORRY] = numLorries;
                 break;
         }
@@ -2703,7 +2703,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
@@ -2788,7 +2787,6 @@ class SpawnHelper {
                 break;
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
@@ -2881,7 +2879,6 @@ class SpawnHelper {
                 break;
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
@@ -2945,7 +2942,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     fillTower: true,
@@ -2997,7 +2993,6 @@ class SpawnHelper {
         switch (roomState) {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     upgrade: true,
@@ -3110,7 +3105,6 @@ class SpawnHelper {
                 break;
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     repair: true,
@@ -3156,7 +3150,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 // Remote reservers don't really have options perse, so just leave as defaults
                 creepOptions = {};
@@ -3201,7 +3194,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     build: true,
@@ -3229,7 +3221,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {};
                 break;
@@ -3298,7 +3289,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: 1,
@@ -3366,7 +3356,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: squadSizeParam,
@@ -3425,7 +3414,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: squadSizeParam,
@@ -3482,7 +3470,13 @@ class SpawnHelper {
     static generateStalkerOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
         let creepOptions = this.getDefaultCreepOptionsMili();
         switch (roomState) {
+            case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -3539,7 +3533,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: 0,
@@ -8071,8 +8064,6 @@ class RoomVisualManager {
                 return "Advanced";
             case ROOM_STATE_NUKE_INBOUND$1:
                 return "Nuke Incoming!";
-            case ROOM_STATE_SEIGE$1:
-                return "Seige!";
             case ROOM_STATE_STIMULATE$1:
                 return "Stimulate";
             case ROOM_STATE_UPGRADER$1:
@@ -9130,35 +9121,9 @@ class CreepApi {
         // Creep is not on exit tile
         return false;
     }
-}
-
-// Manager for the miner creep role
-class MinerCreepManager {
-    /**
-     * Run the miner creep
-     * @param creep The creep to run
-     */
-    static runCreepRole(creep) {
-        if (creep.spawning) {
-            return; // Don't do anything until you've spawned
-        }
-        const homeRoom = Game.rooms[creep.memory.homeRoom];
-        if (creep.memory.job === undefined) {
-            creep.memory.job = this.getNewSourceJob(creep, homeRoom);
-            if (creep.memory.job === undefined) {
-                return; // idle for a tick
-            }
-            // Set supplementary.moveTarget to container if one exists and isn't already taken
-            this.handleNewJob(creep, homeRoom);
-        }
-        if (creep.memory.job) {
-            if (creep.memory.working) {
-                CreepApi.doWork(creep, creep.memory.job);
-                return;
-            }
-            CreepApi.travelTo(creep, creep.memory.job);
-        }
-    }
+    /**********************************************************/
+    /*        GET NEW JOB SECTION                           ***/
+    /**********************************************************/
     static getNewSourceJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.harvestSources) {
@@ -9185,9 +9150,37 @@ class MinerCreepManager {
                     return _.find(sourceJobs, (job) => job.targetID === closestAvailableSource.id);
                 }
             }
-        } // End harvestSources option
-        // no available jobs
+        }
         return undefined;
+    }
+}
+
+// Manager for the miner creep role
+class MinerCreepManager {
+    /**
+     * Run the miner creep
+     * @param creep The creep to run
+     */
+    static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // Don't do anything until you've spawned
+        }
+        const homeRoom = Game.rooms[creep.memory.homeRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = CreepApi.getNewSourceJob(creep, homeRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            // Set supplementary.moveTarget to container if one exists and isn't already taken
+            this.handleNewJob(creep, homeRoom);
+        }
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
+        }
     }
     /**
      * Handle initalizing a new job
@@ -9234,17 +9227,12 @@ class HarvesterCreepManager {
             }
             this.handleNewJob(creep, homeRoom);
         }
-        // I think i know how to fix creeps idling for a tick between traveling and doing the job
-        // Travel to checks if they're there and returns, problem is we call it after do work
-        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
-        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
-        // ticks spent filling up spawn alone
-        if (creep.memory.job) {
-            if (creep.memory.working) {
-                CreepApi.doWork(creep, creep.memory.job);
-                return;
-            }
+        if (!creep.memory.working) {
             CreepApi.travelTo(creep, creep.memory.job);
+        }
+        if (creep.memory.working) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
         }
     }
     /**
@@ -9306,22 +9294,16 @@ class HarvesterCreepManager {
         if (creepOptions.fillStorage || creepOptions.fillContainer) {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
             if (storeJobs.length > 0) {
-                // Find the closeest job to the creep currently
-                // ! - I'm 90% confident theres a better way to do this, feel free
-                const jobObjects = _.map(storeJobs, (storeJob) => Game.getObjectById(storeJob.targetID));
-                const jobObjectPos = [];
-                for (const jo of jobObjects) {
-                    if (!jo) {
-                        continue;
-                    }
-                    jobObjectPos.push(jo.pos);
+                const jobObjects = MemoryHelper.getOnlyObjectsFromIDs(_.map(storeJobs, job => job.targetID));
+                const closestTarget = creep.pos.findClosestByRange(jobObjects);
+                let closestJob;
+                if (closestTarget !== null) {
+                    closestJob = _.find(storeJobs, (job) => job.targetID === closestTarget.id);
                 }
-                const closestTarget = creep.pos.findClosestByPath(jobObjectPos);
-                const closestJob = _.find(storeJobs, (j) => {
-                    const roomObj = Game.getObjectById(j.targetID);
-                    const roomPos = roomObj.pos;
-                    return closestTarget === roomPos;
-                });
+                else {
+                    // if findCLosest nulls out, just choose first
+                    closestJob = storeJobs[0];
+                }
                 return closestJob;
             }
             return undefined;
