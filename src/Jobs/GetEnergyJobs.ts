@@ -11,6 +11,7 @@ export default class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the sources of a room
      * @param room The room to create the job list for
+     * [Accurate-Restore]
      */
     public static createSourceJobs(room: Room): GetEnergyJob[] {
         // List of all sources that are under optimal work capacity
