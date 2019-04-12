@@ -217,21 +217,21 @@ export default class RoomVisualManager {
         }
 
         // Reset rolling average so that values remain significant instead of being watered down over time
-        if (Memory.visual.room[room.name].rcl !== room.controller!.level) {
-            Memory.visual.room[room.name].avgPointsPerTick = 0;
-            Memory.visual.room[room.name].ticksMeasured = 0;
-            Memory.visual.room[room.name].rcl = room.controller!.level;
+        if (Memory.room[room.name].visual.rcl !== room.controller!.level) {
+            Memory.room[room.name].visual.avgPointsPerTick = 0;
+            Memory.room[room.name].visual.ticksMeasured = 0;
+            Memory.room[room.name].visual.rcl = room.controller!.level;
         }
 
         // Increment Tick Count
-        Memory.visual.room[room.name].ticksMeasured++;
+        Memory.room[room.name].visual.ticksMeasured++;
 
         // The difference this newValue adds/subtracts to the average
         const differential =
-            (newValue - Memory.visual.room[room.name].avgPointsPerTick) / Memory.visual.room[room.name].ticksMeasured;
+            (newValue - Memory.room[room.name].visual.avgPointsPerTick) / Memory.room[room.name].visual.ticksMeasured;
 
         // The new average is OldAverage + Differential
-        Memory.visual.room[room.name].avgPointsPerTick = Memory.visual.room[room.name].avgPointsPerTick + differential;
+        Memory.room[room.name].visual.avgPointsPerTick = Memory.room[room.name].visual.avgPointsPerTick + differential;
     }
 
     /**
@@ -254,15 +254,15 @@ export default class RoomVisualManager {
         }
 
         // Get the most recent cp/hour from memory
-        const ticksTracked = Memory.visual.controllerProgressArray.length;
+        const ticksTracked = Memory.rooms[room.name].visual!.controllerProgressArray.length;
 
         if (ticksTracked < 2) {
             return "NaN";
         }
 
         const pointsThisTick =
-            Memory.visual.controllerProgressArray[ticksTracked - 1] -
-            Memory.visual.controllerProgressArray[ticksTracked - 2];
+            Memory.rooms[room.name].visual!.controllerProgressArray[ticksTracked - 1] -
+            Memory.rooms[room.name].visual!.controllerProgressArray[ticksTracked - 2];
 
         // Calculate the rolling average and store it back in memory
         this.updateRollingAverage(pointsThisTick, room);
@@ -271,10 +271,10 @@ export default class RoomVisualManager {
         const pointsToNextLevel = room.controller!.progressTotal - room.controller!.progress;
 
         // Get the number of ticks to next level
-        const ticksToNextLevel = pointsToNextLevel / Memory.visual.room[room.name].avgPointsPerTick;
+        const ticksToNextLevel = pointsToNextLevel / Memory.rooms[room.name].visual!.room[room.name].avgPointsPerTick;
 
         // Get the number of seconds to next level
-        const secondsToNextLevel = ticksToNextLevel * Memory.visual.secondsPerTick;
+        const secondsToNextLevel = ticksToNextLevel * Memory.rooms[room.name].visual!.secondsPerTick;
 
         // Get the formatted version of secondsToNextLevel
         return this.convertSecondsToTime(secondsToNextLevel);

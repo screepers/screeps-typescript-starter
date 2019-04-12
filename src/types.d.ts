@@ -608,6 +608,10 @@ interface RoomMemory {
      * List of all of the room's GetEnergyJobs
      */
     jobs?: JobListing;
+    /**
+     * extra memory for visual function
+     */
+    visual?: VisualMemory;
 }
 
 interface EmpireMemory { }
@@ -1049,12 +1053,6 @@ type TIER_6 = 2300;
 type TIER_7 = 5300;
 type TIER_8 = 12300;
 
-/**
- * Extra data for memory structures
- */
-interface Memory {
-    visual: VisualMemory;
-}
 /**
  * room visual memory related memory
  */
