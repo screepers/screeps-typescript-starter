@@ -1063,6 +1063,7 @@ interface VisualMemory {
     secondsPerTick: number;
     controllerProgressArray: number[];
     avgControlPointsPerHourArray: number[];
+    room: StringMap;
 }
 
 /**

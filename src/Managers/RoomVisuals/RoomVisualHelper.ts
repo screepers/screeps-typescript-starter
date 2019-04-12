@@ -12,13 +12,12 @@ import {
 } from "utils/constants";
 import RoomHelper from "Helpers/RoomHelper";
 
-const textColor = '#bab8ba';
-const textSize = .8;
+const textColor = "#bab8ba";
+const textSize = 0.8;
 const charHeight = textSize * 1.1;
 
 // Helper for room visuals
 export default class RoomVisualManager {
-
     /**
      * display m
      * @param lines the array of text we want to display
@@ -36,21 +35,19 @@ export default class RoomVisualManager {
         // Draw text
         let dy = 0;
         for (const line of lines) {
-
             if (isLeft) {
                 vis.text(line, x, y + dy, {
-                    align: 'left',
+                    align: "left",
                     color: textColor,
-                    opacity: .8,
-                    font: ' .7 Trebuchet MS'
+                    opacity: 0.8,
+                    font: " .7 Trebuchet MS"
                 });
-            }
-            else {
+            } else {
                 vis.text(line, x, y + dy, {
-                    align: 'right',
+                    align: "right",
                     color: textColor,
-                    opacity: .8,
-                    font: ' .7 Trebuchet MS'
+                    opacity: 0.8,
+                    font: " .7 Trebuchet MS"
                 });
             }
 
@@ -63,7 +60,6 @@ export default class RoomVisualManager {
      * @param roomState the room state we are getting the string for
      */
     public static convertRoomStateToString(roomState: RoomStateConstant): string {
-
         switch (roomState) {
             case ROOM_STATE_INTRO:
                 return "Intro";
@@ -95,7 +91,7 @@ export default class RoomVisualManager {
             case ZEALOT_SOLO:
                 return "Zealot Solo";
             default:
-                return "Not An Attack Flag"
+                return "Not An Attack Flag";
         }
     }
 
@@ -109,8 +105,8 @@ export default class RoomVisualManager {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
-                avgControlPointsPerHourArray: []
-
+                avgControlPointsPerHourArray: [],
+                room: {}
             } as VisualMemory;
         }
 
@@ -118,7 +114,7 @@ export default class RoomVisualManager {
         if (RoomHelper.excecuteEveryTicks(TIME_BETWEEN_CHECKS)) {
             const updatedTime: number = Date.now();
             const oldTime: number = Memory.visual.time;
-            const avgTimePerTick = ((updatedTime - oldTime) / TIME_BETWEEN_CHECKS) / 1000;
+            const avgTimePerTick = (updatedTime - oldTime) / TIME_BETWEEN_CHECKS / 1000;
             Memory.visual.time = updatedTime;
             Memory.visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
         }
@@ -136,7 +132,8 @@ export default class RoomVisualManager {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
-                avgControlPointsPerHourArray: []
+                avgControlPointsPerHourArray: [],
+                room: {}
             } as VisualMemory;
         }
 
@@ -147,8 +144,7 @@ export default class RoomVisualManager {
         if (progressSampleSize < ticks) {
             // Add this ticks value to the array if it isn't already too large
             Memory.visual.controllerProgressArray.push(newControllerProgress);
-        }
-        else {
+        } else {
             // Move everything left, then add new value to end
             for (let j = 0; j < progressSampleSize; ++j) {
                 Memory.visual.controllerProgressArray[j] = Memory.visual.controllerProgressArray[j + 1];
@@ -158,7 +154,7 @@ export default class RoomVisualManager {
 
         // Get the average control points per tick
         for (let i = 0; i < progressSampleSize - 1; ++i) {
-            progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
+            progressSum += Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i];
         }
 
         return Math.floor(progressSum / progressSampleSize);
@@ -170,7 +166,72 @@ export default class RoomVisualManager {
      * @param rangeVal the value we are converting
      */
     public static convertRangeToDisplayVal(rangeVal: number): string | number {
-        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + "k" : rangeVal;
+    }
+
+    /**
+     * Converts seconds to days hours minutes seconds
+     * @param seconds The seconds to convert to larger units
+     */
+    public static convertSecondsToTime(seconds: number): string {
+        const days = Math.floor(seconds / 86400);
+        seconds = seconds % 86400;
+        const hours = Math.floor(seconds / 3600);
+        seconds = seconds % 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+
+        let timeString = "";
+        if (days > 0) {
+            timeString = timeString.concat(days + "d ");
+        }
+        if (hours > 0) {
+            timeString = timeString.concat(hours + "h ");
+        }
+        if (minutes > 0) {
+            timeString = timeString.concat(minutes + "m ");
+        }
+        // Only show seconds if it's all there is
+        if (seconds > 0 && timeString.length === 0) {
+            timeString = timeString.concat(seconds + "s");
+        }
+
+        if (timeString === "") {
+            return "NaN";
+        }
+
+        return timeString;
+    }
+
+    /**
+     * Updates a rolling average for the controller level
+     * @param room
+     */
+    public static updateRollingAverage(newValue: number, room: Room) {
+        if (!Memory.visual.room[room.name]) {
+            Memory.visual.room[room.name] = {
+                avgPointsPerTick: 0,
+                ticksMeasured: 0,
+                rcl: room.controller!.level
+            };
+        }
+
+        // Reset rolling average so that values remain significant instead of being watered down over time
+        if (Memory.visual.room[room.name].rcl !== room.controller!.level) {
+            Memory.visual.room[room.name].avgPointsPerTick = 0;
+            Memory.visual.room[room.name].ticksMeasured = 0;
+            Memory.visual.room[room.name].rcl = room.controller!.level;
+        }
+
+        // Increment Tick Count
+        Memory.visual.room[room.name].ticksMeasured++;
+
+        // The difference this newValue adds/subtracts to the average
+        const differential =
+            (newValue - Memory.visual.room[room.name].avgPointsPerTick) / Memory.visual.room[room.name].ticksMeasured;
+
+        // The new average is OldAverage + Differential
+        Memory.visual.room[room.name].avgPointsPerTick = Memory.visual.room[room.name].avgPointsPerTick + differential;
     }
 
     /**
@@ -178,6 +239,44 @@ export default class RoomVisualManager {
      * @param room the room we are gettign this value for
      */
     public static getEstimatedTimeToNextLevel(room: Room): string {
-        return "";
+        if (room.controller === undefined) {
+            return "NaN";
+        }
+
+        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: [],
+                room: {}
+            } as VisualMemory;
+        }
+
+        // Get the most recent cp/hour from memory
+        const ticksTracked = Memory.visual.controllerProgressArray.length;
+
+        if (ticksTracked < 2) {
+            return "NaN";
+        }
+
+        const pointsThisTick =
+            Memory.visual.controllerProgressArray[ticksTracked - 1] -
+            Memory.visual.controllerProgressArray[ticksTracked - 2];
+
+        // Calculate the rolling average and store it back in memory
+        this.updateRollingAverage(pointsThisTick, room);
+
+        // Get the number of points to next level
+        const pointsToNextLevel = room.controller!.progressTotal - room.controller!.progress;
+
+        // Get the number of ticks to next level
+        const ticksToNextLevel = pointsToNextLevel / Memory.visual.room[room.name].avgPointsPerTick;
+
+        // Get the number of seconds to next level
+        const secondsToNextLevel = ticksToNextLevel * Memory.visual.secondsPerTick;
+
+        // Get the formatted version of secondsToNextLevel
+        return this.convertSecondsToTime(secondsToNextLevel);
     }
 }

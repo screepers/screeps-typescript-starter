@@ -79,7 +79,6 @@ class MemoryHelper {
         }
     }
 }
-//# sourceMappingURL=MemoryHelper.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO = 0;
@@ -206,7 +205,6 @@ const FILL_JOB_CACHE_TTL = 10; // Fill Jobs
 const STORE_JOB_CACHE_TTL = 50; // Store Jobs
 const ERROR_ERROR$1 = 2; // Regular error - Creep/Room ruining
 const ERROR_WARN$1 = 1; // Small error - Something went wrong, but doesn't ruin anything
-//# sourceMappingURL=Constants.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO$1 = 0;
@@ -264,7 +262,6 @@ const DEFAULT_MOVE_OPTS$1 = {
     // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
     visualizePathStyle: {} // Empty object for now, just uses default visualization
 };
-//# sourceMappingURL=Constants.js.map
 
 /**
  * Custom error class
@@ -281,7 +278,6 @@ class UserException extends Error {
         this.bodyColor = useBodyColor !== undefined ? useBodyColor : "#ff1113";
     }
 }
-//# sourceMappingURL=UserException.js.map
 
 // helper functions for rooms
 class RoomHelper {
@@ -621,7 +617,6 @@ class RoomHelper {
         return sum;
     }
 }
-//# sourceMappingURL=RoomHelper.js.map
 
 /**
  * Disallow the caching of all memory
@@ -686,7 +681,6 @@ const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 const ROOM_MANAGER_BUCKET_LIMIT = 500;
 const MEMORY_MANAGER_BUCKET_LIMIT = 1;
-//# sourceMappingURL=config.js.map
 
 // an api used for functions related to the room
 class RoomApi {
@@ -1012,7 +1006,6 @@ class RoomApi {
         // i have no idea yet lol
     }
 }
-//# sourceMappingURL=Room.Api.js.map
 
 // TODO Create jobs for tombstones and dropped resources if wanted
 class GetEnergyJobs {
@@ -1194,7 +1187,6 @@ class GetEnergyJobs {
         return dropJobList;
     }
 }
-//# sourceMappingURL=GetEnergyJobs.js.map
 
 class ClaimPartJobs {
     /**
@@ -1290,7 +1282,6 @@ class ClaimPartJobs {
         return attackJobs;
     }
 }
-//# sourceMappingURL=ClaimPartJobs.js.map
 
 class WorkPartJobs {
     /**
@@ -1374,7 +1365,6 @@ class WorkPartJobs {
         return upgradeJobs;
     }
 }
-//# sourceMappingURL=WorkPartJobs.js.map
 
 class CarryPartJobs {
     /**
@@ -1480,7 +1470,6 @@ class CarryPartJobs {
         return storeJobs;
     }
 }
-//# sourceMappingURL=CarryPartJobs.js.map
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -1930,7 +1919,6 @@ class MemoryHelper_Room {
         Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
     }
 }
-//# sourceMappingURL=MemoryHelper_Room.js.map
 
 /**
  * The API used by the spawn manager
@@ -2556,7 +2544,6 @@ class SpawnApi {
         return room.name;
     }
 }
-//# sourceMappingURL=Spawn.Api.js.map
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -3751,7 +3738,6 @@ class SpawnHelper {
         return accesssibleTiles;
     }
 }
-//# sourceMappingURL=SpawnHelper.js.map
 
 // the api for the memory class
 class MemoryApi {
@@ -4851,7 +4837,6 @@ class MemoryApi {
         }
     }
 }
-//# sourceMappingURL=Memory.Api.js.map
 
 class EmpireHelper {
     /**
@@ -5329,7 +5314,6 @@ class EmpireHelper {
         return attackFlagMemory;
     }
 }
-//# sourceMappingURL=EmpireHelper.js.map
 
 // Config file for memory related actions
 /**
@@ -5344,7 +5328,6 @@ const STALKER_FLAG_ONE_TIME_USE = true;
  * set a standard squad flag to one time use
  */
 const STANDARD_SQUAD_FLAG_ONE_TIME_USE = true;
-//# sourceMappingURL=militaryConfig.js.map
 
 class Empire {
     /**
@@ -5487,7 +5470,6 @@ class Empire {
         }
     }
 }
-//# sourceMappingURL=Empire.Api.js.map
 
 // empire-wide manager
 class EmpireManager {
@@ -5509,7 +5491,6 @@ class EmpireManager {
         // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
     }
 }
-//# sourceMappingURL=EmpireManager.js.map
 
 // @ts-ignore
 // manager for the memory of the empire
@@ -5542,7 +5523,6 @@ class MemoryManager {
         }
     }
 }
-//# sourceMappingURL=MemoryManagement.js.map
 
 // room-wide manager
 class RoomManager {
@@ -5591,7 +5571,6 @@ class RoomManager {
         }
     }
 }
-//# sourceMappingURL=RoomManager.js.map
 
 // handles spawning for every room
 class SpawnManager {
@@ -5639,7 +5618,6 @@ class SpawnManager {
         }
     }
 }
-//# sourceMappingURL=SpawnManager.js.map
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
@@ -7974,7 +7952,6 @@ class ErrorMapper {
 }
 // Cache previously mapped traces to improve performance
 ErrorMapper.cache = {};
-//# sourceMappingURL=ErrorMapper.js.map
 
 class UtilHelper {
     /**
@@ -7992,10 +7969,9 @@ class UtilHelper {
         }
     }
 }
-//# sourceMappingURL=UtilHelper.js.map
 
-const textColor = '#bab8ba';
-const textSize = .8;
+const textColor = "#bab8ba";
+const textSize = 0.8;
 const charHeight = textSize * 1.1;
 // Helper for room visuals
 class RoomVisualManager {
@@ -8017,18 +7993,18 @@ class RoomVisualManager {
         for (const line of lines) {
             if (isLeft) {
                 vis.text(line, x, y + dy, {
-                    align: 'left',
+                    align: "left",
                     color: textColor,
-                    opacity: .8,
-                    font: ' .7 Trebuchet MS'
+                    opacity: 0.8,
+                    font: " .7 Trebuchet MS"
                 });
             }
             else {
                 vis.text(line, x, y + dy, {
-                    align: 'right',
+                    align: "right",
                     color: textColor,
-                    opacity: .8,
-                    font: ' .7 Trebuchet MS'
+                    opacity: 0.8,
+                    font: " .7 Trebuchet MS"
                 });
             }
             dy += charHeight;
@@ -8082,14 +8058,15 @@ class RoomVisualManager {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
-                avgControlPointsPerHourArray: []
+                avgControlPointsPerHourArray: [],
+                room: {}
             };
         }
         // Every 50 ticks, update the time and find the new seconds per tick
         if (RoomHelper.excecuteEveryTicks(TIME_BETWEEN_CHECKS)) {
             const updatedTime = Date.now();
             const oldTime = Memory.visual.time;
-            const avgTimePerTick = ((updatedTime - oldTime) / TIME_BETWEEN_CHECKS) / 1000;
+            const avgTimePerTick = (updatedTime - oldTime) / TIME_BETWEEN_CHECKS / 1000;
             Memory.visual.time = updatedTime;
             Memory.visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
         }
@@ -8106,7 +8083,8 @@ class RoomVisualManager {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
-                avgControlPointsPerHourArray: []
+                avgControlPointsPerHourArray: [],
+                room: {}
             };
         }
         const progressSampleSize = Memory.visual.controllerProgressArray.length;
@@ -8125,7 +8103,7 @@ class RoomVisualManager {
         }
         // Get the average control points per tick
         for (let i = 0; i < progressSampleSize - 1; ++i) {
-            progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
+            progressSum += Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i];
         }
         return Math.floor(progressSum / progressSampleSize);
     }
@@ -8135,17 +8113,99 @@ class RoomVisualManager {
      * @param rangeVal the value we are converting
      */
     static convertRangeToDisplayVal(rangeVal) {
-        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + "k" : rangeVal;
+    }
+    /**
+     * Converts seconds to days hours minutes seconds
+     * @param seconds The seconds to convert to larger units
+     */
+    static convertSecondsToTime(seconds) {
+        const days = Math.floor(seconds / 86400);
+        seconds = seconds % 86400;
+        const hours = Math.floor(seconds / 3600);
+        seconds = seconds % 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+        let timeString = "";
+        if (days > 0) {
+            timeString = timeString.concat(days + "d ");
+        }
+        if (hours > 0) {
+            timeString = timeString.concat(hours + "h ");
+        }
+        if (minutes > 0) {
+            timeString = timeString.concat(minutes + "m ");
+        }
+        // Only show seconds if it's all there is
+        if (seconds > 0 && timeString.length === 0) {
+            timeString = timeString.concat(seconds + "s");
+        }
+        if (timeString === "") {
+            return "NaN";
+        }
+        return timeString;
+    }
+    /**
+     * Updates a rolling average for the controller level
+     * @param room
+     */
+    static updateRollingAverage(newValue, room) {
+        if (!Memory.visual.room[room.name]) {
+            Memory.visual.room[room.name] = {
+                avgPointsPerTick: 0,
+                ticksMeasured: 0,
+                rcl: room.controller.level
+            };
+        }
+        // Reset rolling average so that values remain significant instead of being watered down over time
+        if (Memory.visual.room[room.name].rcl !== room.controller.level) {
+            Memory.visual.room[room.name].avgPointsPerTick = 0;
+            Memory.visual.room[room.name].ticksMeasured = 0;
+            Memory.visual.room[room.name].rcl = room.controller.level;
+        }
+        // Increment Tick Count
+        Memory.visual.room[room.name].ticksMeasured++;
+        // The difference this newValue adds/subtracts to the average
+        const differential = (newValue - Memory.visual.room[room.name].avgPointsPerTick) / Memory.visual.room[room.name].ticksMeasured;
+        // The new average is OldAverage + Differential
+        Memory.visual.room[room.name].avgPointsPerTick = Memory.visual.room[room.name].avgPointsPerTick + differential;
     }
     /**
      * gets the estimated time in days, hours, minutes to the next rcl based on current average
      * @param room the room we are gettign this value for
      */
     static getEstimatedTimeToNextLevel(room) {
-        return "";
+        if (room.controller === undefined) {
+            return "NaN";
+        }
+        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
+            Memory.visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: [],
+                room: {}
+            };
+        }
+        // Get the most recent cp/hour from memory
+        const ticksTracked = Memory.visual.controllerProgressArray.length;
+        if (ticksTracked < 2) {
+            return "NaN";
+        }
+        const pointsThisTick = Memory.visual.controllerProgressArray[ticksTracked - 1] -
+            Memory.visual.controllerProgressArray[ticksTracked - 2];
+        // Calculate the rolling average and store it back in memory
+        this.updateRollingAverage(pointsThisTick, room);
+        // Get the number of points to next level
+        const pointsToNextLevel = room.controller.progressTotal - room.controller.progress;
+        // Get the number of ticks to next level
+        const ticksToNextLevel = pointsToNextLevel / Memory.visual.room[room.name].avgPointsPerTick;
+        // Get the number of seconds to next level
+        const secondsToNextLevel = ticksToNextLevel * Memory.visual.secondsPerTick;
+        // Get the formatted version of secondsToNextLevel
+        return this.convertSecondsToTime(secondsToNextLevel);
     }
 }
-//# sourceMappingURL=RoomVisualHelper.js.map
 
 // Api for room visuals
 class RoomVisualApi {
@@ -8552,7 +8612,6 @@ class RoomVisualApi {
         }
     }
 }
-//# sourceMappingURL=RoomVisual.Api.js.map
 
 // Manager for room visuals
 class RoomVisualManager$1 {
@@ -8600,7 +8659,6 @@ class RoomVisualManager$1 {
         endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
     }
 }
-//# sourceMappingURL=RoomVisualManager.js.map
 
 class Normalize {
     /**
@@ -8665,7 +8723,6 @@ class Normalize {
         return obj;
     }
 }
-//# sourceMappingURL=Normalize.js.map
 
 // helper function for creeps
 class CreepHelper {
@@ -8749,7 +8806,6 @@ class CreepHelper {
         }
     }
 }
-//# sourceMappingURL=CreepHelper.js.map
 
 // Api for all types of creeps (more general stuff here)
 class CreepApi {
@@ -9146,7 +9202,6 @@ class CreepApi {
         return undefined;
     }
 }
-//# sourceMappingURL=Creep.Api.js.map
 
 // Manager for the miner creep role
 class MinerCreepManager {
@@ -9201,7 +9256,6 @@ class MinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
-//# sourceMappingURL=MinerCreepManager.js.map
 
 // Manager for the miner creep role
 class HarvesterCreepManager {
@@ -9480,7 +9534,6 @@ class WorkerCreepManager {
         }
     }
 }
-//# sourceMappingURL=WorkerCreepManager.js.map
 
 // Manager for the miner creep role
 class LorryCreepManager {
@@ -9491,7 +9544,6 @@ class LorryCreepManager {
     static runCreepRole(creep) {
     }
 }
-//# sourceMappingURL=LorryCreepManager.js.map
 
 // Manager for the miner creep role
 class PowerUpgraderCreepManager {
@@ -9565,7 +9617,6 @@ class PowerUpgraderCreepManager {
         MemoryApi.updateJobMemory(creep, room);
     }
 }
-//# sourceMappingURL=PowerUpgraderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteMinerCreepManager {
@@ -9627,7 +9678,6 @@ class RemoteMinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
-//# sourceMappingURL=RemoteMinerCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteHarvesterCreepManager {
@@ -9729,7 +9779,6 @@ class RemoteHarvesterCreepManager {
         }
     }
 }
-//# sourceMappingURL=RemoteHarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteColonizerCreepManager {
@@ -9740,7 +9789,6 @@ class RemoteColonizerCreepManager {
     static runCreepRole(creep) {
     }
 }
-//# sourceMappingURL=RemoteColonizerCreepManager.js.map
 
 // Manager for the miner creep role
 class ClaimerCreepManager {
@@ -9751,7 +9799,6 @@ class ClaimerCreepManager {
     static runCreepRole(creep) {
     }
 }
-//# sourceMappingURL=ClaimerCreepManager.js.map
 
 // Api for military creep's
 class CreepMili {
@@ -10000,7 +10047,6 @@ class CreepMili {
         return false;
     }
 }
-//# sourceMappingURL=CreepMili.Api.js.map
 
 // Manager for the miner creep role
 class RemoteDefenderCreepManager {
@@ -10036,7 +10082,6 @@ class RemoteDefenderCreepManager {
         creep.attack(target);
     }
 }
-//# sourceMappingURL=RemoteDefenderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteReserverCreepManager {
@@ -10083,7 +10128,6 @@ class RemoteReserverCreepManager {
         // set is taken to true
     }
 }
-//# sourceMappingURL=RemoteReserverCreepManager.js.map
 
 // Manager for the miner creep role
 class ZealotCreepManager {
@@ -10116,7 +10160,6 @@ class ZealotCreepManager {
         creep.attack(target);
     }
 }
-//# sourceMappingURL=ZealotCreepManager.js.map
 
 // Manager for the miner creep role
 class MedicCreepManager {
@@ -10169,7 +10212,6 @@ class MedicCreepManager {
         }
     }
 }
-//# sourceMappingURL=MedicCreepManager.js.map
 
 // Manager for the miner creep role
 class StalkerCreepManager {
@@ -10202,7 +10244,6 @@ class StalkerCreepManager {
         creep.attack(target);
     }
 }
-//# sourceMappingURL=StalkerCreepManager.js.map
 
 // Manager for the Domestic Defender Creep Role
 class DomesticDefenderCreepManager {
@@ -10238,7 +10279,6 @@ class DomesticDefenderCreepManager {
         creep.attack(target);
     }
 }
-//# sourceMappingURL=DomesticDefenderCreepManager.js.map
 
 // Call the creep manager for each role
 class CreepManager {
@@ -10313,7 +10353,6 @@ class CreepManager {
         }
     }
 }
-//# sourceMappingURL=CreepManager.js.map
 
 class ConsoleCommands {
     static init() {
@@ -10407,7 +10446,6 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
     // check if we have enough energy to send the resource
     // send the resources
 };
-//# sourceMappingURL=ConsoleCommands.js.map
 
 /*
   Kung Fu Klan's Screeps Code
@@ -10479,7 +10517,6 @@ const loop = ErrorMapper.wrapLoop(() => {
     }
     // -------- end managers --------
 });
-//# sourceMappingURL=main.js.map
 
 exports.loop = loop;
 //# sourceMappingURL=main.js.map
