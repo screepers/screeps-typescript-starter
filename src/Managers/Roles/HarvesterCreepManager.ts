@@ -51,6 +51,14 @@ export default class HarvesterCreepManager {
                 job = this.newWorkPartJob(creep, room);
             }
 
+            if (job !== undefined) {
+                // Reset creep options if a job is found
+                // * This prevents a creep from getting a storageFill job after getting a getFromStorage job
+                const options = creep.memory.options as CreepOptionsCiv;
+                options.getFromStorage = true;
+                options.getFromTerminal = true;
+            }
+
             return job;
         }
     }
@@ -92,6 +100,10 @@ export default class HarvesterCreepManager {
             );
 
             if (backupStructures.length > 0) {
+                // Turn off access to storage until creep gets a work/carry job
+                const options = creep.memory.options as CreepOptionsCiv;
+                options.getFromStorage = false;
+                options.getFromTerminal = false;
                 return backupStructures[0];
             }
 
@@ -119,7 +131,7 @@ export default class HarvesterCreepManager {
             }
         }
 
-        if (creepOptions.fillStorage || creepOptions.fillContainer) {
+        if (creepOptions.fillStorage || creepOptions.fillTerminal) {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob: CarryPartJob) => !bsJob.isTaken);
 
             if (storeJobs.length > 0) {
