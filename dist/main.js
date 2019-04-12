@@ -9246,8 +9246,8 @@ class HarvesterCreepManager {
                 // Reset creep options if a job is found
                 // * This prevents a creep from getting a storageFill job after getting a getFromStorage job
                 const options = creep.memory.options;
-                options.getFromStorage = true;
-                options.getFromTerminal = true;
+                options.fillStorage = true;
+                options.fillTerminal = true;
             }
             return job;
         }
@@ -9277,8 +9277,8 @@ class HarvesterCreepManager {
             if (backupStructures.length > 0) {
                 // Turn off access to storage until creep gets a work/carry job
                 const options = creep.memory.options;
-                options.getFromStorage = false;
-                options.getFromTerminal = false;
+                options.fillStorage = false;
+                options.fillTerminal = false;
                 return backupStructures[0];
             }
             return undefined;
@@ -9341,7 +9341,6 @@ class HarvesterCreepManager {
         MemoryApi.updateJobMemory(creep, room);
     }
 }
-//# sourceMappingURL=HarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class WorkerCreepManager {
