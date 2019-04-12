@@ -145,7 +145,7 @@ export default class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the backup structures of a room (terminal, storage)
      * @param room  The room to create the job list
-     * [Estimate-Restore] Uses the worst-case of old and new values to estimate storage
+     * [No-Restore] Uses a new job every time
      */
     public static createBackupStructuresJobs(room: Room): GetEnergyJob[] {
         const backupJobList: GetEnergyJob[] = [];
@@ -161,19 +161,6 @@ export default class GetEnergyJobs {
                 isTaken: false
             };
 
-            const oldJob = MemoryApi.searchGetEnergyJobs(storageJob, room);
-
-            // Choose the lowest of oldJob vs storageJob for each resource
-            if (oldJob !== undefined) {
-                _.forEach(Object.keys(storageJob.resources), (type: ResourceConstant) => {
-                    const oldValue = oldJob.resources[type] === undefined ? 0 : oldJob.resources[type];
-                    const newValue = storageJob.resources[type] === undefined ? 0 : storageJob.resources[type];
-                    storageJob.resources[type] = oldValue! > newValue! ? newValue : oldValue;
-                });
-
-                storageJob.isTaken = _.sum(storageJob.resources) <= 0;
-            }
-
             backupJobList.push(storageJob);
         }
         // Create the terminal job if active
@@ -186,19 +173,6 @@ export default class GetEnergyJobs {
                 resources: room.terminal.store,
                 isTaken: false
             };
-
-            const oldJob = MemoryApi.searchGetEnergyJobs(terminalJob, room);
-
-            // Choose the lowest of oldJob vs storageJob for each resource
-            if (oldJob !== undefined) {
-                _.forEach(Object.keys(terminalJob.resources), (type: ResourceConstant) => {
-                    const oldValue = oldJob.resources[type] === undefined ? 0 : oldJob.resources[type];
-                    const newValue = terminalJob.resources[type] === undefined ? 0 : terminalJob.resources[type];
-                    terminalJob.resources[type] = oldValue! > newValue! ? newValue : oldValue;
-                });
-
-                terminalJob.isTaken = _.sum(terminalJob.resources) <= 0;
-            }
 
             backupJobList.push(terminalJob);
         }

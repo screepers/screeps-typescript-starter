@@ -1119,7 +1119,7 @@ class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the backup structures of a room (terminal, storage)
      * @param room  The room to create the job list
-     * [Estimate-Restore] Uses the worst-case of old and new values to estimate storage
+     * [No-Restore] Uses a new job every time
      */
     static createBackupStructuresJobs(room) {
         const backupJobList = [];
@@ -1133,16 +1133,6 @@ class GetEnergyJobs {
                 resources: room.storage.store,
                 isTaken: false
             };
-            const oldJob = MemoryApi.searchGetEnergyJobs(storageJob, room);
-            // Choose the lowest of oldJob vs storageJob for each resource
-            if (oldJob !== undefined) {
-                _.forEach(Object.keys(storageJob.resources), (type) => {
-                    const oldValue = oldJob.resources[type] === undefined ? 0 : oldJob.resources[type];
-                    const newValue = storageJob.resources[type] === undefined ? 0 : storageJob.resources[type];
-                    storageJob.resources[type] = oldValue > newValue ? newValue : oldValue;
-                });
-                storageJob.isTaken = _.sum(storageJob.resources) <= 0;
-            }
             backupJobList.push(storageJob);
         }
         // Create the terminal job if active
@@ -1155,16 +1145,6 @@ class GetEnergyJobs {
                 resources: room.terminal.store,
                 isTaken: false
             };
-            const oldJob = MemoryApi.searchGetEnergyJobs(terminalJob, room);
-            // Choose the lowest of oldJob vs storageJob for each resource
-            if (oldJob !== undefined) {
-                _.forEach(Object.keys(terminalJob.resources), (type) => {
-                    const oldValue = oldJob.resources[type] === undefined ? 0 : oldJob.resources[type];
-                    const newValue = terminalJob.resources[type] === undefined ? 0 : terminalJob.resources[type];
-                    terminalJob.resources[type] = oldValue > newValue ? newValue : oldValue;
-                });
-                terminalJob.isTaken = _.sum(terminalJob.resources) <= 0;
-            }
             backupJobList.push(terminalJob);
         }
         return backupJobList;
@@ -1446,7 +1426,7 @@ class CarryPartJobs {
     /**
      * Gets a list of store jobs for the room
      * @param room The room to get the jobs for
-     * [Estimate-Restore]
+     * [No-Restore] New job every time
      */
     static createStoreJobs(room) {
         const storeJobs = [];
@@ -1459,12 +1439,6 @@ class CarryPartJobs {
                 actionType: "transfer",
                 isTaken: false
             };
-            const oldJob = MemoryApi.searchCarryPartJobs(storageJob, room);
-            if (oldJob !== undefined) {
-                storageJob.remaining =
-                    storageJob.remaining > oldJob.remaining ? oldJob.remaining : storageJob.remaining;
-                storageJob.isTaken = storageJob.remaining >= room.storage.storeCapacity;
-            }
             storeJobs.push(storageJob);
         }
         if (room.terminal !== undefined) {
@@ -1476,12 +1450,6 @@ class CarryPartJobs {
                 actionType: "transfer",
                 isTaken: false
             };
-            const oldJob = MemoryApi.searchCarryPartJobs(terminalJob, room);
-            if (oldJob !== undefined) {
-                terminalJob.remaining =
-                    terminalJob.remaining > oldJob.remaining ? oldJob.remaining : terminalJob.remaining;
-                terminalJob.isTaken = terminalJob.remaining >= room.terminal.storeCapacity;
-            }
             storeJobs.push(terminalJob);
         }
         const upgraderLink = MemoryApi.getUpgraderLink(room);
@@ -1496,12 +1464,6 @@ class CarryPartJobs {
                     actionType: "transfer",
                     isTaken: false
                 };
-                const oldJob = MemoryApi.searchCarryPartJobs(fillLinkJob, room);
-                if (oldJob !== undefined) {
-                    fillLinkJob.remaining =
-                        fillLinkJob.remaining > oldJob.remaining ? oldJob.remaining : fillLinkJob.remaining;
-                    fillLinkJob.isTaken = fillLinkJob.remaining <= 0;
-                }
                 storeJobs.push(fillLinkJob);
             });
         }
@@ -9127,7 +9089,8 @@ class CreepApi {
     static getNewSourceJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.harvestSources) {
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob) => !sJob.isTaken);
+            // forceUpdate to get accurate job listing
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob) => !sJob.isTaken, true);
             if (sourceJobs.length > 0) {
                 // Filter out jobs that have too little energy -
                 // The energy in the StoreDefinition is the amount of energy per 300 ticks left

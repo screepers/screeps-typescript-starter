@@ -435,7 +435,8 @@ export default class CreepApi {
         const creepOptions = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.harvestSources) {
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken);
+            // forceUpdate to get accurate job listing
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken, true);
 
             if (sourceJobs.length > 0) {
                 // Filter out jobs that have too little energy -

@@ -79,7 +79,7 @@ export default class CarryPartJobs {
     /**
      * Gets a list of store jobs for the room
      * @param room The room to get the jobs for
-     * [Estimate-Restore]
+     * [No-Restore] New job every time
      */
     public static createStoreJobs(room: Room): CarryPartJob[] {
         const storeJobs: CarryPartJob[] = [];
@@ -94,14 +94,6 @@ export default class CarryPartJobs {
                 isTaken: false
             };
 
-            const oldJob = MemoryApi.searchCarryPartJobs(storageJob, room);
-
-            if (oldJob !== undefined) {
-                storageJob.remaining =
-                    storageJob.remaining > oldJob.remaining ? oldJob.remaining : storageJob.remaining;
-
-                storageJob.isTaken = storageJob.remaining >= room.storage.storeCapacity;
-            }
             storeJobs.push(storageJob);
         }
 
@@ -115,14 +107,6 @@ export default class CarryPartJobs {
                 isTaken: false
             };
 
-            const oldJob = MemoryApi.searchCarryPartJobs(terminalJob, room);
-
-            if (oldJob !== undefined) {
-                terminalJob.remaining =
-                    terminalJob.remaining > oldJob.remaining ? oldJob.remaining : terminalJob.remaining;
-
-                terminalJob.isTaken = terminalJob.remaining >= room.terminal.storeCapacity;
-            }
             storeJobs.push(terminalJob);
         }
 
@@ -144,15 +128,6 @@ export default class CarryPartJobs {
                     actionType: "transfer",
                     isTaken: false
                 };
-
-                const oldJob = MemoryApi.searchCarryPartJobs(fillLinkJob, room);
-
-                if (oldJob !== undefined) {
-                    fillLinkJob.remaining =
-                        fillLinkJob.remaining > oldJob.remaining ? oldJob.remaining : fillLinkJob.remaining;
-
-                    fillLinkJob.isTaken = fillLinkJob.remaining <= 0;
-                }
 
                 storeJobs.push(fillLinkJob);
             });
