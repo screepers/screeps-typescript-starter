@@ -20,14 +20,11 @@ export default class CarryPartJobs {
 
         _.forEach(lowSpawnsAndExtensions, (structure: StructureSpawn | StructureExtension) => {
             const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
-                if (
-                    creep.memory.job &&
+                return (
+                    creep.memory.job !== undefined &&
                     creep.memory.job.targetID === structure.id &&
                     creep.memory.job.actionType === "transfer"
-                ) {
-                    return true;
-                }
-                return false;
+                );
             });
 
             const creepCapacity = _.sum(creepsUsing, (creep: Creep) => creep.carryCapacity - _.sum(creep.carry));

@@ -1296,7 +1296,7 @@ class WorkPartJobs {
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for
-     * [Estimate-Restore] Chooses the lower of two values
+     * [Accurate-Restore] Chooses the lower of two values
      */
     static createRepairJobs(room) {
         const repairTargets = RoomApi.getRepairTargets(room);
@@ -1313,10 +1313,17 @@ class WorkPartJobs {
                 remaining: structure.hitsMax - structure.hits,
                 isTaken: false
             };
-            const oldJob = MemoryApi.searchWorkPartJobs(repairJob, room);
-            if (oldJob !== undefined) {
-                repairJob.remaining = oldJob.remaining > repairJob.remaining ? repairJob.remaining : oldJob.remaining;
-                repairJob.isTaken = repairJob.remaining <= 0;
+            const creepTargeting = MemoryApi.getMyCreeps(room.name, (creep) => {
+                return (creep.memory.job !== undefined &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "repair");
+            });
+            // Repair 20 hits/part/tick at .1 energy/hit rounded up to nearest whole number
+            _.forEach(creepTargeting, (creep) => {
+                repairJob.remaining -= Math.ceil(creep.carry.energy * 0.1);
+            });
+            if (repairJob.remaining <= 0) {
+                repairJob.isTaken = true;
             }
             repairJobs.push(repairJob);
         });
@@ -1325,7 +1332,7 @@ class WorkPartJobs {
     /**
      * Gets a list of buildJobs for the room
      * @param room The room to get jobs for
-     * [Estimate-Restore] Chooses the lower of two values
+     * [Accurate-Restore] Chooses the lower of two values
      */
     static createBuildJobs(room) {
         const constructionSites = MemoryApi.getConstructionSites(room.name);
@@ -1342,10 +1349,13 @@ class WorkPartJobs {
                 remaining: cs.progressTotal - cs.progress,
                 isTaken: false
             };
-            const oldJob = MemoryApi.searchWorkPartJobs(buildJob, room);
-            if (oldJob !== undefined) {
-                buildJob.remaining = buildJob.remaining > oldJob.remaining ? oldJob.remaining : buildJob.remaining;
-                buildJob.isTaken = buildJob.remaining <= 0;
+            const creepsTargeting = MemoryApi.getMyCreeps(room.name, (creep) => {
+                return creep.memory.job !== undefined && creep.memory.job.targetID === cs.id;
+            });
+            // 1 to 1 ratio energy to points built
+            _.forEach(creepsTargeting, (creep) => (buildJob.remaining -= creep.carry.energy));
+            if (buildJob.remaining <= 0) {
+                buildJob.isTaken = true;
             }
             buildJobs.push(buildJob);
         });
@@ -1391,12 +1401,9 @@ class CarryPartJobs {
         const fillJobs = [];
         _.forEach(lowSpawnsAndExtensions, (structure) => {
             const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep) => {
-                if (creep.memory.job &&
+                return (creep.memory.job !== undefined &&
                     creep.memory.job.targetID === structure.id &&
-                    creep.memory.job.actionType === "transfer") {
-                    return true;
-                }
-                return false;
+                    creep.memory.job.actionType === "transfer");
             });
             const creepCapacity = _.sum(creepsUsing, (creep) => creep.carryCapacity - _.sum(creep.carry));
             const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
@@ -8240,6 +8247,7 @@ class RoomVisualManager {
         return this.convertSecondsToTime(secondsToNextLevel);
     }
 }
+//# sourceMappingURL=RoomVisualHelper.js.map
 
 // Api for room visuals
 class RoomVisualApi {

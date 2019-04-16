@@ -5,7 +5,7 @@ export default class WorkPartJobs {
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for
-     * [Estimate-Restore] Chooses the lower of two values
+     * [Accurate-Restore] Chooses the lower of two values
      */
     public static createRepairJobs(room: Room): WorkPartJob[] {
         const repairTargets = RoomApi.getRepairTargets(room);
@@ -26,12 +26,21 @@ export default class WorkPartJobs {
                 isTaken: false
             };
 
-            const oldJob = MemoryApi.searchWorkPartJobs(repairJob, room);
+            const creepTargeting = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                return (
+                    creep.memory.job !== undefined &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "repair"
+                );
+            });
 
-            if (oldJob !== undefined) {
-                repairJob.remaining = oldJob.remaining > repairJob.remaining ? repairJob.remaining : oldJob.remaining;
+            // Repair 20 hits/part/tick at .1 energy/hit rounded up to nearest whole number
+            _.forEach(creepTargeting, (creep: Creep) => {
+                repairJob.remaining -= Math.ceil(creep.carry.energy * 0.1);
+            });
 
-                repairJob.isTaken = repairJob.remaining <= 0;
+            if (repairJob.remaining <= 0) {
+                repairJob.isTaken = true;
             }
 
             repairJobs.push(repairJob);
@@ -43,7 +52,7 @@ export default class WorkPartJobs {
     /**
      * Gets a list of buildJobs for the room
      * @param room The room to get jobs for
-     * [Estimate-Restore] Chooses the lower of two values
+     * [Accurate-Restore] Chooses the lower of two values
      */
     public static createBuildJobs(room: Room): WorkPartJob[] {
         const constructionSites = MemoryApi.getConstructionSites(room.name);
@@ -64,12 +73,17 @@ export default class WorkPartJobs {
                 isTaken: false
             };
 
-            const oldJob = MemoryApi.searchWorkPartJobs(buildJob, room);
+            const creepsTargeting = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                return creep.memory.job !== undefined && creep.memory.job.targetID === cs.id;
+            });
 
-            if (oldJob !== undefined) {
-                buildJob.remaining = buildJob.remaining > oldJob.remaining ? oldJob.remaining : buildJob.remaining;
-                buildJob.isTaken = buildJob.remaining <= 0;
+            // 1 to 1 ratio energy to points built
+            _.forEach(creepsTargeting, (creep: Creep) => (buildJob.remaining -= creep.carry.energy));
+
+            if (buildJob.remaining <= 0) {
+                buildJob.isTaken = true;
             }
+
             buildJobs.push(buildJob);
         });
 
