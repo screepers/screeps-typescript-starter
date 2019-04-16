@@ -1062,6 +1062,7 @@ interface VisualMemory {
     controllerProgressArray: number[];
     avgControlPointsPerHourArray: number[];
     room: StringMap;
+    etaMemory: ETAMemory;
 }
 
 /**
@@ -1070,4 +1071,13 @@ interface VisualMemory {
 interface GraphTickMarkMemory {
     start: number;
     end: number;
+}
+
+/**
+ * Memory used by rolling average to next eta level
+ */
+interface ETAMemory {
+    rcl: number;
+    avgPointsPerTick: number;
+    ticksMeasured: number;
 }

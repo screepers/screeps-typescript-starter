@@ -403,7 +403,7 @@ export default class RoomVisualApi {
         ];
         const Y_SCALE = 7.5;
         const X_SCALE = 15;
-        const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick();
+        const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick(room);
         const ticksPerHour: number = Math.floor(3600 / secondsPerTick);
         const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(25, room);
         const controlPointsPerHourEstimate: number = avgControlPointsPerTick * ticksPerHour;
@@ -415,7 +415,8 @@ export default class RoomVisualApi {
                 controllerProgressArray: [],
                 time: 0,
                 secondsPerTick: 0,
-                room: {}
+                room: {},
+                etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
             }
         }
 

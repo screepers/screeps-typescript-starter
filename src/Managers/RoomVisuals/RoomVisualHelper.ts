@@ -98,27 +98,28 @@ export default class RoomVisualManager {
     /**
      * get the amount of seconds in each tick (estimate)
      */
-    public static getSecondsPerTick(): number {
+    public static getSecondsPerTick(room: Room): number {
         const TIME_BETWEEN_CHECKS: number = 50;
-        if (!Memory.visual) {
-            Memory.visual = {
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
                 avgControlPointsPerHourArray: [],
-                room: {}
+                room: {},
+                etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
             } as VisualMemory;
         }
 
         // Every 50 ticks, update the time and find the new seconds per tick
         if (RoomHelper.excecuteEveryTicks(TIME_BETWEEN_CHECKS)) {
             const updatedTime: number = Date.now();
-            const oldTime: number = Memory.visual.time;
+            const oldTime: number = Memory.rooms[room.name].visual!.time;
             const avgTimePerTick = (updatedTime - oldTime) / TIME_BETWEEN_CHECKS / 1000;
-            Memory.visual.time = updatedTime;
-            Memory.visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
+            Memory.rooms[room.name].visual!.time = updatedTime;
+            Memory.rooms[room.name].visual!.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
         }
-        return Memory.visual.secondsPerTick;
+        return Memory.rooms[room.name].visual!.secondsPerTick;
     }
 
     /**
@@ -127,34 +128,39 @@ export default class RoomVisualManager {
      * @param room the room we are getting the CPPT for
      */
     public static getAverageControlPointsPerTick(ticks: number, room: Room): number {
-        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
-            Memory.visual = {
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
                 avgControlPointsPerHourArray: [],
-                room: {}
-            } as VisualMemory;
+                room: {},
+                etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
+            } as VisualMemory; 
         }
 
-        const progressSampleSize: number = Memory.visual.controllerProgressArray.length;
+        const progressSampleSize: number = Memory.rooms[room.name].visual!.controllerProgressArray.length;
         const newControllerProgress: number = room.controller!.progress;
         let progressSum: number = 0;
 
         if (progressSampleSize < ticks) {
             // Add this ticks value to the array if it isn't already too large
-            Memory.visual.controllerProgressArray.push(newControllerProgress);
+            Memory.rooms[room.name].visual!.controllerProgressArray.push(newControllerProgress);
         } else {
             // Move everything left, then add new value to end
             for (let j = 0; j < progressSampleSize; ++j) {
-                Memory.visual.controllerProgressArray[j] = Memory.visual.controllerProgressArray[j + 1];
+                Memory.rooms[room.name].visual!.controllerProgressArray[j] = Memory.rooms[
+                    room.name
+                ].visual!.controllerProgressArray[j + 1];
             }
-            Memory.visual.controllerProgressArray[progressSampleSize - 1] = newControllerProgress;
+            Memory.rooms[room.name].visual!.controllerProgressArray[progressSampleSize - 1] = newControllerProgress;
         }
 
         // Get the average control points per tick
         for (let i = 0; i < progressSampleSize - 1; ++i) {
-            progressSum += Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i];
+            progressSum +=
+                Memory.rooms[room.name].visual!.controllerProgressArray[i + 1] -
+                Memory.rooms[room.name].visual!.controllerProgressArray[i];
         }
 
         return Math.floor(progressSum / progressSampleSize);
@@ -208,30 +214,35 @@ export default class RoomVisualManager {
      * @param room
      */
     public static updateRollingAverage(newValue: number, room: Room) {
-        if (!Memory.visual.room[room.name]) {
-            Memory.visual.room[room.name] = {
-                avgPointsPerTick: 0,
-                ticksMeasured: 0,
-                rcl: room.controller!.level
-            };
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: [],
+                room: {},
+                etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
+            } as VisualMemory;
         }
 
         // Reset rolling average so that values remain significant instead of being watered down over time
-        if (Memory.room[room.name].visual.rcl !== room.controller!.level) {
-            Memory.room[room.name].visual.avgPointsPerTick = 0;
-            Memory.room[room.name].visual.ticksMeasured = 0;
-            Memory.room[room.name].visual.rcl = room.controller!.level;
+        if (Memory.rooms[room.name].visual!.etaMemory.rcl !== room.controller!.level) {
+            Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick = 0;
+            Memory.rooms[room.name].visual!.etaMemory.ticksMeasured = 0;
+            Memory.rooms[room.name].visual!.etaMemory.rcl = room.controller!.level;
         }
 
         // Increment Tick Count
-        Memory.room[room.name].visual.ticksMeasured++;
+        Memory.rooms[room.name].visual!.etaMemory.ticksMeasured++;
 
         // The difference this newValue adds/subtracts to the average
         const differential =
-            (newValue - Memory.room[room.name].visual.avgPointsPerTick) / Memory.room[room.name].visual.ticksMeasured;
+            (newValue - Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick) /
+            Memory.rooms[room.name].visual!.etaMemory.ticksMeasured;
 
         // The new average is OldAverage + Differential
-        Memory.room[room.name].visual.avgPointsPerTick = Memory.room[room.name].visual.avgPointsPerTick + differential;
+        Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick =
+            Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick + differential;
     }
 
     /**
@@ -240,16 +251,17 @@ export default class RoomVisualManager {
      */
     public static getEstimatedTimeToNextLevel(room: Room): string {
         if (room.controller === undefined) {
-            return "NaN";
+            return "No rcl";
         }
 
-        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
-            Memory.visual = {
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
                 avgControlPointsPerHourArray: [],
-                room: {}
+                room: {},
+                etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
             } as VisualMemory;
         }
 
@@ -257,7 +269,7 @@ export default class RoomVisualManager {
         const ticksTracked = Memory.rooms[room.name].visual!.controllerProgressArray.length;
 
         if (ticksTracked < 2) {
-            return "NaN";
+            return "No Data";
         }
 
         const pointsThisTick =
@@ -271,7 +283,7 @@ export default class RoomVisualManager {
         const pointsToNextLevel = room.controller!.progressTotal - room.controller!.progress;
 
         // Get the number of ticks to next level
-        const ticksToNextLevel = pointsToNextLevel / Memory.rooms[room.name].visual!.room[room.name].avgPointsPerTick;
+        const ticksToNextLevel = pointsToNextLevel / Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick;
 
         // Get the number of seconds to next level
         const secondsToNextLevel = ticksToNextLevel * Memory.rooms[room.name].visual!.secondsPerTick;
