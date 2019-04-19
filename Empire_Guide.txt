@@ -98,3 +98,24 @@ Write manager
 Add process x flag type function
 Add this function to switch case for processing new flag
 Carry out the flags purpose once it has been processed in memory
+
+
+----- Military Instructions ------
+
+Zealot Solo:
+    Red + Blue
+
+Standard Squad:
+    Red + Red
+
+Stalker Solo:
+    Red + Brown
+
+Only one flag can be active in a room at time to count towards spawning for the attack room
+You can change flags from being 1 time use in the military config, but by default once a flag's
+spawning has been satisfied, it is removed
+
+Send 5 people in a row, one after enough, a set number of times:
+    set flag to one time use in config, place 5 flags of the same type down
+
+
