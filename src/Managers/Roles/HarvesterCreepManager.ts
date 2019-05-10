@@ -1,5 +1,9 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
+import UtilHelper from "Helpers/UtilHelper";
+import RoomHelper from "Helpers/RoomHelper";
+import MemoryHelper from "Helpers/MemoryHelper";
+import { close } from "fs";
 
 // Manager for the miner creep role
 export default class HarvesterCreepManager {
@@ -24,18 +28,13 @@ export default class HarvesterCreepManager {
             this.handleNewJob(creep, homeRoom);
         }
 
-        // I think i know how to fix creeps idling for a tick between traveling and doing the job
-        // Travel to checks if they're there and returns, problem is we call it after do work
-        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
-        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
-        // ticks spent filling up spawn alone
-        if (creep.memory.job) {
-            if (creep.memory.working) {
-                CreepApi.doWork(creep, creep.memory.job);
-                return;
-            }
-
+        if (!creep.memory.working) {
             CreepApi.travelTo(creep, creep.memory.job);
+        }
+
+        if (creep.memory.working) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
         }
     }
 
@@ -48,8 +47,17 @@ export default class HarvesterCreepManager {
             return this.newGetEnergyJob(creep, room);
         } else {
             let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
+            
             if (job === undefined) {
                 job = this.newWorkPartJob(creep, room);
+            }
+
+            if (job !== undefined) {
+                // Reset creep options if a job is found
+                // * This prevents a creep from getting a storageFill job after getting a getFromStorage job
+                const options = creep.memory.options as CreepOptionsCiv;
+                options.fillStorage = true;
+                options.fillTerminal = true;
             }
 
             return job;
@@ -93,6 +101,10 @@ export default class HarvesterCreepManager {
             );
 
             if (backupStructures.length > 0) {
+                // Turn off access to storage until creep gets a work/carry job
+                const options = creep.memory.options as CreepOptionsCiv;
+                options.fillStorage = false;
+                options.fillTerminal = false;
                 return backupStructures[0];
             }
 
@@ -120,27 +132,24 @@ export default class HarvesterCreepManager {
             }
         }
 
-        if (creepOptions.fillStorage || creepOptions.fillContainer) {
+        if (creepOptions.fillStorage || creepOptions.fillTerminal) {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob: CarryPartJob) => !bsJob.isTaken);
 
             if (storeJobs.length > 0) {
-                // Find the closeest job to the creep currently
-                // ! - I'm 90% confident theres a better way to do this, feel free
-                const jobObjects: Array<any | null> = _.map(storeJobs, (storeJob: CarryPartJob) => Game.getObjectById(storeJob.targetID));
-                const jobObjectPos: RoomPosition[] = [];
-                for (const jo of jobObjects) {
-                    if (!jo) {
-                        continue;
-                    }
-                    jobObjectPos.push(jo.pos);
+                const jobObjects: Structure[] = MemoryHelper.getOnlyObjectsFromIDs(
+                    _.map(storeJobs, job => job.targetID)
+                );
+
+                const closestTarget = creep.pos.findClosestByRange(jobObjects);
+
+                let closestJob;
+
+                if (closestTarget !== null) {
+                    closestJob = _.find(storeJobs, (job: CarryPartJob) => job.targetID === closestTarget.id);
+                } else {
+                    // if findCLosest nulls out, just choose first
+                    closestJob = storeJobs[0];
                 }
-                const closestTarget: RoomPosition = creep.pos.findClosestByPath(jobObjectPos) as RoomPosition;
-                const closestJob: CarryPartJob | undefined = _.find(storeJobs,
-                    (j: CarryPartJob) => {
-                        const roomObj: any = Game.getObjectById(j.targetID);
-                        const roomPos: RoomPosition = roomObj.pos as RoomPosition;
-                        return closestTarget === roomPos;
-                    });
                 return closestJob;
             }
 

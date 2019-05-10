@@ -403,29 +403,37 @@ export default class RoomVisualApi {
         ];
         const Y_SCALE = 7.5;
         const X_SCALE = 15;
-        const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick();
+        const secondsPerTick: number = RoomVisualHelper.getSecondsPerTick(room);
         const ticksPerHour: number = Math.floor(3600 / secondsPerTick);
         const avgControlPointsPerTick: number = RoomVisualHelper.getAverageControlPointsPerTick(25, room);
         const controlPointsPerHourEstimate: number = avgControlPointsPerTick * ticksPerHour;
 
-        // Update the control points per hour estimate array
-        if (!Memory.visual!.avgControlPointsPerHourArray) {
-            Memory.visual!.avgControlPointsPerHourArray = [];
+        // Make sure visual memory exists
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
+                avgControlPointsPerHourArray: [],
+                controllerProgressArray: [],
+                time: 0,
+                secondsPerTick: 0,
+                room: {},
+                etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
+            }
         }
-        const avgControlPointsPerHourSize: number = Memory.visual.avgControlPointsPerHourArray.length;
+
+        const avgControlPointsPerHourSize: number = Memory.rooms[room.name].visual!.avgControlPointsPerHourArray.length;
         if (avgControlPointsPerHourSize < 5) {
-            Memory.visual.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
+            Memory.rooms[room.name].visual!.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
         }
         else {
             for (let i = 0; i < avgControlPointsPerHourSize - 1; ++i) {
-                Memory.visual.avgControlPointsPerHourArray[i] = Memory.visual.avgControlPointsPerHourArray[i + 1]
+                Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[i] = Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[i + 1]
             }
-            Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
+            Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
         }
 
         // Collect values and functions needed to draw the lines on the graph
-        const minVal: number = _.min(Memory.visual.avgControlPointsPerHourArray);
-        const maxVal: number = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minVal: number = _.min(Memory.rooms[room.name].visual!.avgControlPointsPerHourArray);
+        const maxVal: number = _.max(Memory.rooms[room.name].visual!.avgControlPointsPerHourArray);
         const minRange: number = minVal * .75;
         const maxRange: number = maxVal * 1.25;
         const getY2Coord = (raw: number) => {
@@ -466,10 +474,10 @@ export default class RoomVisualApi {
         for (let i = 0; i < avgControlPointsPerHourSize; ++i) {
             // Set the initial previous and next coordinate (first line will always be flat)
             if (i === 0) {
-                startCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+                startCoord = getY2Coord(Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[i]);
                 endCoord = startCoord;
             }
-            endCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+            endCoord = getY2Coord(Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[i]);
             new RoomVisual(room.name)
                 .line(X_VALS[i].start, y - startCoord, X_VALS[i].end, y - endCoord)
                 .circle(X_VALS[i].end, y - endCoord);

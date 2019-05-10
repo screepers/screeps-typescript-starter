@@ -241,11 +241,6 @@ export default class MemoryHelper_Room {
      * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
      */
     public static updateGetEnergy_allJobs(room: Room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs!.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.getEnergyJobs;
-        }
-
         this.updateGetEnergy_sourceJobs(room);
         this.updateGetEnergy_containerJobs(room);
         this.updateGetEnergy_linkJobs(room);
@@ -263,14 +258,6 @@ export default class MemoryHelper_Room {
             Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
 
-        // What to do if the jobs already exist
-        // ! Deletes existing jobs
-        // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?
-        // ? Or should we just set it up so that each time the Job objects are updated they start fresh? (might require mining creep memory for changes to the job status, or accepting inaccuracy)
-        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs;
-        }
-
         Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs = {
             data: GetEnergyJobs.createSourceJobs(room),
             cache: Game.time
@@ -284,10 +271,6 @@ export default class MemoryHelper_Room {
     public static updateGetEnergy_containerJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs!.getEnergyJobs = {};
-        }
-
-        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs;
         }
 
         Memory.rooms[room.name].jobs!.getEnergyJobs!.containerJobs = {
@@ -305,10 +288,6 @@ export default class MemoryHelper_Room {
             Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
 
-        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs;
-        }
-
         Memory.rooms[room.name].jobs!.getEnergyJobs!.linkJobs = {
             data: GetEnergyJobs.createLinkJobs(room),
             cache: Game.time
@@ -322,10 +301,6 @@ export default class MemoryHelper_Room {
     public static updateGetEnergy_backupStructuresJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs!.getEnergyJobs = {};
-        }
-
-        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures !== undefined) {
-            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures;
         }
 
         Memory.rooms[room.name].jobs!.getEnergyJobs!.backupStructures = {
@@ -343,10 +318,6 @@ export default class MemoryHelper_Room {
             Memory.rooms[room.name].jobs!.getEnergyJobs = {};
         }
 
-        if (Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs;
-        }
-
         Memory.rooms[room.name].jobs!.getEnergyJobs!.pickupJobs = {
             data: GetEnergyJobs.createPickupJobs(room),
             cache: Game.time
@@ -359,11 +330,6 @@ export default class MemoryHelper_Room {
      * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
      */
     public static updateClaimPart_allJobs(room: Room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs!.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.getEnergyJobs;
-        }
-
         this.updateClaimPart_claimJobs(room);
         this.updateClaimPart_reserveJobs(room);
         this.updateClaimPart_signJobs(room);
@@ -372,16 +338,11 @@ export default class MemoryHelper_Room {
 
     /**
      * Update the room's ClaimPartJobListing_claimJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateClaimPart_claimJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs;
         }
 
         Memory.rooms[room.name].jobs!.claimPartJobs!.claimJobs = {
@@ -392,16 +353,11 @@ export default class MemoryHelper_Room {
 
     /**
      * Update the room's ClaimPartJobListing_reserveJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateClaimPart_reserveJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs;
         }
 
         Memory.rooms[room.name].jobs!.claimPartJobs!.reserveJobs = {
@@ -412,16 +368,11 @@ export default class MemoryHelper_Room {
 
     /**
      * Update the room's ClaimPartJobListing_signJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateClaimPart_signJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs;
         }
 
         Memory.rooms[room.name].jobs!.claimPartJobs!.signJobs = {
@@ -432,16 +383,11 @@ export default class MemoryHelper_Room {
 
     /**
      * Update the room's ClaimPartJobListing_attackJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateClaimPart_controllerAttackJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs;
         }
 
         Memory.rooms[room.name].jobs!.claimPartJobs!.attackJobs = {
@@ -455,11 +401,6 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateWorkPart_allJobs(room: Room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs!.workPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.workPartJobs;
-        }
-
         this.updateWorkPart_repairJobs(room);
         this.updateWorkPart_buildJobs(room);
         this.updateWorkPart_upgradeJobs(room);
@@ -467,16 +408,11 @@ export default class MemoryHelper_Room {
 
     /**
      * Update the room's WorkPartJobListing_repairJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateWorkPart_repairJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs;
         }
 
         Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs = {
@@ -487,16 +423,11 @@ export default class MemoryHelper_Room {
 
     /**
      * Update the room's WorkPartJobListing_buildJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateWorkPart_buildJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs;
         }
 
         Memory.rooms[room.name].jobs!.workPartJobs!.buildJobs = {
@@ -506,16 +437,11 @@ export default class MemoryHelper_Room {
     }
     /**
      * Update the room's WorkPartJobListing_upgradeJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateWorkPart_upgradeJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs;
         }
 
         Memory.rooms[room.name].jobs!.workPartJobs!.upgradeJobs = {
@@ -529,11 +455,6 @@ export default class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     public static updateCarryPart_allJobs(room: Room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs!.carryPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.carryPartJobs;
-        }
-
         this.updateCarryPart_fillJobs(room);
         this.updateCarryPart_storeJobs(room);
     }
@@ -545,10 +466,6 @@ export default class MemoryHelper_Room {
     public static updateCarryPart_fillJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.carryPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.carryPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs;
         }
 
         Memory.rooms[room.name].jobs!.carryPartJobs!.fillJobs = {
@@ -564,10 +481,6 @@ export default class MemoryHelper_Room {
     public static updateCarryPart_storeJobs(room: Room) {
         if (Memory.rooms[room.name].jobs!.carryPartJobs === undefined) {
             Memory.rooms[room.name].jobs!.carryPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs;
         }
 
         Memory.rooms[room.name].jobs!.carryPartJobs!.storeJobs = {

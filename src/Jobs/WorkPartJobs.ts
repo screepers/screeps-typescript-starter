@@ -5,6 +5,7 @@ export default class WorkPartJobs {
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for
+     * [Accurate-Restore] Chooses the lower of two values
      */
     public static createRepairJobs(room: Room): WorkPartJob[] {
         const repairTargets = RoomApi.getRepairTargets(room);
@@ -25,6 +26,23 @@ export default class WorkPartJobs {
                 isTaken: false
             };
 
+            const creepTargeting = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                return (
+                    creep.memory.job !== undefined &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "repair"
+                );
+            });
+
+            // Repair 20 hits/part/tick at .1 energy/hit rounded up to nearest whole number
+            _.forEach(creepTargeting, (creep: Creep) => {
+                repairJob.remaining -= Math.ceil(creep.carry.energy * 0.1);
+            });
+
+            if (repairJob.remaining <= 0) {
+                repairJob.isTaken = true;
+            }
+
             repairJobs.push(repairJob);
         });
 
@@ -34,6 +52,7 @@ export default class WorkPartJobs {
     /**
      * Gets a list of buildJobs for the room
      * @param room The room to get jobs for
+     * [Accurate-Restore] Chooses the lower of two values
      */
     public static createBuildJobs(room: Room): WorkPartJob[] {
         const constructionSites = MemoryApi.getConstructionSites(room.name);
@@ -54,6 +73,17 @@ export default class WorkPartJobs {
                 isTaken: false
             };
 
+            const creepsTargeting = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                return creep.memory.job !== undefined && creep.memory.job.targetID === cs.id;
+            });
+
+            // 1 to 1 ratio energy to points built
+            _.forEach(creepsTargeting, (creep: Creep) => (buildJob.remaining -= creep.carry.energy));
+
+            if (buildJob.remaining <= 0) {
+                buildJob.isTaken = true;
+            }
+
             buildJobs.push(buildJob);
         });
 
@@ -62,7 +92,8 @@ export default class WorkPartJobs {
 
     /**
      * Gets a list of upgradeJobs for the room
-     * @param room The room to get jobs for
+     * @param room The room to get jobs
+     * [No-Restore] Create a fresh job every time
      */
     public static createUpgradeJobs(room: Room): WorkPartJob[] {
         // Just returning a single upgrade controller job for now

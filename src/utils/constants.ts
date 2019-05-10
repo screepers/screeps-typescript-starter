@@ -4,7 +4,6 @@ export const ROOM_STATE_BEGINNER = 1;
 export const ROOM_STATE_INTER = 2;
 export const ROOM_STATE_ADVANCED = 3;
 export const ROOM_STATE_UPGRADER = 4;
-export const ROOM_STATE_SEIGE = 5;
 export const ROOM_STATE_STIMULATE = 6;
 export const ROOM_STATE_NUKE_INBOUND = 7;
 

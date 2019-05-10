@@ -6,6 +6,7 @@ export default class CarryPartJobs {
     /**
      * Gets a list of fill jobs for the room
      * @param room The room to get the jobs for
+     * [Accurate-Restore]
      */
     public static createFillJobs(room: Room): CarryPartJob[] {
         const lowSpawnsAndExtensions = RoomApi.getLowSpawnAndExtensions(room);
@@ -18,25 +19,52 @@ export default class CarryPartJobs {
         const fillJobs: CarryPartJob[] = [];
 
         _.forEach(lowSpawnsAndExtensions, (structure: StructureSpawn | StructureExtension) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                return (
+                    creep.memory.job !== undefined &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer"
+                );
+            });
+
+            const creepCapacity = _.sum(creepsUsing, (creep: Creep) => creep.carryCapacity - _.sum(creep.carry));
+
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
+
             const fillJob: CarryPartJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
 
             fillJobs.push(fillJob);
         });
         _.forEach(lowTowers, (structure: StructureTower) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                if (
+                    creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer"
+                ) {
+                    return true;
+                }
+                return false;
+            });
+
+            const creepCapacity = _.sum(creepsUsing, (creep: Creep) => creep.carryCapacity - _.sum(creep.carry));
+
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
+
             const fillJob: CarryPartJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
 
             fillJobs.push(fillJob);
@@ -48,6 +76,7 @@ export default class CarryPartJobs {
     /**
      * Gets a list of store jobs for the room
      * @param room The room to get the jobs for
+     * [No-Restore] New job every time
      */
     public static createStoreJobs(room: Room): CarryPartJob[] {
         const storeJobs: CarryPartJob[] = [];

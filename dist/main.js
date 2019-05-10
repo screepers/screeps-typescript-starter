@@ -79,6 +79,7 @@ class MemoryHelper {
         }
     }
 }
+//# sourceMappingURL=MemoryHelper.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO = 0;
@@ -86,7 +87,6 @@ const ROOM_STATE_BEGINNER = 1;
 const ROOM_STATE_INTER = 2;
 const ROOM_STATE_ADVANCED = 3;
 const ROOM_STATE_UPGRADER = 4;
-const ROOM_STATE_SEIGE = 5;
 const ROOM_STATE_STIMULATE = 6;
 const ROOM_STATE_NUKE_INBOUND = 7;
 // Role Constants
@@ -206,6 +206,7 @@ const FILL_JOB_CACHE_TTL = 10; // Fill Jobs
 const STORE_JOB_CACHE_TTL = 50; // Store Jobs
 const ERROR_ERROR$1 = 2; // Regular error - Creep/Room ruining
 const ERROR_WARN$1 = 1; // Small error - Something went wrong, but doesn't ruin anything
+//# sourceMappingURL=Constants.js.map
 
 // Room State Constants
 const ROOM_STATE_INTRO$1 = 0;
@@ -213,7 +214,6 @@ const ROOM_STATE_BEGINNER$1 = 1;
 const ROOM_STATE_INTER$1 = 2;
 const ROOM_STATE_ADVANCED$1 = 3;
 const ROOM_STATE_UPGRADER$1 = 4;
-const ROOM_STATE_SEIGE$1 = 5;
 const ROOM_STATE_STIMULATE$1 = 6;
 const ROOM_STATE_NUKE_INBOUND$1 = 7;
 // Role Constants
@@ -264,6 +264,7 @@ const DEFAULT_MOVE_OPTS$1 = {
     // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
     visualizePathStyle: {} // Empty object for now, just uses default visualization
 };
+//# sourceMappingURL=Constants.js.map
 
 /**
  * Custom error class
@@ -280,6 +281,7 @@ class UserException extends Error {
         this.bodyColor = useBodyColor !== undefined ? useBodyColor : "#ff1113";
     }
 }
+//# sourceMappingURL=UserException.js.map
 
 // helper functions for rooms
 class RoomHelper {
@@ -619,6 +621,7 @@ class RoomHelper {
         return sum;
     }
 }
+//# sourceMappingURL=RoomHelper.js.map
 
 /**
  * Disallow the caching of all memory
@@ -683,6 +686,7 @@ const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 const ROOM_MANAGER_BUCKET_LIMIT = 500;
 const MEMORY_MANAGER_BUCKET_LIMIT = 1;
+//# sourceMappingURL=config.js.map
 
 // an api used for functions related to the room
 class RoomApi {
@@ -722,13 +726,6 @@ class RoomApi {
         const creeps = MemoryApi.getMyCreeps(room.name);
         if (creeps.length < 3) {
             MemoryApi.updateRoomState(ROOM_STATE_INTRO$1, room);
-            return;
-        }
-        // check if we are siege room state
-        // defcon is level 3+ and hostiles activity in the room is high
-        const defconLevel = MemoryApi.getDefconLevel(room);
-        if (defconLevel >= 3) {
-            MemoryApi.updateRoomState(ROOM_STATE_SEIGE$1, room);
             return;
         }
         // ----------
@@ -1015,12 +1012,14 @@ class RoomApi {
         // i have no idea yet lol
     }
 }
+//# sourceMappingURL=Room.Api.js.map
 
 // TODO Create jobs for tombstones and dropped resources if wanted
 class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the sources of a room
      * @param room The room to create the job list for
+     * [Accurate-Restore] Adjusts for creeps targeting it
      */
     static createSourceJobs(room) {
         // List of all sources that are under optimal work capacity
@@ -1032,13 +1031,9 @@ class GetEnergyJobs {
         _.forEach(openSources, (source) => {
             // Get all miners that are targeting this source
             const miners = MemoryApi.getMyCreeps(room.name, (creep) => {
-                if (creep.memory.role === ROLE_MINER) {
-                    if (creep.memory.job && creep.memory.job.targetID === source.id) {
-                        // ! Can optionally add another statement here that checks
-                        // ! if creep.ticksToLive > however many ticks it takes to spawn a creep
-                        // ! so that creeps that are about to die are not considered as using a part of the job.
-                        return true;
-                    }
+                if (creep.memory.role === ROLE_MINER && creep.memory.job && creep.memory.job.targetID === source.id) {
+                    // * Can optionally add another statement here that checks if creep has enough life to be considered part of the job
+                    return true;
                 }
                 return false;
             });
@@ -1055,12 +1050,8 @@ class GetEnergyJobs {
                 targetType: "source",
                 actionType: "harvest",
                 resources: sourceResources,
-                isTaken: false
+                isTaken: sourceEnergyRemaining <= 0 // Taken if no energy remaining
             };
-            // Mark the job as taken if there is no energy remaining
-            if (sourceEnergyRemaining <= 0) {
-                sourceJob.isTaken = true;
-            }
             // Append the GetEnergyJob to the main array
             sourceJobList.push(sourceJob);
         });
@@ -1069,6 +1060,7 @@ class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the containers of a room
      * @param room The room to create the job list for
+     * [Accurate-Restore] Adjusts for creeps currently targeting it
      */
     static createContainerJobs(room) {
         // List of all containers with >= CONTAINER_MINIMUM_ENERGY (from config.ts)
@@ -1078,13 +1070,29 @@ class GetEnergyJobs {
         }
         const containerJobList = [];
         _.forEach(containers, (container) => {
+            // Get all creeps that are targeting this container to withdraw from it
+            const creepsUsingContainer = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === container.id &&
+                    creep.memory.job.actionType === "withdraw") {
+                    return true;
+                }
+                return false;
+            });
+            // The container.store we will use instead of the true value
+            const adjustedContainerStore = container.store;
+            // Subtract the empty carry of creeps targeting this container to withdraw
+            _.forEach(creepsUsingContainer, (creep) => {
+                adjustedContainerStore.energy -= creep.carryCapacity - creep.carry.energy;
+            });
+            // Create the containerJob
             const containerJob = {
                 jobType: "getEnergyJob",
                 targetID: container.id,
                 targetType: STRUCTURE_CONTAINER,
                 actionType: "withdraw",
-                resources: container.store,
-                isTaken: false
+                resources: adjustedContainerStore,
+                isTaken: _.sum(adjustedContainerStore) <= 0 // Taken if empty
             };
             // Append to the main array
             containerJobList.push(containerJob);
@@ -1117,7 +1125,8 @@ class GetEnergyJobs {
     }
     /**
      * Gets a list of GetEnergyJobs for the backup structures of a room (terminal, storage)
-     * @param room  The room to create the job list for
+     * @param room  The room to create the job list
+     * [No-Restore] Uses a new job every time
      */
     static createBackupStructuresJobs(room) {
         const backupJobList = [];
@@ -1150,6 +1159,7 @@ class GetEnergyJobs {
     /**
      * Gets a list of GetEnergyJobs for the dropped resources of a room
      * @param room The room to create the job for
+     * [Accurate-Restore] Adjusts for creeps targeting it
      */
     static createPickupJobs(room) {
         // All dropped energy in the room
@@ -1161,6 +1171,16 @@ class GetEnergyJobs {
         _.forEach(drops, (drop) => {
             const dropStore = { energy: 0 };
             dropStore[drop.resourceType] = drop.amount;
+            const creepsUsingDrop = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === drop.id &&
+                    creep.memory.job.actionType === "pickup") {
+                    return true;
+                }
+                return false;
+            });
+            // Subtract creep's carryspace from drop amount
+            dropStore[drop.resourceType] -= _.sum(creepsUsingDrop, creep => creep.carryCapacity - _.sum(creep.carry));
             const dropJob = {
                 jobType: "getEnergyJob",
                 targetID: drop.id,
@@ -1174,6 +1194,7 @@ class GetEnergyJobs {
         return dropJobList;
     }
 }
+//# sourceMappingURL=GetEnergyJobs.js.map
 
 class ClaimPartJobs {
     /**
@@ -1269,11 +1290,13 @@ class ClaimPartJobs {
         return attackJobs;
     }
 }
+//# sourceMappingURL=ClaimPartJobs.js.map
 
 class WorkPartJobs {
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for
+     * [Accurate-Restore] Chooses the lower of two values
      */
     static createRepairJobs(room) {
         const repairTargets = RoomApi.getRepairTargets(room);
@@ -1290,6 +1313,18 @@ class WorkPartJobs {
                 remaining: structure.hitsMax - structure.hits,
                 isTaken: false
             };
+            const creepTargeting = MemoryApi.getMyCreeps(room.name, (creep) => {
+                return (creep.memory.job !== undefined &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "repair");
+            });
+            // Repair 20 hits/part/tick at .1 energy/hit rounded up to nearest whole number
+            _.forEach(creepTargeting, (creep) => {
+                repairJob.remaining -= Math.ceil(creep.carry.energy * 0.1);
+            });
+            if (repairJob.remaining <= 0) {
+                repairJob.isTaken = true;
+            }
             repairJobs.push(repairJob);
         });
         return repairJobs;
@@ -1297,6 +1332,7 @@ class WorkPartJobs {
     /**
      * Gets a list of buildJobs for the room
      * @param room The room to get jobs for
+     * [Accurate-Restore] Chooses the lower of two values
      */
     static createBuildJobs(room) {
         const constructionSites = MemoryApi.getConstructionSites(room.name);
@@ -1313,13 +1349,22 @@ class WorkPartJobs {
                 remaining: cs.progressTotal - cs.progress,
                 isTaken: false
             };
+            const creepsTargeting = MemoryApi.getMyCreeps(room.name, (creep) => {
+                return creep.memory.job !== undefined && creep.memory.job.targetID === cs.id;
+            });
+            // 1 to 1 ratio energy to points built
+            _.forEach(creepsTargeting, (creep) => (buildJob.remaining -= creep.carry.energy));
+            if (buildJob.remaining <= 0) {
+                buildJob.isTaken = true;
+            }
             buildJobs.push(buildJob);
         });
         return buildJobs;
     }
     /**
      * Gets a list of upgradeJobs for the room
-     * @param room The room to get jobs for
+     * @param room The room to get jobs
+     * [No-Restore] Create a fresh job every time
      */
     static createUpgradeJobs(room) {
         // Just returning a single upgrade controller job for now
@@ -1339,11 +1384,13 @@ class WorkPartJobs {
         return upgradeJobs;
     }
 }
+//# sourceMappingURL=WorkPartJobs.js.map
 
 class CarryPartJobs {
     /**
      * Gets a list of fill jobs for the room
      * @param room The room to get the jobs for
+     * [Accurate-Restore]
      */
     static createFillJobs(room) {
         const lowSpawnsAndExtensions = RoomApi.getLowSpawnAndExtensions(room);
@@ -1353,24 +1400,41 @@ class CarryPartJobs {
         }
         const fillJobs = [];
         _.forEach(lowSpawnsAndExtensions, (structure) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep) => {
+                return (creep.memory.job !== undefined &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer");
+            });
+            const creepCapacity = _.sum(creepsUsing, (creep) => creep.carryCapacity - _.sum(creep.carry));
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
             const fillJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
             fillJobs.push(fillJob);
         });
         _.forEach(lowTowers, (structure) => {
+            const creepsUsing = MemoryApi.getMyCreeps(room.name, (creep) => {
+                if (creep.memory.job &&
+                    creep.memory.job.targetID === structure.id &&
+                    creep.memory.job.actionType === "transfer") {
+                    return true;
+                }
+                return false;
+            });
+            const creepCapacity = _.sum(creepsUsing, (creep) => creep.carryCapacity - _.sum(creep.carry));
+            const storageSpace = structure.energyCapacity - structure.energy - creepCapacity;
             const fillJob = {
                 jobType: "carryPartJob",
                 targetID: structure.id,
                 targetType: structure.structureType,
-                remaining: structure.energyCapacity - structure.energy,
+                remaining: storageSpace,
                 actionType: "transfer",
-                isTaken: false
+                isTaken: storageSpace <= 0
             };
             fillJobs.push(fillJob);
         });
@@ -1379,6 +1443,7 @@ class CarryPartJobs {
     /**
      * Gets a list of store jobs for the room
      * @param room The room to get the jobs for
+     * [No-Restore] New job every time
      */
     static createStoreJobs(room) {
         const storeJobs = [];
@@ -1422,6 +1487,7 @@ class CarryPartJobs {
         return storeJobs;
     }
 }
+//# sourceMappingURL=CarryPartJobs.js.map
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -1626,10 +1692,6 @@ class MemoryHelper_Room {
      * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
      */
     static updateGetEnergy_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs;
-        }
         this.updateGetEnergy_sourceJobs(room);
         this.updateGetEnergy_containerJobs(room);
         this.updateGetEnergy_linkJobs(room);
@@ -1645,13 +1707,6 @@ class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
         }
-        // What to do if the jobs already exist
-        // ! Deletes existing jobs
-        // ? Should we change it to temporarily store the data for each job, and then restore them onto the newly created Jobs?
-        // ? Or should we just set it up so that each time the Job objects are updated they start fresh? (might require mining creep memory for changes to the job status, or accepting inaccuracy)
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs;
-        }
         Memory.rooms[room.name].jobs.getEnergyJobs.sourceJobs = {
             data: GetEnergyJobs.createSourceJobs(room),
             cache: Game.time
@@ -1664,9 +1719,6 @@ class MemoryHelper_Room {
     static updateGetEnergy_containerJobs(room) {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
-        }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs;
         }
         Memory.rooms[room.name].jobs.getEnergyJobs.containerJobs = {
             data: GetEnergyJobs.createContainerJobs(room),
@@ -1681,9 +1733,6 @@ class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
         }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs;
-        }
         Memory.rooms[room.name].jobs.getEnergyJobs.linkJobs = {
             data: GetEnergyJobs.createLinkJobs(room),
             cache: Game.time
@@ -1696,9 +1745,6 @@ class MemoryHelper_Room {
     static updateGetEnergy_backupStructuresJobs(room) {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
-        }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures;
         }
         Memory.rooms[room.name].jobs.getEnergyJobs.backupStructures = {
             data: GetEnergyJobs.createBackupStructuresJobs(room),
@@ -1713,9 +1759,6 @@ class MemoryHelper_Room {
         if (Memory.rooms[room.name].jobs.getEnergyJobs === undefined) {
             Memory.rooms[room.name].jobs.getEnergyJobs = {};
         }
-        if (Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs;
-        }
         Memory.rooms[room.name].jobs.getEnergyJobs.pickupJobs = {
             data: GetEnergyJobs.createPickupJobs(room),
             cache: Game.time
@@ -1727,10 +1770,6 @@ class MemoryHelper_Room {
      * @param jobList The object to store in `Memory.rooms[room.name].jobs.getEnergyJobs`
      */
     static updateClaimPart_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.getEnergyJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.getEnergyJobs;
-        }
         this.updateClaimPart_claimJobs(room);
         this.updateClaimPart_reserveJobs(room);
         this.updateClaimPart_signJobs(room);
@@ -1738,16 +1777,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_claimJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_claimJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.claimJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.claimJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.claimJobs = {
             data: ClaimPartJobs.createClaimJobs(room),
@@ -1756,16 +1790,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_reserveJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_reserveJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.reserveJobs = {
             data: ClaimPartJobs.createReserveJobs(room),
@@ -1774,16 +1803,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_signJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_signJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.signJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.signJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.signJobs = {
             data: ClaimPartJobs.createSignJobs(room),
@@ -1792,16 +1816,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's ClaimPartJobListing_attackJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateClaimPart_controllerAttackJobs(room) {
         if (Memory.rooms[room.name].jobs.claimPartJobs === undefined) {
             Memory.rooms[room.name].jobs.claimPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.claimPartJobs.attackJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.claimPartJobs.attackJobs;
         }
         Memory.rooms[room.name].jobs.claimPartJobs.attackJobs = {
             data: ClaimPartJobs.createAttackJobs(room),
@@ -1813,26 +1832,17 @@ class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     static updateWorkPart_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.workPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs;
-        }
         this.updateWorkPart_repairJobs(room);
         this.updateWorkPart_buildJobs(room);
         this.updateWorkPart_upgradeJobs(room);
     }
     /**
      * Update the room's WorkPartJobListing_repairJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateWorkPart_repairJobs(room) {
         if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs.repairJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs.repairJobs;
         }
         Memory.rooms[room.name].jobs.workPartJobs.repairJobs = {
             data: WorkPartJobs.createRepairJobs(room),
@@ -1841,16 +1851,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's WorkPartJobListing_buildJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateWorkPart_buildJobs(room) {
         if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs.buildJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs.buildJobs;
         }
         Memory.rooms[room.name].jobs.workPartJobs.buildJobs = {
             data: WorkPartJobs.createBuildJobs(room),
@@ -1859,16 +1864,11 @@ class MemoryHelper_Room {
     }
     /**
      * Update the room's WorkPartJobListing_upgradeJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     static updateWorkPart_upgradeJobs(room) {
         if (Memory.rooms[room.name].jobs.workPartJobs === undefined) {
             Memory.rooms[room.name].jobs.workPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs;
         }
         Memory.rooms[room.name].jobs.workPartJobs.upgradeJobs = {
             data: WorkPartJobs.createUpgradeJobs(room),
@@ -1880,10 +1880,6 @@ class MemoryHelper_Room {
      * @param room The room to update the memory of
      */
     static updateCarryPart_allJobs(room) {
-        // Clean out old job listing
-        if (Memory.rooms[room.name].jobs.carryPartJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs;
-        }
         this.updateCarryPart_fillJobs(room);
         this.updateCarryPart_storeJobs(room);
     }
@@ -1894,10 +1890,6 @@ class MemoryHelper_Room {
     static updateCarryPart_fillJobs(room) {
         if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
             Memory.rooms[room.name].jobs.carryPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.carryPartJobs.fillJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs.fillJobs;
         }
         Memory.rooms[room.name].jobs.carryPartJobs.fillJobs = {
             data: CarryPartJobs.createFillJobs(room),
@@ -1911,10 +1903,6 @@ class MemoryHelper_Room {
     static updateCarryPart_storeJobs(room) {
         if (Memory.rooms[room.name].jobs.carryPartJobs === undefined) {
             Memory.rooms[room.name].jobs.carryPartJobs = {};
-        }
-        // What to do if the jobs already exist
-        if (Memory.rooms[room.name].jobs.carryPartJobs.storeJobs !== undefined) {
-            delete Memory.rooms[room.name].jobs.carryPartJobs.storeJobs;
         }
         Memory.rooms[room.name].jobs.carryPartJobs.storeJobs = {
             data: CarryPartJobs.createStoreJobs(room),
@@ -1949,6 +1937,7 @@ class MemoryHelper_Room {
         Memory.rooms[room.name].creepLimit["militaryLimits"] = newLimits;
     }
 }
+//# sourceMappingURL=MemoryHelper_Room.js.map
 
 /**
  * The API used by the spawn manager
@@ -2025,14 +2014,6 @@ class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 3;
                 domesticLimits[ROLE_POWER_UPGRADER] = 2;
-                domesticLimits[ROLE_LORRY] = numLorries;
-                break;
-            // Seige
-            case ROOM_STATE_SEIGE:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_LORRY] = numLorries;
                 break;
         }
@@ -2582,6 +2563,7 @@ class SpawnApi {
         return room.name;
     }
 }
+//# sourceMappingURL=Spawn.Api.js.map
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -2703,7 +2685,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
@@ -2788,7 +2769,6 @@ class SpawnHelper {
                 break;
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
@@ -2881,7 +2861,6 @@ class SpawnHelper {
                 break;
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
@@ -2945,7 +2924,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     fillTower: true,
@@ -2997,7 +2975,6 @@ class SpawnHelper {
         switch (roomState) {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     upgrade: true,
@@ -3110,7 +3087,6 @@ class SpawnHelper {
                 break;
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     repair: true,
@@ -3156,7 +3132,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 // Remote reservers don't really have options perse, so just leave as defaults
                 creepOptions = {};
@@ -3201,7 +3176,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     build: true,
@@ -3229,7 +3203,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {};
                 break;
@@ -3298,7 +3271,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: 1,
@@ -3366,7 +3338,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: squadSizeParam,
@@ -3425,7 +3396,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: squadSizeParam,
@@ -3482,7 +3452,13 @@ class SpawnHelper {
     static generateStalkerOptions(roomState, squadSizeParam, squadUUIDParam, rallyLocationParam) {
         let creepOptions = this.getDefaultCreepOptionsMili();
         switch (roomState) {
+            case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
+            case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_STIMULATE:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
@@ -3539,7 +3515,6 @@ class SpawnHelper {
             case ROOM_STATE_ADVANCED:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_SEIGE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     squadSize: 0,
@@ -3783,6 +3758,7 @@ class SpawnHelper {
         return accesssibleTiles;
     }
 }
+//# sourceMappingURL=SpawnHelper.js.map
 
 // the api for the memory class
 class MemoryApi {
@@ -4882,6 +4858,7 @@ class MemoryApi {
         }
     }
 }
+//# sourceMappingURL=Memory.Api.js.map
 
 class EmpireHelper {
     /**
@@ -5359,6 +5336,7 @@ class EmpireHelper {
         return attackFlagMemory;
     }
 }
+//# sourceMappingURL=EmpireHelper.js.map
 
 // Config file for memory related actions
 /**
@@ -5373,6 +5351,7 @@ const STALKER_FLAG_ONE_TIME_USE = true;
  * set a standard squad flag to one time use
  */
 const STANDARD_SQUAD_FLAG_ONE_TIME_USE = true;
+//# sourceMappingURL=militaryConfig.js.map
 
 class Empire {
     /**
@@ -5515,6 +5494,7 @@ class Empire {
         }
     }
 }
+//# sourceMappingURL=Empire.Api.js.map
 
 // empire-wide manager
 class EmpireManager {
@@ -5536,6 +5516,7 @@ class EmpireManager {
         // ! - [TODO] Empire Queue and Alliance/Public Memory Stuff
     }
 }
+//# sourceMappingURL=EmpireManager.js.map
 
 // @ts-ignore
 // manager for the memory of the empire
@@ -5568,6 +5549,7 @@ class MemoryManager {
         }
     }
 }
+//# sourceMappingURL=MemoryManagement.js.map
 
 // room-wide manager
 class RoomManager {
@@ -5616,6 +5598,7 @@ class RoomManager {
         }
     }
 }
+//# sourceMappingURL=RoomManager.js.map
 
 // handles spawning for every room
 class SpawnManager {
@@ -5663,6 +5646,7 @@ class SpawnManager {
         }
     }
 }
+//# sourceMappingURL=SpawnManager.js.map
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
@@ -7997,6 +7981,7 @@ class ErrorMapper {
 }
 // Cache previously mapped traces to improve performance
 ErrorMapper.cache = {};
+//# sourceMappingURL=ErrorMapper.js.map
 
 class UtilHelper {
     /**
@@ -8014,9 +7999,10 @@ class UtilHelper {
         }
     }
 }
+//# sourceMappingURL=UtilHelper.js.map
 
-const textColor = '#bab8ba';
-const textSize = .8;
+const textColor = "#bab8ba";
+const textSize = 0.8;
 const charHeight = textSize * 1.1;
 // Helper for room visuals
 class RoomVisualManager {
@@ -8038,18 +8024,18 @@ class RoomVisualManager {
         for (const line of lines) {
             if (isLeft) {
                 vis.text(line, x, y + dy, {
-                    align: 'left',
+                    align: "left",
                     color: textColor,
-                    opacity: .8,
-                    font: ' .7 Trebuchet MS'
+                    opacity: 0.8,
+                    font: " .7 Trebuchet MS"
                 });
             }
             else {
                 vis.text(line, x, y + dy, {
-                    align: 'right',
+                    align: "right",
                     color: textColor,
-                    opacity: .8,
-                    font: ' .7 Trebuchet MS'
+                    opacity: 0.8,
+                    font: " .7 Trebuchet MS"
                 });
             }
             dy += charHeight;
@@ -8071,8 +8057,6 @@ class RoomVisualManager {
                 return "Advanced";
             case ROOM_STATE_NUKE_INBOUND$1:
                 return "Nuke Incoming!";
-            case ROOM_STATE_SEIGE$1:
-                return "Seige!";
             case ROOM_STATE_STIMULATE$1:
                 return "Stimulate";
             case ROOM_STATE_UPGRADER$1:
@@ -8098,25 +8082,27 @@ class RoomVisualManager {
     /**
      * get the amount of seconds in each tick (estimate)
      */
-    static getSecondsPerTick() {
+    static getSecondsPerTick(room) {
         const TIME_BETWEEN_CHECKS = 50;
-        if (!Memory.visual) {
-            Memory.visual = {
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
-                avgControlPointsPerHourArray: []
+                avgControlPointsPerHourArray: [],
+                room: {},
+                etaMemory: { rcl: room.controller.level, avgPointsPerTick: 0, ticksMeasured: 0 }
             };
         }
         // Every 50 ticks, update the time and find the new seconds per tick
         if (RoomHelper.excecuteEveryTicks(TIME_BETWEEN_CHECKS)) {
             const updatedTime = Date.now();
-            const oldTime = Memory.visual.time;
-            const avgTimePerTick = ((updatedTime - oldTime) / TIME_BETWEEN_CHECKS) / 1000;
-            Memory.visual.time = updatedTime;
-            Memory.visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
+            const oldTime = Memory.rooms[room.name].visual.time;
+            const avgTimePerTick = (updatedTime - oldTime) / TIME_BETWEEN_CHECKS / 1000;
+            Memory.rooms[room.name].visual.time = updatedTime;
+            Memory.rooms[room.name].visual.secondsPerTick = Math.floor(avgTimePerTick * 10) / 10;
         }
-        return Memory.visual.secondsPerTick;
+        return Memory.rooms[room.name].visual.secondsPerTick;
     }
     /**
      * get the average controller progress over the last specified ticks
@@ -8124,31 +8110,35 @@ class RoomVisualManager {
      * @param room the room we are getting the CPPT for
      */
     static getAverageControlPointsPerTick(ticks, room) {
-        if (!Memory.visual || !Memory.visual.controllerProgressArray) {
-            Memory.visual = {
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
                 time: Date.now(),
                 secondsPerTick: 0,
                 controllerProgressArray: [],
-                avgControlPointsPerHourArray: []
+                avgControlPointsPerHourArray: [],
+                room: {},
+                etaMemory: { rcl: room.controller.level, avgPointsPerTick: 0, ticksMeasured: 0 }
             };
         }
-        const progressSampleSize = Memory.visual.controllerProgressArray.length;
+        const progressSampleSize = Memory.rooms[room.name].visual.controllerProgressArray.length;
         const newControllerProgress = room.controller.progress;
         let progressSum = 0;
         if (progressSampleSize < ticks) {
             // Add this ticks value to the array if it isn't already too large
-            Memory.visual.controllerProgressArray.push(newControllerProgress);
+            Memory.rooms[room.name].visual.controllerProgressArray.push(newControllerProgress);
         }
         else {
             // Move everything left, then add new value to end
             for (let j = 0; j < progressSampleSize; ++j) {
-                Memory.visual.controllerProgressArray[j] = Memory.visual.controllerProgressArray[j + 1];
+                Memory.rooms[room.name].visual.controllerProgressArray[j] = Memory.rooms[room.name].visual.controllerProgressArray[j + 1];
             }
-            Memory.visual.controllerProgressArray[progressSampleSize - 1] = newControllerProgress;
+            Memory.rooms[room.name].visual.controllerProgressArray[progressSampleSize - 1] = newControllerProgress;
         }
         // Get the average control points per tick
         for (let i = 0; i < progressSampleSize - 1; ++i) {
-            progressSum += (Memory.visual.controllerProgressArray[i + 1] - Memory.visual.controllerProgressArray[i]);
+            progressSum +=
+                Memory.rooms[room.name].visual.controllerProgressArray[i + 1] -
+                    Memory.rooms[room.name].visual.controllerProgressArray[i];
         }
         return Math.floor(progressSum / progressSampleSize);
     }
@@ -8158,16 +8148,106 @@ class RoomVisualManager {
      * @param rangeVal the value we are converting
      */
     static convertRangeToDisplayVal(rangeVal) {
-        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + 'k' : rangeVal;
+        return rangeVal > 999 ? (rangeVal / 1000).toFixed(1) + "k" : rangeVal;
+    }
+    /**
+     * Converts seconds to days hours minutes seconds
+     * @param seconds The seconds to convert to larger units
+     */
+    static convertSecondsToTime(seconds) {
+        const days = Math.floor(seconds / 86400);
+        seconds = seconds % 86400;
+        const hours = Math.floor(seconds / 3600);
+        seconds = seconds % 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+        let timeString = "";
+        if (days > 0) {
+            timeString = timeString.concat(days + "d ");
+        }
+        if (hours > 0) {
+            timeString = timeString.concat(hours + "h ");
+        }
+        if (minutes > 0) {
+            timeString = timeString.concat(minutes + "m ");
+        }
+        // Only show seconds if it's all there is
+        if (seconds > 0 && timeString.length === 0) {
+            timeString = timeString.concat(seconds + "s");
+        }
+        if (timeString === "") {
+            return "NaN";
+        }
+        return timeString;
+    }
+    /**
+     * Updates a rolling average for the controller level
+     * @param room
+     */
+    static updateRollingAverage(newValue, room) {
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: [],
+                room: {},
+                etaMemory: { rcl: room.controller.level, avgPointsPerTick: 0, ticksMeasured: 0 }
+            };
+        }
+        // Reset rolling average so that values remain significant instead of being watered down over time
+        if (Memory.rooms[room.name].visual.etaMemory.rcl !== room.controller.level) {
+            Memory.rooms[room.name].visual.etaMemory.avgPointsPerTick = 0;
+            Memory.rooms[room.name].visual.etaMemory.ticksMeasured = 0;
+            Memory.rooms[room.name].visual.etaMemory.rcl = room.controller.level;
+        }
+        // Increment Tick Count
+        Memory.rooms[room.name].visual.etaMemory.ticksMeasured++;
+        // The difference this newValue adds/subtracts to the average
+        const differential = (newValue - Memory.rooms[room.name].visual.etaMemory.avgPointsPerTick) /
+            Memory.rooms[room.name].visual.etaMemory.ticksMeasured;
+        // The new average is OldAverage + Differential
+        Memory.rooms[room.name].visual.etaMemory.avgPointsPerTick =
+            Memory.rooms[room.name].visual.etaMemory.avgPointsPerTick + differential;
     }
     /**
      * gets the estimated time in days, hours, minutes to the next rcl based on current average
      * @param room the room we are gettign this value for
      */
     static getEstimatedTimeToNextLevel(room) {
-        return "";
+        if (room.controller === undefined) {
+            return "No rcl";
+        }
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
+                time: Date.now(),
+                secondsPerTick: 0,
+                controllerProgressArray: [],
+                avgControlPointsPerHourArray: [],
+                room: {},
+                etaMemory: { rcl: room.controller.level, avgPointsPerTick: 0, ticksMeasured: 0 }
+            };
+        }
+        // Get the most recent cp/hour from memory
+        const ticksTracked = Memory.rooms[room.name].visual.controllerProgressArray.length;
+        if (ticksTracked < 2) {
+            return "No Data";
+        }
+        const pointsThisTick = Memory.rooms[room.name].visual.controllerProgressArray[ticksTracked - 1] -
+            Memory.rooms[room.name].visual.controllerProgressArray[ticksTracked - 2];
+        // Calculate the rolling average and store it back in memory
+        this.updateRollingAverage(pointsThisTick, room);
+        // Get the number of points to next level
+        const pointsToNextLevel = room.controller.progressTotal - room.controller.progress;
+        // Get the number of ticks to next level
+        const ticksToNextLevel = pointsToNextLevel / Memory.rooms[room.name].visual.etaMemory.avgPointsPerTick;
+        // Get the number of seconds to next level
+        const secondsToNextLevel = ticksToNextLevel * Memory.rooms[room.name].visual.secondsPerTick;
+        // Get the formatted version of secondsToNextLevel
+        return this.convertSecondsToTime(secondsToNextLevel);
     }
 }
+//# sourceMappingURL=RoomVisualHelper.js.map
 
 // Api for room visuals
 class RoomVisualApi {
@@ -8505,27 +8585,34 @@ class RoomVisualApi {
         ];
         const Y_SCALE = 7.5;
         const X_SCALE = 15;
-        const secondsPerTick = RoomVisualManager.getSecondsPerTick();
+        const secondsPerTick = RoomVisualManager.getSecondsPerTick(room);
         const ticksPerHour = Math.floor(3600 / secondsPerTick);
         const avgControlPointsPerTick = RoomVisualManager.getAverageControlPointsPerTick(25, room);
         const controlPointsPerHourEstimate = avgControlPointsPerTick * ticksPerHour;
-        // Update the control points per hour estimate array
-        if (!Memory.visual.avgControlPointsPerHourArray) {
-            Memory.visual.avgControlPointsPerHourArray = [];
+        // Make sure visual memory exists
+        if (!Memory.rooms[room.name].visual) {
+            Memory.rooms[room.name].visual = {
+                avgControlPointsPerHourArray: [],
+                controllerProgressArray: [],
+                time: 0,
+                secondsPerTick: 0,
+                room: {},
+                etaMemory: { rcl: room.controller.level, avgPointsPerTick: 0, ticksMeasured: 0 }
+            };
         }
-        const avgControlPointsPerHourSize = Memory.visual.avgControlPointsPerHourArray.length;
+        const avgControlPointsPerHourSize = Memory.rooms[room.name].visual.avgControlPointsPerHourArray.length;
         if (avgControlPointsPerHourSize < 5) {
-            Memory.visual.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
+            Memory.rooms[room.name].visual.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
         }
         else {
             for (let i = 0; i < avgControlPointsPerHourSize - 1; ++i) {
-                Memory.visual.avgControlPointsPerHourArray[i] = Memory.visual.avgControlPointsPerHourArray[i + 1];
+                Memory.rooms[room.name].visual.avgControlPointsPerHourArray[i] = Memory.rooms[room.name].visual.avgControlPointsPerHourArray[i + 1];
             }
-            Memory.visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
+            Memory.rooms[room.name].visual.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
         }
         // Collect values and functions needed to draw the lines on the graph
-        const minVal = _.min(Memory.visual.avgControlPointsPerHourArray);
-        const maxVal = _.max(Memory.visual.avgControlPointsPerHourArray);
+        const minVal = _.min(Memory.rooms[room.name].visual.avgControlPointsPerHourArray);
+        const maxVal = _.max(Memory.rooms[room.name].visual.avgControlPointsPerHourArray);
         const minRange = minVal * .75;
         const maxRange = maxVal * 1.25;
         const getY2Coord = (raw) => {
@@ -8563,10 +8650,10 @@ class RoomVisualApi {
         for (let i = 0; i < avgControlPointsPerHourSize; ++i) {
             // Set the initial previous and next coordinate (first line will always be flat)
             if (i === 0) {
-                startCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+                startCoord = getY2Coord(Memory.rooms[room.name].visual.avgControlPointsPerHourArray[i]);
                 endCoord = startCoord;
             }
-            endCoord = getY2Coord(Memory.visual.avgControlPointsPerHourArray[i]);
+            endCoord = getY2Coord(Memory.rooms[room.name].visual.avgControlPointsPerHourArray[i]);
             new RoomVisual(room.name)
                 .line(X_VALS[i].start, y - startCoord, X_VALS[i].end, y - endCoord)
                 .circle(X_VALS[i].end, y - endCoord);
@@ -8574,6 +8661,7 @@ class RoomVisualApi {
         }
     }
 }
+//# sourceMappingURL=RoomVisual.Api.js.map
 
 // Manager for room visuals
 class RoomVisualManager$1 {
@@ -8621,6 +8709,7 @@ class RoomVisualManager$1 {
         endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
     }
 }
+//# sourceMappingURL=RoomVisualManager.js.map
 
 class Normalize {
     /**
@@ -8685,6 +8774,7 @@ class Normalize {
         return obj;
     }
 }
+//# sourceMappingURL=Normalize.js.map
 
 // helper function for creeps
 class CreepHelper {
@@ -8768,6 +8858,7 @@ class CreepHelper {
         }
     }
 }
+//# sourceMappingURL=CreepHelper.js.map
 
 // Api for all types of creeps (more general stuff here)
 class CreepApi {
@@ -9130,39 +9221,14 @@ class CreepApi {
         // Creep is not on exit tile
         return false;
     }
-}
-
-// Manager for the miner creep role
-class MinerCreepManager {
-    /**
-     * Run the miner creep
-     * @param creep The creep to run
-     */
-    static runCreepRole(creep) {
-        if (creep.spawning) {
-            return; // Don't do anything until you've spawned
-        }
-        const homeRoom = Game.rooms[creep.memory.homeRoom];
-        if (creep.memory.job === undefined) {
-            creep.memory.job = this.getNewSourceJob(creep, homeRoom);
-            if (creep.memory.job === undefined) {
-                return; // idle for a tick
-            }
-            // Set supplementary.moveTarget to container if one exists and isn't already taken
-            this.handleNewJob(creep, homeRoom);
-        }
-        if (creep.memory.job) {
-            if (creep.memory.working) {
-                CreepApi.doWork(creep, creep.memory.job);
-                return;
-            }
-            CreepApi.travelTo(creep, creep.memory.job);
-        }
-    }
+    /**********************************************************/
+    /*        GET NEW JOB SECTION                           ***/
+    /**********************************************************/
     static getNewSourceJob(creep, room) {
         const creepOptions = creep.memory.options;
         if (creepOptions.harvestSources) {
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob) => !sJob.isTaken);
+            // forceUpdate to get accurate job listing
+            const sourceJobs = MemoryApi.getSourceJobs(room, (sJob) => !sJob.isTaken, true);
             if (sourceJobs.length > 0) {
                 // Filter out jobs that have too little energy -
                 // The energy in the StoreDefinition is the amount of energy per 300 ticks left
@@ -9185,9 +9251,38 @@ class MinerCreepManager {
                     return _.find(sourceJobs, (job) => job.targetID === closestAvailableSource.id);
                 }
             }
-        } // End harvestSources option
-        // no available jobs
+        }
         return undefined;
+    }
+}
+//# sourceMappingURL=Creep.Api.js.map
+
+// Manager for the miner creep role
+class MinerCreepManager {
+    /**
+     * Run the miner creep
+     * @param creep The creep to run
+     */
+    static runCreepRole(creep) {
+        if (creep.spawning) {
+            return; // Don't do anything until you've spawned
+        }
+        const homeRoom = Game.rooms[creep.memory.homeRoom];
+        if (creep.memory.job === undefined) {
+            creep.memory.job = CreepApi.getNewSourceJob(creep, homeRoom);
+            if (creep.memory.job === undefined) {
+                return; // idle for a tick
+            }
+            // Set supplementary.moveTarget to container if one exists and isn't already taken
+            this.handleNewJob(creep, homeRoom);
+        }
+        if (creep.memory.job) {
+            if (creep.memory.working) {
+                CreepApi.doWork(creep, creep.memory.job);
+                return;
+            }
+            CreepApi.travelTo(creep, creep.memory.job);
+        }
     }
     /**
      * Handle initalizing a new job
@@ -9215,6 +9310,7 @@ class MinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
+//# sourceMappingURL=MinerCreepManager.js.map
 
 // Manager for the miner creep role
 class HarvesterCreepManager {
@@ -9234,17 +9330,12 @@ class HarvesterCreepManager {
             }
             this.handleNewJob(creep, homeRoom);
         }
-        // I think i know how to fix creeps idling for a tick between traveling and doing the job
-        // Travel to checks if they're there and returns, problem is we call it after do work
-        // We should either have travelTo before do work to and change them to return a boolean value on if there creep was there
-        // Or we should have some sort of canReach check here. 1 tick delay between every extension for example will add up to an extra 40-80
-        // ticks spent filling up spawn alone
-        if (creep.memory.job) {
-            if (creep.memory.working) {
-                CreepApi.doWork(creep, creep.memory.job);
-                return;
-            }
+        if (!creep.memory.working) {
             CreepApi.travelTo(creep, creep.memory.job);
+        }
+        if (creep.memory.working) {
+            CreepApi.doWork(creep, creep.memory.job);
+            return;
         }
     }
     /**
@@ -9259,6 +9350,13 @@ class HarvesterCreepManager {
             let job = this.newCarryPartJob(creep, room);
             if (job === undefined) {
                 job = this.newWorkPartJob(creep, room);
+            }
+            if (job !== undefined) {
+                // Reset creep options if a job is found
+                // * This prevents a creep from getting a storageFill job after getting a getFromStorage job
+                const options = creep.memory.options;
+                options.fillStorage = true;
+                options.fillTerminal = true;
             }
             return job;
         }
@@ -9286,6 +9384,10 @@ class HarvesterCreepManager {
             // All backupStructures with enough energy to fill creep.carry, and not taken
             const backupStructures = MemoryApi.getBackupStructuresJobs(room, (job) => !job.isTaken && job.resources.energy >= creep.carryCapacity);
             if (backupStructures.length > 0) {
+                // Turn off access to storage until creep gets a work/carry job
+                const options = creep.memory.options;
+                options.fillStorage = false;
+                options.fillTerminal = false;
                 return backupStructures[0];
             }
             return undefined;
@@ -9303,25 +9405,19 @@ class HarvesterCreepManager {
                 return fillJobs[0];
             }
         }
-        if (creepOptions.fillStorage || creepOptions.fillContainer) {
+        if (creepOptions.fillStorage || creepOptions.fillTerminal) {
             const storeJobs = MemoryApi.getStoreJobs(room, (bsJob) => !bsJob.isTaken);
             if (storeJobs.length > 0) {
-                // Find the closeest job to the creep currently
-                // ! - I'm 90% confident theres a better way to do this, feel free
-                const jobObjects = _.map(storeJobs, (storeJob) => Game.getObjectById(storeJob.targetID));
-                const jobObjectPos = [];
-                for (const jo of jobObjects) {
-                    if (!jo) {
-                        continue;
-                    }
-                    jobObjectPos.push(jo.pos);
+                const jobObjects = MemoryHelper.getOnlyObjectsFromIDs(_.map(storeJobs, job => job.targetID));
+                const closestTarget = creep.pos.findClosestByRange(jobObjects);
+                let closestJob;
+                if (closestTarget !== null) {
+                    closestJob = _.find(storeJobs, (job) => job.targetID === closestTarget.id);
                 }
-                const closestTarget = creep.pos.findClosestByPath(jobObjectPos);
-                const closestJob = _.find(storeJobs, (j) => {
-                    const roomObj = Game.getObjectById(j.targetID);
-                    const roomPos = roomObj.pos;
-                    return closestTarget === roomPos;
-                });
+                else {
+                    // if findCLosest nulls out, just choose first
+                    closestJob = storeJobs[0];
+                }
                 return closestJob;
             }
             return undefined;
@@ -9354,6 +9450,7 @@ class HarvesterCreepManager {
         MemoryApi.updateJobMemory(creep, room);
     }
 }
+//# sourceMappingURL=HarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class WorkerCreepManager {
@@ -9493,6 +9590,7 @@ class WorkerCreepManager {
         }
     }
 }
+//# sourceMappingURL=WorkerCreepManager.js.map
 
 // Manager for the miner creep role
 class LorryCreepManager {
@@ -9503,6 +9601,7 @@ class LorryCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=LorryCreepManager.js.map
 
 // Manager for the miner creep role
 class PowerUpgraderCreepManager {
@@ -9576,6 +9675,7 @@ class PowerUpgraderCreepManager {
         MemoryApi.updateJobMemory(creep, room);
     }
 }
+//# sourceMappingURL=PowerUpgraderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteMinerCreepManager {
@@ -9637,6 +9737,7 @@ class RemoteMinerCreepManager {
         creep.memory.supplementary.moveTargetID = miningContainer.id;
     }
 }
+//# sourceMappingURL=RemoteMinerCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteHarvesterCreepManager {
@@ -9738,6 +9839,7 @@ class RemoteHarvesterCreepManager {
         }
     }
 }
+//# sourceMappingURL=RemoteHarvesterCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteColonizerCreepManager {
@@ -9748,6 +9850,7 @@ class RemoteColonizerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=RemoteColonizerCreepManager.js.map
 
 // Manager for the miner creep role
 class ClaimerCreepManager {
@@ -9758,6 +9861,7 @@ class ClaimerCreepManager {
     static runCreepRole(creep) {
     }
 }
+//# sourceMappingURL=ClaimerCreepManager.js.map
 
 // Api for military creep's
 class CreepMili {
@@ -10006,6 +10110,7 @@ class CreepMili {
         return false;
     }
 }
+//# sourceMappingURL=CreepMili.Api.js.map
 
 // Manager for the miner creep role
 class RemoteDefenderCreepManager {
@@ -10041,6 +10146,7 @@ class RemoteDefenderCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=RemoteDefenderCreepManager.js.map
 
 // Manager for the miner creep role
 class RemoteReserverCreepManager {
@@ -10087,6 +10193,7 @@ class RemoteReserverCreepManager {
         // set is taken to true
     }
 }
+//# sourceMappingURL=RemoteReserverCreepManager.js.map
 
 // Manager for the miner creep role
 class ZealotCreepManager {
@@ -10119,6 +10226,7 @@ class ZealotCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=ZealotCreepManager.js.map
 
 // Manager for the miner creep role
 class MedicCreepManager {
@@ -10171,6 +10279,7 @@ class MedicCreepManager {
         }
     }
 }
+//# sourceMappingURL=MedicCreepManager.js.map
 
 // Manager for the miner creep role
 class StalkerCreepManager {
@@ -10203,6 +10312,7 @@ class StalkerCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=StalkerCreepManager.js.map
 
 // Manager for the Domestic Defender Creep Role
 class DomesticDefenderCreepManager {
@@ -10238,6 +10348,7 @@ class DomesticDefenderCreepManager {
         creep.attack(target);
     }
 }
+//# sourceMappingURL=DomesticDefenderCreepManager.js.map
 
 // Call the creep manager for each role
 class CreepManager {
@@ -10312,6 +10423,7 @@ class CreepManager {
         }
     }
 }
+//# sourceMappingURL=CreepManager.js.map
 
 class ConsoleCommands {
     static init() {
@@ -10405,6 +10517,7 @@ ConsoleCommands.sendResource = function (sendingRoom, receivingRoom, resourceTyp
     // check if we have enough energy to send the resource
     // send the resources
 };
+//# sourceMappingURL=ConsoleCommands.js.map
 
 /*
   Kung Fu Klan's Screeps Code
@@ -10476,6 +10589,7 @@ const loop = ErrorMapper.wrapLoop(() => {
     }
     // -------- end managers --------
 });
+//# sourceMappingURL=main.js.map
 
 exports.loop = loop;
 //# sourceMappingURL=main.js.map

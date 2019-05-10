@@ -25,7 +25,6 @@ import {
     ROOM_STATE_INTER,
     ROOM_STATE_ADVANCED,
     ROOM_STATE_NUKE_INBOUND,
-    ROOM_STATE_SEIGE,
     ROOM_STATE_STIMULATE,
     ROOM_STATE_UPGRADER,
     TIER_1,
@@ -134,16 +133,6 @@ export default class SpawnApi {
                 domesticLimits[ROLE_HARVESTER] = 3;
                 domesticLimits[ROLE_WORKER] = 3;
                 domesticLimits[ROLE_POWER_UPGRADER] = 2;
-                domesticLimits[ROLE_LORRY] = numLorries;
-
-                break;
-
-            // Seige
-            case ROOM_STATE_SEIGE:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 2;
                 domesticLimits[ROLE_LORRY] = numLorries;
 
                 break;
