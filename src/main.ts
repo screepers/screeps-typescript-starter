@@ -15,6 +15,15 @@
  * ~~~~~~~~~~~~~~~~~~
  * ~~ NEW FEATURES ~~
  * ~~~~~~~~~~~~~~~~~~
+ * 1. Spawn Rework
+ * Move military spawn system into a queue, add the queue inside of the military limits function
+ * Rewrite all the military limit generators to add to this queue rather than setting hard limits
+ * Develop a middle man for get next creep function to decide what to spawn next (interfaces with the
+ * limits system of domestic creeps and the queue system of remote creeps)
+ * Before  this though, move get next creep into a weight system with a base weight for each creep
+ * An idea for this is a constant in the config file that has a base weight for each creep type, then a variable in room memory
+ * that has the additional weights for each role that can be adjusted on the fly and added to the base weight in the next creep calculation
+ * to decide if we want tha creep to be more or less likely to spawn next
  *
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
@@ -72,34 +81,14 @@
  * Still do not target solo healers (maybe consider it if we calculate our damage (we have a function for that, thanks bonzai)
  * and find that we can out damage the amount of healing on a creep and those around it)
  *
- * The only job list that updates from old values atm is sourceJobs.
- * I need to update every other queue to refresh in one of two ways
- *
- * 1) Jobs that are amount sensitive, such as filling extensions, spawns, turrets etc need to be handled in a precise way
- *  -- I need to loop through each creep in the room and check if they are targetting that structure and have the appropriate job type in memory
- * -- essentially I loop through and recreate the effects of updateJobMemory (I might be able to even just call updateJobMemory if I do it right)
- *
- * 2) Jobs that are not amount sensitive, e.g. upgrading controller, constructing a building
- * -- I need to basically create a new job and compare it to the old job
- *  - If old job has a higher number (e.g. more hits remaining to completely being built) than new job, I use the new job completely.
- * -- If new job has a higher number than old job, I use old job completely
- *
  *
  * ~~~~~~~~~~~~~~~~
  * ~~ BUG FIXES ~~
  * ~~~~~~~~~~~~~~~~
  *
- * 1. Harvesters fill themselves on storage and put it right back again, same issue as last code base, and they were doing it while energy was in the containers
- * Need to expand rules for when they should use storage in their get energy jobs method
- *
  * 3. Ramparts are being left to decay as their job is too low on the totem pole
  * Need to raise them up, the idea from Brock was structures under 25% get precedence over construction
  * Good idea in general and easy to do with how our jobs are structured
- *
- * 4. Rework how we are getting military limits to fit how the other ones work
- *    We need a way to make sure a flag only effects the limits while its active,
- *    so we need to get all active attack flags (should only be 1 at a time tho)
- *    and set the limits accordingly all in the same method then return that to do the adjusting
  *
  * 5. Zealot spawned with no target room, need to figure out why getTargetRoom for creep memory set up is going wrong
  *
