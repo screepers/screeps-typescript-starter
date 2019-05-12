@@ -200,96 +200,11 @@ export default class SpawnApi {
     }
 
     /**
-     * set military creep limits
-     * @param room the room we want limits for
+     * set military creep queue
+     * @param room the room we want queue for
      */
-    public static generateMilitaryCreepLimits(room: Room): void {
+    public static generateMilitaryCreepQueue(room: Room): void {
 
-        const defaultMilitaryLimits: MilitaryCreepLimits = {
-            zealot: 0,
-            stalker: 0,
-            medic: 0,
-            domesticDefender: 0
-        };
-        // For extra saftey, find first active flag (only 1 should be active at a time)
-        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
-        let activeAttackRoomFlag: ParentFlagMemory | undefined;
-        for (const attackRoom of targetRoomMemoryArray) {
-            if (!attackRoom) {
-                continue;
-            }
-            activeAttackRoomFlag = _.find(attackRoom!["flags"], flagMem => {
-                if (!flagMem) {
-                    return false;
-                }
-                return flagMem.active;
-            });
-            if (activeAttackRoomFlag) {
-                break;
-            }
-        }
-
-        if (activeAttackRoomFlag) {
-            // Set the limits in memory based on the flag type
-            this.adjustMilitaryCreepLimits(activeAttackRoomFlag as AttackFlagMemory, room);
-        }
-        else {
-            // If we don't have active attack rooms, reset spawn back to 0
-            room.memory.creepLimit!.militaryLimits = defaultMilitaryLimits;
-        }
-
-
-        // Check if we need domestic defenders and adjust accordingly
-        const defcon: number = MemoryApi.getDefconLevel(room);
-        if (defcon >= 2) {
-            this.adjustDomesticDefenderCreepLimits(room, defcon);
-        }
-        else {
-            // if we don't need, make sure spawn gets set to 0
-            MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 0);
-        }
-    }
-
-    /**
-     * raises the military creep limits based on the flag type
-     * @param flagMemory the memory associated with the attack flag
-     * @param room the room we are raising limits for
-     */
-    public static adjustMilitaryCreepLimits(flagMemory: AttackFlagMemory | undefined, room: Room): void {
-        // If flag memory is undefined, don't waste cpu
-        if (!flagMemory) {
-            return;
-        }
-
-        switch (flagMemory!.flagType) {
-            case ZEALOT_SOLO:
-                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "zealot", 1);
-
-                break;
-
-            case STALKER_SOLO:
-                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "stalker", 1);
-
-                break;
-
-            case STANDARD_SQUAD:
-                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "zealot", 1);
-                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "stalker", 1);
-                MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", "medic", 1);
-
-                break;
-        }
-    }
-
-    /**
-     * raises the domestic defender limit based on the defcon state of the room
-     * @param room the room we are in
-     * @param defcon the defcon of said room
-     */
-    public static adjustDomesticDefenderCreepLimits(room: Room, defcon: number): void {
-        // For now, just raise by one, later we can decide what certain defcons means for what we want to spawn
-        // just wanted it in a function so we have the foundation for that in place
-        MemoryApi.adjustCreepLimitsByDelta(room, "militaryLimits", ROLE_DOMESTIC_DEFENDER, 1);
     }
 
     /**
@@ -305,7 +220,7 @@ export default class SpawnApi {
 
         // Set Military Limits to Memory, this handles the memory itself so no need to pass the return into update function
         // This is because different situations can pop up that call for military, we don't want to overwrite the memory every time
-        this.generateMilitaryCreepLimits(room);
+        this.generateMilitaryCreepQueue(room);
     }
 
     /**
@@ -341,18 +256,14 @@ export default class SpawnApi {
                 return role;
             }
         }
-        // Check if we need a military creep -- Return role if one is found
-        for (const role of militaryRolePriority) {
-            if (MemoryApi.getCreepCount(room, role) < creepLimits.militaryLimits[role]) {
-                return role;
-            }
-        }
         // Check if we need a remote creep -- Return role if one is found
         for (const role of remoteRolePriority) {
             if (MemoryApi.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
                 return role;
             }
         }
+
+        // Military removed until we figure out how to middle man this function properly
 
         // Return null if we don't need to spawn anything
         return null;
@@ -678,10 +589,8 @@ export default class SpawnApi {
             return squadOptions;
         }
 
-        // Get an appropirate attack flag for the creep
-        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room, targetRoom);
-        // Only going to be one room returned, but had to be an array, so just grab it
-        const roomMemory: AttackRoomMemory | undefined = _.first(targetRoomMemoryArray);
+        // Get an appropirate attack flag for the creep, should only be 1 room returned, so grab first
+        const roomMemory: AttackRoomMemory | undefined = _.first(MemoryApi.getAttackRooms(room, targetRoom));
 
         // Drop out early if there are no attack rooms
         if (roomMemory === undefined) {
