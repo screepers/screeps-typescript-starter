@@ -240,6 +240,14 @@ export default class SpawnApi {
             for (const role of attackingRoles) {
                 rolesToAdd.push(role);
             }
+
+            // Set the flag as complete, so it's only added to the queue once
+            // For now we use isAttackFlagOneTimeUse, but there is likely a better way to
+            // ensure continued spawning of a certain type of creep until a condition is met
+            // or until we cancel the flag manually, need to brainstorm this. For now, use config
+            if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory)) {
+                Memory.flags[activeAttackRoomFlag.flagName].complete = true;
+            }
         }
 
         // Add the constructed queue to the military queue
@@ -665,14 +673,6 @@ export default class SpawnApi {
         if (selectedFlagMemory === undefined) {
             return squadOptions;
         } else {
-            // if this flag has met its requirements, deactivate it
-            if (selectedFlagActiveSquadMembers >= selectedFlagMemory.squadSize) {
-                selectedFlagMemory.active = false;
-                // If its a one time use, complete it as well
-                if (EmpireApi.isAttackFlagOneTimeUse(selectedFlagMemory)) {
-                    Game.flags[selectedFlagMemory.flagName].memory.complete = true;
-                }
-            }
 
             // Set squad options to the flags memory and return it
             squadOptions.squadSize = selectedFlagMemory.squadSize;
