@@ -204,7 +204,9 @@ export default class SpawnApi {
      * @param room the room we want queue for
      */
     public static generateMilitaryCreepQueue(room: Room): void {
-
+        // basic idea... get the active flag, build an array of roles to add
+        // loop over this array and insert each into the queue for the room
+        // set the flag to complete
     }
 
     /**
