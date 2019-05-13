@@ -207,6 +207,9 @@ export default class SpawnApi {
         // basic idea... get the active flag, build an array of roles to add
         // loop over this array and insert each into the queue for the room
         // set the flag to complete
+        // do the same for remote defenders
+        // do the same for domestic defenders
+
     }
 
     /**
