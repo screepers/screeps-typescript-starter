@@ -204,12 +204,56 @@ export default class SpawnApi {
      * @param room the room we want queue for
      */
     public static generateMilitaryCreepQueue(room: Room): void {
-        // basic idea... get the active flag, build an array of roles to add
-        // loop over this array and insert each into the queue for the room
-        // set the flag to complete
-        // do the same for remote defenders
-        // do the same for domestic defenders
+        const rolesToAdd: RoleConstant[] = [];
 
+        // Check for Domestic Defenders
+        const defconLevel: number = MemoryApi.getDefconLevel(room);
+        const limit: number = RoomHelper.getDomesticDefenderLimitByDefcon(defconLevel)
+        if (
+            defconLevel >= 2 &&
+            !SpawnHelper.isCreepCountSpawnedAndQueueAtLimit(room, ROLE_DOMESTIC_DEFENDER, limit)
+        ) {
+            rolesToAdd.push(ROLE_DOMESTIC_DEFENDER);
+        }
+
+        // Check for Military Creeps
+        // For extra saftey, find first active flag (only 1 should be active at a time)
+        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
+        let activeAttackRoomFlag: ParentFlagMemory | undefined;
+        for (const attackRoom of targetRoomMemoryArray) {
+            if (!attackRoom) {
+                continue;
+            }
+            activeAttackRoomFlag = _.find(attackRoom!["flags"], flagMem => {
+                if (!flagMem) {
+                    return false;
+                }
+                return flagMem.active;
+            });
+            if (activeAttackRoomFlag) {
+                break;
+            }
+        }
+        // If we found an active attack flag, add it's roles to the array
+        if (activeAttackRoomFlag) {
+            const attackingRoles: RoleConstant[] = SpawnHelper.getRolesArrayFromAttackFlag(activeAttackRoomFlag);
+            for (const role of attackingRoles) {
+                rolesToAdd.push(role);
+            }
+
+            // Set the flag as complete, so it's only added to the queue once
+            // For now we use isAttackFlagOneTimeUse, but there is likely a better way to
+            // ensure continued spawning of a certain type of creep until a condition is met
+            // or until we cancel the flag manually, need to brainstorm this. For now, use config
+            if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory)) {
+                Memory.flags[activeAttackRoomFlag.flagName].complete = true;
+            }
+        }
+
+        // Add the constructed queue to the military queue
+        for (const role of rolesToAdd) {
+            room.memory.creepLimit!["militaryLimits"].push(role);
+        }
     }
 
     /**
@@ -223,8 +267,7 @@ export default class SpawnApi {
         // Set Remote Limits to Memory
         MemoryHelperRoom.updateRemoteLimits(room, this.generateRemoteCreepLimits(room));
 
-        // Set Military Limits to Memory, this handles the memory itself so no need to pass the return into update function
-        // This is because different situations can pop up that call for military, we don't want to overwrite the memory every time
+        // Create the Military Queue
         this.generateMilitaryCreepQueue(room);
     }
 
@@ -630,14 +673,6 @@ export default class SpawnApi {
         if (selectedFlagMemory === undefined) {
             return squadOptions;
         } else {
-            // if this flag has met its requirements, deactivate it
-            if (selectedFlagActiveSquadMembers >= selectedFlagMemory.squadSize) {
-                selectedFlagMemory.active = false;
-                // If its a one time use, complete it as well
-                if (EmpireApi.isAttackFlagOneTimeUse(selectedFlagMemory)) {
-                    Game.flags[selectedFlagMemory.flagName].memory.complete = true;
-                }
-            }
 
             // Set squad options to the flags memory and return it
             squadOptions.squadSize = selectedFlagMemory.squadSize;
