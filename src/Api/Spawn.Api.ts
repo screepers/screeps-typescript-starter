@@ -204,7 +204,48 @@ export default class SpawnApi {
      * @param room the room we want queue for
      */
     public static generateMilitaryCreepQueue(room: Room): void {
+        const rolesToAdd: RoleConstant[] = [];
 
+        // Check for Domestic Defenders
+        const defconLevel: number = MemoryApi.getDefconLevel(room);
+        const limit: number = RoomHelper.getDomesticDefenderLimitByDefcon(defconLevel)
+        if (
+            defconLevel >= 2 &&
+            SpawnHelper.isCreepCountSpawnedAndQueueAtLimit(room, ROLE_DOMESTIC_DEFENDER, limit)
+        ) {
+            rolesToAdd.push(ROLE_DOMESTIC_DEFENDER);
+        }
+
+        // Check for Military Creeps
+        // For extra saftey, find first active flag (only 1 should be active at a time)
+        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
+        let activeAttackRoomFlag: ParentFlagMemory | undefined;
+        for (const attackRoom of targetRoomMemoryArray) {
+            if (!attackRoom) {
+                continue;
+            }
+            activeAttackRoomFlag = _.find(attackRoom!["flags"], flagMem => {
+                if (!flagMem) {
+                    return false;
+                }
+                return flagMem.active;
+            });
+            if (activeAttackRoomFlag) {
+                break;
+            }
+        }
+        // If we found an active attack flag, add it's roles to the array
+        if (activeAttackRoomFlag) {
+            const attackingRoles: RoleConstant[] = SpawnHelper.getRolesArrayFromAttackFlag(activeAttackRoomFlag);
+            for (const role of attackingRoles) {
+                rolesToAdd.push(role);
+            }
+        }
+
+        // Add the constructed queue to the military queue
+        for (const role of rolesToAdd) {
+            room.memory.creepLimit!["militaryLimits"].push(role);
+        }
     }
 
     /**
@@ -218,8 +259,7 @@ export default class SpawnApi {
         // Set Remote Limits to Memory
         MemoryHelperRoom.updateRemoteLimits(room, this.generateRemoteCreepLimits(room));
 
-        // Set Military Limits to Memory, this handles the memory itself so no need to pass the return into update function
-        // This is because different situations can pop up that call for military, we don't want to overwrite the memory every time
+        // Create the Military Queue
         this.generateMilitaryCreepQueue(room);
     }
 
