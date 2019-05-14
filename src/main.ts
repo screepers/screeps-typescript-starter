@@ -83,10 +83,6 @@
  * ~~ BUG FIXES ~~
  * ~~~~~~~~~~~~~~~~
  *
- * 3. Ramparts are being left to decay as their job is too low on the totem pole
- * Need to raise them up, the idea from Brock was structures under 25% get precedence over construction
- * Good idea in general and easy to do with how our jobs are structured
- *
  * 6. Option flags throw an error regardless if they are processed or not
  * Place an option flag to recreate
  *
@@ -101,6 +97,12 @@
  *
  * 8. Even worse, just had an invasion and my targets didn't even fire once. Either defcon isn't getting set properly or they aren't finding their target properly.
  * Not sure how to recreate, as they seem to respond to invasions, but it happens frequently enough where i lost 200 creep parts in last 24 hours
+ * 
+ * 9. Multiple Spawns are not being handled correctly - Will duplicate creeps - e.g. I had 3 miners when limit was 2
+ * 
+ * 10. If harvesters get from storage, and there are no other useEnergy jobs in the room, they will let energy pile up on the floors around them
+ *     until they can use the energy they got from storage. 
+ *          E.g. Storage is at 900k/1000k, both harvesters are storage blocked, each mining container is full so resources are decaying on the ground
  */
 
 import EmpireManager from "Managers/EmpireManager";
