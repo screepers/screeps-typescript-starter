@@ -211,7 +211,7 @@ export default class SpawnApi {
         const limit: number = RoomHelper.getDomesticDefenderLimitByDefcon(defconLevel)
         if (
             defconLevel >= 2 &&
-            SpawnHelper.isCreepCountSpawnedAndQueueAtLimit(room, ROLE_DOMESTIC_DEFENDER, limit)
+            !SpawnHelper.isCreepCountSpawnedAndQueueAtLimit(room, ROLE_DOMESTIC_DEFENDER, limit)
         ) {
             rolesToAdd.push(ROLE_DOMESTIC_DEFENDER);
         }
