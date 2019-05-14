@@ -1159,7 +1159,7 @@ export default class MemoryApi {
                 return obj.hits < obj.hitsMax * PRIORITY_REPAIR_THRESHOLD;
             }
             else {
-                return obj.hits < RoomApi.getWallHpLimit(room);
+                return obj.hits < RoomApi.getWallHpLimit(room) * PRIORITY_REPAIR_THRESHOLD;
             }
         });
 
