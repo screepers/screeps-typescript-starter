@@ -32,6 +32,7 @@ import {
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
 import RoomHelper from "./RoomHelper";
+import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY } from "utils/militaryConfig";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -1481,21 +1482,13 @@ export class SpawnHelper {
         // check the flag type and return the array
         switch (attackFlag.flagType) {
             case ZEALOT_SOLO:
-                return [
-                    ROLE_ZEALOT,
-                ];
+                return ZEALOT_SOLO_ARRAY;
 
             case STANDARD_SQUAD:
-                return [
-                    ROLE_ZEALOT,
-                    ROLE_STALKER,
-                    ROLE_MEDIC
-                ];
+                return STANDARD_SQUAD_ARRAY;
 
             case STALKER_SOLO:
-                return [
-                    ROLE_STALKER,
-                ];
+                return STALKER_SOLO_ARRAY;
         }
         return [];
     }
