@@ -32,6 +32,7 @@ import {
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
 import RoomHelper from "./RoomHelper";
+import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY } from "utils/militaryConfig";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -1470,5 +1471,50 @@ export class SpawnHelper {
             }
         });
         return accesssibleTiles;
+    }
+
+    /**
+     * get the array of roles based on the attack flag type
+     * @param attackFlag the flag memory of the active attack flag
+     */
+    public static getRolesArrayFromAttackFlag(attackFlag: ParentFlagMemory): RoleConstant[] {
+
+        // check the flag type and return the array
+        switch (attackFlag.flagType) {
+            case ZEALOT_SOLO:
+                return ZEALOT_SOLO_ARRAY;
+
+            case STANDARD_SQUAD:
+                return STANDARD_SQUAD_ARRAY;
+
+            case STALKER_SOLO:
+                return STALKER_SOLO_ARRAY;
+        }
+        return [];
+    }
+
+    /**
+     * check if the creep role exists in the room's queue
+     * @param room the room we are checking for
+     * @param roleConst the role we are checking for
+     * @param limit the limit we are checking for
+     */
+    public static isCreepCountSpawnedAndQueueAtLimit(room: Room, roleConst: RoleConstant, limit: number): boolean {
+        const roleArray: RoleConstant[] = room.memory.creepLimit!["militaryLimits"];
+        const creepsInRoom: Creep[] = MemoryApi.getMyCreeps(room.name,
+            (c: Creep) => c.memory.role === roleConst
+        );
+        let sum = 0;
+
+        // Get all the defenders in queue to be spawned
+        for (const role of roleArray) {
+            if (role === roleConst) {
+                sum++;
+            }
+        }
+
+        // Get all defenders currently spawned
+        sum += creepsInRoom.length;
+        return sum >= limit;
     }
 }
