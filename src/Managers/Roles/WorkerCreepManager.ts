@@ -115,6 +115,14 @@ export default class WorkerCreepManager {
             }
         }
 
+        // Priority Repair Only
+        if (creepOptions.repair){
+            const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
+            if (priorityRepairJobs.length > 0) {
+                return priorityRepairJobs[0];
+            }
+        }
+
         if (creepOptions.build) {
             const buildJobs = MemoryApi.getBuildJobs(room, (job: WorkPartJob) => !job.isTaken);
             if (buildJobs.length > 0) {
@@ -122,6 +130,7 @@ export default class WorkerCreepManager {
             }
         }
 
+        // Regular repair
         if (creepOptions.repair) {
             const repairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => !job.isTaken);
             if (repairJobs.length > 0) {

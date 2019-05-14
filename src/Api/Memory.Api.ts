@@ -2,7 +2,7 @@ import MemoryHelper from "Helpers/MemoryHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import RoomHelper from "Helpers/RoomHelper";
 import { SpawnHelper } from "Helpers/SpawnHelper";
-import { NO_CACHING_MEMORY } from "utils/config";
+import { NO_CACHING_MEMORY, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
 import {
     BACKUP_JOB_CACHE_TTL,
     CONSTR_CACHE_TTL,
@@ -36,6 +36,8 @@ import {
 import UserException from "utils/UserException";
 import CarryPartJobs from "Jobs/CarryPartJobs";
 import UtilHelper from "Helpers/UtilHelper";
+import WorkPartJobs from "Jobs/WorkPartJobs";
+import RoomApi from "./Room.Api";
 
 // the api for the memory class
 export default class MemoryApi {
@@ -1116,6 +1118,51 @@ export default class MemoryApi {
         }
 
         let repairJobs: WorkPartJob[] = Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs!.data;
+
+        if (filterFunction !== undefined) {
+            repairJobs = _.filter(repairJobs, filterFunction);
+        }
+
+        return repairJobs;
+    }
+
+    /**
+     * Get the list of WorkPartJobs.repairJobs where hp% < config:PRIORITY_REPAIR_THRESHOLD
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the WorkPartJobs list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getPriorityRepairJobs(
+        room: Room,
+        filterFunction?: (object: WorkPartJob) => boolean,
+        forceUpdate?: boolean
+    ): WorkPartJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs!.workPartJobs ||
+            !Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs ||
+            Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs!.cache < Game.time - REPAIR_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateWorkPart_repairJobs(room);
+        }
+
+        // Get only priority jobs
+        let repairJobs: WorkPartJob[] = Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs!.data;
+        repairJobs = _.filter(repairJobs, (job: WorkPartJob) => {
+            const obj = Game.getObjectById(job.targetID) as Structure<StructureConstant> | null;
+            if(obj == null){
+                return false;
+            }
+
+            if(obj.structureType !== STRUCTURE_WALL && obj.structureType !== STRUCTURE_RAMPART){
+                return obj.hits < obj.hitsMax * PRIORITY_REPAIR_THRESHOLD;
+            }
+            else {
+                return obj.hits < RoomApi.getWallHpLimit(room);
+            }
+        });
+
 
         if (filterFunction !== undefined) {
             repairJobs = _.filter(repairJobs, filterFunction);

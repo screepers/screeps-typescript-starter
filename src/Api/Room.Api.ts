@@ -15,7 +15,7 @@ import {
 } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "./Memory.Api";
-import { REPAIR_THRESHOLD } from "utils/config";
+import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -36,15 +36,15 @@ export default class RoomApi {
      * @param room the room we are setting state for
      */
     public static setRoomState(room: Room): void {
-
         // If theres no controller, throw an error
         if (!room.controller) {
-            throw new UserException("Can't set room state for room with no controller!",
+            throw new UserException(
+                "Can't set room state for room with no controller!",
                 "You attempted to call setRoomState on room [" + room.name + "]. Theres no controller here.",
-                ERROR_WARN);
+                ERROR_WARN
+            );
         }
         // ----------
-
 
         // check if we are in nuke inbound room state
         // nuke is coming in and we need to gtfo, but they take like 20k ticks, so only check every 1000 or so
@@ -70,7 +70,6 @@ export default class RoomApi {
         const containers: Array<Structure | null> = MemoryApi.getStructureOfType(room.name, STRUCTURE_CONTAINER);
         const sources: Array<Source | null> = MemoryApi.getSources(room.name);
         if (room.controller!.level >= 6) {
-
             // check if we are in upgrader room state
             // container mining and storage set up, and we got links online
             if (
@@ -78,7 +77,6 @@ export default class RoomApi {
                 RoomHelper.isUpgraderLink(room) &&
                 storage !== undefined
             ) {
-
                 if (RoomHelper.isStimulateRoom(room)) {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
                     return;
@@ -90,13 +88,11 @@ export default class RoomApi {
         }
         // ----------
 
-
         if (room.controller!.level >= 4) {
             // check if we are in advanced room state
             // container mining and storage set up
             // then check if we are flagged for sitmulate state
             if (RoomHelper.isContainerMining(room, sources, containers) && storage !== undefined) {
-
                 if (RoomHelper.isStimulateRoom(room)) {
                     MemoryApi.updateRoomState(ROOM_STATE_STIMULATE, room);
                     return;
@@ -109,7 +105,6 @@ export default class RoomApi {
         }
         // ----------
 
-
         if (room.controller!.level >= 3) {
             // check if we are in intermediate room state
             // container mining set up, but no storage
@@ -119,7 +114,6 @@ export default class RoomApi {
             }
         }
         // ----------
-
 
         // check if we are in beginner room state
         // no containers set up at sources so we are just running a bare knuckle room
@@ -135,7 +129,6 @@ export default class RoomApi {
      * @param room the room we are defending
      */
     public static runTowers(room: Room): void {
-
         const towers = MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER);
         // choose the most ideal target and have every tower attack it
         const idealTarget: Creep | undefined | null = RoomHelper.chooseTowerTarget(room);
@@ -153,7 +146,6 @@ export default class RoomApi {
      * @param room the room we are setting defcon for
      */
     public static setDefconLevel(room: Room): void {
-
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room.name);
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
@@ -198,26 +190,31 @@ export default class RoomApi {
     }
 
     /**
-     * get repair targets for the room (any structure under 75% hp)
+     * get repair targets for the room (any structure under config:REPAIR_THRESHOLD% hp)
      * @param room the room we are checking for repair targets
      */
     public static getRepairTargets(room: Room): Array<Structure<StructureConstant>> {
-        const repairStructures: Array<Structure<StructureConstant>> = MemoryApi.getStructures(room.name, (struct: Structure<StructureConstant>) => {
+        return MemoryApi.getStructures(room.name, (struct: Structure<StructureConstant>) => {
             if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
-                return struct.hits < (struct.hitsMax * REPAIR_THRESHOLD);
+                return struct.hits < struct.hitsMax * REPAIR_THRESHOLD;
+            } else {
+                return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
             }
-            return false;
         });
+    }
 
-        if (repairStructures.length === 0) {
-            return MemoryApi.getStructures(room.name, (struct: Structure<StructureConstant>) => {
-                if (struct.structureType === STRUCTURE_RAMPART || struct.structureType === STRUCTURE_WALL) {
-                    return struct.hits < this.getWallHpLimit(room) * REPAIR_THRESHOLD;
-                }
-                return false;
-            });
-        }
-        return repairStructures
+    /**
+     * Get priority repair targets for the room (any structure under config:PRIORITY_REPAIR_THRESHOLD% hp)
+     * @param room The room we are checking for repair targets
+     */
+    public static getPriorityRepairTargets(room: Room): Array<Structure<StructureConstant>> {
+        return MemoryApi.getStructures(room.name, (struct: Structure<StructureConstant>) => {
+            if(struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
+                return struct.hits < struct.hitsMax * PRIORITY_REPAIR_THRESHOLD;
+            } else {
+                return struct.hits < this.getWallHpLimit(room) * PRIORITY_REPAIR_THRESHOLD;
+            }
+        });
     }
 
     /**
@@ -226,16 +223,20 @@ export default class RoomApi {
      */
     public static getLowSpawnAndExtensions(room: Room): Array<StructureSpawn | StructureExtension> {
         const extensionsNeedFilled: StructureExtension[] = MemoryApi.getStructureOfType(
-            room.name, STRUCTURE_EXTENSION,
+            room.name,
+            STRUCTURE_EXTENSION,
             (e: StructureExtension) => {
                 return e.energy < e.energyCapacity;
-            }) as StructureExtension[];
+            }
+        ) as StructureExtension[];
 
         const spawnsNeedFilled: StructureSpawn[] = MemoryApi.getStructureOfType(
-            room.name, STRUCTURE_SPAWN,
+            room.name,
+            STRUCTURE_SPAWN,
             (e: StructureSpawn) => {
                 return e.energy < e.energyCapacity;
-            }) as StructureSpawn[];
+            }
+        ) as StructureSpawn[];
 
         const extensionsAndSpawns: Array<StructureExtension | StructureSpawn> = [];
         _.forEach(extensionsNeedFilled, (ext: StructureExtension) => extensionsAndSpawns.push(ext));
@@ -310,7 +311,10 @@ export default class RoomApi {
      * @param source the source we are considering
      */
     public static getMiningContainer(room: Room, source: Source): Structure<StructureConstant> | undefined {
-        const containers: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(room.name, STRUCTURE_CONTAINER);
+        const containers: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(
+            room.name,
+            STRUCTURE_CONTAINER
+        );
 
         return _.find(
             containers,
@@ -337,7 +341,7 @@ export default class RoomApi {
      * get the current hp limit for walls/ramparts
      * @param room the current room
      */
-    private static getWallHpLimit(room: Room): number {
+    public static getWallHpLimit(room: Room): number {
         // only do so if the room has a controller otherwise we have an exception
         if (room.controller !== undefined) {
             // % of way to next level
@@ -364,7 +368,6 @@ export default class RoomApi {
      * @param room the room we want to run links for
      */
     public static runLinks(room: Room): void {
-
         // If we don't have an upgrader link, cancel early
         const upgraderLink: StructureLink | null = MemoryApi.getUpgraderLink(room);
         if (!upgraderLink || upgraderLink.energy <= 400) {
@@ -372,8 +375,11 @@ export default class RoomApi {
         }
 
         // Get non-upgrader links above 100 energy to fill the upgrader link
-        const nonUpgraderLinks: StructureLink[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_LINK,
-            (link: StructureLink) => link.id !== upgraderLink.id && link.energy >= 100) as StructureLink[];
+        const nonUpgraderLinks: StructureLink[] = MemoryApi.getStructureOfType(
+            room.name,
+            STRUCTURE_LINK,
+            (link: StructureLink) => link.id !== upgraderLink.id && link.energy >= 100
+        ) as StructureLink[];
         for (const link of nonUpgraderLinks) {
             if (link.cooldown > 0) {
                 continue;
@@ -384,8 +390,7 @@ export default class RoomApi {
             let amountToTransfer: number = 0;
             if (missingEnergy > link.energy) {
                 amountToTransfer = link.energy;
-            }
-            else {
+            } else {
                 amountToTransfer = missingEnergy;
             }
 

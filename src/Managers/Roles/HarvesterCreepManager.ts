@@ -178,7 +178,14 @@ export default class HarvesterCreepManager {
                 return buildJobs[0];
             }
         }
-
+        
+        if (creepOptions.repair){
+            const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
+            if (priorityRepairJobs.length > 0) {
+                return priorityRepairJobs[0];
+            }
+        }
+        
         return undefined;
     }
 

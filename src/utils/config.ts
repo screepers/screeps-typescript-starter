@@ -21,9 +21,14 @@ export const CONTAINER_MINIMUM_ENERGY = 100;
 export const LINK_MINIMUM_ENERGY = 1;
 
 /**
- * Percentage HP to begin repairing structures (besides Ramparts and Walls)
+ * Percentage HP to begin repairing structures (Percentage of current limit for Ramparts and Walls)
  */
 export const REPAIR_THRESHOLD = .75;
+
+/**
+ * Percentage HP to make repairing structures a priority (Percentage of current limit for Ramparts and Walls)
+ */
+export const PRIORITY_REPAIR_THRESHOLD = .25;
 
 /**
  * toggle for the room visual overlay
