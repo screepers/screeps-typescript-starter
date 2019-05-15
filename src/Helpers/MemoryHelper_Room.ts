@@ -508,14 +508,4 @@ export default class MemoryHelper_Room {
         // * Optionally apply a filter or otherwise check the limits before assigning them
         Memory.rooms[room.name].creepLimit!["remoteLimits"] = newLimits;
     }
-
-    /**
-     * update creep limits for military creeps
-     * @param room room we are updating limits for
-     * @param newLimits new limits we are setting
-     */
-    public static updateMilitaryLimits(room: Room, newLimits: MilitaryCreepLimits): void {
-        // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit!["militaryLimits"] = newLimits;
-    }
 }

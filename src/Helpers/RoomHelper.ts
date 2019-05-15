@@ -418,4 +418,19 @@ export default class RoomHelper {
 
         return sum;
     }
+
+    /**
+     * get the number of domestic defenders by the defcon number
+     */
+    public static getDomesticDefenderLimitByDefcon(defcon: number): number {
+        switch (defcon) {
+            case 2:
+                return 1;
+            case 3:
+                return 2;
+            case 4:
+                return 3;
+        }
+        return 0;
+    }
 }

@@ -760,7 +760,7 @@ interface CreepLimits extends StringMap {
     /**
      * creep limits for military creeps
      */
-    militaryLimits: MilitaryCreepLimits;
+    militaryLimits: Array<RoleConstant>;
 }
 
 /**
@@ -819,29 +819,6 @@ interface DomesticCreepLimits {
      * limit for domestic lorries
      */
     lorry: number;
-}
-
-/**
- * creep limits for military creeps
- */
-interface MilitaryCreepLimits {
-    [index: string]: number;
-    /**
-     * limit for military zealots
-     */
-    zealot: number;
-    /**
-     * limit for military stalkers
-     */
-    stalker: number;
-    /**
-     * limit for military medics
-     */
-    medic: number;
-    /**
-     * limit for domestic defender
-     */
-    domesticDefender: number;
 }
 
 /**
