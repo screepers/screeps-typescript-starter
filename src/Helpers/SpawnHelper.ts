@@ -1517,4 +1517,28 @@ export class SpawnHelper {
         sum += creepsInRoom.length;
         return sum >= limit;
     }
+
+
+    /**
+     *
+     * @param tier the priority tier of the military creep we are attempting to spawn
+     * @param room the room we are spawning for
+     */
+    public static spawnMiliQueue(tier: number, room: Room): RoleConstant | null {
+
+        switch (tier) {
+            case 1:
+
+            case 2:
+
+            case 3:
+
+            default:
+                throw new UserException(
+                    "Invalid tier number",
+                    "spawnHelper/spawnMiliQueue",
+                    ERROR_WARN
+                );
+        }
+    }
 }
