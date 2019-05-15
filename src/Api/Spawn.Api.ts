@@ -1,7 +1,6 @@
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import {
     domesticRolePriority,
-    militaryRolePriority,
     remoteRolePriority,
     ROLE_COLONIZER,
     ROLE_REMOTE_MINER,
@@ -298,12 +297,17 @@ export default class SpawnApi {
         // Get Limits for each creep department
         const creepLimits: CreepLimits = MemoryApi.getCreepLimits(room);
 
+        // Spawn High Priority military creeps
+        SpawnHelper.spawnMiliQueue(1, room);
         // Check if we need a domestic creep -- Return role if one is found
         for (const role of domesticRolePriority) {
             if (MemoryApi.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
                 return role;
             }
         }
+
+        // Spawn Mid Priority military creeps
+        SpawnHelper.spawnMiliQueue(2, room);
         // Check if we need a remote creep -- Return role if one is found
         for (const role of remoteRolePriority) {
             if (MemoryApi.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
@@ -311,7 +315,8 @@ export default class SpawnApi {
             }
         }
 
-        // Military removed until we figure out how to middle man this function properly
+        // Spawn Low Priority military creeps
+        SpawnHelper.spawnMiliQueue(3, room);
 
         // Return null if we don't need to spawn anything
         return null;

@@ -66,9 +66,6 @@ export const remoteRolePriority: RoleConstant[] = [
     ROLE_COLONIZER
 ];
 
-// * Keep this list ordered by spawn priority
-export const militaryRolePriority: RoleConstant[] = [ROLE_MEDIC, ROLE_STALKER, ROLE_ZEALOT];
-
 // List of every structure in the game
 export const ALL_STRUCTURE_TYPES: StructureConstant[] = [
     STRUCTURE_EXTENSION,
