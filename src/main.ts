@@ -15,17 +15,8 @@
  * ~~~~~~~~~~~~~~~~~~
  * ~~ NEW FEATURES ~~
  * ~~~~~~~~~~~~~~~~~~
- * 1. Spawn Rework
- * Move military spawn system into a queue, add the queue inside of the military limits function
- * Rewrite all the military limit generators to add to this queue rather than setting hard limits
- * Develop a middle man for get next creep function to decide what to spawn next (interfaces with the
- * limits system of domestic creeps and the queue system of remote creeps)
- * Before  this though, move get next creep into a weight system with a base weight for each creep
- * An idea for this is a constant in the config file that has a base weight for each creep type, then a variable in room memory
- * that has the additional weights for each role that can be adjusted on the fly and added to the base weight in the next creep calculation
- * to decide if we want tha creep to be more or less likely to spawn next
- * 
- * TODO Complete Remote Job Creation - Need to get the rooms that need something done 
+ *
+ * TODO Complete Remote Job Creation - Need to get the rooms that need something done
  *
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
@@ -86,7 +77,7 @@
  * ~~~~~~~~~~~~~~~~
  *
  * 1. Harvesters need to fill extensions more efficiently - Choose closest, then check surrounding area for extensions before retargeting
- * 
+ *
  * 6. Option flags throw an error regardless if they are processed or not
  * Place an option flag to recreate
  *
@@ -101,9 +92,9 @@
  *
  * 8. Even worse, just had an invasion and my targets didn't even fire once. Either defcon isn't getting set properly or they aren't finding their target properly.
  * Not sure how to recreate, as they seem to respond to invasions, but it happens frequently enough where i lost 200 creep parts in last 24 hours
- * 
+ *
  * 9. Multiple Spawns are not being handled correctly - Will duplicate creeps - e.g. I had 3 miners when limit was 2
- * 
+ *
  */
 
 import EmpireManager from "Managers/EmpireManager";
