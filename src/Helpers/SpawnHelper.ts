@@ -27,7 +27,8 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
-    ROLE_DOMESTIC_DEFENDER
+    ROLE_DOMESTIC_DEFENDER,
+    ERROR_WARN,
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
@@ -1530,29 +1531,32 @@ export class SpawnHelper {
         const militaryQueue: RoleConstant[] = room.memory.creepLimit!["militaryLimits"];
         switch (tier) {
             case 1:
-                for (const queueRole of militaryQueue) {
+                for (const queueRole in militaryQueue) {
                     for (const tierRole of TIER_1_MILITARY_PRIORITY) {
-                        if (queueRole === tierRole) {
-                            return queueRole;
+                        if (militaryQueue[queueRole] === tierRole) {
+                            return militaryQueue[queueRole];
                         }
                     }
                 }
+                return null;
             case 2:
-                for (const queueRole of militaryQueue) {
+                for (const queueRole in militaryQueue) {
                     for (const tierRole of TIER_2_MILITARY_PRIORITY) {
-                        if (queueRole === tierRole) {
-                            return queueRole;
+                        if (militaryQueue[queueRole] === tierRole) {
+                            return militaryQueue[queueRole];
                         }
                     }
                 }
+                return null;
             case 3:
-                for (const queueRole of militaryQueue) {
+                for (const queueRole in militaryQueue) {
                     for (const tierRole of TIER_3_MILITARY_PRIORITY) {
-                        if (queueRole === tierRole) {
-                            return queueRole;
+                        if (militaryQueue[queueRole] === tierRole) {
+                            return militaryQueue[queueRole];
                         }
                     }
                 }
+                return null;
             default:
                 throw new UserException(
                     "Invalid tier number",
