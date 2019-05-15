@@ -24,6 +24,8 @@
  * An idea for this is a constant in the config file that has a base weight for each creep type, then a variable in room memory
  * that has the additional weights for each role that can be adjusted on the fly and added to the base weight in the next creep calculation
  * to decide if we want tha creep to be more or less likely to spawn next
+ * 
+ * TODO Complete Remote Job Creation - Need to get the rooms that need something done 
  *
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
@@ -83,6 +85,8 @@
  * ~~ BUG FIXES ~~
  * ~~~~~~~~~~~~~~~~
  *
+ * 1. Harvesters need to fill extensions more efficiently - Choose closest, then check surrounding area for extensions before retargeting
+ * 
  * 6. Option flags throw an error regardless if they are processed or not
  * Place an option flag to recreate
  *
@@ -100,9 +104,6 @@
  * 
  * 9. Multiple Spawns are not being handled correctly - Will duplicate creeps - e.g. I had 3 miners when limit was 2
  * 
- * 10. If harvesters get from storage, and there are no other useEnergy jobs in the room, they will let energy pile up on the floors around them
- *     until they can use the energy they got from storage. 
- *          E.g. Storage is at 900k/1000k, both harvesters are storage blocked, each mining container is full so resources are decaying on the ground
  */
 
 import EmpireManager from "Managers/EmpireManager";

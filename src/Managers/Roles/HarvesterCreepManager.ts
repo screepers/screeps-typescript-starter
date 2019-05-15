@@ -4,6 +4,7 @@ import UtilHelper from "Helpers/UtilHelper";
 import RoomHelper from "Helpers/RoomHelper";
 import MemoryHelper from "Helpers/MemoryHelper";
 import { close } from "fs";
+import { formatWithOptions } from "util";
 
 // Manager for the miner creep role
 export default class HarvesterCreepManager {
@@ -58,6 +59,27 @@ export default class HarvesterCreepManager {
                 const options = creep.memory.options as CreepOptionsCiv;
                 options.fillStorage = true;
                 options.fillTerminal = true;
+            } 
+            else if(room.memory.jobs && room.memory.jobs.getEnergyJobs){
+                // Reset creep options if storage is not full and there are getEnergyJobs
+                // * This prevents a creep from idling after getting storage if storage is not full and there are now other sources of energy in the room
+                let numberOfGetEnergyJobs = 0;
+                // Add up the number of jobs available for this creep (>= creepCapacity)
+                if(room.memory.jobs.getEnergyJobs.containerJobs){
+                    // add the number of jobs that meet criteria
+                    numberOfGetEnergyJobs += _.filter(room.memory.jobs.getEnergyJobs.containerJobs.data, (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity).length;
+                }
+
+                if(room.memory.jobs.getEnergyJobs.pickupJobs){
+                    // add the number of jobs that meet criteria
+                    numberOfGetEnergyJobs += _.filter(room.memory.jobs.getEnergyJobs.pickupJobs.data, (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity).length;
+                }
+ 
+                if(numberOfGetEnergyJobs > 0){
+                    const options = creep.memory.options as CreepOptionsCiv;
+                    options.fillStorage = true;
+                    options.fillTerminal = true;
+                }
             }
 
             return job;
@@ -93,7 +115,7 @@ export default class HarvesterCreepManager {
             }
         }
 
-        if (creepOptions.getFromStorage || creepOptions.getFromTerminal) {
+        if(creepOptions.getFromStorage || creepOptions.getFromTerminal) {
             // All backupStructures with enough energy to fill creep.carry, and not taken
             const backupStructures = MemoryApi.getBackupStructuresJobs(
                 room,

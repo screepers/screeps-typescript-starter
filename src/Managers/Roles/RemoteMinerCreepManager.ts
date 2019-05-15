@@ -18,6 +18,10 @@ export default class RemoteMinerCreepManager {
             return; // Don't do anything until you've spawned
         }
 
+        if (creep.room.memory.defcon > 0){
+            // call flee code here
+        }
+
         const targetRoom: Room = Game.rooms[creep.memory.targetRoom];
 
         if (creep.memory.job === undefined) {
