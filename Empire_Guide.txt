@@ -119,3 +119,14 @@ Send 5 people in a row, one after enough, a set number of times:
     set flag to one time use in config, place 5 flags of the same type down
 
 
+---- Adding a new military role --------
+
+---- Adding a new Domestic Role --------
+
+---- Adding a new remote role ----------
+
+---- Adding a new option flag ----------
+
+
+
+
