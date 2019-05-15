@@ -3,6 +3,7 @@ import {
     ROLE_MEDIC,
     ROLE_STALKER,
     ROLE_ZEALOT,
+    ROLE_DOMESTIC_DEFENDER,
 } from "utils/Constants";
 
 /**
@@ -35,3 +36,17 @@ export const STANDARD_SQUAD_ARRAY: RoleConstant[] = [ROLE_STALKER, ROLE_MEDIC, R
  * create the array for stalker solo flag
  */
 export const STALKER_SOLO_ARRAY: RoleConstant[] = [ROLE_STALKER];
+
+/**
+ * Config for priority tier 1
+ */
+export const TIER_1_MILITARY_PRIORITY: RoleConstant[] = [ROLE_DOMESTIC_DEFENDER];
+/**
+ * Config for priority tier 2
+ */
+export const TIER_2_MILITARY_PRIORITY: RoleConstant[] = [];
+
+/**
+ * Config for priority tier 3
+ */
+export const TIER_3_MILITARY_PRIORITY: RoleConstant[] = [ROLE_STALKER, ROLE_MEDIC, ROLE_ZEALOT];

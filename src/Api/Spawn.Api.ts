@@ -1,7 +1,6 @@
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import {
     domesticRolePriority,
-    militaryRolePriority,
     remoteRolePriority,
     ROLE_COLONIZER,
     ROLE_REMOTE_MINER,

@@ -32,7 +32,7 @@ import {
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
 import RoomHelper from "./RoomHelper";
-import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY } from "utils/militaryConfig";
+import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY, TIER_1_MILITARY_PRIORITY, TIER_2_MILITARY_PRIORITY, TIER_3_MILITARY_PRIORITY } from "utils/militaryConfig";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -1526,13 +1526,33 @@ export class SpawnHelper {
      */
     public static spawnMiliQueue(tier: number, room: Room): RoleConstant | null {
 
+        // Look for the correspondings tier's within the military queue for the room, return it if we find one
+        const militaryQueue: RoleConstant[] = room.memory.creepLimit!["militaryLimits"];
         switch (tier) {
             case 1:
-
+                for (const queueRole of militaryQueue) {
+                    for (const tierRole of TIER_1_MILITARY_PRIORITY) {
+                        if (queueRole === tierRole) {
+                            return queueRole;
+                        }
+                    }
+                }
             case 2:
-
+                for (const queueRole of militaryQueue) {
+                    for (const tierRole of TIER_2_MILITARY_PRIORITY) {
+                        if (queueRole === tierRole) {
+                            return queueRole;
+                        }
+                    }
+                }
             case 3:
-
+                for (const queueRole of militaryQueue) {
+                    for (const tierRole of TIER_3_MILITARY_PRIORITY) {
+                        if (queueRole === tierRole) {
+                            return queueRole;
+                        }
+                    }
+                }
             default:
                 throw new UserException(
                     "Invalid tier number",
