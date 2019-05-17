@@ -185,8 +185,7 @@ export default class SpawnApi {
                     ROLE_REMOTE_HARVESTER,
                     numRemoteSources
                 );
-                remoteLimits[ROLE_REMOTE_RESERVER] =
-                    numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
+                remoteLimits[ROLE_REMOTE_RESERVER] = numRemoteRooms * SpawnHelper.getRemoteReserverLimitForRoom(room);
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
                 remoteLimits[ROLE_CLAIMER] =

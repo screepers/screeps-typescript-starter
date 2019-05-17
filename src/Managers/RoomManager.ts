@@ -8,6 +8,7 @@ import {
     RUN_TERMINAL_TIMER,
     RUN_ROOM_STATE_TIMER,
     RUN_DEFCON_TIMER,
+    RUN_RESERVE_TTL_TIMER,
 } from "utils/config";
 
 // room-wide manager
@@ -63,6 +64,12 @@ export default class RoomManager {
         if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL) &&
             RoomHelper.excecuteEveryTicks(RUN_TERMINAL_TIMER)) {
             RoomApi.runTerminal(room);
+        }
+
+        // Run accessory functions for dependent rooms ----
+        // Update reserve timer for remote rooms
+        if (RoomHelper.excecuteEveryTicks(RUN_RESERVE_TTL_TIMER)) {
+            RoomApi.simulateReserveTTL(room);
         }
     }
 }
