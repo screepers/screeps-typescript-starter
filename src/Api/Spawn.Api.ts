@@ -705,11 +705,23 @@ export default class SpawnApi {
                 break;
 
             // Remote creeps going to their remote rooms
-            case ROLE_REMOTE_DEFENDER:
             case ROLE_REMOTE_HARVESTER:
             case ROLE_REMOTE_MINER:
-            case ROLE_REMOTE_RESERVER:
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst);
+                if (roomMemory) {
+                    return roomMemory.roomName;
+                }
+                break;
+
+            case ROLE_REMOTE_RESERVER:
+                roomMemory = SpawnHelper.getRemoteRoomNeedingRemoteReserver(room);
+                if (roomMemory) {
+                    return roomMemory.roomName;
+                }
+                break;
+
+            case ROLE_REMOTE_DEFENDER:
+                roomMemory = SpawnHelper.getRemoteRoomNeedingRemoteDefender(room);
                 if (roomMemory) {
                     return roomMemory.roomName;
                 }
