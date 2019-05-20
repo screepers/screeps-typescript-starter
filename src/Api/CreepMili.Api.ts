@@ -1,6 +1,7 @@
 import MemoryApi from "./Memory.Api";
 import { DEFAULT_MOVE_OPTS } from "utils/constants";
 import CreepApi from "./Creep.Api";
+import MiliHelper from "Helpers/MiliHelper";
 
 // Api for military creep's
 export default class CreepMili {
@@ -212,7 +213,7 @@ export default class CreepMili {
         }
 
         // No squad members, find closest creep
-        const creepsInRoom: Creep[] = creep.room.find(FIND_MY_CREEPS);
+        const creepsInRoom: Creep[] = CreepMili.getAllyCreepsInRoom(creep.room);
         return creep.pos.findClosestByPath(creepsInRoom, { filter: (c: Creep) => c.hits < c.hitsMax });
     }
 
@@ -298,5 +299,14 @@ export default class CreepMili {
 
         // Return false if we didn't need to do any of this
         return false;
+    }
+
+    /**
+     * get all ally creeps in the room
+     * @param room the room we are in
+     */
+    public static getAllyCreepsInRoom(room: Room): Creep[] {
+        return _.filter(room.find(FIND_CREEPS),
+            (creep: Creep) => MiliHelper.isAllyCreep(creep));
     }
 };
