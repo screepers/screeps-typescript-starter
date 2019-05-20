@@ -1662,7 +1662,7 @@ export default class MemoryApi {
         // Return all visible rooms which appear in roomNames array
         return _.filter(Game.rooms,
             (room: Room) =>
-                _.some(roomNames, (roomName: string) => roomName === room.name
-                ));
+                roomNames.includes(room.name)
+        );
     }
 }
