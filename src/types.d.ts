@@ -913,6 +913,10 @@ interface RemoteRoomMemory extends DepedentRoomParentMemory {
      * structures in room
      */
     structures: Cache;
+    /**
+     * time remaining for reserving the controller
+     */
+    reserveTTL: number;
 }
 
 /**
@@ -967,7 +971,7 @@ interface ClaimFlagMemory extends ParentFlagMemory {
 }
 
 /**
- * memory associated with a claim flag inside a claim room memory
+ * memory associated with a remote flag inside a remote room memory
  */
 interface RemoteFlagMemory extends ParentFlagMemory {
     // Same deal as above for now

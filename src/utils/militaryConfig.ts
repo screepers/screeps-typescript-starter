@@ -50,3 +50,8 @@ export const TIER_2_MILITARY_PRIORITY: RoleConstant[] = [];
  * Config for priority tier 3
  */
 export const TIER_3_MILITARY_PRIORITY: RoleConstant[] = [ROLE_STALKER, ROLE_MEDIC, ROLE_ZEALOT];
+
+/**
+ * config for all military roles
+ */
+export const ALL_MILITARY_ROLES: RoleConstant[] = [ROLE_STALKER, ROLE_MEDIC, ROLE_ZEALOT, ROLE_DOMESTIC_DEFENDER];

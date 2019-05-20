@@ -15,7 +15,7 @@ import {
 } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "./Memory.Api";
-import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
+import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD, RUN_RESERVE_TTL_TIMER } from "utils/config";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -209,7 +209,7 @@ export default class RoomApi {
      */
     public static getPriorityRepairTargets(room: Room): Array<Structure<StructureConstant>> {
         return MemoryApi.getStructures(room.name, (struct: Structure<StructureConstant>) => {
-            if(struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
+            if (struct.structureType !== STRUCTURE_RAMPART && struct.structureType !== STRUCTURE_WALL) {
                 return struct.hits < struct.hitsMax * PRIORITY_REPAIR_THRESHOLD;
             } else {
                 return struct.hits < this.getWallHpLimit(room) * PRIORITY_REPAIR_THRESHOLD;
@@ -414,5 +414,33 @@ export default class RoomApi {
      */
     public static runLabs(room: Room): void {
         // i have no idea yet lol
+    }
+
+    /**
+     * simulate or update the reserve TTL for all remote rooms in that room
+     * @param room the room we are updating the remote rooms for
+     */
+    public static simulateReserveTTL(room: Room): void {
+        const remoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
+        for (const remoteRoom of remoteRooms) {
+            // Handle unreserved and undefined rooms
+            if (!remoteRoom) {
+                continue;
+            }
+
+            const currentRoom: Room = Game.rooms[remoteRoom.roomName];
+            if (!currentRoom.controller && remoteRoom.reserveTTL > 0) {
+                // Simulate the dropping of reserve timer by the number of ticks between checks
+                remoteRoom.reserveTTL -= RUN_RESERVE_TTL_TIMER;
+            } else if (currentRoom.controller) {
+                // Get the actual value of the reserve timer
+                if (currentRoom.controller!.reservation) {
+                    remoteRoom.reserveTTL = Game.rooms[remoteRoom.roomName].controller!.reservation!.ticksToEnd;
+                }
+                else {
+                    remoteRoom.reserveTTL = 0;
+                }
+            }
+        }
     }
 }

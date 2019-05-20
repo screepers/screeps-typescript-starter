@@ -32,8 +32,8 @@ import {
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
-import RoomHelper from "./RoomHelper";
-import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY, TIER_1_MILITARY_PRIORITY, TIER_2_MILITARY_PRIORITY, TIER_3_MILITARY_PRIORITY } from "utils/militaryConfig";
+import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY, TIER_1_MILITARY_PRIORITY, TIER_2_MILITARY_PRIORITY, TIER_3_MILITARY_PRIORITY, ALL_MILITARY_ROLES } from "utils/militaryConfig";
+import { RESERVER_MIN_TTL } from "utils/config";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -1243,12 +1243,12 @@ export class SpawnHelper {
      * @param roleConst the role of the creep
      */
     public static isMilitaryRole(roleConst: RoleConstant): boolean {
-        return (
-            roleConst === ROLE_DOMESTIC_DEFENDER ||
-            roleConst === ROLE_STALKER ||
-            roleConst === ROLE_ZEALOT ||
-            roleConst === ROLE_MEDIC
-        );
+        for (const role in ALL_MILITARY_ROLES) {
+            if (roleConst === ALL_MILITARY_ROLES[role]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1406,9 +1406,6 @@ export class SpawnHelper {
             case ROLE_REMOTE_HARVESTER || ROLE_REMOTE_MINER:
                 creepNum = 1 * numSources;
                 break;
-
-            case ROLE_REMOTE_RESERVER:
-                creepNum = 1;
         }
 
         return creepNum;
@@ -1521,7 +1518,7 @@ export class SpawnHelper {
 
 
     /**
-     *
+     * spawn the next creep in the military queue for that tier
      * @param tier the priority tier of the military creep we are attempting to spawn
      * @param room the room we are spawning for
      */
@@ -1565,4 +1562,51 @@ export class SpawnHelper {
                 );
         }
     }
+
+    /**
+     * get the number of remote rooms that need a reserver
+     * @param room the room we are checking the remote rooms for
+     */
+    public static getRemoteReserverLimitForRoom(room: Room): number {
+        const remoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
+        let numReserversNeeded: number = 0;
+        for (const remoteRoom of remoteRooms) {
+            // Handle undefined rooms
+            if (!remoteRoom) {
+                continue;
+            }
+
+            // If the TTL is below the limit set in config, we need a reserver
+            if (remoteRoom.reserveTTL <= RESERVER_MIN_TTL) {
+                numReserversNeeded++;
+            }
+        }
+
+        return numReserversNeeded;
+    }
+
+    /**
+     * get a remote room that needs a remote reserver
+     */
+    public static getRemoteRoomNeedingRemoteReserver(room: Room): RemoteRoomMemory | undefined {
+        return _.first(MemoryApi.getRemoteRooms(room,
+            (rr: RemoteRoomMemory) =>
+                rr.reserveTTL < RESERVER_MIN_TTL
+        ));
+    }
+
+    /**
+     * get a remote room that needs a remote reserver
+     */
+    public static getRemoteRoomNeedingRemoteDefender(room: Room): RemoteRoomMemory | undefined {
+        return _.first(MemoryApi.getRemoteRooms(room,
+            (rr: RemoteRoomMemory) => {
+                if (Memory.rooms[rr.roomName]) {
+                    return Memory.rooms[rr.roomName].defcon > 0;
+                }
+                return false;
+            }
+        ));
+    }
+
 }

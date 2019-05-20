@@ -62,6 +62,7 @@ export default class EmpireHelper {
             structures: { cache: Game.time, data: null },
             roomName: flag.pos.roomName,
             flags: [remoteFlagMemory],
+            reserveTTL: 0,
         };
 
         console.log("Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");

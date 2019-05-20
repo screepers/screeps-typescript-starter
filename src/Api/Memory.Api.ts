@@ -588,14 +588,14 @@ export default class MemoryApi {
      */
     public static getRemoteRooms(
         room: Room,
-        filterFunction?: (object: Room) => boolean,
+        filterFunction?: (object: RemoteRoomMemory) => boolean,
         targetRoom?: string
     ): Array<RemoteRoomMemory | undefined> {
         let remoteRooms: Array<RemoteRoomMemory | undefined>;
 
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
-            filterFunction = (badPractice: Room) => true;
+            filterFunction = (badPractice: RemoteRoomMemory) => true;
         }
 
         // TargetRoom parameter provided
@@ -1151,11 +1151,11 @@ export default class MemoryApi {
         let repairJobs: WorkPartJob[] = Memory.rooms[room.name].jobs!.workPartJobs!.repairJobs!.data;
         repairJobs = _.filter(repairJobs, (job: WorkPartJob) => {
             const obj = Game.getObjectById(job.targetID) as Structure<StructureConstant> | null;
-            if(obj == null){
+            if (obj == null) {
                 return false;
             }
 
-            if(obj.structureType !== STRUCTURE_WALL && obj.structureType !== STRUCTURE_RAMPART){
+            if (obj.structureType !== STRUCTURE_WALL && obj.structureType !== STRUCTURE_RAMPART) {
                 return obj.hits < obj.hitsMax * PRIORITY_REPAIR_THRESHOLD;
             }
             else {
@@ -1641,5 +1641,28 @@ export default class MemoryApi {
 
             return;
         }
+    }
+
+    /**
+     * get all visible dependent rooms
+     */
+    public static getVisibleDependentRooms(): Room[] {
+
+        const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
+        const roomNames: string[] = [];
+        _.forEach(ownedRooms, (room: Room) => {
+            // Collect the room names for dependent rooms
+            _.forEach(MemoryApi.getRemoteRooms(room),
+                (rr: RemoteRoomMemory) => roomNames.push(rr.roomName));
+
+            _.forEach(MemoryApi.getClaimRooms(room),
+                (rr: ClaimRoomMemory) => roomNames.push(rr.roomName));
+        });
+
+        // Return all visible rooms which appear in roomNames array
+        return _.filter(Game.rooms,
+            (room: Room) =>
+                _.some(roomNames, (roomName: string) => roomName === room.name
+                ));
     }
 }
