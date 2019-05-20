@@ -1592,13 +1592,13 @@ export class SpawnHelper {
      * get a remote room that needs a remote reserver
      */
     public static getRemoteRoomNeedingRemoteReserver(room: Room): RemoteRoomMemory | undefined {
-
+        return undefined;
     }
 
     /**
      * get a remote room that needs a remote reserver
      */
     public static getRemoteRoomNeedingRemoteDefender(room: Room): RemoteRoomMemory | undefined {
-
+        return undefined;
     }
 }
