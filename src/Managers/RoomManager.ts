@@ -19,14 +19,22 @@ export default class RoomManager {
      */
     public static runRoomManager(): void {
 
+        // Run all owned rooms
         const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
         _.forEach(ownedRooms, (room: Room) => {
             this.runSingleRoom(room);
         });
+
+        // Run all dependent rooms we have visiblity in
+        const dependentRooms: Room[] = MemoryApi.getVisibleDependentRooms();
+        _.forEach(dependentRooms, (room: Room) => {
+            this.runSingleDependentRoom(room);
+        })
+
     }
 
     /**
-     * run the room for a single room
+     * run the room for a single owned room
      * @param room the room we are running this manager function on
      */
     public static runSingleRoom(room: Room): void {
@@ -70,6 +78,18 @@ export default class RoomManager {
         // Update reserve timer for remote rooms
         if (RoomHelper.excecuteEveryTicks(RUN_RESERVE_TTL_TIMER)) {
             RoomApi.simulateReserveTTL(room);
+        }
+    }
+
+    /**
+     * run the room for an unowned room
+     * @param room the room we are running
+     */
+    public static runSingleDependentRoom(room: Room): void {
+
+        // Set Defcon for the dependent room
+        if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
+            RoomApi.setDefconLevel(room);
         }
     }
 }

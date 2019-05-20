@@ -32,7 +32,7 @@ import {
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
-import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY, TIER_1_MILITARY_PRIORITY, TIER_2_MILITARY_PRIORITY, TIER_3_MILITARY_PRIORITY } from "utils/militaryConfig";
+import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY, TIER_1_MILITARY_PRIORITY, TIER_2_MILITARY_PRIORITY, TIER_3_MILITARY_PRIORITY, ALL_MILITARY_ROLES } from "utils/militaryConfig";
 import { RESERVER_MIN_TTL } from "utils/config";
 
 /**
@@ -1243,12 +1243,12 @@ export class SpawnHelper {
      * @param roleConst the role of the creep
      */
     public static isMilitaryRole(roleConst: RoleConstant): boolean {
-        return (
-            roleConst === ROLE_DOMESTIC_DEFENDER ||
-            roleConst === ROLE_STALKER ||
-            roleConst === ROLE_ZEALOT ||
-            roleConst === ROLE_MEDIC
-        );
+        for (const role in ALL_MILITARY_ROLES) {
+            if (roleConst === ALL_MILITARY_ROLES[role]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1406,9 +1406,6 @@ export class SpawnHelper {
             case ROLE_REMOTE_HARVESTER || ROLE_REMOTE_MINER:
                 creepNum = 1 * numSources;
                 break;
-
-            case ROLE_REMOTE_RESERVER:
-                creepNum = 1;
         }
 
         return creepNum;
@@ -1592,13 +1589,24 @@ export class SpawnHelper {
      * get a remote room that needs a remote reserver
      */
     public static getRemoteRoomNeedingRemoteReserver(room: Room): RemoteRoomMemory | undefined {
-        return undefined;
+        return _.first(MemoryApi.getRemoteRooms(room,
+            (rr: RemoteRoomMemory) =>
+                rr.reserveTTL < RESERVER_MIN_TTL
+        ));
     }
 
     /**
      * get a remote room that needs a remote reserver
      */
     public static getRemoteRoomNeedingRemoteDefender(room: Room): RemoteRoomMemory | undefined {
-        return undefined;
+        return _.first(MemoryApi.getRemoteRooms(room,
+            (rr: RemoteRoomMemory) => {
+                if (Memory.rooms[rr.roomName]) {
+                    return Memory.rooms[rr.roomName].defcon > 0;
+                }
+                return false;
+            }
+        ));
     }
+
 }
