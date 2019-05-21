@@ -71,7 +71,18 @@ export default class CreepApi {
      * Do work on the target provided by claimPartJob
      */
     public static doWork_ClaimPartJob(creep: Creep, job: ClaimPartJob) {
-        const target = Game.getObjectById(job.targetID);
+        let target;
+
+        if (job.targetType === "roomName") {
+            if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
+                target = Game.getObjectById(creep.memory.supplementary.moveTargetID);
+            } else {
+                target = null;
+            }
+        } else {
+            target = Game.getObjectById(job.targetID);
+        }
+
         this.nullCheck_target(creep, target);
 
         let deleteOnSuccess = true;
