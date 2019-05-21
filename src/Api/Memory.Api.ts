@@ -560,7 +560,7 @@ export default class MemoryApi {
     }
 
     /**
-     * get minerals in the room
+     * get minerals in the room -- NOT IMPLEMENTED
      * @param room the room we want minerals from
      * @param filterFunction [Optional] The function to filter all mineral objects
      * @param forceUpdate [Optional] Invalidate cache by force
@@ -590,8 +590,8 @@ export default class MemoryApi {
         room: Room,
         filterFunction?: (object: RemoteRoomMemory) => boolean,
         targetRoom?: string
-    ): Array<RemoteRoomMemory | undefined> {
-        let remoteRooms: Array<RemoteRoomMemory | undefined>;
+    ): RemoteRoomMemory[] {
+        let remoteRooms: RemoteRoomMemory[];
 
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
@@ -612,6 +612,10 @@ export default class MemoryApi {
             );
         }
 
+        if(remoteRooms.length === 0){
+            return [];
+        }
+
         return remoteRooms;
     }
 
@@ -625,14 +629,14 @@ export default class MemoryApi {
      */
     public static getClaimRooms(
         room: Room,
-        filterFunction?: (object: Room) => boolean,
+        filterFunction?: (object: ClaimRoomMemory) => boolean,
         targetRoom?: string
-    ): Array<ClaimRoomMemory | undefined> {
-        let claimRooms: Array<ClaimRoomMemory | undefined>;
+    ): ClaimRoomMemory[] {
+        let claimRooms: ClaimRoomMemory[];
 
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
-            filterFunction = (badPractice: Room) => true;
+            filterFunction = (badPractice: ClaimRoomMemory) => true;
         }
 
         // TargetRoom parameter provided
@@ -644,6 +648,10 @@ export default class MemoryApi {
         } else {
             // No target room provided, just return them all
             claimRooms = _.filter(Memory.rooms[room.name].claimRooms!, (roomMemory: ClaimRoomMemory) => filterFunction);
+        }
+        
+        if(claimRooms.length === 0){
+            return [];
         }
 
         return claimRooms;
@@ -661,8 +669,8 @@ export default class MemoryApi {
         room: Room,
         targetRoom?: string,
         filterFunction?: (object: Room) => boolean
-    ): Array<AttackRoomMemory | undefined> {
-        let attackRooms: Array<AttackRoomMemory | undefined>;
+    ): AttackRoomMemory[] {
+        let attackRooms: AttackRoomMemory[];
 
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
@@ -681,6 +689,10 @@ export default class MemoryApi {
                 Memory.rooms[room.name].attackRooms!,
                 (roomMemory: AttackRoomMemory) => filterFunction
             );
+        }
+
+        if(attackRooms.length === 0) {
+            return [];
         }
 
         return attackRooms;

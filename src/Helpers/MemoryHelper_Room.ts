@@ -250,7 +250,6 @@ export default class MemoryHelper_Room {
 
     /**
      * Update the room's GetEnergyJobListing_sourceJobs
-     * TODO Change this function to restore old job memory, rather than delete it and refresh it
      * @param room The room to update the memory of
      */
     public static updateGetEnergy_sourceJobs(room: Room) {

@@ -421,7 +421,7 @@ export default class RoomApi {
      * @param room the room we are updating the remote rooms for
      */
     public static simulateReserveTTL(room: Room): void {
-        const remoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
+        const remoteRooms = MemoryApi.getRemoteRooms(room);
         for (const remoteRoom of remoteRooms) {
             // Handle unreserved and undefined rooms
             if (!remoteRoom) {
@@ -429,6 +429,10 @@ export default class RoomApi {
             }
 
             const currentRoom: Room = Game.rooms[remoteRoom.roomName];
+            if(currentRoom === undefined){
+                continue;
+            }
+
             if (!currentRoom.controller && remoteRoom.reserveTTL > 0) {
                 // Simulate the dropping of reserve timer by the number of ticks between checks
                 remoteRoom.reserveTTL -= RUN_RESERVE_TTL_TIMER;

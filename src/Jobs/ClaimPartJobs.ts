@@ -1,22 +1,25 @@
+import MemoryApi from "Api/Memory.Api";
+import { RESERVER_MIN_TTL } from "utils/config";
+
 export default class ClaimPartJobs {
     /**
      * Gets a list of ClaimJobs for the Room
      * @param room The room to get the jobs for
      */
     public static createClaimJobs(room: Room): ClaimPartJob[] {
-        // TODO Get a list of rooms to be claimed somehow
-        const roomNames: string[] = [];
+        // Get only ClaimRoomMemory objects that are defined
+        const claimRooms = MemoryApi.getClaimRooms(room);
 
-        if (roomNames.length === 0) {
+        if (claimRooms.length === 0) {
             return [];
         }
 
         const claimJobs: ClaimPartJob[] = [];
 
-        _.forEach(roomNames, (name: string) => {
+        _.forEach(claimRooms, (room: ClaimRoomMemory) => {
             const claimJob: ClaimPartJob = {
                 jobType: "claimPartJob",
-                targetID: name,
+                targetID: room.roomName,
                 targetType: "roomName",
                 actionType: "claim",
                 isTaken: false
@@ -33,19 +36,20 @@ export default class ClaimPartJobs {
      * @param room The room to get the jobs for
      */
     public static createReserveJobs(room: Room): ClaimPartJob[] {
-        // TODO Get a list of rooms to be reserved
-        const roomNames: string[] = [];
+        const reserveRooms: RemoteRoomMemory[] = MemoryApi.getRemoteRooms(room, (roomMemory: RemoteRoomMemory) => {
+            return roomMemory.reserveTTL < RESERVER_MIN_TTL
+        });
 
-        if (roomNames.length === 0) {
+        if (reserveRooms.length === 0) {
             return [];
         }
 
         const reserveJobs: ClaimPartJob[] = [];
 
-        _.forEach(roomNames, (name: string) => {
+        _.forEach(reserveRooms, (room: RemoteRoomMemory) => {
             const reserveJob: ClaimPartJob = {
                 jobType: "claimPartJob",
-                targetID: name,
+                targetID: room.roomName,
                 targetType: "roomName",
                 actionType: "reserve",
                 isTaken: false
