@@ -28,11 +28,19 @@ import {
     TIER_7,
     TIER_8,
     ROLE_DOMESTIC_DEFENDER,
-    ERROR_WARN,
+    ERROR_WARN
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
-import { ZEALOT_SOLO_ARRAY, STANDARD_SQUAD_ARRAY, STALKER_SOLO_ARRAY, TIER_1_MILITARY_PRIORITY, TIER_2_MILITARY_PRIORITY, TIER_3_MILITARY_PRIORITY, ALL_MILITARY_ROLES } from "utils/militaryConfig";
+import {
+    ZEALOT_SOLO_ARRAY,
+    STANDARD_SQUAD_ARRAY,
+    STALKER_SOLO_ARRAY,
+    TIER_1_MILITARY_PRIORITY,
+    TIER_2_MILITARY_PRIORITY,
+    TIER_3_MILITARY_PRIORITY,
+    ALL_MILITARY_ROLES
+} from "utils/militaryConfig";
 import { RESERVER_MIN_TTL } from "utils/config";
 
 /**
@@ -171,7 +179,7 @@ export class SpawnHelper {
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     harvestSources: true, //
-                    fillContainer: true, //
+                    fillContainer: true //
                 };
 
                 break;
@@ -235,8 +243,8 @@ export class SpawnHelper {
                     // Options marked with // are overriding the defaults
                     build: true, //
                     upgrade: true, //
-                    fillSpawn: true,    //
-                    getDroppedEnergy: true, //
+                    fillSpawn: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -247,9 +255,9 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     repair: true, //
-                    fillSpawn: true,    //
+                    fillSpawn: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -258,7 +266,7 @@ export class SpawnHelper {
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     fillStorage: true, //
-                    fillSpawn: true,    //
+                    fillSpawn: true, //
                     getFromStorage: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
@@ -342,7 +350,7 @@ export class SpawnHelper {
                     repair: true, //
                     wallRepair: true, //
                     fillTower: true, //
-                    getDroppedEnergy: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -356,7 +364,7 @@ export class SpawnHelper {
                     wallRepair: true, //
                     fillTower: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -515,7 +523,7 @@ export class SpawnHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     upgrade: true, //
-                    getFromLink: true, //
+                    getFromLink: true //
                 };
 
                 break;
@@ -569,7 +577,7 @@ export class SpawnHelper {
                 creepOptions = {
                     build: true, //
                     repair: true, //
-                    fillContainer: true, //
+                    fillContainer: true //
                 };
 
                 break;
@@ -585,7 +593,7 @@ export class SpawnHelper {
     public static generateRemoteHarvesterBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for Remote Harvester
         let body: CreepBodyDescriptor = { carry: 8, move: 8 };
-        const opts: CreepBodyOptions = { mixType: GROUPED };
+        const opts: CreepBodyOptions = { mixType: COLLATED };
 
         switch (tier) {
             case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
@@ -629,7 +637,7 @@ export class SpawnHelper {
                     wallRepair: true, //
                     fillTower: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -639,7 +647,7 @@ export class SpawnHelper {
                     repair: true, //
                     fillStorage: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -652,7 +660,7 @@ export class SpawnHelper {
                     fillStorage: true, //
                     fillLink: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -700,7 +708,9 @@ export class SpawnHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_NUKE_INBOUND:
                 // Remote reservers don't really have options perse, so just leave as defaults
-                creepOptions = {};
+                creepOptions = {
+                    claim: true
+                };
 
                 break;
         }
@@ -759,7 +769,7 @@ export class SpawnHelper {
                     harvestSources: true,
                     wallRepair: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true, //
+                    getDroppedEnergy: true //
                 };
 
                 break;
@@ -870,7 +880,7 @@ export class SpawnHelper {
                     rallyLocation: null,
                     rallyDone: false,
                     healer: true,
-                    defender: true,
+                    defender: true
                 };
 
                 break;
@@ -953,7 +963,7 @@ export class SpawnHelper {
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
                     rallyDone: false,
-                    attacker: true,
+                    attacker: true
                 };
 
                 break;
@@ -1106,7 +1116,7 @@ export class SpawnHelper {
                     squadSize: squadSizeParam,
                     squadUUID: squadUUIDParam,
                     rallyLocation: rallyLocationParam,
-                    rallyDone: false,
+                    rallyDone: false
                 };
 
                 break;
@@ -1175,7 +1185,7 @@ export class SpawnHelper {
                     squadSize: 0,
                     squadUUID: null,
                     rallyLocation: null,
-                    defender: true,
+                    defender: true
                 };
 
                 break;
@@ -1197,7 +1207,7 @@ export class SpawnHelper {
      */
     public static getDefaultCreepOptionsMili(): CreepOptionsMili {
         return {
-            squadSize: 0,
+            squadSize: 0
         };
     }
 
@@ -1455,7 +1465,7 @@ export class SpawnHelper {
     public static getNumAccessTilesToSources(room: Room): number {
         const sources: Source[] = MemoryApi.getSources(room.name);
         let accesssibleTiles: number = 0;
-        const roomTerrian: RoomTerrain = new Room.Terrain(room.name)
+        const roomTerrian: RoomTerrain = new Room.Terrain(room.name);
         _.forEach(sources, (source: Source) => {
             for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
                 for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
@@ -1476,7 +1486,6 @@ export class SpawnHelper {
      * @param attackFlag the flag memory of the active attack flag
      */
     public static getRolesArrayFromAttackFlag(attackFlag: ParentFlagMemory): RoleConstant[] {
-
         // check the flag type and return the array
         switch (attackFlag.flagType) {
             case ZEALOT_SOLO:
@@ -1499,9 +1508,7 @@ export class SpawnHelper {
      */
     public static isCreepCountSpawnedAndQueueAtLimit(room: Room, roleConst: RoleConstant, limit: number): boolean {
         const roleArray: RoleConstant[] = room.memory.creepLimit!["militaryLimits"];
-        const creepsInRoom: Creep[] = MemoryApi.getMyCreeps(room.name,
-            (c: Creep) => c.memory.role === roleConst
-        );
+        const creepsInRoom: Creep[] = MemoryApi.getMyCreeps(room.name, (c: Creep) => c.memory.role === roleConst);
         let sum = 0;
 
         // Get all the defenders in queue to be spawned
@@ -1516,14 +1523,12 @@ export class SpawnHelper {
         return sum >= limit;
     }
 
-
     /**
      * spawn the next creep in the military queue for that tier
      * @param tier the priority tier of the military creep we are attempting to spawn
      * @param room the room we are spawning for
      */
     public static spawnMiliQueue(tier: number, room: Room): RoleConstant | null {
-
         // Look for the correspondings tier's within the military queue for the room, return it if we find one
         const militaryQueue: RoleConstant[] = room.memory.creepLimit!["militaryLimits"];
         switch (tier) {
@@ -1555,11 +1560,7 @@ export class SpawnHelper {
                 }
                 return null;
             default:
-                throw new UserException(
-                    "Invalid tier number",
-                    "spawnHelper/spawnMiliQueue",
-                    ERROR_WARN
-                );
+                throw new UserException("Invalid tier number", "spawnHelper/spawnMiliQueue", ERROR_WARN);
         }
     }
 
@@ -1589,24 +1590,20 @@ export class SpawnHelper {
      * get a remote room that needs a remote reserver
      */
     public static getRemoteRoomNeedingRemoteReserver(room: Room): RemoteRoomMemory | undefined {
-        return _.first(MemoryApi.getRemoteRooms(room,
-            (rr: RemoteRoomMemory) =>
-                rr.reserveTTL < RESERVER_MIN_TTL
-        ));
+        return _.first(MemoryApi.getRemoteRooms(room, (rr: RemoteRoomMemory) => rr.reserveTTL < RESERVER_MIN_TTL));
     }
 
     /**
      * get a remote room that needs a remote reserver
      */
     public static getRemoteRoomNeedingRemoteDefender(room: Room): RemoteRoomMemory | undefined {
-        return _.first(MemoryApi.getRemoteRooms(room,
-            (rr: RemoteRoomMemory) => {
+        return _.first(
+            MemoryApi.getRemoteRooms(room, (rr: RemoteRoomMemory) => {
                 if (Memory.rooms[rr.roomName]) {
                     return Memory.rooms[rr.roomName].defcon > 0;
                 }
                 return false;
-            }
-        ));
+            })
+        );
     }
-
 }

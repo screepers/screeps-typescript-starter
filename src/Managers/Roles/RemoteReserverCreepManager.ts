@@ -27,13 +27,13 @@ export default class RemoteReserverCreepManager {
         const homeRoom = Game.rooms[creep.memory.homeRoom];
 
         if (creep.memory.job === undefined) {
-            this.getNewReserveJob(creep, homeRoom);
+            creep.memory.job = this.getNewReserveJob(creep, homeRoom);
 
             if (creep.memory.job === undefined) {
                 return;
             }
 
-            this.handleNewJob(creep, creep.memory.job);
+            this.handleNewJob(creep, creep.memory.job as ClaimPartJob);
         }
 
         if (creep.memory.working === true) {

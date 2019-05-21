@@ -337,14 +337,18 @@ export default class CreepApi {
         // If target is roomPosition then we know we want the controller
         // So as soon as we get in room we set supplementaryTarget
         if (job.targetType === "roomName" && creep.pos.roomName === job.targetID) {
-            const targetRoom = Game.rooms[job.targetType];
+            if (CreepApi.moveCreepOffExit(creep)) {
+                return;
+            }
+
+            const targetRoom = Game.rooms[job.targetID];
 
             // If there is a controller, set it as supplementary room target
             if (targetRoom.controller) {
                 if (!creep.memory.supplementary) {
                     creep.memory.supplementary = {};
                 }
-                creep.memory.supplementary.moveTarget = targetRoom.controller.id;
+                creep.memory.supplementary.moveTargetID = targetRoom.controller.id;
             } else {
                 throw new UserException(
                     "No controller in room",
