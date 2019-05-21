@@ -77,7 +77,7 @@
  * ~~~~~~~~~~~~~~~~
  *
  * 1. Harvesters need to fill extensions more efficiently - Choose closest, then check surrounding area for extensions before retargeting
- * 
+ *
  * 2. UpgraderLink does not set itself in room memory - It should choose the one closest to spawn
  *          To be more useable, it should also reset if there is a closer link placed. This follows our rule of not forcing a gameplay style.
  *
