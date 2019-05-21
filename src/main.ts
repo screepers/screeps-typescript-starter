@@ -18,6 +18,8 @@
  *
  * TODO Complete Remote Job Creation - Need to get the rooms that need something done
  *
+ * 1. Migrate some of the getJob functions from CreepManagers to Creep.Api to make code accessible by other CreepManagers
+ * 
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
  * We should also give remote miners 7 work parts imo. 6 wasn't enough to keep the container repaired and it was slow on building it
