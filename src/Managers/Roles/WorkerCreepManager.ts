@@ -1,6 +1,7 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import { ROOM_STATE_UPGRADER } from "utils/constants";
+import { RAMPART_HITS_THRESHOLD, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
 
 // Manager for the miner creep role
 export default class WorkerCreepManager {
@@ -115,8 +116,23 @@ export default class WorkerCreepManager {
             }
         }
 
+        // Startup On Ramparts
+        if (creepOptions.repair) {
+            const defenseRepairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => {
+                const target = Game.getObjectById(job.targetID) as Structure;
+                if (target.structureType === STRUCTURE_RAMPART) {
+                    return target.hits <= RAMPART_HITS_THRESHOLD;
+                }
+                return false;
+            });
+
+            if (defenseRepairJobs.length > 0) {
+                return defenseRepairJobs[0];
+            }
+        }
+
         // Priority Repair Only
-        if (creepOptions.repair){
+        if (creepOptions.repair) {
             const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
             if (priorityRepairJobs.length > 0) {
                 return priorityRepairJobs[0];

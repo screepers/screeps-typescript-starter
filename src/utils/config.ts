@@ -31,6 +31,11 @@ export const REPAIR_THRESHOLD = .75;
 export const PRIORITY_REPAIR_THRESHOLD = .25;
 
 /**
+ * Number of HP to repair Ramparts/Walls to before considering them as a normal structure 
+ */
+export const RAMPART_HITS_THRESHOLD = 10000;
+
+/**
  * toggle for the room visual overlay
  */
 export const ROOM_OVERLAY_ON = true;
