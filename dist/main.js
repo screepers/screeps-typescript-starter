@@ -23,18 +23,18 @@ class MemoryHelper {
         const ownedRooms = MemoryApi.getOwnedRooms();
         // Loop over d-rooms within each room looking for the parameter room name
         for (const room of ownedRooms) {
-            for (const rr of room.memory.remoteRooms) {
-                if (rr && roomName === rr.roomName) {
+            for (const rr in room.memory.remoteRooms) {
+                if (room.memory.remoteRooms[rr] && roomName === room.memory.remoteRooms[rr].roomName) {
                     return true;
                 }
             }
-            for (const cr of room.memory.claimRooms) {
-                if (cr && roomName === cr.roomName) {
+            for (const cr in room.memory.claimRooms) {
+                if (room.memory.claimRooms[cr] && roomName === room.memory.claimRooms[cr].roomName) {
                     return true;
                 }
             }
-            for (const ar of room.memory.attackRooms) {
-                if (ar && roomName === ar.roomName) {
+            for (const ar in room.memory.attackRooms) {
+                if (room.memory.attackRooms[ar] && roomName === room.memory.attackRooms[ar].roomName) {
                     return true;
                 }
             }
@@ -1537,6 +1537,16 @@ class CarryPartJobs {
     }
 }
 
+class MiliHelper {
+    /**
+     * check if the creep belongs to an alliance member
+     * @param creep the creep we are evaluating
+     */
+    static isAllyCreep(creep) {
+        return ALLY_LIST.includes(creep.owner.username);
+    }
+}
+
 /**
  * Contains all functions for initializing and updating room memory
  */
@@ -1595,7 +1605,9 @@ class MemoryHelper_Room {
             return;
         }
         Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
-        const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
+        const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS, {
+            filter: (creep) => MiliHelper.isAllyCreep(creep)
+        });
         // Sort creeps into categories
         _.forEach(enemies, (enemy) => {
             // * Check for boosted creeps and put them at the front of the if else stack
@@ -10117,16 +10129,6 @@ class ClaimerCreepManager {
      * @param creep the creep we are running
      */
     static runCreepRole(creep) {
-    }
-}
-
-class MiliHelper {
-    /**
-     * check if the creep belongs to an alliance member
-     * @param creep the creep we are evaluating
-     */
-    static isAllyCreep(creep) {
-        return ALLY_LIST.includes(creep.owner.username);
     }
 }
 

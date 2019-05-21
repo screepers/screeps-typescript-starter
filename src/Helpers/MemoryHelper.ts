@@ -25,20 +25,20 @@ export default class MemoryHelper {
         // Loop over d-rooms within each room looking for the parameter room name
         for (const room of ownedRooms) {
 
-            for (const rr of room.memory.remoteRooms!) {
-                if (rr && roomName === rr.roomName) {
+            for (const rr in room.memory.remoteRooms!) {
+                if (room.memory.remoteRooms![rr] && roomName === room.memory.remoteRooms![rr].roomName) {
                     return true;
                 }
             }
 
-            for (const cr of room.memory.claimRooms!) {
-                if (cr && roomName === cr.roomName) {
+            for (const cr in room.memory.claimRooms!) {
+                if (room.memory.claimRooms![cr] && roomName === room.memory.claimRooms![cr].roomName) {
                     return true;
                 }
             }
 
-            for (const ar of room.memory.attackRooms!) {
-                if (ar && roomName === ar.roomName) {
+            for (const ar in room.memory.attackRooms!) {
+                if (room.memory.attackRooms![ar] && roomName === room.memory.attackRooms![ar].roomName) {
                     return true;
                 }
             }
