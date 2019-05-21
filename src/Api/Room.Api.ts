@@ -430,15 +430,17 @@ export default class RoomApi {
 
             const currentRoom: Room = Game.rooms[remoteRoom.roomName];
 
-            if (currentRoom === undefined && remoteRoom.reserveTTL > 0) {
+            if (currentRoom === undefined) {
                 // Simulate the dropping of reserve timer by the number of ticks between checks
                 remoteRoom.reserveTTL -= RUN_RESERVE_TTL_TIMER;
+                if (remoteRoom.reserveTTL < 0) {
+                    remoteRoom.reserveTTL = 0;
+                }
             } else if (currentRoom.controller) {
                 // Get the actual value of the reserve timer
                 if (currentRoom.controller!.reservation) {
                     remoteRoom.reserveTTL = Game.rooms[remoteRoom.roomName].controller!.reservation!.ticksToEnd;
-                }
-                else {
+                } else {
                     remoteRoom.reserveTTL = 0;
                 }
             }

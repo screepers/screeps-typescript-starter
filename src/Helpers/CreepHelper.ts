@@ -99,11 +99,15 @@ export default class CreepHelper {
     /**
      * Gets creep.memory.supplementary.moveTargetID, or falls back to creep.memory.job.
      */
-    public static getMoveTarget(creep: Creep, job: BaseJob): RoomObject | null {
+    public static getMoveTarget(creep: Creep, job: BaseJob): RoomObject | RoomPosition | null {
         // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
         if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
             return Game.getObjectById(creep.memory.supplementary.moveTargetID);
-        } else {
+        }
+        else if(creep.memory.job && creep.memory.job.targetType === "roomName"){
+            return new RoomPosition(25, 25, creep.memory.job.targetID);
+        } 
+        else {
             return Game.getObjectById(job.targetID);
         }
     }

@@ -11,6 +11,7 @@ import {
 import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
+import UtilHelper from "Helpers/UtilHelper";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -81,12 +82,12 @@ export default class CreepApi {
             returnCode = creep.claimController(target);
         } else if (job.actionType === "reserve" && target instanceof StructureController) {
             returnCode = creep.reserveController(target);
-            deleteOnSuccess = false;
+            deleteOnSuccess = false; // don't delete job since we do this until death
         } else if (job.actionType === "sign" && target instanceof StructureController) {
             returnCode = creep.signController(target, CreepHelper.getSigningText());
         } else if (job.actionType === "attack" && target instanceof StructureController) {
             returnCode = creep.attackController(target);
-            deleteOnSuccess = false;
+            deleteOnSuccess = false; // Do this until death
         } else {
             throw this.badTarget_Error(creep, job);
         }
@@ -311,6 +312,14 @@ export default class CreepApi {
      * Travel to the target provided by ClaimPartJob in creep.memory.job
      */
     public static travelTo_ClaimPartJob(creep: Creep, job: ClaimPartJob) {
+        // Remove supplementary.moveTarget if we are not in room with controller - Safety
+        if (job.targetType === "roomName" && job.targetID !== creep.pos.roomName) {
+            if (creep.memory.supplementary) {
+                delete creep.memory.supplementary!.moveTarget;
+            }
+        }
+
+        // Will return a roomPosition in this case, or controller if we have that targeted instead
         const moveTarget = CreepHelper.getMoveTarget(creep, job);
 
         this.nullCheck_target(creep, moveTarget);
@@ -321,6 +330,28 @@ export default class CreepApi {
         // All actiontypes that affect controller have range of 1
         if (moveTarget instanceof StructureController) {
             moveOpts.range = 1;
+        } else if (moveTarget instanceof RoomPosition) {
+            moveOpts.range = 0;
+        }
+
+        // If target is roomPosition then we know we want the controller
+        // So as soon as we get in room we set supplementaryTarget
+        if (job.targetType === "roomName" && creep.pos.roomName === job.targetID) {
+            const targetRoom = Game.rooms[job.targetType];
+
+            // If there is a controller, set it as supplementary room target
+            if (targetRoom.controller) {
+                if (!creep.memory.supplementary) {
+                    creep.memory.supplementary = {};
+                }
+                creep.memory.supplementary.moveTarget = targetRoom.controller.id;
+            } else {
+                throw new UserException(
+                    "No controller in room",
+                    "There is no controller in room: " + job.targetID + "\nCreep: " + creep.name,
+                    ERROR_WARN
+                );
+            }
         }
 
         if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
