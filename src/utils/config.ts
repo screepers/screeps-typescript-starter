@@ -99,3 +99,11 @@ export const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 export const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 export const ROOM_MANAGER_BUCKET_LIMIT = 500;
 export const MEMORY_MANAGER_BUCKET_LIMIT = 1;
+
+/**
+ * List of allies
+ */
+export const ALLY_LIST: string[] = [
+    "jakesboy2",
+    "Uhmbrock",
+]

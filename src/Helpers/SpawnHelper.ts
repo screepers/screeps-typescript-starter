@@ -1505,8 +1505,8 @@ export class SpawnHelper {
         let sum = 0;
 
         // Get all the defenders in queue to be spawned
-        for (const role of roleArray) {
-            if (role === roleConst) {
+        for (const role in roleArray) {
+            if (roleArray[role] === roleConst) {
                 sum++;
             }
         }
