@@ -4,6 +4,7 @@ import ClaimPartJobs from "Jobs/ClaimPartJobs";
 import RoomApi from "Api/Room.Api";
 import WorkPartJobs from "Jobs/WorkPartJobs";
 import CarryPartJobs from "Jobs/CarryPartJobs";
+import MiliHelper from "./MiliHelper";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -65,7 +66,10 @@ export default class MemoryHelper_Room {
         }
 
         Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
-        const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
+        const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS, {
+            filter:
+                (creep: Creep) => MiliHelper.isAllyCreep(creep)
+        });
 
         // Sort creeps into categories
         _.forEach(enemies, (enemy: Creep) => {
