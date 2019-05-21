@@ -73,6 +73,7 @@ export default class Empire {
                     else if (flag.secondaryColor === COLOR_YELLOW) {
                         EmpireHelper.processNewStimulateFlag(flag);
                     }
+                    break;
 
                 // Unhandled Flag, print warning to console
                 // Set to processed to prevent the flag from attempting processization every tick
@@ -80,6 +81,7 @@ export default class Empire {
 
                     console.log("Attempted to process flag of an unhandled type.")
                     flag.memory.processed = true;
+                    flag.memory.complete = true;
                     break;
             }
 

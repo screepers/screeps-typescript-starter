@@ -197,6 +197,8 @@ export default class EmpireHelper {
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
+
+        console.log("Option Flag [" + flag.name + "] processed. Flag Type: [" + flagTypeConst + "]");
     }
 
     /**

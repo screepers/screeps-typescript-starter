@@ -65,13 +65,13 @@ export default class MemoryHelper_Room {
             return;
         }
 
-        Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [] }, cache: null };
         const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS, {
             filter:
-                (creep: Creep) => MiliHelper.isAllyCreep(creep)
+                (creep: Creep) => !MiliHelper.isAllyCreep(creep)
         });
 
         // Sort creeps into categories
+        Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [], civilian: [] }, cache: null };
         _.forEach(enemies, (enemy: Creep) => {
             // * Check for boosted creeps and put them at the front of the if else stack
             if (enemy.getActiveBodyparts(HEAL) > 0) {
@@ -80,9 +80,10 @@ export default class MemoryHelper_Room {
                 Memory.rooms[roomName].hostiles.data.ranged.push(enemy.id);
             } else if (enemy.getActiveBodyparts(ATTACK) > 0) {
                 Memory.rooms[roomName].hostiles.data.melee.push(enemy.id);
+            } else {
+                Memory.rooms[roomName].hostiles.data.civilian.push(enemy.id);
             }
         });
-
         Memory.rooms[roomName].hostiles.cache = Game.time;
     }
 

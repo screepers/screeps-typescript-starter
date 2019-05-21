@@ -190,7 +190,7 @@ export default class RoomVisualApi {
         // Adding this disclaimer, beacuse some of the information you need is actually calculated in the graph function
         // Consider decoupling these so you could use them independently
         if (ROOM_OVERLAY_GRAPH_ON) {
-            // ! Disabled due to error in calculations. 
+            // ! Disabled due to error in calculations.
             // TODO Fix this function
             // lines.push("Est TTL:        " + RoomVisualHelper.getEstimatedTimeToNextLevel(room));
         }
@@ -353,10 +353,9 @@ export default class RoomVisualApi {
      */
     public static createOptionFlagVisual(room: Room, x: number, y: number): number {
 
-        const optionFlags = _.filter(Memory.flags, (flag: FlagMemory) =>
-            flag.flagType ===
-            (OVERRIDE_D_ROOM_FLAG || STIMULATE_FLAG) &&
-            (Game.flags[flag.flagName].pos.roomName === room.name)
+        const allFlagsMemory: FlagMemory[] = _.map(Game.flags, (flag: Flag) => flag.memory);
+        const optionFlags: FlagMemory[] = _.filter(allFlagsMemory,
+            (flag: FlagMemory) => (flag.flagType === OVERRIDE_D_ROOM_FLAG) || flag.flagType === STIMULATE_FLAG
         );
 
         // Draw the text
@@ -364,13 +363,13 @@ export default class RoomVisualApi {
         lines.push("");
         lines.push("Option Flags ")
         lines.push("");
-        for (const of of optionFlags) {
-            if (!of) {
+        for (const optionFlag in optionFlags) {
+            if (!optionFlags[optionFlag]) {
                 continue;
             }
 
-            lines.push("Flag:   [ " + of.flagName + " ] ");
-            lines.push("Type:   [ " + of.flagType + " ] ");
+            lines.push("Flag:   [ " + optionFlags[optionFlag].flagName + " ] ");
+            lines.push("Type:   [ " + RoomVisualHelper.convertFlagTypeToString(optionFlags[optionFlag].flagType) + " ] ");
             lines.push("");
         }
 

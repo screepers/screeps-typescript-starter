@@ -83,12 +83,6 @@
  * 2. UpgraderLink does not set itself in room memory - It should choose the one closest to spawn
  *          To be more useable, it should also reset if there is a closer link placed. This follows our rule of not forcing a gameplay style.
  *
- * 6. Option flags throw an error regardless if they are processed or not
- * Place an option flag to recreate
- *
- * 7. Stimulate flags don't process at all
- * Place a stimulate flag to recreate
- *
  * 8. Towers do not fire the last shot to kill invaders, only seen this happen once
  * To recreate, spawn a big boosted invader and the tower will stop on the final attack
  * and the defcon level will go down. This is most likely related to how we are getting the defcon level
@@ -97,8 +91,6 @@
  *
  * 8. Even worse, just had an invasion and my targets didn't even fire once. Either defcon isn't getting set properly or they aren't finding their target properly.
  * Not sure how to recreate, as they seem to respond to invasions, but it happens frequently enough where i lost 200 creep parts in last 24 hours
- *
- * 9. Multiple Spawns are not being handled correctly - Will duplicate creeps - e.g. I had 3 miners when limit was 2
  *
  */
 
