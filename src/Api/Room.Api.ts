@@ -429,12 +429,9 @@ export default class RoomApi {
             }
 
             const currentRoom: Room = Game.rooms[remoteRoom.roomName];
-<<<<<<< HEAD
-=======
             if (currentRoom === undefined) {
                 continue;
             }
->>>>>>> bd9d433... added set rampart status
 
             if (currentRoom === undefined) {
                 // Simulate the dropping of reserve timer by the number of ticks between checks
