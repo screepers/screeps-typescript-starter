@@ -688,6 +688,8 @@ const RUN_LINKS_TIMER = 2;
 const RUN_TERMINAL_TIMER = 5;
 const RUN_ROOM_STATE_TIMER = 5;
 const RUN_DEFCON_TIMER = 2;
+const RUN_RESERVE_TTL_TIMER = 1;
+const RESERVER_MIN_TTL = 500;
 /**
  * bucket limits for manager
  * decides the min the bucket must be to run this manager
@@ -697,6 +699,13 @@ const SPAWN_MANAGER_BUCKET_LIMIT = 50;
 const EMPIRE_MANAGER_BUCKET_LIMIT = 5000;
 const ROOM_MANAGER_BUCKET_LIMIT = 500;
 const MEMORY_MANAGER_BUCKET_LIMIT = 1;
+/**
+ * List of allies
+ */
+const ALLY_LIST = [
+    "jakesboy2",
+    "Uhmbrock",
+];
 
 // an api used for functions related to the room
 class RoomApi {
@@ -1027,6 +1036,33 @@ class RoomApi {
      */
     static runLabs(room) {
         // i have no idea yet lol
+    }
+    /**
+     * simulate or update the reserve TTL for all remote rooms in that room
+     * @param room the room we are updating the remote rooms for
+     */
+    static simulateReserveTTL(room) {
+        const remoteRooms = MemoryApi.getRemoteRooms(room);
+        for (const remoteRoom of remoteRooms) {
+            // Handle unreserved and undefined rooms
+            if (!remoteRoom) {
+                continue;
+            }
+            const currentRoom = Game.rooms[remoteRoom.roomName];
+            if (!currentRoom.controller && remoteRoom.reserveTTL > 0) {
+                // Simulate the dropping of reserve timer by the number of ticks between checks
+                remoteRoom.reserveTTL -= RUN_RESERVE_TTL_TIMER;
+            }
+            else if (currentRoom.controller) {
+                // Get the actual value of the reserve timer
+                if (currentRoom.controller.reservation) {
+                    remoteRoom.reserveTTL = Game.rooms[remoteRoom.roomName].controller.reservation.ticksToEnd;
+                }
+                else {
+                    remoteRoom.reserveTTL = 0;
+                }
+            }
+        }
     }
 }
 
@@ -1958,12 +1994,8 @@ class SpawnApi {
             lorry: 0
         };
         const numLorries = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState);
+        const numRemoteRooms = RoomHelper.numRemoteRooms(room);
         let minerLimits = MemoryApi.getSources(room.name).length;
-        let numRemoteRooms = RoomHelper.numRemoteRooms(room);
-        // To prevent dropping to 2 workers if we don't have remote rooms
-        if (numRemoteRooms === 0) {
-            numRemoteRooms = 1;
-        }
         // check what room state we are in
         switch (room.memory.roomState) {
             // Intro
@@ -1996,7 +2028,7 @@ class SpawnApi {
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 3 + (numRemoteRooms - 1);
+                domesticLimits[ROLE_WORKER] = 2 + numRemoteRooms;
                 domesticLimits[ROLE_POWER_UPGRADER] = 0;
                 domesticLimits[ROLE_LORRY] = numLorries;
                 break;
@@ -2056,8 +2088,7 @@ class SpawnApi {
                 // Remote Creep Definitions
                 remoteLimits[ROLE_REMOTE_MINER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_MINER, numRemoteSources);
                 remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_HARVESTER, numRemoteSources);
-                remoteLimits[ROLE_REMOTE_RESERVER] =
-                    numRemoteRooms * SpawnHelper.getLimitPerRemoteRoomForRolePerSource(ROLE_REMOTE_RESERVER, 1);
+                remoteLimits[ROLE_REMOTE_RESERVER] = SpawnHelper.getRemoteReserverLimitForRoom(room);
                 remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
                 remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
                 remoteLimits[ROLE_CLAIMER] =
@@ -2112,6 +2143,9 @@ class SpawnApi {
             }
         }
         // Add the constructed queue to the military queue
+        if (!room.memory.creepLimit["militaryLimits"]) {
+            room.memory.creepLimit["militaryLimits"] = [];
+        }
         for (const role of rolesToAdd) {
             room.memory.creepLimit["militaryLimits"].push(role);
         }
@@ -2121,6 +2155,10 @@ class SpawnApi {
      * @param room the room we are setting limits for
      */
     static setCreepLimits(room) {
+        // Ensure creep limits are set
+        if (!room.memory.creepLimit) {
+            MemoryApi.initCreepLimits(room);
+        }
         // Set Domestic Limits to Memory
         MemoryHelper_Room.updateDomesticLimits(room, this.generateDomesticCreepLimits(room));
         // Set Remote Limits to Memory
@@ -2479,11 +2517,21 @@ class SpawnApi {
                 }
                 break;
             // Remote creeps going to their remote rooms
-            case ROLE_REMOTE_DEFENDER:
             case ROLE_REMOTE_HARVESTER:
             case ROLE_REMOTE_MINER:
-            case ROLE_REMOTE_RESERVER:
                 roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst);
+                if (roomMemory) {
+                    return roomMemory.roomName;
+                }
+                break;
+            case ROLE_REMOTE_RESERVER:
+                roomMemory = SpawnHelper.getRemoteRoomNeedingRemoteReserver(room);
+                if (roomMemory) {
+                    return roomMemory.roomName;
+                }
+                break;
+            case ROLE_REMOTE_DEFENDER:
+                roomMemory = SpawnHelper.getRemoteRoomNeedingRemoteDefender(room);
                 if (roomMemory) {
                     return roomMemory.roomName;
                 }
@@ -2561,6 +2609,10 @@ const TIER_2_MILITARY_PRIORITY = [];
  * Config for priority tier 3
  */
 const TIER_3_MILITARY_PRIORITY = [ROLE_STALKER, ROLE_MEDIC, ROLE_ZEALOT];
+/**
+ * config for all military roles
+ */
+const ALL_MILITARY_ROLES = [ROLE_STALKER, ROLE_MEDIC, ROLE_ZEALOT, ROLE_DOMESTIC_DEFENDER];
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -3571,10 +3623,12 @@ class SpawnHelper {
      * @param roleConst the role of the creep
      */
     static isMilitaryRole(roleConst) {
-        return (roleConst === ROLE_DOMESTIC_DEFENDER ||
-            roleConst === ROLE_STALKER ||
-            roleConst === ROLE_ZEALOT ||
-            roleConst === ROLE_MEDIC);
+        for (const role in ALL_MILITARY_ROLES) {
+            if (roleConst === ALL_MILITARY_ROLES[role]) {
+                return true;
+            }
+        }
+        return false;
     }
     /**
      * Returns the number of miners that are not spawning, and have > 50 ticksToLive
@@ -3691,8 +3745,6 @@ class SpawnHelper {
             case ROLE_REMOTE_HARVESTER:
                 creepNum = 1 * numSources;
                 break;
-            case ROLE_REMOTE_RESERVER:
-                creepNum = 1;
         }
         return creepNum;
     }
@@ -3781,8 +3833,8 @@ class SpawnHelper {
         const creepsInRoom = MemoryApi.getMyCreeps(room.name, (c) => c.memory.role === roleConst);
         let sum = 0;
         // Get all the defenders in queue to be spawned
-        for (const role of roleArray) {
-            if (role === roleConst) {
+        for (const role in roleArray) {
+            if (roleArray[role] === roleConst) {
                 sum++;
             }
         }
@@ -3791,7 +3843,7 @@ class SpawnHelper {
         return sum >= limit;
     }
     /**
-     *
+     * spawn the next creep in the military queue for that tier
      * @param tier the priority tier of the military creep we are attempting to spawn
      * @param room the room we are spawning for
      */
@@ -3829,6 +3881,42 @@ class SpawnHelper {
             default:
                 throw new UserException("Invalid tier number", "spawnHelper/spawnMiliQueue", ERROR_WARN$1);
         }
+    }
+    /**
+     * get the number of remote rooms that need a reserver
+     * @param room the room we are checking the remote rooms for
+     */
+    static getRemoteReserverLimitForRoom(room) {
+        const remoteRooms = MemoryApi.getRemoteRooms(room);
+        let numReserversNeeded = 0;
+        for (const remoteRoom of remoteRooms) {
+            // Handle undefined rooms
+            if (!remoteRoom) {
+                continue;
+            }
+            // If the TTL is below the limit set in config, we need a reserver
+            if (remoteRoom.reserveTTL <= RESERVER_MIN_TTL) {
+                numReserversNeeded++;
+            }
+        }
+        return numReserversNeeded;
+    }
+    /**
+     * get a remote room that needs a remote reserver
+     */
+    static getRemoteRoomNeedingRemoteReserver(room) {
+        return _.first(MemoryApi.getRemoteRooms(room, (rr) => rr.reserveTTL < RESERVER_MIN_TTL));
+    }
+    /**
+     * get a remote room that needs a remote reserver
+     */
+    static getRemoteRoomNeedingRemoteDefender(room) {
+        return _.first(MemoryApi.getRemoteRooms(room, (rr) => {
+            if (Memory.rooms[rr.roomName]) {
+                return Memory.rooms[rr.roomName].defcon > 0;
+            }
+            return false;
+        }));
     }
 }
 
@@ -3987,9 +4075,6 @@ class MemoryApi {
         this.getAllGetEnergyJobs(room, undefined, forceUpdate);
         this.getAllClaimPartJobs(room, undefined, forceUpdate);
         this.getAllWorkPartJobs(room, undefined, forceUpdate);
-        // this.getCreepLimits(room, undefined, forceUpdate);
-        // this.getDefcon(room, undefined, forceUpdate);
-        // this.getRoomState(room, undefined, forceUpdate);
     }
     /**
      * Initializes the memory of a newly spawned creep
@@ -4339,12 +4424,42 @@ class MemoryApi {
      * @param room the room we want the limits for
      */
     static getCreepLimits(room) {
+        // Make sure everything is defined at the memory level
+        if (!Memory.rooms[room.name].creepLimit ||
+            !Memory.rooms[room.name].creepLimit["domesticLimits"] ||
+            !Memory.rooms[room.name].creepLimit["remoteLimits"] ||
+            !Memory.rooms[room.name].creepLimit["militaryLimits"]) {
+            MemoryApi.initCreepLimits(room);
+        }
         const creepLimits = {
             domesticLimits: Memory.rooms[room.name].creepLimit["domesticLimits"],
             remoteLimits: Memory.rooms[room.name].creepLimit["remoteLimits"],
             militaryLimits: Memory.rooms[room.name].creepLimit["militaryLimits"]
         };
         return creepLimits;
+    }
+    /**
+     * initilize creep limits in room memory in the case it is not defined
+     * @param room the room we are initing the creep memory for
+     */
+    static initCreepLimits(room) {
+        Memory.rooms[room.name].creepLimit = [];
+        Memory.rooms[room.name].creepLimit["domesticLimits"] = {
+            miner: 0,
+            harvester: 0,
+            worker: 0,
+            powerUpgrader: 0,
+            lorry: 0
+        };
+        Memory.rooms[room.name].creepLimit["remoteLimits"] = {
+            remoteMiner: 0,
+            remoteHarvester: 0,
+            remoteReserver: 0,
+            remoteDefender: 0,
+            remoteColonizer: 0,
+            claimer: 0,
+        };
+        Memory.rooms[room.name].creepLimit["militaryLimits"] = {};
     }
     /**
      * get all owned rooms
@@ -4961,6 +5076,20 @@ class MemoryApi {
             return;
         }
     }
+    /**
+     * get all visible dependent rooms
+     */
+    static getVisibleDependentRooms() {
+        const ownedRooms = MemoryApi.getOwnedRooms();
+        const roomNames = [];
+        _.forEach(ownedRooms, (room) => {
+            // Collect the room names for dependent rooms
+            _.forEach(MemoryApi.getRemoteRooms(room), (rr) => roomNames.push(rr.roomName));
+            _.forEach(MemoryApi.getClaimRooms(room), (rr) => roomNames.push(rr.roomName));
+        });
+        // Return all visible rooms which appear in roomNames array
+        return _.filter(Game.rooms, (room) => roomNames.includes(room.name));
+    }
 }
 
 class EmpireHelper {
@@ -5002,6 +5131,7 @@ class EmpireHelper {
             structures: { cache: Game.time, data: null },
             roomName: flag.pos.roomName,
             flags: [remoteFlagMemory],
+            reserveTTL: 0,
         };
         console.log("Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
         dependentRoom.memory.remoteRooms.push(remoteRoomMemory);
@@ -5613,10 +5743,17 @@ class MemoryManager {
         this.initMainMemory();
         MemoryApi.garbageCollection();
         const ownedRooms = MemoryApi.getOwnedRooms();
+        // Init memory for all owned rooms
         _.forEach(ownedRooms, (room) => {
             const isOwnedRoom = true;
             MemoryApi.initRoomMemory(room.name, isOwnedRoom);
             MemoryApi.cleanDependentRoomMemory(room);
+        });
+        // Init memory for all visible dependent rooms
+        const dependentRooms = MemoryApi.getVisibleDependentRooms();
+        _.forEach(dependentRooms, (room) => {
+            const isOwnedRoom = false;
+            MemoryApi.initRoomMemory(room.name, isOwnedRoom);
         });
     }
     /**
@@ -5641,13 +5778,19 @@ class RoomManager {
      * run the room for every room
      */
     static runRoomManager() {
+        // Run all owned rooms
         const ownedRooms = MemoryApi.getOwnedRooms();
         _.forEach(ownedRooms, (room) => {
             this.runSingleRoom(room);
         });
+        // Run all dependent rooms we have visiblity in
+        const dependentRooms = MemoryApi.getVisibleDependentRooms();
+        _.forEach(dependentRooms, (room) => {
+            this.runSingleDependentRoom(room);
+        });
     }
     /**
-     * run the room for a single room
+     * run the room for a single owned room
      * @param room the room we are running this manager function on
      */
     static runSingleRoom(room) {
@@ -5679,6 +5822,21 @@ class RoomManager {
         if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL) &&
             RoomHelper.excecuteEveryTicks(RUN_TERMINAL_TIMER)) {
             RoomApi.runTerminal(room);
+        }
+        // Run accessory functions for dependent rooms ----
+        // Update reserve timer for remote rooms
+        if (RoomHelper.excecuteEveryTicks(RUN_RESERVE_TTL_TIMER)) {
+            RoomApi.simulateReserveTTL(room);
+        }
+    }
+    /**
+     * run the room for an unowned room
+     * @param room the room we are running
+     */
+    static runSingleDependentRoom(room) {
+        // Set Defcon for the dependent room
+        if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
+            RoomApi.setDefconLevel(room);
         }
     }
 }
@@ -8474,12 +8632,12 @@ class RoomVisualApi {
         lines.push("Progress:         " + controllerPercent + "%");
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
-            lines.push("Storage:        " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            // Regex adds commas
+            lines.push("Storage:         " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
         }
-        // Adding this disclaimer, beacuse some of the information you need is actually calculated in the graph function
-        // Consider decoupling these so you could use them independently
-        {
-            lines.push("Est TTL:        " + RoomVisualManager.getEstimatedTimeToNextLevel(room));
+        if (room.terminal) {
+            // Regex adds commas
+            lines.push("Terminal:       " + room.terminal.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
         }
         lines.push("");
         RoomVisualManager.multiLineText(lines, x, y, room.name, true);
@@ -9962,6 +10120,16 @@ class ClaimerCreepManager {
     }
 }
 
+class MiliHelper {
+    /**
+     * check if the creep belongs to an alliance member
+     * @param creep the creep we are evaluating
+     */
+    static isAllyCreep(creep) {
+        return ALLY_LIST.includes(creep.owner.username);
+    }
+}
+
 // Api for military creep's
 class CreepMili {
     /**
@@ -10131,7 +10299,7 @@ class CreepMili {
             return healingTarget;
         }
         // No squad members, find closest creep
-        const creepsInRoom = creep.room.find(FIND_MY_CREEPS);
+        const creepsInRoom = CreepMili.getAllyCreepsInRoom(creep.room);
         return creep.pos.findClosestByPath(creepsInRoom, { filter: (c) => c.hits < c.hitsMax });
     }
     /**
@@ -10207,6 +10375,13 @@ class CreepMili {
         }
         // Return false if we didn't need to do any of this
         return false;
+    }
+    /**
+     * get all ally creeps in the room
+     * @param room the room we are in
+     */
+    static getAllyCreepsInRoom(room) {
+        return _.filter(room.find(FIND_CREEPS), (creep) => MiliHelper.isAllyCreep(creep));
     }
 }
 

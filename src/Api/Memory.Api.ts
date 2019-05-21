@@ -214,9 +214,6 @@ export default class MemoryApi {
         this.getAllGetEnergyJobs(room, undefined, forceUpdate);
         this.getAllClaimPartJobs(room, undefined, forceUpdate);
         this.getAllWorkPartJobs(room, undefined, forceUpdate);
-        // this.getCreepLimits(room, undefined, forceUpdate);
-        // this.getDefcon(room, undefined, forceUpdate);
-        // this.getRoomState(room, undefined, forceUpdate);
     }
 
     /**
@@ -727,6 +724,14 @@ export default class MemoryApi {
      * @param room the room we want the limits for
      */
     public static getCreepLimits(room: Room): CreepLimits {
+        // Make sure everything is defined at the memory level
+        if (!Memory.rooms[room.name].creepLimit ||
+            !Memory.rooms[room.name].creepLimit!["domesticLimits"] ||
+            !Memory.rooms[room.name].creepLimit!["remoteLimits"] ||
+            !Memory.rooms[room.name].creepLimit!["militaryLimits"]) {
+
+            MemoryApi.initCreepLimits(room);
+        }
         const creepLimits: CreepLimits = {
             domesticLimits: Memory.rooms[room.name].creepLimit!["domesticLimits"],
             remoteLimits: Memory.rooms[room.name].creepLimit!["remoteLimits"],
@@ -734,6 +739,30 @@ export default class MemoryApi {
         };
 
         return creepLimits;
+    }
+
+    /**
+     * initilize creep limits in room memory in the case it is not defined
+     * @param room the room we are initing the creep memory for
+     */
+    public static initCreepLimits(room: Room): void {
+        Memory.rooms[room.name].creepLimit = [];
+        Memory.rooms[room.name].creepLimit!["domesticLimits"] = {
+            miner: 0,
+            harvester: 0,
+            worker: 0,
+            powerUpgrader: 0,
+            lorry: 0
+        };
+        Memory.rooms[room.name].creepLimit!["remoteLimits"] = {
+            remoteMiner: 0,
+            remoteHarvester: 0,
+            remoteReserver: 0,
+            remoteDefender: 0,
+            remoteColonizer: 0,
+            claimer: 0,
+        }
+        Memory.rooms[room.name].creepLimit!["militaryLimits"] = {};
     }
 
     /**

@@ -245,6 +245,9 @@ export default class SpawnApi {
         }
 
         // Add the constructed queue to the military queue
+        if (!room.memory.creepLimit!["militaryLimits"]) {
+            room.memory.creepLimit!["militaryLimits"] = [];
+        }
         for (const role of rolesToAdd) {
             room.memory.creepLimit!["militaryLimits"].push(role);
         }
@@ -255,6 +258,12 @@ export default class SpawnApi {
      * @param room the room we are setting limits for
      */
     public static setCreepLimits(room: Room): void {
+
+        // Ensure creep limits are set
+        if (!room.memory.creepLimit) {
+            MemoryApi.initCreepLimits(room);
+        }
+
         // Set Domestic Limits to Memory
         MemoryHelperRoom.updateDomesticLimits(room, this.generateDomesticCreepLimits(room));
 
