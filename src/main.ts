@@ -80,7 +80,9 @@
  *
  * 1. Harvesters need to fill extensions more efficiently - Choose closest, then check surrounding area for extensions before retargeting
  *
- * 2. UpgraderLink does not set itself in room memory - It should choose the one closest to spawn
+ * 2. It spawns 2 reservers when a remote room is placed, due to it not detecting the first one targeting the room yet.
+ * 
+ * 3. UpgraderLink does not set itself in room memory - It should choose the one closest to spawn
  *          To be more useable, it should also reset if there is a closer link placed. This follows our rule of not forcing a gameplay style.
  *
  * 6. Option flags throw an error regardless if they are processed or not
