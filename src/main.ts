@@ -19,7 +19,7 @@
  * TODO Complete Remote Job Creation - Need to get the rooms that need something done
  *
  * 1. Migrate some of the getJob functions from CreepManagers to Creep.Api to make code accessible by other CreepManagers
- * 
+ *
  * 2. Complete Remote Miner
  * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
  * We should also give remote miners 7 work parts imo. 6 wasn't enough to keep the container repaired and it was slow on building it
@@ -69,11 +69,6 @@
  * Also make the system that spawns more workers in the case of remote rooms more reliable and cleanly coded (combine these systems preferrably)
  * into a function like getExtraWorkerAmount: number and add to the base amount of workers for that room state
  *
- * 14. Expand tower targeting to target non-combat creeps if no other targets are found, we might as well snipe out scouts
- * Still do not target solo healers (maybe consider it if we calculate our damage (we have a function for that, thanks bonzai)
- * and find that we can out damage the amount of healing on a creep and those around it)
- *
- *
  * ~~~~~~~~~~~~~~~~
  * ~~ BUG FIXES ~~
  * ~~~~~~~~~~~~~~~~
@@ -82,15 +77,6 @@
  *
  * 2. UpgraderLink does not set itself in room memory - It should choose the one closest to spawn
  *          To be more useable, it should also reset if there is a closer link placed. This follows our rule of not forcing a gameplay style.
- *
- * 8. Towers do not fire the last shot to kill invaders, only seen this happen once
- * To recreate, spawn a big boosted invader and the tower will stop on the final attack
- * and the defcon level will go down. This is most likely related to how we are getting the defcon level
- * because towers won't even attempt to target anything if the defcon level is 0
- * So start by looking in how we're getting defcon and make sure we keep it that level until every creep is dead
- *
- * 8. Even worse, just had an invasion and my targets didn't even fire once. Either defcon isn't getting set properly or they aren't finding their target properly.
- * Not sure how to recreate, as they seem to respond to invasions, but it happens frequently enough where i lost 200 creep parts in last 24 hours
  *
  */
 
