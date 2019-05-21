@@ -8,7 +8,11 @@ import {
     ROOM_STATE_UPGRADER,
     STANDARD_SQUAD,
     ZEALOT_SOLO,
-    STALKER_SOLO
+    STALKER_SOLO,
+    CLAIM_FLAG,
+    REMOTE_FLAG,
+    OVERRIDE_D_ROOM_FLAG,
+    STIMULATE_FLAG
 } from "utils/constants";
 import RoomHelper from "Helpers/RoomHelper";
 
@@ -90,8 +94,16 @@ export default class RoomVisualManager {
                 return "Stalker Solo";
             case ZEALOT_SOLO:
                 return "Zealot Solo";
+            case CLAIM_FLAG:
+                return "Claim";
+            case REMOTE_FLAG:
+                return "Remote";
+            case OVERRIDE_D_ROOM_FLAG:
+                return "Override";
+            case STIMULATE_FLAG:
+                return "Stimulate";
             default:
-                return "Not An Attack Flag";
+                return "Not a valid flag type (roomVisualHelper/convertFlagTypeToString).";
         }
     }
 
@@ -136,7 +148,7 @@ export default class RoomVisualManager {
                 avgControlPointsPerHourArray: [],
                 room: {},
                 etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
-            } as VisualMemory; 
+            } as VisualMemory;
         }
 
         const progressSampleSize: number = Memory.rooms[room.name].visual!.controllerProgressArray.length;

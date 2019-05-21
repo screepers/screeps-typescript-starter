@@ -95,7 +95,7 @@ export default class SpawnApi {
                 // Domestic Creep Definitions
                 domesticLimits[ROLE_MINER] = minerLimits;
                 domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 5;
+                domesticLimits[ROLE_WORKER] = 4;
 
                 break;
 

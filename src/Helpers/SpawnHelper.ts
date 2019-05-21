@@ -1262,19 +1262,6 @@ export class SpawnHelper {
     }
 
     /**
-     * Returns the number of miners that are not spawning, and have > 50 ticksToLive
-     * @param room the room we are checking in
-     */
-    public static getActiveMiners(room: Room): number {
-        let miners = MemoryHelper.getCreepOfRole(room, ROLE_MINER);
-        miners = _.filter(miners, (creep: Creep) => {
-            // False if miner is spawning or has less than 50 ticks to live
-            return !creep.spawning && creep.ticksToLive! > 50;
-        });
-        return miners.length;
-    }
-
-    /**
      * gets the ClaimRoomMemory with lowest number creeps of the specified role with it as their target room
      * Must also be less than the max amount of that role allowed for the room
      * @param room the room spawning the creep

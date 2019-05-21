@@ -265,6 +265,11 @@ export default class RoomHelper {
             _.some(c.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack"));
         const isWorkers: boolean = _.some(hostileCreeps, (c: Creep) =>
             _.some(c.body, (b: BodyPartDefinition) => b.type === "work"));
+        const isCivilians: boolean = _.some(hostileCreeps, (creep: Creep) =>
+            !_.some(creep.body, (b: BodyPartDefinition) => b.type === "heal") &&
+            !_.some(creep.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack") &&
+            !_.some(creep.body, (b: BodyPartDefinition) => b.type === "work")
+        );
 
         // If only healers are present, don't waste ammo
         if (isHealers && !isAttackers && !isWorkers) {
@@ -287,6 +292,15 @@ export default class RoomHelper {
         if (isAttackers) {
             return _.find(hostileCreeps, (c: Creep) =>
                 _.some(c.body, (b: BodyPartDefinition) => b.type === "attack"));
+        }
+
+        // If no combat related creeps, target civilians
+        if (isCivilians) {
+            _.find(hostileCreeps, (creep: Creep) =>
+                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "heal") &&
+                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack") &&
+                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "work")
+            );
         }
 
         // If there are no hostile creeps, or we didn't find a valid target, return undefined

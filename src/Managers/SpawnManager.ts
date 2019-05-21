@@ -1,5 +1,6 @@
 import SpawnApi from "../Api/Spawn.Api";
 import MemoryApi from "../Api/Memory.Api";
+import { TIER_2 } from "../utils/constants";
 
 // handles spawning for every room
 export default class SpawnManager {
