@@ -373,7 +373,7 @@ export default class MemoryApi {
      * Get structures of a single type in a room, updating if necessary
      *
      * [Cached] Memory.rooms[room.name].structures
-     * @param room The room to check in
+     * @param roomName The room to check in
      * @param type The type of structure to retrieve
      * @param filterFunction [Optional] A function to filter by
      * @param forceUpdate [Optional] Force structures memory to be updated
@@ -609,7 +609,7 @@ export default class MemoryApi {
             );
         }
 
-        if(remoteRooms.length === 0){
+        if (remoteRooms.length === 0) {
             return [];
         }
 
@@ -646,8 +646,8 @@ export default class MemoryApi {
             // No target room provided, just return them all
             claimRooms = _.filter(Memory.rooms[room.name].claimRooms!, (roomMemory: ClaimRoomMemory) => filterFunction);
         }
-        
-        if(claimRooms.length === 0){
+
+        if (claimRooms.length === 0) {
             return [];
         }
 
@@ -688,7 +688,7 @@ export default class MemoryApi {
             );
         }
 
-        if(attackRooms.length === 0) {
+        if (attackRooms.length === 0) {
             return [];
         }
 
@@ -722,13 +722,14 @@ export default class MemoryApi {
     public static getCreepCount(room: Room, creepConst?: RoleConstant): number {
         const filterFunction = creepConst === undefined ? undefined : (c: Creep) => c.memory.role === creepConst;
 
-        // Use get active mienrs instead specifically for miners to get them out early before they die
-        if (creepConst === ROLE_MINER) {
-            return SpawnHelper.getActiveMiners(room);
-        } else {
-            // Otherwise just get the actual count of the creeps
-            return MemoryApi.getMyCreeps(room.name, filterFunction).length;
-        }
+        // Return all creeps in that role, excluding those on deaths door
+        return _.filter(MemoryApi.getMyCreeps(room.name, filterFunction),
+            (creep: Creep) => {
+                if (creep.ticksToLive) {
+                    return creep.ticksToLive > (creep.body.length * 3);
+                }
+                return false;
+            }).length;
     }
 
     /**
@@ -1705,5 +1706,23 @@ export default class MemoryApi {
             (room: Room) =>
                 roomNames.includes(room.name)
         );
+    }
+
+    /**
+     * create a message node to display as an alert
+     * @param message the message you want displayed
+     * @param expirationLimit the time you want it to be displayed for
+     */
+    public static createEmpireAlertNode(displayMessage: string, limit: number): void {
+
+        if (!Memory.empire.alertMessages) {
+            Memory.empire.alertMessages = [];
+        }
+        const messageNode: AlertMessageNode = {
+            message: displayMessage,
+            tickCreated: Game.time,
+            expirationLimit: limit
+        };
+        Memory.empire.alertMessages.push(messageNode);
     }
 }

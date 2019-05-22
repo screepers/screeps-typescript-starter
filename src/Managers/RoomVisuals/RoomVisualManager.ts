@@ -58,5 +58,7 @@ export default class RoomVisualManager {
         endRightLine = RoomVisualApi.createAttackFlagVisual(room, RIGHT_START_X, endRightLine);
         // Display Option Flag box on the bottom right
         endRightLine = RoomVisualApi.createOptionFlagVisual(room, RIGHT_START_X, endRightLine);
+        // Display message box on the bottom right
+        endRightLine = RoomVisualApi.createMessageBoxVisual(room, RIGHT_START_X, endRightLine);
     }
 }

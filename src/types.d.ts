@@ -614,7 +614,33 @@ interface RoomMemory {
     visual?: VisualMemory;
 }
 
-interface EmpireMemory { }
+interface Memory {
+    empire: EmpireMemory
+}
+interface EmpireMemory {
+    /**
+     * messages to display in each room's alert box
+     */
+    alertMessages?: AlertMessageNode[];
+}
+
+/**
+ * a node for an alert message
+ */
+interface AlertMessageNode {
+    /**
+     * the message
+     */
+    message: string;
+    /**
+     * tick that it was created on
+     */
+    tickCreated: number;
+    /**
+     * the number of ticks you want the message to be shown
+     */
+    expirationLimit: number;
+}
 // ----------------------------------
 
 /**

@@ -9,6 +9,7 @@ import {
     RUN_ROOM_STATE_TIMER,
     RUN_DEFCON_TIMER,
     RUN_RESERVE_TTL_TIMER,
+    RUN_RAMPART_STATUS_UPDATE,
 } from "utils/config";
 
 // room-wide manager
@@ -74,6 +75,11 @@ export default class RoomManager {
             RoomApi.runTerminal(room);
         }
 
+        // Set Rampart access status
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_RAMPART) &&
+            RoomHelper.excecuteEveryTicks(RUN_RAMPART_STATUS_UPDATE)) {
+            RoomApi.runSetRampartStatus(room);
+        }
         // Run accessory functions for dependent rooms ----
         // Update reserve timer for remote rooms
         if (RoomHelper.excecuteEveryTicks(RUN_RESERVE_TTL_TIMER)) {

@@ -11,6 +11,7 @@ import {
     ERROR_WARN,
     STIMULATE_FLAG
 } from "utils/Constants";
+import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 
 export default class EmpireHelper {
 
@@ -65,7 +66,7 @@ export default class EmpireHelper {
             reserveTTL: 0,
         };
 
-        console.log("Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
+        MemoryApi.createEmpireAlertNode("Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]", 10);
         dependentRoom.memory.remoteRooms!.push(remoteRoomMemory);
     }
 
@@ -99,7 +100,7 @@ export default class EmpireHelper {
             });
 
         if (existingDepedentAttackRoomMem) {
-            console.log("Attack Flag [" + flag.name + "] processed. Added to existing Host Room: [" + existingDepedentAttackRoomMem.roomName + "]");
+            MemoryApi.createEmpireAlertNode("Attack Flag [" + flag.name + "] processed. Added to existing Host Room: [" + existingDepedentAttackRoomMem.roomName + "]", 10);
             existingDepedentAttackRoomMem.flags.push(attackFlagMemory);
             return;
         }
@@ -112,7 +113,7 @@ export default class EmpireHelper {
             flags: [attackFlagMemory],
         };
 
-        console.log("Attack Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
+        MemoryApi.createEmpireAlertNode("Attack Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]", 10);
         dependentRoom.memory.attackRooms!.push(attackRoomMemory);
     }
 
@@ -163,7 +164,7 @@ export default class EmpireHelper {
             flags: [claimFlagMemory],
         };
 
-        console.log("Claim Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]");
+        MemoryApi.createEmpireAlertNode("Claim Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]", 10);
         dependentRoom.memory.claimRooms!.push(claimRoomMemory);
     }
 
@@ -181,7 +182,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
 
-        console.log("Option Flag [" + flag.name + "] processed. Flag Type: [" + flagTypeConst + "]");
+        MemoryApi.createEmpireAlertNode("Option Flag [" + flag.name + "] processed. Flag Type: [" + RoomVisualHelper.convertFlagTypeToString(flagTypeConst) + "]", 10);
     }
 
     /**
@@ -197,6 +198,8 @@ export default class EmpireHelper {
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
+
+        MemoryApi.createEmpireAlertNode("Option Flag [" + flag.name + "] processed. Flag Type: [" + RoomVisualHelper.convertFlagTypeToString(flagTypeConst) + "]", 10);
     }
 
     /**
@@ -326,7 +329,7 @@ export default class EmpireHelper {
             const claimRoomName: string = claimRooms[claimRoom]!.roomName;
 
             if (!claimRooms[claimRoom]!.flags[0]) {
-                console.log("Removing Claim Room [" + claimRooms[claimRoom]!.roomName + "]");
+                MemoryApi.createEmpireAlertNode("Removing Claim Room [" + claimRooms[claimRoom]!.roomName + "]", 10);
 
                 // Get the dependent room for the attack room we are removing from memory
                 const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),
@@ -366,7 +369,7 @@ export default class EmpireHelper {
                 // Tell typescript that these are claim flag memory structures
                 const currentFlag: ClaimFlagMemory = claimRoom!.flags[flag] as ClaimFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    console.log("Removing [" + flag + "] from Claim Room [" + claimRoom!.roomName + "]");
+                    MemoryApi.createEmpireAlertNode("Removing [" + flag + "] from Claim Room [" + claimRoom!.roomName + "]", 10);
                     delete claimRoom!.flags[flag];
                 }
             }
@@ -387,7 +390,7 @@ export default class EmpireHelper {
             const attackRoomName: string = attackRooms[attackRoom]!.roomName;
 
             if (!attackRooms[attackRoom]!.flags[0]) {
-                console.log("Removing Attack Room [" + attackRooms[attackRoom]!.roomName + "]");
+                MemoryApi.createEmpireAlertNode("Removing Attack Room [" + attackRooms[attackRoom]!.roomName + "]", 10);
 
                 // Get the dependent room for the attack room we are removing from memory
                 const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),
@@ -426,7 +429,7 @@ export default class EmpireHelper {
                 // Tell typescript that these are claim flag memory structures
                 const currentFlag: AttackFlagMemory = attackRoom!.flags[flag] as AttackFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    console.log("Removing [" + flag + "] from Attack Room [" + attackRoom!.roomName + "]");
+                    MemoryApi.createEmpireAlertNode("Removing [" + flag + "] from Attack Room [" + attackRoom!.roomName + "]", 10);
                     delete attackRoom!.flags[flag];;
                 }
             }
@@ -447,7 +450,7 @@ export default class EmpireHelper {
             const remoteRoomName: string = remoteRooms[remoteRoom]!.roomName;
 
             if (!remoteRooms[remoteRoom]!.flags[0]) {
-                console.log("Removing Remote Room [" + remoteRooms[remoteRoom]!.roomName + "]");
+                MemoryApi.createEmpireAlertNode("Removing Remote Room [" + remoteRooms[remoteRoom]!.roomName + "]", 10);
 
                 // Get the dependent room for this room
                 const dependentRoom: Room | undefined = _.find(MemoryApi.getOwnedRooms(),
@@ -487,7 +490,7 @@ export default class EmpireHelper {
                 // Tell typescript that these are claim flag memory structures
                 const currentFlag: RemoteFlagMemory = remoteRoom!.flags[flag] as RemoteFlagMemory;
                 if (!Game.flags[currentFlag.flagName]) {
-                    console.log("Removing [" + flag + "] from Remote Room Memory [" + remoteRoom!.roomName + "]");
+                    MemoryApi.createEmpireAlertNode("Removing [" + flag + "] from Remote Room Memory [" + remoteRoom!.roomName + "]", 10);
                     delete remoteRoom!.flags[flag];
                 }
             }

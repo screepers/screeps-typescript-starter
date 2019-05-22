@@ -43,5 +43,9 @@ export default class MemoryManager {
         if (!Memory.creeps) {
             Memory.creeps = {};
         }
+
+        if (!Memory.empire) {
+            Memory.empire = {};
+        }
     }
 }

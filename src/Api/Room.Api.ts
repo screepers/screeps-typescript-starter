@@ -429,6 +429,9 @@ export default class RoomApi {
             }
 
             const currentRoom: Room = Game.rooms[remoteRoom.roomName];
+            if (currentRoom === undefined) {
+                continue;
+            }
 
             if (currentRoom === undefined) {
                 // Simulate the dropping of reserve timer by the number of ticks between checks
@@ -444,6 +447,21 @@ export default class RoomApi {
                     remoteRoom.reserveTTL = 0;
                 }
             }
+        }
+    }
+
+    /**
+     * sets the ramparts status in the room to public or private
+     * @param room the room we are setting ramparts for
+     */
+    public static runSetRampartStatus(room: Room): void {
+
+        // If defcon is on in the room, set to private, otherwise, public
+        const rampartsInRoom: StructureRampart[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_RAMPART) as StructureRampart[];
+        const isPublic: boolean = MemoryApi.getDefconLevel(room) > 0;
+        for (const i in rampartsInRoom) {
+            const rampart: StructureRampart = rampartsInRoom[i];
+            rampart.setPublic(isPublic);
         }
     }
 }
