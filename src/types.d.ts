@@ -583,7 +583,7 @@ interface RoomMemory {
     /**
      * the limit of each role for the room
      */
-    creepLimit?: StringMap | CreepLimits;
+    creepLimit?: CreepLimits;
     /**
      * IDs of all hostile creeps in this room
      */
@@ -774,7 +774,7 @@ interface CreepOptionsMili {
 /**
  * creep limits for room
  */
-interface CreepLimits extends StringMap {
+interface CreepLimits {
     /**
      * creep limits for remote creeps
      */

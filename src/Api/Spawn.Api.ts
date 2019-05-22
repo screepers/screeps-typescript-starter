@@ -222,7 +222,8 @@ export default class SpawnApi {
                 if (!flagMem) {
                     return false;
                 }
-                return flagMem.active;
+                const flag: FlagMemory = Memory.flags[flagMem.flagName];
+                return flagMem.active && !flag.complete;
             });
             if (activeAttackRoomFlag) {
                 break;
@@ -236,21 +237,21 @@ export default class SpawnApi {
             }
 
             // Set the flag as complete, so it's only added to the queue once
-            // For now we use isAttackFlagOneTimeUse, but there is likely a better way to
-            // ensure continued spawning of a certain type of creep until a condition is met
-            // or until we cancel the flag manually, need to brainstorm this. For now, use config
-            if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory)) {
+            if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory) &&
+                Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
+
                 Memory.flags[activeAttackRoomFlag.flagName].complete = true;
             }
         }
 
         // Add the constructed queue to the military queue
-        if (!room.memory.creepLimit!["militaryLimits"]) {
-            room.memory.creepLimit!["militaryLimits"] = [];
+        if (!room.memory.creepLimit!.militaryLimits) {
+            room.memory.creepLimit!.militaryLimits = [];
         }
         for (const role of rolesToAdd) {
-            room.memory.creepLimit!["militaryLimits"].push(role);
+            room.memory.creepLimit!.militaryLimits.push(role);
         }
+
     }
 
     /**
@@ -300,9 +301,13 @@ export default class SpawnApi {
     public static getNextCreep(room: Room): RoleConstant | null {
         // Get Limits for each creep department
         const creepLimits: CreepLimits = MemoryApi.getCreepLimits(room);
+        let militaryRole: RoleConstant | null;
 
         // Spawn High Priority military
-        SpawnHelper.spawnMiliQueue(1, room);
+        militaryRole = SpawnHelper.spawnMiliQueue(1, room);
+        if (militaryRole !== null) {
+            return militaryRole;
+        }
         // Check if we need a domestic creep -- Return role if one is found
         for (const role of domesticRolePriority) {
             if (MemoryApi.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
@@ -311,7 +316,10 @@ export default class SpawnApi {
         }
 
         // Spawn Mid Priority military creeps
-        SpawnHelper.spawnMiliQueue(2, room);
+        militaryRole = SpawnHelper.spawnMiliQueue(2, room);
+        if (militaryRole !== null) {
+            return militaryRole;
+        }
         // Check if we need a remote creep -- Return role if one is found
         for (const role of remoteRolePriority) {
             if (MemoryApi.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
@@ -320,10 +328,10 @@ export default class SpawnApi {
         }
 
         // Spawn Low Priority military creeps
-        SpawnHelper.spawnMiliQueue(3, room);
+        militaryRole = SpawnHelper.spawnMiliQueue(3, room);
 
         // Return null if we don't need to spawn anything
-        return null;
+        return militaryRole;
     }
 
     /**
@@ -695,15 +703,16 @@ export default class SpawnApi {
      * get the target room for the creep
      * @param room the room we are spawning the creep in
      * @param roleConst the role we are getting room for
+     * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      */
-    public static getCreepTargetRoom(room: Room, roleConst: RoleConstant): string {
+    public static getCreepTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[]): string {
         let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory | undefined;
 
         switch (roleConst) {
             // Colonizing creeps going to their claim rooms
             case ROLE_COLONIZER:
             case ROLE_CLAIMER:
-                roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst);
+                roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst, creepBody);
                 if (roomMemory) {
                     return roomMemory.roomName;
                 }
@@ -712,7 +721,7 @@ export default class SpawnApi {
             // Remote creeps going to their remote rooms
             case ROLE_REMOTE_HARVESTER:
             case ROLE_REMOTE_MINER:
-                roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst);
+                roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst, creepBody);
                 if (roomMemory) {
                     return roomMemory.roomName;
                 }
@@ -767,5 +776,21 @@ export default class SpawnApi {
         // That would actually take them out of the creep count for this room, spawning them in an infinite loop
         // We will just set their target room as the claim room and it will have the desired effect
         return room.name;
+    }
+
+    /**
+     * remove the spawned military creep from the military spawn queue
+     * @param nextCreepRole the role we are trying to remove
+     * @param room the room we are doing this for
+     */
+    public static removeSpawnedCreepFromMiliQueue(nextCreepRole: RoleConstant, room: Room): void {
+        if (SpawnHelper.isMilitaryRole(nextCreepRole)) {
+            for (let i = 0; i < room.memory.creepLimit!.militaryLimits.length; ++i) {
+                if (room.memory.creepLimit!.militaryLimits[i] === nextCreepRole) {
+                    room.memory.creepLimit!.militaryLimits.splice(i, 1);
+                    break;
+                }
+            }
+        }
     }
 }

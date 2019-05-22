@@ -76,10 +76,28 @@
  * 1. Harvesters need to fill extensions more efficiently - Choose closest, then check surrounding area for extensions before retargeting
  *
  * 2. It spawns 2 reservers when a remote room is placed, due to it not detecting the first one targeting the room yet.
- * 
+ *
  * 3. UpgraderLink does not set itself in room memory - It should choose the one closest to spawn
  *          To be more useable, it should also reset if there is a closer link placed. This follows our rule of not forcing a gameplay style.
  *
+ */
+
+/**
+ * local todo: short term
+ *
+ * fix getTargetRoom for military creeps..
+ * its using attack rooms to find the target room
+ * either find a way to keep attack rooms alive until the squad has all spawned, or find a way for it to use something else
+ * preferably the first one, so we get to keep the attack flag up
+ * would be nice also to find a way to just keep them up full time, but not feasable atm
+ *
+ * fix red + brown spawning squad instead of stalker solo
+ *
+ * start with zealot and examine its attack code, look for bugs
+ *
+ * switch to travelTo for military creeps, brock says its good
+ *
+ * fix squad stuff (after stalker examinization obv)
  */
 
 import EmpireManager from "Managers/EmpireManager";

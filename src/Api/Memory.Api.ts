@@ -161,7 +161,24 @@ export default class MemoryApi {
                 attackRooms: [],
                 claimRooms: [],
                 constructionSites: { data: null, cache: null },
-                creepLimit: {},
+                creepLimit: {
+                    domesticLimits: {
+                        miner: 0,
+                        harvester: 0,
+                        worker: 0,
+                        powerUpgrader: 0,
+                        lorry: 0,
+                    },
+                    remoteLimits: {
+                        remoteMiner: 0,
+                        remoteHarvester: 0,
+                        remoteReserver: 0,
+                        remoteDefender: 0,
+                        remoteColonizer: 0,
+                        claimer: 0,
+                    },
+                    militaryLimits: []
+                },
                 creeps: { data: null, cache: null },
                 defcon: -1,
                 hostiles: { data: null, cache: null },
@@ -695,16 +712,7 @@ export default class MemoryApi {
         return attackRooms;
     }
 
-    /**
-     * Adjust creep limits given the amount and creep limit you want adjusted
-     * @param room the room we are adjusting limits for
-     * @param limitType the classification of limit (mili, remote, domestic)
-     * @param roleConst the actual role we are adjusting
-     * @param delta the change we are applying to the limit
-     */
-    public static adjustCreepLimitsByDelta(room: Room, limitType: string, role: string, delta: number): void {
-        Memory.rooms[room.name].creepLimit![limitType][role] = delta;
-    }
+
 
     /**
      * get the defcon level for the room
@@ -739,16 +747,16 @@ export default class MemoryApi {
     public static getCreepLimits(room: Room): CreepLimits {
         // Make sure everything is defined at the memory level
         if (!Memory.rooms[room.name].creepLimit ||
-            !Memory.rooms[room.name].creepLimit!["domesticLimits"] ||
-            !Memory.rooms[room.name].creepLimit!["remoteLimits"] ||
-            !Memory.rooms[room.name].creepLimit!["militaryLimits"]) {
+            !Memory.rooms[room.name].creepLimit!.domesticLimits ||
+            !Memory.rooms[room.name].creepLimit!.remoteLimits ||
+            !Memory.rooms[room.name].creepLimit!.militaryLimits) {
 
             MemoryApi.initCreepLimits(room);
         }
         const creepLimits: CreepLimits = {
-            domesticLimits: Memory.rooms[room.name].creepLimit!["domesticLimits"],
-            remoteLimits: Memory.rooms[room.name].creepLimit!["remoteLimits"],
-            militaryLimits: Memory.rooms[room.name].creepLimit!["militaryLimits"]
+            domesticLimits: Memory.rooms[room.name].creepLimit!.domesticLimits,
+            remoteLimits: Memory.rooms[room.name].creepLimit!.remoteLimits,
+            militaryLimits: Memory.rooms[room.name].creepLimit!.militaryLimits
         };
 
         return creepLimits;
@@ -759,23 +767,24 @@ export default class MemoryApi {
      * @param room the room we are initing the creep memory for
      */
     public static initCreepLimits(room: Room): void {
-        Memory.rooms[room.name].creepLimit = [];
-        Memory.rooms[room.name].creepLimit!["domesticLimits"] = {
-            miner: 0,
-            harvester: 0,
-            worker: 0,
-            powerUpgrader: 0,
-            lorry: 0
+        Memory.rooms[room.name].creepLimit = {
+            domesticLimits: {
+                miner: 0,
+                harvester: 0,
+                worker: 0,
+                powerUpgrader: 0,
+                lorry: 0
+            },
+            remoteLimits: {
+                remoteMiner: 0,
+                remoteHarvester: 0,
+                remoteReserver: 0,
+                remoteDefender: 0,
+                remoteColonizer: 0,
+                claimer: 0,
+            },
+            militaryLimits: [],
         };
-        Memory.rooms[room.name].creepLimit!["remoteLimits"] = {
-            remoteMiner: 0,
-            remoteHarvester: 0,
-            remoteReserver: 0,
-            remoteDefender: 0,
-            remoteColonizer: 0,
-            claimer: 0,
-        }
-        Memory.rooms[room.name].creepLimit!["militaryLimits"] = {};
     }
 
     /**
