@@ -45,10 +45,10 @@ export default class HarvesterCreepManager {
     public static getNewJob(creep: Creep, room: Room): BaseJob | undefined {
         // if creep is empty, get a GetEnergyJob
         if (creep.carry.energy === 0) {
-            return this.newGetEnergyJob(creep, room);
+            return CreepApi.newGetEnergyJob(creep, room);
         } else {
             let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
-            
+
             if (job === undefined) {
                 job = this.newWorkPartJob(creep, room);
             }
@@ -59,23 +59,28 @@ export default class HarvesterCreepManager {
                 const options = creep.memory.options as CreepOptionsCiv;
                 options.fillStorage = true;
                 options.fillTerminal = true;
-            } 
-            else if(room.memory.jobs && room.memory.jobs.getEnergyJobs){
+            } else if (room.memory.jobs && room.memory.jobs.getEnergyJobs) {
                 // Reset creep options if storage is not full and there are getEnergyJobs
                 // * This prevents a creep from idling after getting storage if storage is not full and there are now other sources of energy in the room
                 let numberOfGetEnergyJobs = 0;
                 // Add up the number of jobs available for this creep (>= creepCapacity)
-                if(room.memory.jobs.getEnergyJobs.containerJobs){
+                if (room.memory.jobs.getEnergyJobs.containerJobs) {
                     // add the number of jobs that meet criteria
-                    numberOfGetEnergyJobs += _.filter(room.memory.jobs.getEnergyJobs.containerJobs.data, (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity).length;
+                    numberOfGetEnergyJobs += _.filter(
+                        room.memory.jobs.getEnergyJobs.containerJobs.data,
+                        (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity
+                    ).length;
                 }
 
-                if(room.memory.jobs.getEnergyJobs.pickupJobs){
+                if (room.memory.jobs.getEnergyJobs.pickupJobs) {
                     // add the number of jobs that meet criteria
-                    numberOfGetEnergyJobs += _.filter(room.memory.jobs.getEnergyJobs.pickupJobs.data, (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity).length;
+                    numberOfGetEnergyJobs += _.filter(
+                        room.memory.jobs.getEnergyJobs.pickupJobs.data,
+                        (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity
+                    ).length;
                 }
- 
-                if(numberOfGetEnergyJobs > 0){
+
+                if (numberOfGetEnergyJobs > 0) {
                     const options = creep.memory.options as CreepOptionsCiv;
                     options.fillStorage = true;
                     options.fillTerminal = true;
@@ -84,56 +89,6 @@ export default class HarvesterCreepManager {
 
             return job;
         }
-    }
-
-    /**
-     * Get a GetEnergyJob for the harvester
-     */
-    public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
-        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
-        if (creepOptions.getFromContainer) {
-            // All container jobs with enough energy to fill creep.carry, and not taken
-            const containerJobs = MemoryApi.getContainerJobs(
-                room,
-                (cJob: GetEnergyJob) => !cJob.isTaken && cJob.resources!.energy >= creep.carryCapacity
-            );
-
-            if (containerJobs.length > 0) {
-                return containerJobs[0];
-            }
-        }
-
-        if (creepOptions.getDroppedEnergy) {
-            // All dropped resources with enough energy to fill creep.carry, and not taken
-            const dropJobs = MemoryApi.getPickupJobs(
-                room,
-                (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources!.energy >= creep.carryCapacity
-            );
-
-            if (dropJobs.length > 0) {
-                return dropJobs[0];
-            }
-        }
-
-        if(creepOptions.getFromStorage || creepOptions.getFromTerminal) {
-            // All backupStructures with enough energy to fill creep.carry, and not taken
-            const backupStructures = MemoryApi.getBackupStructuresJobs(
-                room,
-                (job: GetEnergyJob) => !job.isTaken && job.resources!.energy >= creep.carryCapacity
-            );
-
-            if (backupStructures.length > 0) {
-                // Turn off access to storage until creep gets a work/carry job
-                const options = creep.memory.options as CreepOptionsCiv;
-                options.fillStorage = false;
-                options.fillTerminal = false;
-                return backupStructures[0];
-            }
-
-            return undefined;
-        }
-
-        return undefined;
     }
 
     /**
@@ -200,14 +155,14 @@ export default class HarvesterCreepManager {
                 return buildJobs[0];
             }
         }
-        
-        if (creepOptions.repair){
+
+        if (creepOptions.repair) {
             const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
             if (priorityRepairJobs.length > 0) {
                 return priorityRepairJobs[0];
             }
         }
-        
+
         return undefined;
     }
 

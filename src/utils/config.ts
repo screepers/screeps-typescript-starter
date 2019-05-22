@@ -23,15 +23,15 @@ export const LINK_MINIMUM_ENERGY = 1;
 /**
  * Percentage HP to begin repairing structures (Percentage of current limit for Ramparts and Walls)
  */
-export const REPAIR_THRESHOLD = .75;
+export const REPAIR_THRESHOLD = 0.75;
 
 /**
  * Percentage HP to make repairing structures a priority (Percentage of current limit for Ramparts and Walls)
  */
-export const PRIORITY_REPAIR_THRESHOLD = .25;
+export const PRIORITY_REPAIR_THRESHOLD = 0.25;
 
 /**
- * Number of HP to repair Ramparts/Walls to before considering them as a normal structure 
+ * Number of HP to repair Ramparts/Walls to before considering them as a normal structure
  */
 export const RAMPART_HITS_THRESHOLD = 10000;
 
@@ -81,7 +81,7 @@ export const CONTROLLER_SIGNING_TEXT = [
 /**
  * Allow miners to find the closest source instead of just the first one
  */
-export const MINERS_GET_CLOSEST_SOURCE = true;
+export const MINERS_GET_CLOSEST_SOURCE: boolean = true;
 
 /**
  * Constants for Tick Timers - Number of ticks between running the specified constant this is deciding
@@ -109,7 +109,4 @@ export const MEMORY_MANAGER_BUCKET_LIMIT = 1;
 /**
  * List of allies
  */
-export const ALLY_LIST: string[] = [
-    "jakesboy2",
-    "Uhmbrock",
-]
+export const ALLY_LIST: string[] = ["jakesboy2", "Uhmbrock"];
