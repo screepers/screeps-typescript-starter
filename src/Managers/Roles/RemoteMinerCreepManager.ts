@@ -61,6 +61,10 @@ export default class RemoteMinerCreepManager {
      */
     public static handleNewJob(creep: Creep): void {
         const targetRoom: Room = Game.rooms[creep.memory.targetRoom];
+        if (creep.memory.job!.jobType === "movePartJob") {
+            return;
+        }
+
         MemoryApi.updateJobMemory(creep, targetRoom);
 
         const miningContainer = CreepHelper.getMiningContainer(

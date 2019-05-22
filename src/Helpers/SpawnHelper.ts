@@ -601,22 +601,22 @@ export class SpawnHelper {
         const opts: CreepBodyOptions = { mixType: COLLATED };
 
         switch (tier) {
-            case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
-                body = { carry: 8, move: 8 };
+            case TIER_3: // Total Cost: 800
+                body = { work: 2, carry: 5, move: 7 };
                 break;
 
-            case TIER_4: // 10 Carry, 10 Move- Total Cost: 1000
-                body = { carry: 10, move: 10 };
+            case TIER_4: // Total Cost: 1000
+                body = { work: 2, carry: 7, move: 9 };
                 break;
 
-            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1600
-                body = { carry: 16, move: 16 };
+            case TIER_5: // Total Cost: 1600
+                body = { work: 2, carry: 13, move: 15 };
                 break;
 
             case TIER_8:
             case TIER_7:
             case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
-                body = { carry: 20, move: 20 };
+                body = { work: 2, carry: 17, move: 19 };
                 break;
         }
 
@@ -637,7 +637,6 @@ export class SpawnHelper {
             case ROOM_STATE_INTER:
                 creepOptions = {
                     build: true, //
-                    upgrade: true, //
                     repair: true, //
                     wallRepair: true, //
                     fillTower: true, //
@@ -650,7 +649,6 @@ export class SpawnHelper {
             case ROOM_STATE_ADVANCED:
                 creepOptions = {
                     build: true, //
-                    upgrade: true, //
                     repair: true, //
                     wallRepair: true, //
                     fillTower: true, //
@@ -665,7 +663,6 @@ export class SpawnHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     build: true, //
-                    upgrade: true, //
                     repair: true, //
                     wallRepair: true, //
                     fillTower: true, //

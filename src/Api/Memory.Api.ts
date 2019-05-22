@@ -1413,7 +1413,11 @@ export default class MemoryApi {
         if (roomJob === undefined) {
             throw new UserException(
                 "Error in updateJobMemory",
-                "Could not find the job in room memory to update.",
+                "Could not find the job in room memory to update." +
+                    "\nCreep: " +
+                    creep.name +
+                    "\nJob: " +
+                    JSON.stringify(creep.memory.job),
                 ERROR_ERROR
             );
         }
