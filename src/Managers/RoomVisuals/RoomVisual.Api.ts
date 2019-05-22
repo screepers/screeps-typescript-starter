@@ -521,6 +521,7 @@ export default class RoomVisualApi {
             if (!(currentTick - messageNode.tickCreated >= messageNode.expirationLimit)) {
                 newArray.push(messageNode);
                 lines.push(messageNode.message);
+                lines.push("");
                 largestMessage = largestMessage < messageNode.message.length ? messageNode.message.length : largestMessage;
             }
         }
@@ -529,9 +530,6 @@ export default class RoomVisualApi {
         // If no remote rooms, print none
         if (lines.length === 3) {
             lines.push("No Current Alerts ");
-            lines.push("");
-        }
-        else {
             lines.push("");
         }
         RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
