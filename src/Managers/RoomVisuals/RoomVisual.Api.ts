@@ -491,4 +491,60 @@ export default class RoomVisualApi {
             startCoord = endCoord;
         }
     }
+
+    /**
+     * display messages and handle managing the data structure that holds him
+     * @param room the room we are creating the visual for
+     * @param x the x value for the visual
+     * @param y the y value for the visual
+     */
+    public static createMessageBoxVisual(room: Room, x: number, y: number): number {
+
+        // Make sure the message structure exists in memory
+        if (!Memory.empire.alertMessages) {
+            Memory.empire.alertMessages = [];
+        }
+
+        // Draw the title
+        const lines: string[] = [];
+        lines.push("");
+        lines.push("Alerts ")
+        lines.push("");
+
+        // Remove expired messages and add valid messages to the lines array
+        const newArray: AlertMessageNode[] = [];
+        let largestMessage: number = 0;
+        for (const i in Memory.empire.alertMessages) {
+            const messageNode: AlertMessageNode = Memory.empire.alertMessages[i];
+            const currentTick: number = Game.time;
+
+            if (!(currentTick - messageNode.tickCreated >= messageNode.expirationLimit)) {
+                newArray.push(messageNode);
+                lines.push(messageNode.message);
+                largestMessage = largestMessage < messageNode.message.length ? messageNode.message.length : largestMessage;
+            }
+        }
+        Memory.empire.alertMessages = newArray;
+
+        // If no remote rooms, print none
+        if (lines.length === 3) {
+            lines.push("No Current Alerts ");
+            lines.push("");
+        }
+        else {
+            lines.push("");
+        }
+        RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
+
+        // Draw the box around the text
+        largestMessage = (largestMessage / 3) < 10 ? 10 : (largestMessage / 3);
+        new RoomVisual(room.name)
+            .line(x - largestMessage, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
+            .line(x - largestMessage, y - 1, x + .25, y - 1)                  // top line
+            .line(x - largestMessage, y - 1, x - largestMessage, y + lines.length - 1)   // left line
+            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+
+        // Return where the next box should start
+        return y + lines.length;
+    }
 }

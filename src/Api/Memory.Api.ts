@@ -1707,4 +1707,22 @@ export default class MemoryApi {
                 roomNames.includes(room.name)
         );
     }
+
+    /**
+     * create a message node to display as an alert
+     * @param message the message you want displayed
+     * @param expirationLimit the time you want it to be displayed for
+     */
+    public static createEmpireAlertNode(displayMessage: string, limit: number): void {
+
+        if (!Memory.empire.alertMessages) {
+            Memory.empire.alertMessages = [];
+        }
+        const messageNode: AlertMessageNode = {
+            message: displayMessage,
+            tickCreated: Game.time,
+            expirationLimit: limit
+        };
+        Memory.empire.alertMessages.push(messageNode);
+    }
 }

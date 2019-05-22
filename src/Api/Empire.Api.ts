@@ -79,7 +79,7 @@ export default class Empire {
                 // Set to processed to prevent the flag from attempting processization every tick
                 default:
 
-                    console.log("Attempted to process flag of an unhandled type.")
+                    MemoryApi.createEmpireAlertNode("Attempted to process flag of an unhandled type.", 10);
                     flag.memory.processed = true;
                     flag.memory.complete = true;
                     break;
@@ -89,7 +89,7 @@ export default class Empire {
             const roomName = flag.pos.roomName;
             if (!Memory.rooms[roomName]) {
                 const isOwnedRoom: boolean = false;
-                console.log("Initializing Room Memory for Dependent Room [" + roomName + "].");
+                MemoryApi.createEmpireAlertNode("Initializing Room Memory for Dependent Room [" + roomName + "].", 10);
                 MemoryApi.initRoomMemory(roomName, isOwnedRoom);
             }
         }
@@ -104,7 +104,7 @@ export default class Empire {
 
         // Loop over all flags, removing them and their direct memory from the game
         for (const flag of completeFlags) {
-            console.log("Removing flag [" + flag.name + "]");
+            MemoryApi.createEmpireAlertNode("Removing flag [" + flag.name + "]", 10);
             flag.remove();
             delete Memory.flags[flag.name];
         }

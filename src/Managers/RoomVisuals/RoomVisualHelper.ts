@@ -99,7 +99,7 @@ export default class RoomVisualManager {
             case REMOTE_FLAG:
                 return "Remote";
             case OVERRIDE_D_ROOM_FLAG:
-                return "Dependent Room Override";
+                return "Override";
             case STIMULATE_FLAG:
                 return "Stimulate";
             default:
