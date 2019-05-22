@@ -89,8 +89,15 @@ export default class WorkerCreepManager {
             );
 
             if (backupStructures.length > 0) {
-                // TODO Get closest
-                return backupStructures[0];
+                const closestTarget = creep.pos.findClosestByRange(
+                    _.map(backupStructures, (job: GetEnergyJob) => Game.getObjectById(job.targetID) as Structure)
+                );
+
+                if (closestTarget !== null) {
+                    return _.find(backupStructures, (job: GetEnergyJob) => job.targetID === closestTarget!.id);
+                } else if (closestTarget == null) {
+                    return backupStructures[0];
+                }
             }
 
             return undefined;

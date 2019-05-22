@@ -546,16 +546,16 @@ export class SpawnHelper {
 
         // Cap the remote miner at 6 work parts (6 so they finish mining early and can build/repair their container)
         switch (tier) {
-            case TIER_3: // 6 Work, 1 Carry, 3 Move - Total Cost: 800
-                body = { work: 6, carry: 1, move: 3 };
+            case TIER_3: // 5 Work, 3 Move - Total Cost: 650
+                body = { work: 5, move: 3 };
                 break;
 
             case TIER_8:
             case TIER_7:
             case TIER_6:
             case TIER_5:
-            case TIER_4: // 6 Work, 1 Carry, 4 Move - Total Cost: 850
-                body = { work: 6, carry: 1, move: 4 };
+            case TIER_4: // 5 Work, 5 Move - Total Cost: 850
+                body = { work: 5, move: 5 };
                 break;
         }
 
@@ -574,6 +574,10 @@ export class SpawnHelper {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
             case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_NUKE_INBOUND:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_STIMULATE:
                 creepOptions = {
                     harvestSources: true,
                     build: true, //
@@ -645,8 +649,11 @@ export class SpawnHelper {
 
             case ROOM_STATE_ADVANCED:
                 creepOptions = {
+                    build: true, //
+                    upgrade: true, //
                     repair: true, //
-                    fillStorage: true, //
+                    wallRepair: true, //
+                    fillTower: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true //
                 };
@@ -657,9 +664,11 @@ export class SpawnHelper {
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
+                    build: true, //
+                    upgrade: true, //
                     repair: true, //
-                    fillStorage: true, //
-                    fillLink: true, //
+                    wallRepair: true, //
+                    fillTower: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true //
                 };
