@@ -620,15 +620,15 @@ interface RoomMemory {
     /**
      * Names of all rooms flagged to attack
      */
-    attackRooms?: Array<AttackRoomMemory>;
+    attackRooms?: AttackRoomMemory[];
     /**
      * Names of all rooms flagged to remote harvest
      */
-    remoteRooms?: Array<RemoteRoomMemory>;
+    remoteRooms?: RemoteRoomMemory[];
     /**
      * Names of all rooms flagged to colonize
      */
-    claimRooms?: Array<ClaimRoomMemory>;
+    claimRooms?: ClaimRoomMemory[];
     /**
      * List of all of the room's GetEnergyJobs
      */
@@ -811,7 +811,7 @@ interface CreepLimits extends StringMap {
     /**
      * creep limits for military creeps
      */
-    militaryLimits: Array<RoleConstant>;
+    militaryLimits: RoleConstant[];
 }
 
 /**
@@ -932,7 +932,7 @@ interface DepedentRoomParentMemory {
     /**
      * reference to the attack flags placed in the room
      */
-    flags: Array<ParentFlagMemory>;
+    flags: ParentFlagMemory[];
 }
 /**
  * Attack room memory structure
@@ -973,6 +973,7 @@ interface RemoteRoomMemory extends DepedentRoomParentMemory {
 /**
  * Claim room memory structure
  */
+// tslint:disable-next-line:no-empty-interface
 interface ClaimRoomMemory extends DepedentRoomParentMemory {
     // Parent memory covers everything currently needed in here
 }
@@ -1015,6 +1016,7 @@ interface AttackFlagMemory extends ParentFlagMemory {
 /**
  * memory associated with a claim flag inside a claim room memory
  */
+// tslint:disable-next-line:no-empty-interface
 interface ClaimFlagMemory extends ParentFlagMemory {
     // For now, its covered by parent interface
     // Extra claim room flags at the moment don't do anything like it does for attack rooms
@@ -1024,6 +1026,7 @@ interface ClaimFlagMemory extends ParentFlagMemory {
 /**
  * memory associated with a remote flag inside a remote room memory
  */
+// tslint:disable-next-line:no-empty-interface
 interface RemoteFlagMemory extends ParentFlagMemory {
     // Same deal as above for now
 }

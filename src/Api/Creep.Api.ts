@@ -441,8 +441,8 @@ export default class CreepApi {
         const moveOpts = DEFAULT_MOVE_OPTS;
 
         if (job.targetType === "roomName") {
-            // 24 should get us inside the room and off the exit
-            moveOpts.range = 24;
+            // 23 should get us inside the room and off the exit
+            moveOpts.range = 23;
         } else if (job.targetType === "roomPosition") {
             moveOpts.range = 0;
         }
@@ -529,7 +529,17 @@ export default class CreepApi {
      * @param homeRoom The homeRoom of the creep
      */
     public static fleeRemoteRoom(creep: Creep, homeRoom: Room): void {
-        // TODO FIll this method out
+        creep.memory.job = {
+            jobType: "movePartJob",
+            targetType: "roomName",
+            targetID: creep.memory.homeRoom,
+            actionType: "move",
+            isTaken: false
+        };
+        creep.memory.working = false;
+        if (creep.memory.supplementary) {
+            delete creep.memory.supplementary.moveTargetID;
+        }
     }
 
     /**********************************************************/

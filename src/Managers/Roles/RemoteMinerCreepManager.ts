@@ -15,9 +15,10 @@ export default class RemoteMinerCreepManager {
         }
 
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
+        const targetRoom = Game.rooms[creep.memory.targetRoom];
 
-        if (creep.room.memory.defcon > 0) {
-            CreepApi.fleeRemoteRoom(creep, homeRoom);
+        if (targetRoom.memory && targetRoom.memory.defcon > 0) {
+            // Flee Here
         }
 
         if (creep.memory.job === undefined) {
@@ -45,7 +46,6 @@ export default class RemoteMinerCreepManager {
      * Get new job for the creep
      */
     public static getNewJob(creep: Creep): BaseJob | undefined {
-        // TODO Set up container use
         if (creep.room.name === creep.memory.targetRoom) {
             const targetRoom = Game.rooms[creep.memory.targetRoom];
             return CreepApi.getNewSourceJob(creep, targetRoom);

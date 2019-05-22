@@ -635,29 +635,7 @@ export class SpawnHelper {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
             case ROOM_STATE_INTER:
-                creepOptions = {
-                    build: true, //
-                    repair: true, //
-                    wallRepair: true, //
-                    fillTower: true, //
-                    getFromContainer: true, //
-                    getDroppedEnergy: true //
-                };
-
-                break;
-
             case ROOM_STATE_ADVANCED:
-                creepOptions = {
-                    build: true, //
-                    repair: true, //
-                    wallRepair: true, //
-                    fillTower: true, //
-                    getFromContainer: true, //
-                    getDroppedEnergy: true //
-                };
-
-                break;
-
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_NUKE_INBOUND:
@@ -667,7 +645,10 @@ export class SpawnHelper {
                     wallRepair: true, //
                     fillTower: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true //
+                    getDroppedEnergy: true, //
+                    fillStorage: true,
+                    fillTerminal: true,
+                    fillLink: true
                 };
 
                 break;
@@ -1408,6 +1389,8 @@ export class SpawnHelper {
 
         switch (roleConst) {
             case ROLE_REMOTE_HARVESTER:
+                creepNum = 2 * numSources;
+                break;
             case ROLE_REMOTE_MINER:
                 creepNum = 1 * numSources;
                 break;

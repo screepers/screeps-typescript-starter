@@ -23,12 +23,12 @@ export const LINK_MINIMUM_ENERGY = 1;
 /**
  * Percentage HP to begin repairing structures (Percentage of current limit for Ramparts and Walls)
  */
-export const REPAIR_THRESHOLD = 0.75;
+export const REPAIR_THRESHOLD = 0.9;
 
 /**
  * Percentage HP to make repairing structures a priority (Percentage of current limit for Ramparts and Walls)
  */
-export const PRIORITY_REPAIR_THRESHOLD = 0.25;
+export const PRIORITY_REPAIR_THRESHOLD = 0.3;
 
 /**
  * Number of HP to repair Ramparts/Walls to before considering them as a normal structure

@@ -14,9 +14,10 @@ export default class RemoteHarvesterCreepManager {
         }
 
         const homeRoom = Game.rooms[creep.memory.homeRoom];
+        const targetRoom = Game.rooms[creep.memory.targetRoom];
 
-        if (creep.room.memory.defcon > 0) {
-            CreepApi.fleeRemoteRoom(creep, homeRoom);
+        if (targetRoom.memory && targetRoom.memory.defcon > 0) {
+            // Flee Here
         }
 
         if (creep.memory.job === undefined) {
@@ -48,8 +49,8 @@ export default class RemoteHarvesterCreepManager {
         } else if (creep.carry.energy === 0 && creep.room.name !== creep.memory.targetRoom) {
             // If creep is empty and not in targetRoom - Go to targetRoom
             return CreepApi.newMovePartJob(creep, creep.memory.targetRoom);
-        } else if (creep.carry.energy === creep.carryCapacity && creep.room.name === creep.memory.targetRoom) {
-            // If creep is full and in targetRoom - Get workpartJob
+        } else if (creep.carry.energy > 0 && creep.room.name === creep.memory.targetRoom) {
+            // If creep has energy and is in targetRoom - Get workpartJob
             const targetRoom = Game.rooms[creep.memory.targetRoom];
             let job = CreepApi.newWorkPartJob(creep, targetRoom) as BaseJob;
             // if no work part job - Go to homeRoom
@@ -61,9 +62,9 @@ export default class RemoteHarvesterCreepManager {
         } else if (creep.carry.energy > 0 && creep.room.name === creep.memory.homeRoom) {
             // If creep has energy and is in homeRoom - Get a carry job to use energy
             let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
-
+            // If no carryJob, get a workPartJob in homeroom
             if (job === undefined) {
-                job = this.newWorkPartJob(creep, room);
+                job = CreepApi.newWorkPartJob(creep, room);
             }
 
             return job;
@@ -133,36 +134,6 @@ export default class RemoteHarvesterCreepManager {
     }
 
     /**
-     * Gets a new WorkPartJob for harvester
-     */
-    public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
-        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
-        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
-
-        if (creepOptions.upgrade) {
-            if (upgradeJobs.length > 0) {
-                return upgradeJobs[0];
-            }
-        }
-
-        if (creepOptions.build) {
-            const buildJobs = MemoryApi.getBuildJobs(room, (job: WorkPartJob) => !job.isTaken);
-            if (buildJobs.length > 0) {
-                return buildJobs[0];
-            }
-        }
-
-        if (creepOptions.repair) {
-            const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
-            if (priorityRepairJobs.length > 0) {
-                return priorityRepairJobs[0];
-            }
-        }
-
-        return undefined;
-    }
-
-    /**
      * Handles setup for a new job
      */
     public static handleNewJob(creep: Creep, room: Room): void {
@@ -171,11 +142,7 @@ export default class RemoteHarvesterCreepManager {
             return;
         }
 
-        if (creep.memory.job!.jobType === "getEnergyJob" || creep.memory.job!.jobType === "workPartJob") {
-            const targetRoom = Game.rooms[creep.memory.targetRoom];
-            MemoryApi.updateJobMemory(creep, targetRoom);
-        } else {
-            MemoryApi.updateJobMemory(creep, room);
-        }
+        const currentRoom = creep.room;
+        MemoryApi.updateJobMemory(creep, currentRoom);
     }
 }
