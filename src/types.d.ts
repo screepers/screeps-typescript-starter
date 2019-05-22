@@ -344,13 +344,23 @@ type CarryPart_ValidTargets = ResourceContainingStructureConstant | "roomPositio
 type CarryPart_ValidActions = "transfer" | "drop";
 
 /**
+ * Valid types for the MovePartJob targetType
+ */
+type MovePart_ValidTargets = "roomPosition" | "roomName";
+/**
+ * Valid actions for MovePartJob actionType
+ */
+type MovePart_ValidActions = "move"
+
+/**
  * Acceptable ValidTargets Lists for BaseJob
  */
 type Any_ValidTargets =
     | GetEnergy_ValidTargets
     | CarryPart_ValidTargets
     | ClaimPart_ValidTargets
-    | WorkPart_ValidTargets;
+    | WorkPart_ValidTargets
+    | MovePart_ValidTargets;
 /**
  * Acceptable ValidAction Lists for BaseJob
  */
@@ -358,12 +368,13 @@ type Any_ValidActions =
     | GetEnergy_ValidActions
     | CarryPart_ValidActions
     | ClaimPart_ValidActions
-    | WorkPart_ValidActions;
+    | WorkPart_ValidActions
+    | MovePart_ValidActions;
 
 /**
  * Valid jobType for BaseJob
  */
-type Valid_JobTypes = "getEnergyJob" | "claimPartJob" | "carryPartJob" | "workPartJob";
+type Valid_JobTypes = "getEnergyJob" | "claimPartJob" | "carryPartJob" | "workPartJob" | "movePartJob";
 /**
  * Basic Job Interface
  */
@@ -459,6 +470,20 @@ interface CarryPartJob extends BaseJob {
      * The amount of energy to be filled
      */
     remaining: number;
+}
+
+/**
+ * JobObject used to move a creep's location
+ */
+interface MovePartJob extends BaseJob {
+    /**
+     * The type of the target object
+     */
+    targetType: MovePart_ValidTargets;
+    /**
+     * The action to perform on the target object
+     */
+    actionType: MovePart_ValidActions;
 }
 
 /**
