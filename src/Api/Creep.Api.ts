@@ -6,7 +6,8 @@ import {
     ROOM_STATE_BEGINNER,
     ROOM_STATE_INTRO,
     ROLE_MINER,
-    ERROR_WARN
+    ERROR_WARN,
+    ERROR_FATAL
 } from "utils/constants";
 import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
@@ -63,10 +64,15 @@ export default class CreepApi {
                 break;
             case "movePartJob":
                 this.travelTo_MovePartJob(creep, job as MovePartJob);
+                break;
             default:
                 throw new UserException(
                     "Bad job.jobType in CreepApi.travelTo",
-                    "The jobtype of the job passed to CreepApi.travelTo was invalid",
+                    "The jobtype of the job passed to CreepApi.travelTo was invalid" +
+                        "\nCreep: " +
+                        creep.name +
+                        "\n Job Type: " +
+                        job.jobType,
                     ERROR_FATAL
                 );
         }
@@ -627,5 +633,20 @@ export default class CreepApi {
         }
 
         return undefined;
+    }
+
+    /**
+     * Get a MovePartJob for the harvester
+     */
+    public static newMovePartJob(creep: Creep, roomName: string): MovePartJob | undefined {
+        const newJob: MovePartJob = {
+            jobType: "movePartJob",
+            targetType: "roomName",
+            targetID: roomName,
+            actionType: "move",
+            isTaken: false
+        };
+
+        return newJob;
     }
 }

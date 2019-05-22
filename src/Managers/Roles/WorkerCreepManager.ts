@@ -89,6 +89,7 @@ export default class WorkerCreepManager {
             );
 
             if (backupStructures.length > 0) {
+                // TODO Get closest
                 return backupStructures[0];
             }
 

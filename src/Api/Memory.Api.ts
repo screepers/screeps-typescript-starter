@@ -144,7 +144,7 @@ export default class MemoryApi {
         // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
         // We want it to be reformed
         // Make sure jobs exist
-        if (Memory.rooms[roomName] && !Memory.rooms[roomName].jobs && isOwnedRoom) {
+        if (Memory.rooms[roomName] && !Memory.rooms[roomName].jobs) {
             Memory.rooms[roomName].jobs = {};
         }
 
@@ -391,6 +391,7 @@ export default class MemoryApi {
             NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[roomName].structures === undefined ||
+            Memory.rooms[roomName].structures.data === null ||
             Memory.rooms[roomName].structures.data[type] === undefined ||
             Memory.rooms[roomName].structures.cache < Game.time - STRUCT_CACHE_TTL
         ) {
@@ -719,13 +720,12 @@ export default class MemoryApi {
         const filterFunction = creepConst === undefined ? undefined : (c: Creep) => c.memory.role === creepConst;
 
         // Return all creeps in that role, excluding those on deaths door
-        return _.filter(MemoryApi.getMyCreeps(room.name, filterFunction),
-            (creep: Creep) => {
-                if (creep.ticksToLive) {
-                    return creep.ticksToLive > (creep.body.length * 3);
-                }
-                return false;
-            }).length;
+        return _.filter(MemoryApi.getMyCreeps(room.name, filterFunction), (creep: Creep) => {
+            if (creep.ticksToLive) {
+                return creep.ticksToLive > creep.body.length * 3;
+            }
+            return false;
+        }).length;
     }
 
     /**
@@ -1399,6 +1399,9 @@ export default class MemoryApi {
             case "workPartJob":
                 roomJob = this.searchWorkPartJobs(creepJob as WorkPartJob, room);
                 break;
+            case "movePartJob":
+                // We don't need to do anything with movePartJobs, so return early
+                return;
             default:
                 throw new UserException(
                     "Error in updateJobMemory",
@@ -1707,7 +1710,6 @@ export default class MemoryApi {
      * @param expirationLimit the time you want it to be displayed for
      */
     public static createEmpireAlertNode(displayMessage: string, limit: number): void {
-
         if (!Memory.empire.alertMessages) {
             Memory.empire.alertMessages = [];
         }

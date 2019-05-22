@@ -575,6 +575,7 @@ export class SpawnHelper {
             case ROOM_STATE_BEGINNER:
             case ROOM_STATE_INTER:
                 creepOptions = {
+                    harvestSources: true,
                     build: true, //
                     repair: true, //
                     fillContainer: true //
@@ -1400,7 +1401,8 @@ export class SpawnHelper {
         let creepNum: number = 0;
 
         switch (roleConst) {
-            case ROLE_REMOTE_HARVESTER || ROLE_REMOTE_MINER:
+            case ROLE_REMOTE_HARVESTER:
+            case ROLE_REMOTE_MINER:
                 creepNum = 1 * numSources;
                 break;
         }
