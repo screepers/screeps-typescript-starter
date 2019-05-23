@@ -106,7 +106,13 @@ export default class CreepHelper {
         }
         else if(creep.memory.job && creep.memory.job.targetType === "roomName"){
             return new RoomPosition(25, 25, creep.memory.job.targetID);
-        } 
+        } else if(creep.memory.job && creep.memory.job.targetType === "roomPosition"){
+            // TODO Handle parsing a string into a roomPosition object here
+            const x = 25;
+            const y = 25;
+            const roomName = "X##Y##";
+            return new RoomPosition(x, y, roomName);
+        }
         else {
             return Game.getObjectById(job.targetID);
         }

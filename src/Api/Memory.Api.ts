@@ -141,11 +141,10 @@ export default class MemoryApi {
      * @param room The room to initialize the memory of.
      */
     public static initRoomMemory(roomName: string, isOwnedRoom: boolean): void {
-
         // You might think of a better way/place to do this, but if we delete a memory structure as a "reset",
         // We want it to be reformed
         // Make sure jobs exist
-        if (Memory.rooms[roomName] && !Memory.rooms[roomName].jobs && isOwnedRoom) {
+        if (Memory.rooms[roomName] && !Memory.rooms[roomName].jobs) {
             Memory.rooms[roomName].jobs = {};
         }
 
@@ -192,8 +191,7 @@ export default class MemoryApi {
                 structures: { data: null, cache: null },
                 upgradeLink: ""
             };
-        }
-        else {
+        } else {
             Memory.rooms[roomName] = {
                 structures: { data: null, cache: null },
                 sources: { data: null, cache: null },
@@ -202,10 +200,9 @@ export default class MemoryApi {
                 droppedResources: { data: null, cache: null },
                 constructionSites: { data: null, cache: null },
                 defcon: -1,
-                hostiles: { data: null, cache: null },
-            }
+                hostiles: { data: null, cache: null }
+            };
         }
-
 
         // Only populate out the memory structure if we have vision of the room
         // Extra saftey provided at each helper function, but make sure only visible rooms are being sent anyway
@@ -322,7 +319,7 @@ export default class MemoryApi {
             NO_CACHING_MEMORY ||
             forceUpdate ||
             !Memory.rooms[roomName].hostiles ||
-            Memory.rooms[roomName].creeps!.cache < Game.time - HCREEP_CACHE_TTL
+            Memory.rooms[roomName].hostiles!.cache < Game.time - HCREEP_CACHE_TTL
         ) {
             MemoryHelper_Room.updateHostileCreeps(roomName);
         }
@@ -411,6 +408,7 @@ export default class MemoryApi {
             NO_CACHING_MEMORY ||
             forceUpdate ||
             Memory.rooms[roomName].structures === undefined ||
+            Memory.rooms[roomName].structures.data === null ||
             Memory.rooms[roomName].structures.data[type] === undefined ||
             Memory.rooms[roomName].structures.cache < Game.time - STRUCT_CACHE_TTL
         ) {
@@ -442,7 +440,6 @@ export default class MemoryApi {
         filterFunction?: (object: ConstructionSite) => boolean,
         forceUpdate?: boolean
     ): ConstructionSite[] {
-
         // If we have no vision of the room, return an empty array
         if (!Memory.rooms[roomName]) {
             return [];
@@ -750,7 +747,6 @@ export default class MemoryApi {
             !Memory.rooms[room.name].creepLimit!.domesticLimits ||
             !Memory.rooms[room.name].creepLimit!.remoteLimits ||
             !Memory.rooms[room.name].creepLimit!.militaryLimits) {
-
             MemoryApi.initCreepLimits(room);
         }
         const creepLimits: CreepLimits = {
@@ -785,6 +781,15 @@ export default class MemoryApi {
             },
             militaryLimits: [],
         };
+        Memory.rooms[room.name].creepLimit!["remoteLimits"] = {
+            remoteMiner: 0,
+            remoteHarvester: 0,
+            remoteReserver: 0,
+            remoteDefender: 0,
+            remoteColonizer: 0,
+            claimer: 0
+        };
+        Memory.rooms[room.name].creepLimit!["militaryLimits"] = {};
     }
 
     /**
@@ -805,7 +810,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -1208,12 +1213,10 @@ export default class MemoryApi {
 
             if (obj.structureType !== STRUCTURE_WALL && obj.structureType !== STRUCTURE_RAMPART) {
                 return obj.hits < obj.hitsMax * PRIORITY_REPAIR_THRESHOLD;
-            }
-            else {
+            } else {
                 return obj.hits < RoomApi.getWallHpLimit(room) * PRIORITY_REPAIR_THRESHOLD;
             }
         });
-
 
         if (filterFunction !== undefined) {
             repairJobs = _.filter(repairJobs, filterFunction);
@@ -1413,6 +1416,9 @@ export default class MemoryApi {
             case "workPartJob":
                 roomJob = this.searchWorkPartJobs(creepJob as WorkPartJob, room);
                 break;
+            case "movePartJob":
+                // We don't need to do anything with movePartJobs, so return early
+                return;
             default:
                 throw new UserException(
                     "Error in updateJobMemory",
@@ -1424,7 +1430,11 @@ export default class MemoryApi {
         if (roomJob === undefined) {
             throw new UserException(
                 "Error in updateJobMemory",
-                "Could not find the job in room memory to update.",
+                "Could not find the job in room memory to update." +
+                    "\nCreep: " +
+                    creep.name +
+                    "\nJob: " +
+                    JSON.stringify(creep.memory.job),
                 ERROR_ERROR
             );
         }
@@ -1618,9 +1628,13 @@ export default class MemoryApi {
      * @param job The Job to update
      */
     public static updateClaimPartJob(job: ClaimPartJob, creep: Creep): void {
-        if (job.targetType === "controller") {
+        if (job.targetType === STRUCTURE_CONTROLLER) {
             job.isTaken = true;
+            return;
+        }
 
+        if (job.targetType === "roomName") {
+            job.isTaken = true;
             return;
         }
     }
@@ -1698,23 +1712,34 @@ export default class MemoryApi {
      * get all visible dependent rooms
      */
     public static getVisibleDependentRooms(): Room[] {
-
         const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
         const roomNames: string[] = [];
         _.forEach(ownedRooms, (room: Room) => {
             // Collect the room names for dependent rooms
-            _.forEach(MemoryApi.getRemoteRooms(room),
-                (rr: RemoteRoomMemory) => roomNames.push(rr.roomName));
+            _.forEach(MemoryApi.getRemoteRooms(room), (rr: RemoteRoomMemory) => roomNames.push(rr.roomName));
 
-            _.forEach(MemoryApi.getClaimRooms(room),
-                (rr: ClaimRoomMemory) => roomNames.push(rr.roomName));
+            _.forEach(MemoryApi.getClaimRooms(room), (rr: ClaimRoomMemory) => roomNames.push(rr.roomName));
         });
 
         // Return all visible rooms which appear in roomNames array
-        return _.filter(Game.rooms,
-            (room: Room) =>
-                roomNames.includes(room.name)
-        );
+        return _.filter(Game.rooms, (room: Room) => roomNames.includes(room.name));
+    }
+
+    /**
+     * create a message node to display as an alert
+     * @param message the message you want displayed
+     * @param expirationLimit the time you want it to be displayed for
+     */
+    public static createEmpireAlertNode(displayMessage: string, limit: number): void {
+        if (!Memory.empire.alertMessages) {
+            Memory.empire.alertMessages = [];
+        }
+        const messageNode: AlertMessageNode = {
+            message: displayMessage,
+            tickCreated: Game.time,
+            expirationLimit: limit
+        };
+        Memory.empire.alertMessages.push(messageNode);
     }
 
     /**

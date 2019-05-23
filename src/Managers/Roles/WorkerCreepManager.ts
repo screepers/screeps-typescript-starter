@@ -43,7 +43,7 @@ export default class WorkerCreepManager {
         if (creep.carry.energy === 0) {
             return this.newGetEnergyJob(creep, room);
         } else {
-            let job: BaseJob | undefined = this.newWorkPartJob(creep, room);
+            let job: BaseJob | undefined = CreepApi.newWorkPartJob(creep, room);
             if (job === undefined) {
                 job = this.newCarryPartJob(creep, room);
             }
@@ -89,75 +89,18 @@ export default class WorkerCreepManager {
             );
 
             if (backupStructures.length > 0) {
-                return backupStructures[0];
+                const closestTarget = creep.pos.findClosestByRange(
+                    _.map(backupStructures, (job: GetEnergyJob) => Game.getObjectById(job.targetID) as Structure)
+                );
+
+                if (closestTarget !== null) {
+                    return _.find(backupStructures, (job: GetEnergyJob) => job.targetID === closestTarget!.id);
+                } else if (closestTarget == null) {
+                    return backupStructures[0];
+                }
             }
 
             return undefined;
-        }
-
-        return undefined;
-    }
-
-    /**
-     * Gets a new WorkPartJob for worker
-     */
-    public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
-        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
-        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
-        const isCurrentUpgrader: boolean = _.some(
-            MemoryApi.getMyCreeps(room.name),
-            (c: Creep) => c.memory.job && c.memory.job!.actionType === "upgrade"
-        );
-
-        // Assign upgrade job is one isn't currently being worked
-        if (creepOptions.upgrade && !isCurrentUpgrader) {
-            if (upgradeJobs.length > 0) {
-                return upgradeJobs[0];
-            }
-        }
-
-        // Startup On Ramparts
-        if (creepOptions.repair) {
-            const defenseRepairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => {
-                const target = Game.getObjectById(job.targetID) as Structure;
-                if (target.structureType === STRUCTURE_RAMPART) {
-                    return target.hits <= RAMPART_HITS_THRESHOLD;
-                }
-                return false;
-            });
-
-            if (defenseRepairJobs.length > 0) {
-                return defenseRepairJobs[0];
-            }
-        }
-
-        // Priority Repair Only
-        if (creepOptions.repair) {
-            const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
-            if (priorityRepairJobs.length > 0) {
-                return priorityRepairJobs[0];
-            }
-        }
-
-        if (creepOptions.build) {
-            const buildJobs = MemoryApi.getBuildJobs(room, (job: WorkPartJob) => !job.isTaken);
-            if (buildJobs.length > 0) {
-                return buildJobs[0];
-            }
-        }
-
-        // Regular repair
-        if (creepOptions.repair) {
-            const repairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => !job.isTaken);
-            if (repairJobs.length > 0) {
-                return repairJobs[0];
-            }
-        }
-
-        if (creepOptions.upgrade) {
-            if (upgradeJobs.length > 0) {
-                return upgradeJobs[0];
-            }
         }
 
         return undefined;

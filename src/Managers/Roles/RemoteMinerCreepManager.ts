@@ -1,31 +1,28 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import CreepHelper from "Helpers/CreepHelper";
-import {
-    ROLE_REMOTE_MINER
-} from "utils/constants";
+import { ROLE_REMOTE_MINER } from "utils/constants";
 
 // Manager for the miner creep role
 export default class RemoteMinerCreepManager {
-
     /**
      * Run the remote miner creep
      * @param creep The creep to run
      */
     public static runCreepRole(creep: Creep): void {
-
         if (creep.spawning) {
             return; // Don't do anything until you've spawned
         }
 
-        if (creep.room.memory.defcon > 0){
-            // call flee code here
+        const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
+        const targetRoom = Game.rooms[creep.memory.targetRoom];
+
+        if (targetRoom.memory && targetRoom.memory.defcon > 0) {
+            // Flee Here
         }
 
-        const targetRoom: Room = Game.rooms[creep.memory.targetRoom];
-
         if (creep.memory.job === undefined) {
-            creep.memory.job = this.getNewSourceJob(creep, targetRoom);
+            creep.memory.job = this.getNewJob(creep);
 
             if (creep.memory.job === undefined) {
                 return; // idle for a tick
@@ -46,17 +43,16 @@ export default class RemoteMinerCreepManager {
     }
 
     /**
-     * Find a job for the creep
+     * Get new job for the creep
      */
-    public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
-        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
-
-        if (creepOptions.harvestSources) {
-            const sourceJobs = MemoryApi.getSourceJobs(room, (sjob: GetEnergyJob) => !sjob.isTaken);
-            if (sourceJobs.length > 0) {
-                return sourceJobs[0];
-            }
+    public static getNewJob(creep: Creep): BaseJob | undefined {
+        if (creep.room.name === creep.memory.targetRoom) {
+            const targetRoom = Game.rooms[creep.memory.targetRoom];
+            return CreepApi.getNewSourceJob(creep, targetRoom);
+        } else if (creep.room.name !== creep.memory.targetRoom) {
+            return CreepApi.newMovePartJob(creep, creep.memory.targetRoom);
         }
+
         return undefined;
     }
 
@@ -64,6 +60,13 @@ export default class RemoteMinerCreepManager {
      * Handle initalizing a new job
      */
     public static handleNewJob(creep: Creep): void {
+        const targetRoom: Room = Game.rooms[creep.memory.targetRoom];
+        if (creep.memory.job!.jobType === "movePartJob") {
+            return;
+        }
+
+        MemoryApi.updateJobMemory(creep, targetRoom);
+
         const miningContainer = CreepHelper.getMiningContainer(
             creep.memory.job as GetEnergyJob,
             Game.rooms[creep.memory.targetRoom]

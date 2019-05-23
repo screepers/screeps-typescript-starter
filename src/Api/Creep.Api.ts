@@ -6,10 +6,11 @@ import {
     ROOM_STATE_BEGINNER,
     ROOM_STATE_INTRO,
     ROLE_MINER,
-    ERROR_WARN
+    ERROR_WARN,
+    ERROR_FATAL
 } from "utils/constants";
 import MemoryApi from "./Memory.Api";
-import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
+import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
 import UtilHelper from "Helpers/UtilHelper";
 
@@ -31,6 +32,9 @@ export default class CreepApi {
                 break;
             case "workPartJob":
                 this.doWork_WorkPartJob(creep, job as WorkPartJob);
+                break;
+            case "movePartJob":
+                this.doWork_MovePartJob(creep, job as MovePartJob);
                 break;
             default:
                 throw new UserException(
@@ -58,10 +62,17 @@ export default class CreepApi {
             case "workPartJob":
                 this.travelTo_WorkPartJob(creep, job as WorkPartJob);
                 break;
+            case "movePartJob":
+                this.travelTo_MovePartJob(creep, job as MovePartJob);
+                break;
             default:
                 throw new UserException(
                     "Bad job.jobType in CreepApi.travelTo",
-                    "The jobtype of the job passed to CreepApi.travelTo was invalid",
+                    "The jobtype of the job passed to CreepApi.travelTo was invalid" +
+                        "\nCreep: " +
+                        creep.name +
+                        "\n Job Type: " +
+                        job.jobType,
                     ERROR_FATAL
                 );
         }
@@ -218,6 +229,19 @@ export default class CreepApi {
                 }
                 break;
         }
+    }
+
+    /**
+     * Do work on the target provided by workPartJob
+     * * We may need to flesh this method out to accomodate future usage
+     * @param creep The creep to do the work
+     * @param job The job to perform work on
+     */
+    public static doWork_MovePartJob(creep: Creep, job: MovePartJob) {
+        // If we are in here then that means that we have either reached the roomPosition
+        // or are in the specified roomName
+        delete creep.memory.job;
+        creep.memory.working = false;
     }
 
     /**
@@ -407,6 +431,31 @@ export default class CreepApi {
     }
 
     /**
+     * Travel to the target provided by MovePartJob in creep.memory.job
+     */
+    public static travelTo_MovePartJob(creep: Creep, job: MovePartJob) {
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
+
+        this.nullCheck_target(creep, moveTarget);
+
+        const moveOpts = DEFAULT_MOVE_OPTS;
+
+        if (job.targetType === "roomName") {
+            // 23 should get us inside the room and off the exit
+            moveOpts.range = 23;
+        } else if (job.targetType === "roomPosition") {
+            moveOpts.range = 0;
+        }
+
+        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
+            creep.memory.working = true;
+            return;
+        }
+
+        creep.moveTo(moveTarget!, moveOpts);
+        return;
+    }
+    /**
      * Checks if the target is null and throws the appropriate error
      */
     public static nullCheck_target(creep: Creep, target: object | null) {
@@ -474,9 +523,94 @@ export default class CreepApi {
         return false;
     }
 
+    /**
+     * Flee from remoteRoom - Called when defcon is > 0
+     * @param creep The creep to flee
+     * @param homeRoom The homeRoom of the creep
+     */
+    public static fleeRemoteRoom(creep: Creep, homeRoom: Room): void {
+        creep.memory.job = {
+            jobType: "movePartJob",
+            targetType: "roomName",
+            targetID: creep.memory.homeRoom,
+            actionType: "move",
+            isTaken: false
+        };
+        creep.memory.working = false;
+        if (creep.memory.supplementary) {
+            delete creep.memory.supplementary.moveTargetID;
+        }
+    }
+
     /**********************************************************/
     /*        GET NEW JOB SECTION                           ***/
     /**********************************************************/
+
+    /**
+     * Gets a new WorkPartJob for worker
+     */
+    public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
+        const isCurrentUpgrader: boolean = _.some(
+            MemoryApi.getMyCreeps(room.name),
+            (c: Creep) => c.memory.job && c.memory.job!.actionType === "upgrade"
+        );
+
+        // Assign upgrade job is one isn't currently being worked
+        if (creepOptions.upgrade && !isCurrentUpgrader) {
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
+            }
+        }
+
+        // Startup On Ramparts
+        if (creepOptions.repair) {
+            const defenseRepairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => {
+                const target = Game.getObjectById(job.targetID) as Structure;
+                if (target.structureType === STRUCTURE_RAMPART) {
+                    return target.hits <= RAMPART_HITS_THRESHOLD;
+                }
+                return false;
+            });
+
+            if (defenseRepairJobs.length > 0) {
+                return defenseRepairJobs[0];
+            }
+        }
+
+        // Priority Repair Only
+        if (creepOptions.repair) {
+            const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
+            if (priorityRepairJobs.length > 0) {
+                return priorityRepairJobs[0];
+            }
+        }
+
+        if (creepOptions.build) {
+            const buildJobs = MemoryApi.getBuildJobs(room, (job: WorkPartJob) => !job.isTaken);
+            if (buildJobs.length > 0) {
+                return buildJobs[0];
+            }
+        }
+
+        // Regular repair
+        if (creepOptions.repair) {
+            const repairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => !job.isTaken);
+            if (repairJobs.length > 0) {
+                return repairJobs[0];
+            }
+        }
+
+        if (creepOptions.upgrade) {
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
+            }
+        }
+
+        return undefined;
+    }
+
     public static getNewSourceJob(creep: Creep, room: Room): GetEnergyJob | undefined {
         const creepOptions = creep.memory.options as CreepOptionsCiv;
 
@@ -523,5 +657,72 @@ export default class CreepApi {
         }
 
         return undefined;
+    }
+
+    /**
+     * Get a GetEnergyJob for the creep
+     */
+    public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
+        const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
+        if (creepOptions.getFromContainer) {
+            // All container jobs with enough energy to fill creep.carry, and not taken
+            const containerJobs = MemoryApi.getContainerJobs(
+                room,
+                (cJob: GetEnergyJob) => !cJob.isTaken && cJob.resources!.energy >= creep.carryCapacity
+            );
+
+            if (containerJobs.length > 0) {
+                return containerJobs[0];
+            }
+        }
+
+        if (creepOptions.getDroppedEnergy) {
+            // All dropped resources with enough energy to fill creep.carry, and not taken
+            const dropJobs = MemoryApi.getPickupJobs(
+                room,
+                (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources!.energy >= creep.carryCapacity
+            );
+
+            if (dropJobs.length > 0) {
+                return dropJobs[0];
+            }
+        }
+
+        // TODO Get Tombstones Here
+
+        if (creepOptions.getFromStorage || creepOptions.getFromTerminal) {
+            // All backupStructures with enough energy to fill creep.carry, and not taken
+            const backupStructures = MemoryApi.getBackupStructuresJobs(
+                room,
+                (job: GetEnergyJob) => !job.isTaken && job.resources!.energy >= creep.carryCapacity
+            );
+
+            if (backupStructures.length > 0) {
+                // Turn off access to storage until creep gets a work/carry job
+                const options = creep.memory.options as CreepOptionsCiv;
+                options.fillStorage = false;
+                options.fillTerminal = false;
+                return backupStructures[0];
+            }
+
+            return undefined;
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Get a MovePartJob for the harvester
+     */
+    public static newMovePartJob(creep: Creep, roomName: string): MovePartJob | undefined {
+        const newJob: MovePartJob = {
+            jobType: "movePartJob",
+            targetType: "roomName",
+            targetID: roomName,
+            actionType: "move",
+            isTaken: false
+        };
+
+        return newJob;
     }
 }

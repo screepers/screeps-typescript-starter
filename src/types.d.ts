@@ -344,13 +344,23 @@ type CarryPart_ValidTargets = ResourceContainingStructureConstant | "roomPositio
 type CarryPart_ValidActions = "transfer" | "drop";
 
 /**
+ * Valid types for the MovePartJob targetType
+ */
+type MovePart_ValidTargets = "roomPosition" | "roomName";
+/**
+ * Valid actions for MovePartJob actionType
+ */
+type MovePart_ValidActions = "move"
+
+/**
  * Acceptable ValidTargets Lists for BaseJob
  */
 type Any_ValidTargets =
     | GetEnergy_ValidTargets
     | CarryPart_ValidTargets
     | ClaimPart_ValidTargets
-    | WorkPart_ValidTargets;
+    | WorkPart_ValidTargets
+    | MovePart_ValidTargets;
 /**
  * Acceptable ValidAction Lists for BaseJob
  */
@@ -358,12 +368,13 @@ type Any_ValidActions =
     | GetEnergy_ValidActions
     | CarryPart_ValidActions
     | ClaimPart_ValidActions
-    | WorkPart_ValidActions;
+    | WorkPart_ValidActions
+    | MovePart_ValidActions;
 
 /**
  * Valid jobType for BaseJob
  */
-type Valid_JobTypes = "getEnergyJob" | "claimPartJob" | "carryPartJob" | "workPartJob";
+type Valid_JobTypes = "getEnergyJob" | "claimPartJob" | "carryPartJob" | "workPartJob" | "movePartJob";
 /**
  * Basic Job Interface
  */
@@ -459,6 +470,20 @@ interface CarryPartJob extends BaseJob {
      * The amount of energy to be filled
      */
     remaining: number;
+}
+
+/**
+ * JobObject used to move a creep's location
+ */
+interface MovePartJob extends BaseJob {
+    /**
+     * The type of the target object
+     */
+    targetType: MovePart_ValidTargets;
+    /**
+     * The action to perform on the target object
+     */
+    actionType: MovePart_ValidActions;
 }
 
 /**
@@ -595,15 +620,15 @@ interface RoomMemory {
     /**
      * Names of all rooms flagged to attack
      */
-    attackRooms?: Array<AttackRoomMemory>;
+    attackRooms?: AttackRoomMemory[];
     /**
      * Names of all rooms flagged to remote harvest
      */
-    remoteRooms?: Array<RemoteRoomMemory>;
+    remoteRooms?: RemoteRoomMemory[];
     /**
      * Names of all rooms flagged to colonize
      */
-    claimRooms?: Array<ClaimRoomMemory>;
+    claimRooms?: ClaimRoomMemory[];
     /**
      * List of all of the room's GetEnergyJobs
      */
@@ -786,7 +811,7 @@ interface CreepLimits {
     /**
      * creep limits for military creeps
      */
-    militaryLimits: Array<RoleConstant>;
+    militaryLimits: RoleConstant[];
 }
 
 /**
@@ -907,7 +932,7 @@ interface DepedentRoomParentMemory {
     /**
      * reference to the attack flags placed in the room
      */
-    flags: Array<ParentFlagMemory>;
+    flags: ParentFlagMemory[];
 }
 /**
  * Attack room memory structure
@@ -948,6 +973,7 @@ interface RemoteRoomMemory extends DepedentRoomParentMemory {
 /**
  * Claim room memory structure
  */
+// tslint:disable-next-line:no-empty-interface
 interface ClaimRoomMemory extends DepedentRoomParentMemory {
     // Parent memory covers everything currently needed in here
 }
@@ -990,6 +1016,7 @@ interface AttackFlagMemory extends ParentFlagMemory {
 /**
  * memory associated with a claim flag inside a claim room memory
  */
+// tslint:disable-next-line:no-empty-interface
 interface ClaimFlagMemory extends ParentFlagMemory {
     // For now, its covered by parent interface
     // Extra claim room flags at the moment don't do anything like it does for attack rooms
@@ -999,6 +1026,7 @@ interface ClaimFlagMemory extends ParentFlagMemory {
 /**
  * memory associated with a remote flag inside a remote room memory
  */
+// tslint:disable-next-line:no-empty-interface
 interface RemoteFlagMemory extends ParentFlagMemory {
     // Same deal as above for now
 }

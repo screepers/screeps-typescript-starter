@@ -555,16 +555,16 @@ export class SpawnHelper {
 
         // Cap the remote miner at 6 work parts (6 so they finish mining early and can build/repair their container)
         switch (tier) {
-            case TIER_3: // 6 Work, 1 Carry, 3 Move - Total Cost: 800
-                body = { work: 6, carry: 1, move: 3 };
+            case TIER_3: // 5 Work, 3 Move - Total Cost: 650
+                body = { work: 5, move: 3 };
                 break;
 
             case TIER_8:
             case TIER_7:
             case TIER_6:
             case TIER_5:
-            case TIER_4: // 6 Work, 1 Carry, 4 Move - Total Cost: 850
-                body = { work: 6, carry: 1, move: 4 };
+            case TIER_4: // 5 Work, 5 Move - Total Cost: 850
+                body = { work: 5, move: 5 };
                 break;
         }
 
@@ -583,7 +583,12 @@ export class SpawnHelper {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
             case ROOM_STATE_INTER:
+            case ROOM_STATE_ADVANCED:
+            case ROOM_STATE_NUKE_INBOUND:
+            case ROOM_STATE_UPGRADER:
+            case ROOM_STATE_STIMULATE:
                 creepOptions = {
+                    harvestSources: true,
                     build: true, //
                     repair: true, //
                     fillContainer: true //
@@ -605,22 +610,22 @@ export class SpawnHelper {
         const opts: CreepBodyOptions = { mixType: COLLATED };
 
         switch (tier) {
-            case TIER_3: // 8 Carry, 8 Move - Total Cost: 800
-                body = { carry: 8, move: 8 };
+            case TIER_3: // Total Cost: 800
+                body = { work: 2, carry: 5, move: 7 };
                 break;
 
-            case TIER_4: // 10 Carry, 10 Move- Total Cost: 1000
-                body = { carry: 10, move: 10 };
+            case TIER_4: // Total Cost: 1000
+                body = { work: 2, carry: 7, move: 9 };
                 break;
 
-            case TIER_5: // 16 Carry, 16 Move - Total Cost: 1600
-                body = { carry: 16, move: 16 };
+            case TIER_5: // Total Cost: 1600
+                body = { work: 2, carry: 13, move: 15 };
                 break;
 
             case TIER_8:
             case TIER_7:
             case TIER_6: // 20 Carry, 20 Move - Total Cost: 2000
-                body = { carry: 20, move: 20 };
+                body = { work: 2, carry: 17, move: 19 };
                 break;
         }
 
@@ -639,37 +644,20 @@ export class SpawnHelper {
             case ROOM_STATE_INTRO:
             case ROOM_STATE_BEGINNER:
             case ROOM_STATE_INTER:
-                creepOptions = {
-                    build: true, //
-                    upgrade: true, //
-                    repair: true, //
-                    wallRepair: true, //
-                    fillTower: true, //
-                    getFromContainer: true, //
-                    getDroppedEnergy: true //
-                };
-
-                break;
-
             case ROOM_STATE_ADVANCED:
-                creepOptions = {
-                    repair: true, //
-                    fillStorage: true, //
-                    getFromContainer: true, //
-                    getDroppedEnergy: true //
-                };
-
-                break;
-
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_STIMULATE:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
+                    build: true, //
                     repair: true, //
-                    fillStorage: true, //
-                    fillLink: true, //
+                    wallRepair: true, //
+                    fillTower: true, //
                     getFromContainer: true, //
-                    getDroppedEnergy: true //
+                    getDroppedEnergy: true, //
+                    fillStorage: true,
+                    fillTerminal: true,
+                    fillLink: true
                 };
 
                 break;
@@ -1442,7 +1430,10 @@ export class SpawnHelper {
         let creepNum: number = 0;
 
         switch (roleConst) {
-            case ROLE_REMOTE_HARVESTER || ROLE_REMOTE_MINER:
+            case ROLE_REMOTE_HARVESTER:
+                creepNum = 2 * numSources;
+                break;
+            case ROLE_REMOTE_MINER:
                 creepNum = 1 * numSources;
                 break;
         }
