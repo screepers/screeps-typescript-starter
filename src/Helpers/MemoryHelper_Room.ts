@@ -500,7 +500,7 @@ export default class MemoryHelper_Room {
      */
     public static updateDomesticLimits(room: Room, newLimits: DomesticCreepLimits): void {
         // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit!["domesticLimits"] = newLimits;
+        Memory.rooms[room.name].creepLimit!.domesticLimits = newLimits;
     }
 
     /**
@@ -510,6 +510,6 @@ export default class MemoryHelper_Room {
      */
     public static updateRemoteLimits(room: Room, newLimits: RemoteCreepLimits): void {
         // * Optionally apply a filter or otherwise check the limits before assigning them
-        Memory.rooms[room.name].creepLimit!["remoteLimits"] = newLimits;
+        Memory.rooms[room.name].creepLimit!.remoteLimits = newLimits;
     }
 }
