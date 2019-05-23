@@ -28,7 +28,10 @@ import {
     TIER_7,
     TIER_8,
     ROLE_DOMESTIC_DEFENDER,
-    ERROR_WARN
+    ERROR_WARN,
+    STALKER_SOLO,
+    ZEALOT_SOLO,
+    STANDARD_SQUAD
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
@@ -238,6 +241,12 @@ export class SpawnHelper {
 
         switch (roomState) {
             case ROOM_STATE_INTRO:
+                creepOptions = {
+                    fillSpawn: true,
+                    getDroppedEnergy: true
+                };
+                break;
+
             case ROOM_STATE_BEGINNER:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
@@ -919,6 +928,9 @@ export class SpawnHelper {
                 break;
         }
 
+        // ! Important DONT FORGET TO CHANGE
+        // Temp override
+        body = { attack: 1, move: 1 };
         // Generate creep body based on body array and options
         return SpawnApi.getCreepBody(body, opts);
     }
@@ -997,6 +1009,9 @@ export class SpawnHelper {
                 break;
         }
 
+        // ! Important DONT FORGET TO CHANGE
+        // Temp override
+        body = { heal: 1, move: 1 };
         // Generate creep body based on body array and options
         return SpawnApi.getCreepBody(body, opts);
     }
@@ -1073,6 +1088,9 @@ export class SpawnHelper {
                 break;
         }
 
+        // ! Important DONT FORGET TO CHANGE
+        // Temp override
+        body = { ranged_attack: 1, move: 1 };
         // Generate creep body based on body array and options
         return SpawnApi.getCreepBody(body, opts);
     }
@@ -1254,14 +1272,20 @@ export class SpawnHelper {
      * Must also be less than the max amount of that role allowed for the room
      * @param room the room spawning the creep
      * @param roleConst the specified role we are checking for
+     * @param creepBody the body of the creep we are checking, so we know who to exclude from creep count
      */
-    public static getLowestNumRoleAssignedClaimRoom(room: Room, roleConst: RoleConstant): ClaimRoomMemory | undefined {
+    public static getLowestNumRoleAssignedClaimRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[]
+    ): ClaimRoomMemory | undefined {
         const allClaimRooms: Array<ClaimRoomMemory | undefined> = MemoryApi.getClaimRooms(room);
+        const tickLimit: number = creepBody.length * 3;
         // Get all claim rooms in which the specified role does not yet have
         const unfulfilledClaimRooms: Array<ClaimRoomMemory | undefined> = _.filter(
             allClaimRooms,
             claimRoom =>
-                this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom) <
+                this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom, tickLimit) <
                 this.getLimitPerClaimRoomForRole(roleConst)
         );
 
@@ -1274,8 +1298,13 @@ export class SpawnHelper {
                 continue;
             }
 
-            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, nextClaimRoom);
-            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom);
+            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(
+                room,
+                roleConst,
+                nextClaimRoom,
+                tickLimit
+            );
+            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, claimRoom, tickLimit);
 
             if (currentCreepsAssigned < lowestCreepsAssigned) {
                 nextClaimRoom = claimRoom;
@@ -1289,17 +1318,20 @@ export class SpawnHelper {
      * gets the RemoteRoomMemory with lowest number creeps of the specified role with it as their target room
      * @param room the room spawning the creep
      * @param roleConst the specified role we are checking for
+     * @param creepBody the creep body so we know what creeps to exclude from rolecall
      */
     public static getLowestNumRoleAssignedRemoteRoom(
         room: Room,
-        roleConst: RoleConstant
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[]
     ): RemoteRoomMemory | undefined {
         const allRemoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
+        const tickLimit = creepBody.length * 3;
         // Get all claim rooms in which the specified role does not yet have
         const unfulfilledRemoteRooms: Array<RemoteRoomMemory | undefined> = _.filter(
             allRemoteRooms,
             remoteRoom =>
-                this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom) <
+                this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit) <
                 this.getLimitPerRemoteRoomForRolePerSource(roleConst, remoteRoom!.sources.data)
         );
 
@@ -1307,13 +1339,18 @@ export class SpawnHelper {
 
         // Find the unfulfilled with the lowest amount of creeps assigned to it
         for (const remoteRoom of unfulfilledRemoteRooms) {
-            if (!nextRemoteRoom) {
+            if (remoteRoom && !nextRemoteRoom) {
                 nextRemoteRoom = remoteRoom;
                 continue;
             }
 
-            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, nextRemoteRoom);
-            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom);
+            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(
+                room,
+                roleConst,
+                nextRemoteRoom,
+                tickLimit
+            );
+            const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit);
 
             if (currentCreepsAssigned < lowestCreepsAssigned) {
                 nextRemoteRoom = remoteRoom;
@@ -1342,15 +1379,20 @@ export class SpawnHelper {
      * @param room the room spawning the creep
      * @param roleConst the role of the creep
      * @param roomMemory the room memory we are checking
+     * @param ticksToLiveLimit the limit in ticks that the new creep will be spawned in the old creeps place
      */
     public static getNumCreepAssignedAsTargetRoom(
         room: Room,
         roleConst: RoleConstant,
-        roomMemory: ClaimRoomMemory | AttackRoomMemory | RemoteRoomMemory | undefined
+        roomMemory: ClaimRoomMemory | AttackRoomMemory | RemoteRoomMemory | undefined,
+        ticksToLiveLimit: number
     ): number {
+        // Get all creeps above the ticks to live limit with the specified role
         const allCreepsOfRole: Array<Creep | null> = MemoryApi.getMyCreeps(
             room.name,
-            creep => creep.memory.role === roleConst
+            creep =>
+                creep.memory.role === roleConst && (creep.ticksToLive ? creep.ticksToLive : 1600) > ticksToLiveLimit
+            // Find the creep w/ ticks to live higher than the limit (1600 if no ticks to live ie a spawning creep to ensure they're counted)
         );
         let sum = 0;
 
@@ -1508,7 +1550,7 @@ export class SpawnHelper {
      */
     public static spawnMiliQueue(tier: number, room: Room): RoleConstant | null {
         // Look for the correspondings tier's within the military queue for the room, return it if we find one
-        const militaryQueue: RoleConstant[] = room.memory.creepLimit!["militaryLimits"];
+        const militaryQueue: RoleConstant[] = room.memory.creepLimit!.militaryLimits;
         switch (tier) {
             case 1:
                 for (const queueRole in militaryQueue) {

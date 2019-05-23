@@ -1,6 +1,8 @@
 import SpawnApi from "../Api/Spawn.Api";
 import MemoryApi from "../Api/Memory.Api";
 import { TIER_2 } from "../utils/constants";
+import MiliHelper from "Helpers/MiliHelper";
+import { SpawnHelper } from "Helpers/SpawnHelper";
 
 // handles spawning for every room
 export default class SpawnManager {
@@ -45,7 +47,8 @@ export default class SpawnManager {
             if (energyAvailable >= bodyEnergyCost) {
                 // Get all the information we will need to spawn the next creep
                 const roomState: RoomStateConstant = room.memory.roomState!;
-                const targetRoom: string = SpawnApi.getCreepTargetRoom(room, nextCreepRole);
+                // TODO fix target room for military creeps, attack room dissapears so we need to know where to go
+                const targetRoom: string = SpawnApi.getCreepTargetRoom(room, nextCreepRole, creepBody);
                 const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room, targetRoom, nextCreepRole);
                 const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole, targetRoom);
                 const creepOptions: any = SpawnApi.generateCreepOptions(
@@ -59,6 +62,8 @@ export default class SpawnManager {
 
                 // Spawn the creep
                 SpawnApi.spawnNextCreep(room, creepBody, creepOptions, nextCreepRole, openSpawn, homeRoom, targetRoom);
+                // On successful creep spawn of a military creep, remove that role from the military spawn queue
+                SpawnApi.removeSpawnedCreepFromMiliQueue(nextCreepRole, room);
             }
         }
     }
