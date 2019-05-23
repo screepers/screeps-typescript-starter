@@ -15,7 +15,7 @@ export default class RemoteReserverCreepManager {
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
 
-        if (targetRoom.memory && targetRoom.memory.defcon > 0) {
+        if (targetRoom && targetRoom.memory.defcon > 0) {
             // Flee Here
         }
 
