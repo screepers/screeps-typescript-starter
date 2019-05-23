@@ -61,9 +61,10 @@ export default class SpawnManager {
                 );
 
                 // Spawn the creep
-                SpawnApi.spawnNextCreep(room, creepBody, creepOptions, nextCreepRole, openSpawn, homeRoom, targetRoom);
-                // On successful creep spawn of a military creep, remove that role from the military spawn queue
-                SpawnApi.removeSpawnedCreepFromMiliQueue(nextCreepRole, room);
+                if (SpawnApi.spawnNextCreep(room, creepBody, creepOptions, nextCreepRole, openSpawn, homeRoom, targetRoom) === OK) {
+                    // On successful creep spawn of a military creep, remove that role from the military spawn queue
+                    SpawnApi.removeSpawnedCreepFromMiliQueue(nextCreepRole, room);
+                }
             }
         }
     }

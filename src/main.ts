@@ -113,11 +113,17 @@ import {
     SPAWN_MANAGER_BUCKET_LIMIT,
     EMPIRE_MANAGER_BUCKET_LIMIT,
     ROOM_MANAGER_BUCKET_LIMIT,
-    MEMORY_MANAGER_BUCKET_LIMIT
+    MEMORY_MANAGER_BUCKET_LIMIT,
+    EVENT_MANAGER_BUCKET_LIMIT,
+    ROOM_OVERLAY_BUCKET_LIMIT
 } from "utils/config";
 import CreepManager from "Managers/CreepManager";
 import { ConsoleCommands } from "Helpers/ConsoleCommands";
 import RoomHelper from "Helpers/RoomHelper";
+import EventManager from "Managers/EventManager";
+
+// Define prototypes
+import "./proto/structures.prototype";
 
 export const loop = ErrorMapper.wrapLoop(() => {
     // Init console commands
@@ -173,9 +179,18 @@ export const loop = ErrorMapper.wrapLoop(() => {
     }
 
     // Display room visuals if we have a fat enough bucket and config option allows it
-    if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > 2000 && ROOM_OVERLAY_ON)) {
+    if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > ROOM_OVERLAY_BUCKET_LIMIT && ROOM_OVERLAY_ON)) {
         try {
             RoomVisualManager.runRoomVisualManager();
+        } catch (e) {
+            UtilHelper.printError(e);
+        }
+    }
+
+    // Display room visuals if we have a fat enough bucket and config option allows it
+    if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > EVENT_MANAGER_BUCKET_LIMIT)) {
+        try {
+            EventManager.runEventManager();
         } catch (e) {
             UtilHelper.printError(e);
         }

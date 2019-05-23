@@ -233,6 +233,19 @@ interface StringMap {
 // ----------------------------------------
 
 // custom memory objects ------------
+
+/**
+ * add memory to the structure for the compiler
+ */
+interface Structure {
+    memory: StructureMemory;
+}
+
+// Define the structure memory
+interface StructureMemory {
+    processed: boolean
+}
+
 // main memory modules --------------
 interface CreepMemory {
     /**
@@ -573,6 +586,37 @@ interface CarryPartJobListing {
     storeJobs?: Cache;
 }
 
+/**
+ * types of custom events
+ */
+type C_EVENT_BUILD_COMPLETE = 1;
+type C_EVENT_CREEP_SPAWNED = 2;
+type CustomEventConstant =
+    C_EVENT_BUILD_COMPLETE |
+    C_EVENT_CREEP_SPAWNED;
+
+/**
+ * a custom event that signals something notable that occured in a room
+ */
+interface CustomEvent {
+    /**
+     * the constant of the type of event that occured
+     */
+    type: CustomEventConstant;
+    /**
+     * the target id that the event occured on
+     */
+    targetId: string;
+    /**
+     * the room name the event occured in
+     */
+    roomName: string;
+    /**
+     * to mark the event as processed (ie done)
+     */
+    processed: boolean;
+}
+
 interface RoomMemory {
     roomState?: RoomStateConstant;
     /**
@@ -640,10 +684,15 @@ interface RoomMemory {
      * extra memory for visual function
      */
     visual?: VisualMemory;
+    /**
+     * memory for the custom in room events
+     */
+    events: CustomEvent[];
 }
 
 interface Memory {
-    empire: EmpireMemory
+    empire: EmpireMemory;
+    structures: { [structureID: string]: StructureMemory };
 }
 interface EmpireMemory {
     /**
@@ -651,6 +700,10 @@ interface EmpireMemory {
      */
     alertMessages?: AlertMessageNode[];
 }
+
+/**
+ * override structure type
+ */
 
 /**
  * a node for an alert message
@@ -1023,6 +1076,10 @@ interface AttackFlagMemory extends ParentFlagMemory {
      * the location creeps are going to meet
      */
     rallyLocation: RoomPosition | null;
+    /**
+     * the number of creeps this flag has successfully spawned
+     */
+    currentSpawnCount: number;
 }
 
 /**

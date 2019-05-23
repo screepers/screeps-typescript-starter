@@ -585,7 +585,8 @@ export default class EmpireHelper {
             squadUUID: 0,
             rallyLocation: null,
             flagName: flag.name,
-            flagType: flagTypeConst
+            flagType: flagTypeConst,
+            currentSpawnCount: 0,
         }
 
         // Fill in these options based on the flag type

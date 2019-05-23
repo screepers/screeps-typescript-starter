@@ -195,6 +195,7 @@ export default class SpawnApi {
 
     /**
      * set military creep queue
+     * ! lord this function is a mess upon revisiting
      * @param room the room we want queue for
      */
     public static generateMilitaryCreepQueue(room: Room): void {
@@ -236,7 +237,7 @@ export default class SpawnApi {
                 rolesToAdd.push(role);
             }
 
-            // Set the flag as complete, so it's only added to the queue once
+            // Set the flag as processed, so it's only added to the queue once
             if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory) &&
                 Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
 
@@ -350,7 +351,7 @@ export default class SpawnApi {
         spawn: StructureSpawn,
         homeRoom: string,
         targetRoom: string
-    ): void {
+    ): number {
         // Throw error if we don't have enough energy to spawn this creep
         if (this.getEnergyCostOfBody(body) > room.energyAvailable) {
             throw new UserException(
@@ -363,7 +364,7 @@ export default class SpawnApi {
         const name: string = SpawnHelper.generateCreepName(role, this.getTier(room, role), room);
         const creepMemory = SpawnHelper.generateDefaultCreepMemory(role, homeRoom, targetRoom, creepOptions);
 
-        spawn.spawnCreep(body, name, { memory: creepMemory });
+        return spawn.spawnCreep(body, name, { memory: creepMemory });
     }
 
     /**
