@@ -374,7 +374,7 @@ export default class RoomHelper {
             }
 
             let sourcesInRoom: number = 0;
-            if (Memory.rooms[rr.roomName] && Memory.rooms[rr.roomName].sources) {
+            if (Memory.rooms[rr.roomName] && Memory.rooms[rr.roomName].sources && Memory.rooms[rr.roomName].sources.data) {
                 sourcesInRoom = Memory.rooms[rr.roomName].sources.data;
             }
             else {
