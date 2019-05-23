@@ -311,7 +311,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Creep[] {
         // If we have no vision of the room, return an empty array
-        if (!Memory.rooms[roomName]) {
+        if (!Memory.rooms[roomName] || !Memory.rooms[roomName].hostiles) {
             return [];
         }
 
@@ -781,15 +781,6 @@ export default class MemoryApi {
             },
             militaryLimits: [],
         };
-        Memory.rooms[room.name].creepLimit!["remoteLimits"] = {
-            remoteMiner: 0,
-            remoteHarvester: 0,
-            remoteReserver: 0,
-            remoteDefender: 0,
-            remoteColonizer: 0,
-            claimer: 0
-        };
-        Memory.rooms[room.name].creepLimit!["militaryLimits"] = {};
     }
 
     /**
@@ -810,7 +801,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -1431,10 +1422,10 @@ export default class MemoryApi {
             throw new UserException(
                 "Error in updateJobMemory",
                 "Could not find the job in room memory to update." +
-                    "\nCreep: " +
-                    creep.name +
-                    "\nJob: " +
-                    JSON.stringify(creep.memory.job),
+                "\nCreep: " +
+                creep.name +
+                "\nJob: " +
+                JSON.stringify(creep.memory.job),
                 ERROR_ERROR
             );
         }
@@ -1731,24 +1722,6 @@ export default class MemoryApi {
      * @param expirationLimit the time you want it to be displayed for
      */
     public static createEmpireAlertNode(displayMessage: string, limit: number): void {
-        if (!Memory.empire.alertMessages) {
-            Memory.empire.alertMessages = [];
-        }
-        const messageNode: AlertMessageNode = {
-            message: displayMessage,
-            tickCreated: Game.time,
-            expirationLimit: limit
-        };
-        Memory.empire.alertMessages.push(messageNode);
-    }
-
-    /**
-     * create a message node to display as an alert
-     * @param message the message you want displayed
-     * @param expirationLimit the time you want it to be displayed for
-     */
-    public static createEmpireAlertNode(displayMessage: string, limit: number): void {
-
         if (!Memory.empire.alertMessages) {
             Memory.empire.alertMessages = [];
         }

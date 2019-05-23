@@ -373,7 +373,13 @@ export default class RoomHelper {
                 return;
             }
 
-            const sourcesInRoom: number = rr.sources.data;
+            let sourcesInRoom: number = 0;
+            if (Memory.rooms[rr.roomName] && Memory.rooms[rr.roomName].sources) {
+                sourcesInRoom = Memory.rooms[rr.roomName].sources.data;
+            }
+            else {
+                sourcesInRoom = rr.sources.data;
+            }
             numSources += sourcesInRoom;
         });
         return numSources;
@@ -439,11 +445,11 @@ export default class RoomHelper {
     public static getDomesticDefenderLimitByDefcon(defcon: number): number {
         switch (defcon) {
             case 2:
-                return 1;
+                return 0;
             case 3:
-                return 2;
+                return 1;
             case 4:
-                return 3;
+                return 2;
         }
         return 0;
     }
