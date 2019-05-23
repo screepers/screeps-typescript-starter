@@ -223,7 +223,7 @@ export default class SpawnApi {
                     return false;
                 }
                 const flag: FlagMemory = Memory.flags[flagMem.flagName];
-                return flagMem.active && !flag.complete;
+                return flagMem.active && !flag.complete && !flag.spawnProcessed;
             });
             if (activeAttackRoomFlag) {
                 break;
@@ -240,7 +240,7 @@ export default class SpawnApi {
             if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory) &&
                 Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
 
-                Memory.flags[activeAttackRoomFlag.flagName].complete = true;
+                Memory.flags[activeAttackRoomFlag.flagName].spawnProcessed = true;
             }
         }
 

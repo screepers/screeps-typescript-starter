@@ -30,6 +30,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
+        Memory.flags[flag.name].spawnProcessed = false;
 
         // Create the RemoteFlagMemory object for this flag
         const remoteFlagMemory: RemoteFlagMemory = {
@@ -85,6 +86,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
+        Memory.flags[flag.name].spawnProcessed = false;
 
         // Create the RemoteFlagMemory object for this flag
         const attackFlagMemory: AttackFlagMemory = this.generateAttackFlagOptions(flag, flagTypeConst, dependentRoom.name);
@@ -132,6 +134,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
+        Memory.flags[flag.name].spawnProcessed = false;
 
         // Create the ClaimFlagMemory object for this flag
         const claimFlagMemory: ClaimFlagMemory = {
@@ -181,6 +184,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
+        Memory.flags[flag.name].spawnProcessed = false;
 
         MemoryApi.createEmpireAlertNode("Option Flag [" + flag.name + "] processed. Flag Type: [" + RoomVisualHelper.convertFlagTypeToString(flagTypeConst) + "]", 10);
     }
@@ -198,6 +202,7 @@ export default class EmpireHelper {
         Memory.flags[flag.name].timePlaced = Game.time;
         Memory.flags[flag.name].flagType = flagTypeConst;
         Memory.flags[flag.name].flagName = flag.name;
+        Memory.flags[flag.name].spawnProcessed = false;
 
         MemoryApi.createEmpireAlertNode("Option Flag [" + flag.name + "] processed. Flag Type: [" + RoomVisualHelper.convertFlagTypeToString(flagTypeConst) + "]", 10);
     }

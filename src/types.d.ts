@@ -911,6 +911,11 @@ interface FlagMemory {
      * the name of the flag
      */
     flagName: string;
+    /**
+     * if the spawning has been processed
+     * currently only relevant to military flags
+     */
+    spawnProcessed: boolean;
 }
 
 // Attack Flag Options
