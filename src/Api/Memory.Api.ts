@@ -166,7 +166,7 @@ export default class MemoryApi {
                         harvester: 0,
                         worker: 0,
                         powerUpgrader: 0,
-                        lorry: 0,
+                        lorry: 0
                     },
                     remoteLimits: {
                         remoteMiner: 0,
@@ -174,7 +174,7 @@ export default class MemoryApi {
                         remoteReserver: 0,
                         remoteDefender: 0,
                         remoteColonizer: 0,
-                        claimer: 0,
+                        claimer: 0
                     },
                     militaryLimits: []
                 },
@@ -324,7 +324,13 @@ export default class MemoryApi {
             MemoryHelper_Room.updateHostileCreeps(roomName);
         }
 
-        const creepIDs: string[] = Memory.rooms[roomName].hostiles.data;
+        const creepIDs: string[] = [];
+        // Basically flattening the object in memory here
+        _.forEach(Object.keys(Memory.rooms[roomName].hostiles.data), (hostileType: string) => {
+            _.forEach(Memory.rooms[roomName].hostiles.data[hostileType], (enemyID: string) => {
+                creepIDs.push(enemyID);
+            });
+        });
 
         let creeps: Creep[] = MemoryHelper.getOnlyObjectsFromIDs<Creep>(creepIDs);
 
@@ -709,8 +715,6 @@ export default class MemoryApi {
         return attackRooms;
     }
 
-
-
     /**
      * get the defcon level for the room
      * @param room the room we are checking defcon for
@@ -728,13 +732,12 @@ export default class MemoryApi {
         const filterFunction = creepConst === undefined ? undefined : (c: Creep) => c.memory.role === creepConst;
 
         // Return all creeps in that role, excluding those on deaths door
-        return _.filter(MemoryApi.getMyCreeps(room.name, filterFunction),
-            (creep: Creep) => {
-                if (creep.ticksToLive) {
-                    return creep.ticksToLive > (creep.body.length * 3);
-                }
-                return false;
-            }).length;
+        return _.filter(MemoryApi.getMyCreeps(room.name, filterFunction), (creep: Creep) => {
+            if (creep.ticksToLive) {
+                return creep.ticksToLive > creep.body.length * 3;
+            }
+            return false;
+        }).length;
     }
 
     /**
@@ -743,10 +746,12 @@ export default class MemoryApi {
      */
     public static getCreepLimits(room: Room): CreepLimits {
         // Make sure everything is defined at the memory level
-        if (!Memory.rooms[room.name].creepLimit ||
+        if (
+            !Memory.rooms[room.name].creepLimit ||
             !Memory.rooms[room.name].creepLimit!.domesticLimits ||
             !Memory.rooms[room.name].creepLimit!.remoteLimits ||
-            !Memory.rooms[room.name].creepLimit!.militaryLimits) {
+            !Memory.rooms[room.name].creepLimit!.militaryLimits
+        ) {
             MemoryApi.initCreepLimits(room);
         }
         const creepLimits: CreepLimits = {
@@ -777,9 +782,9 @@ export default class MemoryApi {
                 remoteReserver: 0,
                 remoteDefender: 0,
                 remoteColonizer: 0,
-                claimer: 0,
+                claimer: 0
             },
-            militaryLimits: [],
+            militaryLimits: []
         };
     }
 
@@ -801,7 +806,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -1422,10 +1427,10 @@ export default class MemoryApi {
             throw new UserException(
                 "Error in updateJobMemory",
                 "Could not find the job in room memory to update." +
-                "\nCreep: " +
-                creep.name +
-                "\nJob: " +
-                JSON.stringify(creep.memory.job),
+                    "\nCreep: " +
+                    creep.name +
+                    "\nJob: " +
+                    JSON.stringify(creep.memory.job),
                 ERROR_ERROR
             );
         }
