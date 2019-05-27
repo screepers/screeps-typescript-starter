@@ -146,7 +146,7 @@ export default class RoomApi {
      * @param room the room we are setting defcon for
      */
     public static setDefconLevel(room: Room): void {
-        const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room.name);
+        const hostileCreeps = MemoryApi.getHostileCreeps(room.name);
         // check level 0 first to reduce cpu drain as it will be the most common scenario
         // level 0 -- no danger
         if (hostileCreeps.length === 0) {
@@ -156,37 +156,52 @@ export default class RoomApi {
 
         // now define the variables we will need to check the other cases in the event
         // we are not dealing with a level 0 defcon scenario
-        const hostileBodyParts: number = _.sum(hostileCreeps, (c: any) => c.body.length);
+        const hostileBodyParts: number = _.sum(hostileCreeps, (c: Creep) => c.body.length);
+        const hostileDamageParts: number = _.sum(hostileCreeps, (c: Creep) => {
+            return _.filter(c.body, (part: BodyPartDefinition) => {
+                if (part.type === ATTACK || part.type === RANGED_ATTACK) {
+                    return true;
+                }
+                return false;
+            }).length;
+        });
         const boostedHostileBodyParts: number = _.filter(_.flatten(_.map(hostileCreeps, "body")), (p: any) => !!p.boost)
             .length;
 
-        // level 5 -- nuke inbound
+        // level 6 -- nuke inbound
         if (room.find(FIND_NUKES).length > 0) {
+            room.memory.defcon = 6;
+            return;
+        }
+
+        // level 5 full seige, 50+ boosted parts
+        if (boostedHostileBodyParts >= 50) {
             room.memory.defcon = 5;
             return;
         }
 
-        // level 4 full seige, 50+ boosted parts
-        if (boostedHostileBodyParts >= 50) {
+        // level 4 -- 150+ body parts OR any boosted body parts
+        if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
             room.memory.defcon = 4;
             return;
         }
 
-        // level 3 -- 150+ body parts OR any boosted body parts
-        if (boostedHostileBodyParts > 0 || hostileBodyParts >= 150) {
+        // level 3 -- 50 - 150 body parts
+        if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
             room.memory.defcon = 3;
             return;
         }
 
-        // level 2 -- 50 - 150 body parts
-        if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
+        // level 2 -- Any damaging parts
+        if (hostileDamageParts > 0) {
             room.memory.defcon = 2;
-            return;
         }
 
-        // level 1 -- less than 50 body parts
+        // level 1 -- less than 50 body parts, no attack parts
         room.memory.defcon = 1;
         return;
+
+        //
     }
 
     /**
@@ -456,7 +471,10 @@ export default class RoomApi {
      */
     public static runSetRampartStatus(room: Room): void {
         // If defcon is on in the room, set to private, otherwise, public
-        const rampartsInRoom: StructureRampart[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_RAMPART) as StructureRampart[];
+        const rampartsInRoom: StructureRampart[] = MemoryApi.getStructureOfType(
+            room.name,
+            STRUCTURE_RAMPART
+        ) as StructureRampart[];
         const isPublic: boolean = MemoryApi.getDefconLevel(room) > 0;
         for (const i in rampartsInRoom) {
             const rampart: StructureRampart = rampartsInRoom[i];
