@@ -1330,13 +1330,15 @@ export class SpawnHelper {
         // Get all claim rooms in which the specified role does not yet have
         const unfulfilledRemoteRooms: Array<RemoteRoomMemory | undefined> = _.filter(
             allRemoteRooms,
-            remoteRoom =>
-                this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit) <
-                this.getLimitPerRemoteRoomForRolePerSource(roleConst, remoteRoom!.sources.data)
+            remoteRoom => {
+                const numSources = Memory.rooms[remoteRoom!.roomName] === undefined ? remoteRoom!.sources.data.length : Memory.rooms[remoteRoom!.roomName].sources.data.length;
+                return this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit) <
+                this.getLimitPerRemoteRoomForRolePerSource(roleConst, numSources)
+            }
         );
 
         let nextRemoteRoom: RemoteRoomMemory | undefined;
-
+        let lowestCreepsAssigned = Number.MAX_VALUE;
         // Find the unfulfilled with the lowest amount of creeps assigned to it
         for (const remoteRoom of unfulfilledRemoteRooms) {
             if (remoteRoom && !nextRemoteRoom) {
@@ -1344,16 +1346,11 @@ export class SpawnHelper {
                 continue;
             }
 
-            const lowestCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(
-                room,
-                roleConst,
-                nextRemoteRoom,
-                tickLimit
-            );
             const currentCreepsAssigned = this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit);
 
             if (currentCreepsAssigned < lowestCreepsAssigned) {
                 nextRemoteRoom = remoteRoom;
+                lowestCreepsAssigned = currentCreepsAssigned;
             }
         }
 
@@ -1484,21 +1481,21 @@ export class SpawnHelper {
      */
     public static getNumAccessTilesToSources(room: Room): number {
         const sources: Source[] = MemoryApi.getSources(room.name);
-        let accesssibleTiles: number = 0;
-        const roomTerrian: RoomTerrain = new Room.Terrain(room.name);
+        let accessibleTiles: number = 0;
+        const roomTerrain: RoomTerrain = new Room.Terrain(room.name);
         _.forEach(sources, (source: Source) => {
             for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
                 for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
                     if (source.pos.x === x && source.pos.y === y) {
                         continue;
                     }
-                    if (roomTerrian.get(x, y) !== TERRAIN_MASK_WALL) {
-                        accesssibleTiles++;
+                    if (roomTerrain.get(x, y) !== TERRAIN_MASK_WALL) {
+                        accessibleTiles++;
                     }
                 }
             }
         });
-        return accesssibleTiles;
+        return accessibleTiles;
     }
 
     /**

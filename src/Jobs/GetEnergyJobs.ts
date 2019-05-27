@@ -4,7 +4,7 @@ import MemoryApi from "Api/Memory.Api";
 import CreepHelper from "Helpers/CreepHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import SpawnApi from "Api/Spawn.Api";
-import { ROLE_MINER } from "utils/Constants";
+import { ROLE_MINER, ROLE_REMOTE_MINER } from "utils/Constants";
 
 // TODO Create jobs for tombstones and dropped resources if wanted
 export default class GetEnergyJobs {
@@ -25,9 +25,13 @@ export default class GetEnergyJobs {
 
         _.forEach(openSources, (source: Source) => {
             // Get all miners that are targeting this source
-            const miners = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
-                if (creep.memory.role === ROLE_MINER && creep.memory.job && creep.memory.job.targetID === source.id) {
-                    // * Can optionally add another statement here that checks if creep has enough life to be considered part of the job
+            const miners = _.filter(Game.creeps, (creep: Creep) => {
+                if (
+                    creep.my &&
+                    (creep.memory.role === ROLE_MINER || creep.memory.role === ROLE_REMOTE_MINER) &&
+                    creep.memory.job &&
+                    creep.memory.job.targetID === source.id
+                ) {
                     return true;
                 }
 
