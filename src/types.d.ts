@@ -701,6 +701,10 @@ interface CreepOptionsCiv {
      */
     wallRepair?: boolean;
     /**
+     * If the creep can fill extensions
+     */
+    fillExtension?: boolean;
+    /**
      * if the creep can fill towers
      */
     fillTower?: boolean;

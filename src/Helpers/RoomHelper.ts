@@ -401,8 +401,8 @@ export default class RoomHelper {
 
             // If there are any hostile creeps, add one to remoteDefenderCount
             // Get hostile creeps in the remote room
-            const hostileCreeps = rr.hostiles.data;
-            if (hostileCreeps > 0) {
+            const defconLevel = Memory.rooms[rr.roomName].defcon;
+            if (defconLevel >= 2) {
                 numRemoteDefenders++;
             }
         });

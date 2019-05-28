@@ -243,6 +243,9 @@ export class SpawnHelper {
             case ROOM_STATE_INTRO:
                 creepOptions = {
                     fillSpawn: true,
+                    fillExtension: true,
+                    fillStorage: true,
+                    fillTerminal: true,
                     getDroppedEnergy: true
                 };
                 break;
@@ -253,6 +256,9 @@ export class SpawnHelper {
                     build: true, //
                     upgrade: true, //
                     fillSpawn: true, //
+                    fillExtension: true,
+                    fillTerminal: true,
+                    fillStorage: true,
                     getDroppedEnergy: true //
                 };
 
@@ -265,6 +271,9 @@ export class SpawnHelper {
                     upgrade: true, //
                     repair: true, //
                     fillSpawn: true, //
+                    fillExtension: true,
+                    fillTerminal: true,
+                    fillStorage: true,
                     getFromContainer: true, //
                     getDroppedEnergy: true //
                 };
@@ -275,7 +284,9 @@ export class SpawnHelper {
                 creepOptions = {
                     // Options marked with // are overriding the defaults
                     fillStorage: true, //
+                    fillTerminal: true,
                     fillSpawn: true, //
+                    fillExtension: true,
                     getFromStorage: true, //
                     getFromContainer: true, //
                     getDroppedEnergy: true, //
@@ -289,8 +300,9 @@ export class SpawnHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     // Options marked with // are overriding the defaults
-                    repair: true, //
                     fillStorage: true, //
+                    fillTerminal: true,
+                    fillExtension: true,
                     fillSpawn: true,
                     getFromStorage: true, //
                     getDroppedEnergy: true, //
@@ -1328,14 +1340,16 @@ export class SpawnHelper {
         const allRemoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
         const tickLimit = creepBody.length * 3;
         // Get all claim rooms in which the specified role does not yet have
-        const unfulfilledRemoteRooms: Array<RemoteRoomMemory | undefined> = _.filter(
-            allRemoteRooms,
-            remoteRoom => {
-                const numSources = Memory.rooms[remoteRoom!.roomName] === undefined ? remoteRoom!.sources.data.length : Memory.rooms[remoteRoom!.roomName].sources.data.length;
-                return this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit) <
+        const unfulfilledRemoteRooms: Array<RemoteRoomMemory | undefined> = _.filter(allRemoteRooms, remoteRoom => {
+            const numSources =
+                Memory.rooms[remoteRoom!.roomName] === undefined
+                    ? remoteRoom!.sources.data.length
+                    : Memory.rooms[remoteRoom!.roomName].sources.data.length;
+            return (
+                this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit) <
                 this.getLimitPerRemoteRoomForRolePerSource(roleConst, numSources)
-            }
-        );
+            );
+        });
 
         let nextRemoteRoom: RemoteRoomMemory | undefined;
         let lowestCreepsAssigned = Number.MAX_VALUE;

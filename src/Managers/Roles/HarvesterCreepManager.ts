@@ -97,7 +97,7 @@ export default class HarvesterCreepManager {
     public static newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
-        if (creepOptions.fillTower || creepOptions.fillSpawn) {
+        if (creepOptions.fillTower || creepOptions.fillSpawn || creepOptions.fillExtension) {
             const fillJobs = MemoryApi.getFillJobs(
                 room,
                 (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link",
@@ -105,8 +105,24 @@ export default class HarvesterCreepManager {
             );
 
             if (fillJobs.length > 0) {
-                return fillJobs[0];
+                const jobObjects: Structure[] = MemoryHelper.getOnlyObjectsFromIDs(
+                    _.map(fillJobs, job => job.targetID)
+                );
+
+                const closestTarget = creep.pos.findClosestByRange(jobObjects);
+
+                let closestJob;
+
+                if (closestTarget !== null) {
+                    closestJob = _.find(fillJobs, (job: CarryPartJob) => job.targetID === closestTarget.id);
+                } else {
+                    // if findCLosest nulls out, just choose first
+                    closestJob = fillJobs[0];
+                }
+                return closestJob;
             }
+
+            return undefined;
         }
 
         if (creepOptions.fillStorage || creepOptions.fillTerminal) {
