@@ -527,14 +527,14 @@ export default class CreepApi {
         const targetRoom = creep.memory.targetRoom;
 
         if (Memory.rooms[targetRoom] === undefined) {
-            // If we don't have vision of room, we have no way of knowing but to check
+            // If we don't know the state of the room, we have no way of knowing but to check
             return false;
         }
 
         return Memory.rooms[targetRoom].defcon > 1;
     }
     /**
-     * Flee from remoteRoom - Called when defcon is > 0
+     * Flee from remoteRoom - Called when defcon is > 1
      * @param creep The creep to flee
      * @param homeRoom The homeRoom of the creep
      */

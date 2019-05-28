@@ -1617,7 +1617,7 @@ export class SpawnHelper {
         return _.first(
             MemoryApi.getRemoteRooms(room, (rr: RemoteRoomMemory) => {
                 if (Memory.rooms[rr.roomName]) {
-                    return Memory.rooms[rr.roomName].defcon > 0;
+                    return Memory.rooms[rr.roomName].defcon > 1;
                 }
                 return false;
             })

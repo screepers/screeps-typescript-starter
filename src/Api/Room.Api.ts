@@ -195,6 +195,7 @@ export default class RoomApi {
         // level 2 -- Any damaging parts
         if (hostileDamageParts > 0) {
             room.memory.defcon = 2;
+            return;
         }
 
         // level 1 -- less than 50 body parts, no attack parts
