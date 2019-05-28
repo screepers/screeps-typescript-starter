@@ -523,12 +523,41 @@ export default class CreepApi {
         return false;
     }
 
+    public static creepShouldFlee(creep: Creep): boolean {
+        const targetRoom = creep.memory.targetRoom;
+
+        if (Memory.rooms[targetRoom] === undefined) {
+            // If we don't have vision of room, we have no way of knowing but to check
+            return false;
+        }
+
+        return Memory.rooms[targetRoom].defcon > 1;
+    }
     /**
      * Flee from remoteRoom - Called when defcon is > 0
      * @param creep The creep to flee
      * @param homeRoom The homeRoom of the creep
      */
     public static fleeRemoteRoom(creep: Creep, homeRoom: Room): void {
+        // If we are in home room, idle until we no longer need to flee
+        if (creep.room.name === homeRoom.name) {
+            CreepApi.moveCreepOffExit(creep);
+            return;
+        }
+        // If we are not in homeRoom, but our job is to move to homeRoom, then do so
+        if (creep.memory.job && creep.memory.job.targetID === homeRoom.name) {
+            this.travelTo(creep, creep.memory.job);
+            return;
+        }
+
+        // Clean out old job data
+        delete creep.memory.job;
+        creep.memory.working = false;
+        if (creep.memory.supplementary) {
+            delete creep.memory.supplementary.moveTargetID;
+        }
+
+        // Set new move job to homeRoom
         creep.memory.job = {
             jobType: "movePartJob",
             targetType: "roomName",
@@ -536,10 +565,6 @@ export default class CreepApi {
             actionType: "move",
             isTaken: false
         };
-        creep.memory.working = false;
-        if (creep.memory.supplementary) {
-            delete creep.memory.supplementary.moveTargetID;
-        }
     }
 
     /**********************************************************/

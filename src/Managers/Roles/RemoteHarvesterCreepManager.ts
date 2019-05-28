@@ -16,12 +16,13 @@ export default class RemoteHarvesterCreepManager {
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
 
-        if (targetRoom.memory && targetRoom.memory.defcon > 0) {
-            // Flee Here
+        if (CreepApi.creepShouldFlee(creep)) {
+            CreepApi.fleeRemoteRoom(creep, homeRoom);
+            return;
         }
 
         if (creep.memory.job === undefined) {
-            creep.memory.job = this.getNewJob(creep, homeRoom);
+            creep.memory.job = this.getNewJob(creep, homeRoom, targetRoom);
 
             if (creep.memory.job === undefined) {
                 return;
@@ -41,17 +42,15 @@ export default class RemoteHarvesterCreepManager {
     /**
      * Decides which kind of job to get and calls the appropriate function
      */
-    public static getNewJob(creep: Creep, room: Room): BaseJob | undefined {
+    public static getNewJob(creep: Creep, homeRoom: Room, targetRoom: Room): BaseJob | undefined {
         if (creep.carry.energy === 0 && creep.room.name === creep.memory.targetRoom) {
             // If creep is empty and in targetRoom - get energy
-            const targetRoom = Game.rooms[creep.memory.targetRoom];
             return CreepApi.newGetEnergyJob(creep, targetRoom);
         } else if (creep.carry.energy === 0 && creep.room.name !== creep.memory.targetRoom) {
             // If creep is empty and not in targetRoom - Go to targetRoom
             return CreepApi.newMovePartJob(creep, creep.memory.targetRoom);
         } else if (creep.carry.energy > 0 && creep.room.name === creep.memory.targetRoom) {
             // If creep has energy and is in targetRoom - Get workpartJob
-            const targetRoom = Game.rooms[creep.memory.targetRoom];
             let job = CreepApi.newWorkPartJob(creep, targetRoom) as BaseJob;
             // if no work part job - Go to homeRoom
             if (job === undefined) {
@@ -61,10 +60,10 @@ export default class RemoteHarvesterCreepManager {
             return job;
         } else if (creep.carry.energy > 0 && creep.room.name === creep.memory.homeRoom) {
             // If creep has energy and is in homeRoom - Get a carry job to use energy
-            let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
+            let job: BaseJob | undefined = this.newCarryPartJob(creep, homeRoom);
             // If no carryJob, get a workPartJob in homeroom
             if (job === undefined) {
-                job = CreepApi.newWorkPartJob(creep, room);
+                job = CreepApi.newWorkPartJob(creep, homeRoom);
             }
 
             return job;

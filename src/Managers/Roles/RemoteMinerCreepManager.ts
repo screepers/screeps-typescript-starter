@@ -17,8 +17,9 @@ export default class RemoteMinerCreepManager {
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
 
-        if (targetRoom && targetRoom.memory.defcon > 0) {
-            // Flee Here
+        if (CreepApi.creepShouldFlee(creep)){
+            CreepApi.fleeRemoteRoom(creep, homeRoom);
+            return;
         }
 
         if (creep.memory.job === undefined) {
