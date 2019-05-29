@@ -17,6 +17,9 @@ export default class RemoteDefenderCreepManager {
 
         // Carry out the basics of a military creep before moving on to specific logic
         if (MiliApi.checkMilitaryCreepBasics(creep, creepOptions)) {
+            if (creep.hits < creep.hitsMax) {
+                creep.heal(creep);
+            }
             return;
         }
 
@@ -28,11 +31,17 @@ export default class RemoteDefenderCreepManager {
         );
         const isMelee: boolean = false;
         if (!target) {
+            if (creep.hits < creep.hitsMax) {
+                creep.heal(creep);
+            }
             return; // idle if no current target
         }
         // If we aren't in attack range, move towards the attack target
         if (!MiliApi.isInAttackRange(creep, target.pos, isMelee)) {
             creep.moveTo(target, DEFAULT_MOVE_OPTS);
+            if (creep.hits < creep.hitsMax) {
+                creep.heal(creep);
+            }
             return;
         } else {
             MiliApi.kiteEnemyCreep(creep);
@@ -40,5 +49,8 @@ export default class RemoteDefenderCreepManager {
 
         // We are in attack range and healthy, attack the target
         creep.rangedAttack(target);
+        if (creep.hits < creep.hitsMax) {
+            creep.heal(creep);
+        }
     }
 }
