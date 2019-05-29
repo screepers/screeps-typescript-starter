@@ -214,17 +214,17 @@ export class SpawnHelper {
                 break;
 
             case TIER_4: // 2 Work, 11 Carry, 11 Move - Total Cost: 1300
-                body = { work: 2, carry: 11, move: 11 };
+                body = { carry: 13, move: 13 };
                 break;
 
             case TIER_6:
             case TIER_5: // 2 Work, 16 Carry, 16 Move - Total Cost: 1800
-                body = { work: 2, carry: 16, move: 16 };
+                body = { carry: 24, move: 12 };
                 break;
 
             case TIER_8:
             case TIER_7: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
-                body = { work: 2, carry: 20, move: 20 };
+                body = { carry: 28, move: 14 };
                 break;
         }
 
@@ -337,10 +337,13 @@ export class SpawnHelper {
                 body = { work: 4, carry: 4, move: 4 };
                 break;
 
-            case TIER_6:
             case TIER_5:
             case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
                 body = { work: 7, carry: 6, move: 6 };
+                break;
+
+            case TIER_6:
+                body = { work: 14, carry: 6, move: 10 };
                 break;
 
             case TIER_8:
@@ -399,7 +402,6 @@ export class SpawnHelper {
                     wallRepair: true, //
                     fillTower: true, //
                     getFromStorage: true, //
-                    getDroppedEnergy: true, //
                     getFromTerminal: true //
                 };
 
@@ -515,7 +517,7 @@ export class SpawnHelper {
         // Without over draining the storage, but still puts up numbers
         switch (tier) {
             case TIER_6: // 15 Work, 1 Carry, 1 Move - Total Cost: 2300
-                body = { work: 18, carry: 8, move: 4 };
+                body = { work: 17, carry: 8, move: 4 };
                 break;
 
             case TIER_7: // 1 Work, 8 Carry, 4 Move - Total Cost: 2800
