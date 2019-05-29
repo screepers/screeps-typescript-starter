@@ -39,6 +39,6 @@ export default class RemoteDefenderCreepManager {
         }
 
         // We are in attack range and healthy, attack the target
-        creep.attack(target);
+        creep.rangedAttack(target);
     }
 }
