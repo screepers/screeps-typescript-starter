@@ -253,7 +253,7 @@ export default class CreepMili {
         let path: PathFinderPath;
         const goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: CREEP_RANGE }
         const pathFinderOptions: PathFinderOpts = { flee: true }
-        path = PathFinder.search(hostileCreep!.pos, goal, pathFinderOptions);
+        path = PathFinder.search(creep.pos, hostileCreep.pos, pathFinderOptions);
         if (path.path.length > 0) {
             creep.moveTo(path.path[0], DEFAULT_MOVE_OPTS);
             return true;

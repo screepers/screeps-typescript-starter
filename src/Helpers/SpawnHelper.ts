@@ -155,8 +155,8 @@ export class SpawnHelper {
             case TIER_6:
             case TIER_5:
             case TIER_4:
-            case TIER_3: // 5 Work, 2 Move - Total Cost: 600
-                body = { work: 5, move: 2 };
+            case TIER_3: // 5 Work, 3 Move - Total Cost: 650
+                body = { work: 5, move: 3 };
                 break;
         }
 
@@ -210,11 +210,11 @@ export class SpawnHelper {
                 break;
 
             case TIER_3: // 2 Work, 6 Carry, 6 Move - Total Cost: 800
-                body = { work: 2, carry: 6, move: 6 };
+                body = { work: 2, carry: 7, move: 5 };
                 break;
 
             case TIER_4: // 2 Work, 11 Carry, 11 Move - Total Cost: 1300
-                body = { carry: 13, move: 13 };
+                body = { carry: 16, move: 8 };
                 break;
 
             case TIER_6:

@@ -1,9 +1,5 @@
 import MemoryApi from "Api/Memory.Api";
-import {
-    WALL_LIMIT,
-    ERROR_WARN,
-    STIMULATE_FLAG
-} from "utils/Constants";
+import { WALL_LIMIT, ERROR_WARN, STIMULATE_FLAG } from "utils/Constants";
 import UserException from "utils/UserException";
 
 // helper functions for rooms
@@ -71,7 +67,10 @@ export default class RoomHelper {
      * @param room the room we want to check
      */
     public static inTravelRange(homeRoom: string, targetRoom: string): boolean {
-        const routeArray: Array<{ exit: ExitConstant; room: string; }> = Game.map.findRoute(homeRoom, targetRoom) as Array<{ exit: ExitConstant; room: string; }>;
+        const routeArray: Array<{ exit: ExitConstant; room: string }> = Game.map.findRoute(
+            homeRoom,
+            targetRoom
+        ) as Array<{ exit: ExitConstant; room: string }>;
         return routeArray.length < 20;
     }
 
@@ -135,7 +134,7 @@ export default class RoomHelper {
         return (
             TOWER_POWER_ATTACK -
             (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
-            (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
         );
     }
 
@@ -158,14 +157,11 @@ export default class RoomHelper {
         sources: Array<Source | null>,
         containers: Array<Structure<StructureConstant> | null>
     ): boolean {
-
         // Loop over sources and make sure theres at least one container in range to it
         let numMiningContainers: number = 0;
 
         _.forEach(sources, (source: Source) => {
-            if (_.some(containers, (container: StructureContainer) =>
-                source.pos.inRangeTo(container.pos, 2)
-            )) {
+            if (_.some(containers, (container: StructureContainer) => source.pos.inRangeTo(container.pos, 2))) {
                 numMiningContainers++;
             }
         });
@@ -181,13 +177,13 @@ export default class RoomHelper {
      * @param containers the containers we are checking
      */
     public static getUpgraderLink(room: Room): Structure<StructureConstant> | null {
-
         // Throw warning if we do not own this room
         if (!this.isOwnedRoom(room)) {
             throw new UserException(
                 "Stimulate flag check on non-owned room",
                 "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]",
-                ERROR_WARN);
+                ERROR_WARN
+            );
         }
 
         const links: Array<Structure<StructureConstant>> = MemoryApi.getStructureOfType(room.name, STRUCTURE_LINK);
@@ -200,9 +196,14 @@ export default class RoomHelper {
 
         // Make sure theres a controller in the room
         if (!controller) {
-            throw new UserException("Tried to getUpgraderLink of a room with no controller",
-                "Get Upgrader Link was called for room [" + room.name + "]" + ", but theres no controller in this room.",
-                ERROR_WARN);
+            throw new UserException(
+                "Tried to getUpgraderLink of a room with no controller",
+                "Get Upgrader Link was called for room [" +
+                    room.name +
+                    "]" +
+                    ", but theres no controller in this room.",
+                ERROR_WARN
+            );
         }
 
         // Find the closest link to the controller, this is our upgrader link
@@ -214,13 +215,13 @@ export default class RoomHelper {
      * @param room the room we are checking for
      */
     public static isUpgraderLink(room: Room): boolean {
-
         // Throw warning if we do not own this room
         if (!this.isOwnedRoom(room)) {
             throw new UserException(
                 "Stimulate flag check on non-owned room",
                 "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]",
-                ERROR_WARN);
+                ERROR_WARN
+            );
         }
 
         return this.getUpgraderLink(room) !== null;
@@ -232,20 +233,20 @@ export default class RoomHelper {
      * @param room the room we are checking for
      */
     public static isStimulateRoom(room: Room): boolean {
-
         // Throw warning if we do not own this room
         if (!this.isOwnedRoom(room)) {
             throw new UserException(
                 "Stimulate flag check on non-owned room",
                 "You attempted to check for a stimulate flag in a room we do not own. Room [" + room.name + "]",
-                ERROR_WARN);
+                ERROR_WARN
+            );
         }
 
         const terminal: StructureTerminal | undefined = room.terminal;
         // Check if we have a stimulate flag with the same room name as this flag
         return _.some(Memory.flags, (flag: FlagMemory) => {
             if (flag.flagType === STIMULATE_FLAG) {
-                return (Game.flags[flag.flagName].pos.roomName === room.name) && (terminal !== undefined);
+                return Game.flags[flag.flagName].pos.roomName === room.name && terminal !== undefined;
             }
             return false;
         });
@@ -260,46 +261,50 @@ export default class RoomHelper {
         // get the creep we will do the most damage to
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room.name);
         const isHealers: boolean = _.some(hostileCreeps, (c: Creep) =>
-            _.some(c.body, (b: BodyPartDefinition) => b.type === "heal"));
+            _.some(c.body, (b: BodyPartDefinition) => b.type === "heal")
+        );
         const isAttackers: boolean = _.some(hostileCreeps, (c: Creep) =>
-            _.some(c.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack"));
+            _.some(c.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack")
+        );
         const isWorkers: boolean = _.some(hostileCreeps, (c: Creep) =>
-            _.some(c.body, (b: BodyPartDefinition) => b.type === "work"));
-        const isCivilians: boolean = _.some(hostileCreeps, (creep: Creep) =>
-            !_.some(creep.body, (b: BodyPartDefinition) => b.type === "heal") &&
-            !_.some(creep.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack") &&
-            !_.some(creep.body, (b: BodyPartDefinition) => b.type === "work")
+            _.some(c.body, (b: BodyPartDefinition) => b.type === "work")
+        );
+        const isCivilians: boolean = _.some(
+            hostileCreeps,
+            (creep: Creep) =>
+                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "heal") &&
+                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack") &&
+                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "work")
         );
 
-        // If only healers are present, don't waste ammo
-        if (isHealers && !isAttackers && !isWorkers) {
-            return undefined;
-        }
+        //        // If only healers are present, don't waste ammo
+        //        if (isHealers && !isAttackers && !isWorkers) {
+        //            return undefined;
+        //        }
 
         // If healers are present with attackers, target healers
         if (isHealers && isAttackers && !isWorkers) {
-            return _.find(hostileCreeps, (c: Creep) =>
-                _.some(c.body, (b: BodyPartDefinition) => b.type === "heal"));
+            return _.find(hostileCreeps, (c: Creep) => _.some(c.body, (b: BodyPartDefinition) => b.type === "heal"));
         }
 
         // If workers are present, target worker
         if (isWorkers) {
-            return _.find(hostileCreeps, (c: Creep) =>
-                _.some(c.body, (b: BodyPartDefinition) => b.type === "work"));
+            return _.find(hostileCreeps, (c: Creep) => _.some(c.body, (b: BodyPartDefinition) => b.type === "work"));
         }
 
         // If attackers are present, target them
         if (isAttackers) {
-            return _.find(hostileCreeps, (c: Creep) =>
-                _.some(c.body, (b: BodyPartDefinition) => b.type === "attack"));
+            return _.find(hostileCreeps, (c: Creep) => _.some(c.body, (b: BodyPartDefinition) => b.type === "attack"));
         }
 
         // If no combat related creeps, target civilians
         if (isCivilians) {
-            _.find(hostileCreeps, (creep: Creep) =>
-                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "heal") &&
-                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack") &&
-                !_.some(creep.body, (b: BodyPartDefinition) => b.type === "work")
+            _.find(
+                hostileCreeps,
+                (creep: Creep) =>
+                    !_.some(creep.body, (b: BodyPartDefinition) => b.type === "heal") &&
+                    !_.some(creep.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack") &&
+                    !_.some(creep.body, (b: BodyPartDefinition) => b.type === "work")
             );
         }
 
@@ -368,16 +373,18 @@ export default class RoomHelper {
         let numSources: number = 0;
 
         _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {
-
             if (!rr) {
                 return;
             }
 
             let sourcesInRoom: number = 0;
-            if (Memory.rooms[rr.roomName] && Memory.rooms[rr.roomName].sources && Memory.rooms[rr.roomName].sources.data) {
+            if (
+                Memory.rooms[rr.roomName] &&
+                Memory.rooms[rr.roomName].sources &&
+                Memory.rooms[rr.roomName].sources.data
+            ) {
                 sourcesInRoom = Memory.rooms[rr.roomName].sources.data.length;
-            }
-            else {
+            } else {
                 sourcesInRoom = rr.sources.data;
             }
             numSources += sourcesInRoom;
@@ -394,7 +401,6 @@ export default class RoomHelper {
         let numRemoteDefenders: number = 0;
 
         _.forEach(remoteRooms, (rr: RemoteRoomMemory) => {
-
             if (!rr) {
                 return;
             }
@@ -425,13 +431,14 @@ export default class RoomHelper {
         }
 
         for (const claimRoom of allClaimRooms) {
-            if (!_.some(ownedRooms, (ownedRoom) => {
-                if (claimRoom) {
-                    return room.name === claimRoom!.roomName
-                }
-                return false
-            })) {
-
+            if (
+                !_.some(ownedRooms, ownedRoom => {
+                    if (claimRoom) {
+                        return room.name === claimRoom!.roomName;
+                    }
+                    return false;
+                })
+            ) {
                 ++sum;
             }
         }

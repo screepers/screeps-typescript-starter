@@ -152,5 +152,20 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
     ignoreCreeps: false, // TODO Change this to true, and set up a type of collision avoidance/collision handling
     reusePath: 10, // TODO Change this value to be much higher, and set up a type of 'stuck detection'
     // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
-    visualizePathStyle: {} // Empty object for now, just uses default visualization
+    visualizePathStyle: {}, // Empty object for now, just uses default visualization
+    costCallback(roomName: string, costMatrix: CostMatrix) {
+        _.forEach(Game.creeps, (creep: Creep) => {
+            if (creep.my && creep.pos.roomName === roomName) {
+                if (creep.memory.working === true || creep.memory.job === undefined) {
+                    // Walk around working creeps or idling creeps
+                    costMatrix.set(creep.pos.x, creep.pos.y, 255);
+                } else {
+                    // Walk through creeps with a job, but not working (AKA traveling)
+                    costMatrix.set(creep.pos.x, creep.pos.y, 0);
+                }
+            }
+        });
+
+        return costMatrix;
+    }
 };
