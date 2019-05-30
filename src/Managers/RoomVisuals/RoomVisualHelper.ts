@@ -15,13 +15,14 @@ import {
     STIMULATE_FLAG
 } from "utils/constants";
 import RoomHelper from "Helpers/RoomHelper";
+import { STUCK_COUNT_LIMIT } from "utils/config";
 
 const textColor = "#bab8ba";
 const textSize = 0.8;
 const charHeight = textSize * 1.1;
 
 // Helper for room visuals
-export default class RoomVisualManager {
+export default class RoomVisualHelper {
     /**
      * display m
      * @param lines the array of text we want to display
@@ -302,5 +303,38 @@ export default class RoomVisualManager {
 
         // Get the formatted version of secondsToNextLevel
         return this.convertSecondsToTime(secondsToNextLevel);
+    }
+
+    /**
+     * Visualize the creep stuck counter
+     * @param creep Creep The creep to visualize
+     */
+    public static visualizeStuckCreep(creep: Creep): void {
+        if(creep.memory._move === undefined || creep.memory._move.stuckCount === undefined) {
+            return; // Do nothing if no stuck count
+        }
+
+        const percentStuck = creep.memory._move.stuckCount / STUCK_COUNT_LIMIT;
+
+        let circleColor;
+
+        if(percentStuck >= 1) {
+            // Creep is stuck
+            circleColor = "#FF0000";
+        } else if (percentStuck >= .75) {
+            // Almost stuck
+            circleColor = "#8000080";
+        } else if (percentStuck >= .50) {
+            // Halfway to stuck
+            circleColor = "#0000FF";
+        } else if (percentStuck >= .25) {
+            // Starting to get stuck
+            circleColor = "#FFFFFF";
+        } else {
+            // Not very stuck - don't draw
+            return;
+        }
+
+        creep.room.visual.circle(creep.pos, { radius: .55, fill: circleColor, opacity: .10})
     }
 }

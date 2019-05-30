@@ -271,6 +271,9 @@ interface CreepMemory {
         time: number;
         path: number;
         room: string;
+        // Custom stuck-detection object - xyroomName string
+        lastPosition: string;
+        stuckCount: number;
     };
 }
 

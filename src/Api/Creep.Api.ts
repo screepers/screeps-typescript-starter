@@ -10,9 +10,12 @@ import {
     ERROR_FATAL
 } from "utils/constants";
 import MemoryApi from "./Memory.Api";
-import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD } from "utils/config";
+import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
 import UtilHelper from "Helpers/UtilHelper";
+import RoomVisualApi from "Managers/RoomVisuals/RoomVisual.Api";
+import RoomVisualManager from "Managers/RoomVisuals/RoomVisualManager";
+import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -49,6 +52,11 @@ export default class CreepApi {
      * Call the proper travelTo function based on job.jobType
      */
     public static travelTo(creep: Creep, job: BaseJob) {
+        // Perform Stuck Detection - Delete old path if stuck
+        if (this.isCreepStuck(creep)) {
+            delete creep.memory._move;
+        }
+
         switch (job.jobType) {
             case "getEnergyJob":
                 this.travelTo_GetEnergyJob(creep, job as GetEnergyJob);
@@ -75,6 +83,46 @@ export default class CreepApi {
                         job.jobType,
                     ERROR_FATAL
                 );
+        }
+    }
+
+    /**
+     * Prepare stuck detection each tick, return true if stuck, false if not.
+     * @param creep
+     */
+    public static isCreepStuck(creep: Creep): boolean {
+        if (!creep.memory._move) {
+            return false; // Creep has not found a path yet
+        }
+
+        const currPosition: string = creep.pos.x.toString() + creep.pos.y.toString() + creep.room.name;
+
+        if (!creep.memory._move.lastPosition) {
+            creep.memory._move.lastPosition = currPosition;
+            creep.memory._move.stuckCount = 0;
+            return false; // Creep is moving for the first time
+        }
+
+        if (creep.memory._move.lastPosition !== currPosition) {
+            creep.memory._move.lastPosition = currPosition;
+            creep.memory._move.stuckCount = 0;
+            return false; // Creep has moved since last tick
+        } else { 
+            // Creep hasn't moved since last tick
+            if (creep.fatigue === 0) {
+                creep.memory._move.stuckCount++;
+            }
+
+            // Visualize if wanted
+            if (USE_STUCK_VISUAL) {
+                RoomVisualHelper.visualizeStuckCreep(creep);
+            }
+
+            if (creep.memory._move.stuckCount > STUCK_COUNT_LIMIT) {
+                return true; // Creep is stuck
+            } else {
+                return false; // Creep is not stuck yet
+            }
         }
     }
 
@@ -299,6 +347,7 @@ export default class CreepApi {
 
         // Move options target
         const moveOpts: MoveToOpts = DEFAULT_MOVE_OPTS;
+        moveOpts.reusePath = 999;
 
         // In this case all actions are complete with a range of 1, but keeping for structure
         if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
@@ -329,6 +378,7 @@ export default class CreepApi {
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
+        moveOpts.reusePath = 999;
 
         if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
             moveOpts.range = 1;
@@ -361,6 +411,7 @@ export default class CreepApi {
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
+        moveOpts.reusePath = 999;
 
         // All actiontypes that affect controller have range of 1
         if (moveTarget instanceof StructureController) {
@@ -412,6 +463,7 @@ export default class CreepApi {
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
+        moveOpts.reusePath = 999;
 
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
             moveOpts.range = 1;
@@ -439,6 +491,7 @@ export default class CreepApi {
         this.nullCheck_target(creep, moveTarget);
 
         const moveOpts = DEFAULT_MOVE_OPTS;
+        moveOpts.reusePath = 999;
 
         if (job.targetType === "roomName") {
             // 23 should get us inside the room and off the exit
@@ -541,6 +594,7 @@ export default class CreepApi {
     public static fleeRemoteRoom(creep: Creep, homeRoom: Room): void {
         // If we are in home room, idle until we no longer need to flee
         if (creep.room.name === homeRoom.name) {
+            creep.memory.working = true; // Mark as working for pathing purposes
             CreepApi.moveCreepOffExit(creep);
             return;
         }

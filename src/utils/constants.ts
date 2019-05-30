@@ -156,13 +156,19 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
     costCallback(roomName: string, costMatrix: CostMatrix) {
         _.forEach(Game.creeps, (creep: Creep) => {
             if (creep.my && creep.pos.roomName === roomName) {
+                let matrixValue;
+
                 if (creep.memory.working === true || creep.memory.job === undefined) {
                     // Walk around working creeps or idling creeps
-                    costMatrix.set(creep.pos.x, creep.pos.y, 255);
+                    matrixValue = 255;
                 } else {
                     // Walk through creeps with a job, but not working (AKA traveling)
-                    costMatrix.set(creep.pos.x, creep.pos.y, 0);
+                    const terrainValue = new Room.Terrain(roomName).get(creep.pos.x, creep.pos.y);
+                    // Match the terrain underneath the creep to avoid preferring going under creeps
+                    matrixValue = terrainValue > 0 ? 5 : 1;
                 }
+
+                costMatrix.set(creep.pos.x, creep.pos.y, matrixValue);
             }
         });
 

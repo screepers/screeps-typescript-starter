@@ -12,6 +12,16 @@ export const NO_CACHING_MEMORY = false;
 export const ALLOW_CUSTOM_ERRORS = true;
 
 /**
+ * The number of ticks a creep can be stuck before repathing
+ */
+export const STUCK_COUNT_LIMIT = 3;
+
+/**
+ * Whether or not to apply visual on stuck
+ */
+export const USE_STUCK_VISUAL = true;
+
+/**
  * Minimum amount of energy a container must have to be used in a GetEnergyJob
  */
 export const CONTAINER_MINIMUM_ENERGY = 100;
