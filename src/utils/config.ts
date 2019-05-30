@@ -22,6 +22,15 @@ export const STUCK_COUNT_LIMIT = 3;
 export const USE_STUCK_VISUAL = true;
 
 /**
+ * Colors to use for: 100%, 75+%, 50+%, 25+%
+ */
+export const STUCK_VISUAL_COLORS = [
+    "#FF0000", // 100% + 
+    "#800080", //  75% +
+    "#0000FF", //  50% +
+    "#FFFFFF", //  25% +
+]
+/**
  * Minimum amount of energy a container must have to be used in a GetEnergyJob
  */
 export const CONTAINER_MINIMUM_ENERGY = 100;

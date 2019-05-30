@@ -15,7 +15,7 @@ import {
     STIMULATE_FLAG
 } from "utils/constants";
 import RoomHelper from "Helpers/RoomHelper";
-import { STUCK_COUNT_LIMIT } from "utils/config";
+import { STUCK_COUNT_LIMIT, STUCK_VISUAL_COLORS } from "utils/config";
 
 const textColor = "#bab8ba";
 const textSize = 0.8;
@@ -320,16 +320,16 @@ export default class RoomVisualHelper {
 
         if(percentStuck >= 1) {
             // Creep is stuck
-            circleColor = "#FF0000";
+            circleColor = STUCK_VISUAL_COLORS[0];
         } else if (percentStuck >= .75) {
             // Almost stuck
-            circleColor = "#8000080";
+            circleColor = STUCK_VISUAL_COLORS[1];
         } else if (percentStuck >= .50) {
             // Halfway to stuck
-            circleColor = "#0000FF";
+            circleColor = STUCK_VISUAL_COLORS[2];
         } else if (percentStuck >= .25) {
             // Starting to get stuck
-            circleColor = "#FFFFFF";
+            circleColor = STUCK_VISUAL_COLORS[3];
         } else {
             // Not very stuck - don't draw
             return;
