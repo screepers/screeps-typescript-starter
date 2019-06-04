@@ -22,7 +22,7 @@ export const STUCK_COUNT_LIMIT = 3;
 export const USE_STUCK_VISUAL = true;
 
 /**
- * Colors to use for: 100%, 75+%, 50+%, 25+%
+ * Colors to use for: 100%, 75+%, 50+%, 25+% (percent to stuck reset)
  */
 export const STUCK_VISUAL_COLORS = [
     "#FF0000", // 100% + 

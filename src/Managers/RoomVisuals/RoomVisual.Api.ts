@@ -135,6 +135,9 @@ export default class RoomVisualApi {
             if (creepLimits.remoteLimits.remoteColonizer > 0) {
                 lines.push("Remote Colonizers:    " + roles[ROLE_COLONIZER] + " / " + creepLimits.remoteLimits.remoteColonizer);
             }
+            if (creepLimits.remoteLimits.remoteDefender > 0) {
+                lines.push("Remote Defenders:    " + roles[ROLE_REMOTE_DEFENDER] + " / " + creepLimits.remoteLimits.remoteDefender);
+            }
             if (creepLimits.remoteLimits.claimer > 0) {
                 lines.push("Claimers:       " + roles[ROLE_CLAIMER] + " / " + creepLimits.remoteLimits.claimer);
             }
