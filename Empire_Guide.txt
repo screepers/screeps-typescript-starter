@@ -66,9 +66,7 @@ Option Flags:
 
 
 -------- Known Bugs --------
-    Stimulate flag doesn't properly process
-    Depedent override flag processes and works fine, but still gives console warning as if it isn't a correct flag type
-    Harvesters losing job on the way to it (will be fixed by marking jobs as taken)
+    
 
 
 -------- Console Commands --------
