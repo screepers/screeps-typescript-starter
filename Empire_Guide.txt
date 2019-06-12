@@ -121,6 +121,25 @@ Domestic Defender:
   
 Remote Defender:
   Melee + ranged + heal hybrid. Only spawned to defend a remote room from attack.
+  
+---- How To ----------------------------
+Attack a Room --- :
+  Place a Red + {secondaryColor} flag in the room you wish to attack.
+  Place a rally flag where you wish for squads to rally, if no rally flag is present, squad will rally in the room before the attack     room
+  
+Claim a Room ---- :
+  Place a White + {secondaryColor} flag in the room you wish to claim
+  
+Set a Remote Room --- :
+  Place a Yellow + {secondaryColor} flag in the room you wish to set as your remote room
+  
+Override Automatic Dependent Room (Attack, Remote, Claim) Placement --- :
+  Place an Override Option Flag in the Owned room you wish to set as the host room
+  Place a remote, attack, or claim flag at your desired location
+  Note: 
+    Only one dependent override room may be active at a time
+    The override flag will be removed after the host room is assigned a dependent room
+
 Code Instructions: ---------------------
 
 ---- Adding a new Military Role --------
