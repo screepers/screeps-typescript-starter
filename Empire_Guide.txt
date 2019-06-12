@@ -1,44 +1,5 @@
 Simple general info for the empire and running the code:
 
-------- Common terminal commands ---------
-Compile and upload code to screeps:
-    rollup -c --environment DEST:main       // compile and upload once
-    rollup -cw --environment DEST:main      // watch the code to compile and reupload on save
-
-Git Command Line Cheat Sheet:
-    git status
-        shows information about your current state in git (branch, commits, files staged, etc)
-
-    git add {filepath}
-        stage a single file
-    git add -u
-        stage all unstaged files that you previous staged
-    git add .
-        stage all unstaged files
-
-    git commit -m "commit message here"
-        commit with a message
-    git commit
-        commit and opens up vi in terminal with info about your commit, write message and do :wq to save commit
-
-    git push
-        i mean yeah... lol
-    git push -f
-        force replace the origin branch with your local branch
-
-    git rebase {branch name}
-        rebase a branch into your current HEAD (puts all your commits after the last commit on the branch you're bringing in)
-    git pull
-        git fetch and git merge mixed into one command
-
-    git checkout {branch name}
-        checkout a new branch off your current local HEAD
-    git checkout {old branch name} -b {new branch name}
-        checkout a new branch off the old branch (ie git checkout origin/master -b coolnewfeature)
-    git branch
-        show all local branches with a * by the one your HEAD is pointing to
-
-
 -------- Flag Types ---------
 
 Remote Flag:
@@ -66,24 +27,28 @@ Option Flags:
 
 
 -------- Known Bugs --------
-    
+  Remote rooms put a lot of stress on a room, and energy isn't being used effectively (a lot of dissapearing energy for some reason)
+  Military spawning rework in progress so extremely buggy
+  Claiming not online yet
+  Power upgrader not yet working
 
 
 -------- Console Commands --------
-// removes constructions sites in a room, can specify which type
-removeConstructionSites(roomName: string, structureType?: string): void;
 
-// Removes flags by name
-removeFlags(substr: string): void;
+  // removes constructions sites in a room, can specify which type
+  removeConstructionSites(roomName: string, structureType?: string): void;
 
-// Display room status, can specify which room
-displayRoomStatus(roomName: string): void;
+  // Removes flags by name
+  removeFlags(substr: string): void;
 
-// Kills all creeps, can specify which room
-killAllCreeps(room?: Room): void;
+  // Display room status, can specify which room
+  displayRoomStatus(roomName: string): void;
 
-// Send amount of type of resource from one room to the target room
-sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void;
+  // Kills all creeps, can specify which room
+  killAllCreeps(room?: Room): void;
+
+  // Send amount of type of resource from one room to the target room
+  sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void;
 
 
 ----- Military Instructions ------
@@ -140,42 +105,118 @@ Override Automatic Dependent Room (Attack, Remote, Claim) Placement --- :
     Only one dependent override room may be active at a time
     The override flag will be removed after the host room is assigned a dependent room
 
+General Suggested Room Flow ------------ (Subject to change, update as new optimizations are found)
+
+Each RCL ---:
+  Build all extensions and roads leading/through them every chance you get
+  Build towers every chance you get
+  Build Spawn every chance you get
+  
+RCL 1 ---:
+  No action needed
+
+RCL 2 ---:
+  Build roads to sources and controller
+  
+RCL 3 ---: 
+  Build containers at the sources
+  Build walls and ramparts
+
+RCL 4 ---:
+  Build Extensions, roads through the extensions, and a storage
+  Upon storage completion, claim a remote room
+  
+RCL 5 ---: 
+  No additional actions needed
+  
+RCL 6 ---:
+  Build links, terminal, and labs
+  Upon links' completion, power upgrader comes out
+
+RCL 7 ---:
+  Expand to multiple remote rooms as the second spawn can now support them
+
+RCL 8 ---:
+  No additional actions needed
+
+
 Code Instructions: ---------------------
 
 ---- Adding a new Military Role --------
-Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)
-Create and complete a role manager
-Add the call to the role manager to run creep role switch statement
-Add creep body definition
-Add creep options definition
-Add creep military options
-Add getTargetRoom definition
-Create the flag to trigger spawning for the role
-Add the handling for the new role in militaryQueue spawn
-Add reference to empire guide for the flag definition/role spawned
+  Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)
+  Create and complete a role manager
+  Add the call to the role manager to run creep role switch statement
+  Add creep body definition
+  Add creep options definition
+  Add creep military options
+  Add getTargetRoom definition
+  Create the flag to trigger spawning for the role
+  Add the handling for the new role in militaryQueue spawn
+  Add reference to empire guide for the flag definition/role spawned
 
 ---- Adding a new Domestic Role --------
-Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)
-Create and complete a role manager
-Add the call to the role manager to run creep role switch statement
-Add creep body definition
-Add creep options definition
-Add getTargetRoom definition
-Add the new role to creep limits in types and in the spawn api/helper functions
-Add definitions for when this creep should spawn
+  Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)
+  Create and complete a role manager
+  Add the call to the role manager to run creep role switch statement
+  Add creep body definition
+  Add creep options definition
+  Add getTargetRoom definition
+  Add the new role to creep limits in types and in the spawn api/helper functions
+  Add definitions for when this creep should spawn
 
 ---- Adding a new Remote Role ----------
-Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)
-Create and complete a role manager
-Add the call to the role manager to run creep role switch statement
-Add creep body definition
-Add creep options definition
-Add getTargetRoom definition
-Add the new role to creep limits in types and in the spawn api/helper functions
-Add definitions for when this creep should spawn
+  Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)
+  Create and complete a role manager
+  Add the call to the role manager to run creep role switch statement
+  Add creep body definition
+  Add creep options definition
+  Add getTargetRoom definition
+  Add the new role to creep limits in types and in the spawn api/helper functions
+  Add definitions for when this creep should spawn
 
 ---- Adding a new Flag -----------------
-Create the flag type constant
-Put the flag call to be processed in its proper place if its a form of an existing flag, put it in a new color catagory if its a completely new flag type
-Add function in api/helper to process the new flag type
-Add reference to empire guide
+  Create the flag type constant
+  Put the flag call to be processed in its proper place if its a form of an existing flag, put it in a new color catagory if its a completely new flag type
+  Add function in api/helper to process the new flag type
+  Add reference to empire guide
+
+
+------- Common terminal commands ---------
+Compile and upload code to screeps:
+    rollup -c --environment DEST:main       // compile and upload once
+    rollup -cw --environment DEST:main      // watch the code to compile and reupload on save
+
+Git Command Line Cheat Sheet:
+    git status
+        shows information about your current state in git (branch, commits, files staged, etc)
+
+    git add {filepath}
+        stage a single file
+    git add -u
+        stage all unstaged files that you previous staged
+    git add .
+        stage all unstaged files
+
+    git commit -m "commit message here"
+        commit with a message
+    git commit
+        commit and opens up vi in terminal with info about your commit, write message and do :wq to save commit
+
+    git push
+        i mean yeah... lol
+    git push -f
+        force replace the origin branch with your local branch
+
+    git rebase {branch name}
+        rebase a branch into your current HEAD (puts all your commits after the last commit on the branch you're bringing in)
+    git rebase -i {branch name}
+        rebase a branch into your current HEAD, interactive mode, use this to squash/edit/exlucde commits
+    git pull
+        git fetch and git merge mixed into one command
+
+    git checkout {branch name}
+        checkout a new branch off your current local HEAD
+    git checkout {old branch name} -b {new branch name}
+        checkout a new branch off the old branch (ie git checkout origin/master -b coolnewfeature)
+    git branch
+        show all local branches with a * by the one your HEAD is pointing to
