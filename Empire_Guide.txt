@@ -144,6 +144,7 @@ Code Instructions: ---------------------
 
 ---- Adding a new Military Role --------
   Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)
+  Add to mili config the name of the creep role to add to the proper tier it's spawning is considered for, and ALL_MILI_ROLES
   Create and complete a role manager
   Add the call to the role manager to run creep role switch statement
   Add creep body definition
@@ -179,6 +180,7 @@ Code Instructions: ---------------------
   Put the flag call to be processed in its proper place if its a form of an existing flag, put it in a new color catagory if its a completely new flag type
   Add function in api/helper to process the new flag type
   Add reference to empire guide
+  If the new flag is a military flag, go to mili config and add the reference to it (this is used for squad spawning)
 
 
 ------- Common terminal commands ---------
