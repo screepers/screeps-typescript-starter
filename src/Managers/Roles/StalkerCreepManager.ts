@@ -5,13 +5,13 @@ import MiliApi from "Api/CreepMili.Api";
 
 
 // Manager for the miner creep role
-export default class StalkerCreepManager {
+export default class StalkerCreepManager implements ICreepRoleManager {
 
     /**
      * run the stalker creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
+    public runCreepRole(creep: Creep): void {
 
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 3;

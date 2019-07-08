@@ -8,13 +8,13 @@ import {
 } from "utils/constants";
 
 // Manager for the miner creep role
-export default class RemoteColonizerCreepManager {
+export default class RemoteColonizerCreepManager implements ICreepRoleManager {
 
     /**
      * run the remote colonizer creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
+    public runCreepRole(creep: Creep): void {
 
     }
 }

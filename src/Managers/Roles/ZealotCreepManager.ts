@@ -4,13 +4,13 @@ import {
 } from "utils/constants";
 
 // Manager for the miner creep role
-export default class ZealotCreepManager {
+export default class ZealotCreepManager implements ICreepRoleManager {
 
     /**
      * run the zealot creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
+    public runCreepRole(creep: Creep): void {
         if (creep.spawning) {
             return;
         }

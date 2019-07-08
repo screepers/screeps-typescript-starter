@@ -7,12 +7,12 @@ import { ERROR_WARN } from "utils/constants";
 import UserException from "utils/UserException";
 
 // Manager for the miner creep role
-export default class ClaimerCreepManager {
+export default class ClaimerCreepManager implements ICreepRoleManager {
     /**
      * run the claimer creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
+    public runCreepRole(creep: Creep): void {
         if (creep.spawning) {
             return;
         }
@@ -40,7 +40,7 @@ export default class ClaimerCreepManager {
         CreepApi.travelTo(creep, creep.memory.job);
     }
 
-    public static getClaimJob(creep: Creep, room: Room): ClaimPartJob | undefined {
+    public getClaimJob(creep: Creep, room: Room): ClaimPartJob | undefined {
         const creepOptions = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.claim) {
@@ -54,7 +54,7 @@ export default class ClaimerCreepManager {
         return undefined;
     }
 
-    public static handleNewJob(creep: Creep, room: Room, job: ClaimPartJob): void {
+    public handleNewJob(creep: Creep, room: Room, job: ClaimPartJob): void {
         const newJob = MemoryApi.searchClaimPartJobs(job, room);
 
         if (newJob === undefined) {

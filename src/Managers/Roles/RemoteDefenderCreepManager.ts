@@ -2,12 +2,12 @@ import { DEFAULT_MOVE_OPTS } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";
 
 // Manager for the miner creep role
-export default class RemoteDefenderCreepManager {
+export default class RemoteDefenderCreepManager implements ICreepRoleManager {
     /**
      * run the remote defender creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
+    public runCreepRole(creep: Creep): void {
         if (creep.spawning) {
             return;
         }

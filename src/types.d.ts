@@ -169,6 +169,10 @@ type ROLE_MEDIC = "medic"; //
  * Military Creep - Defends the home room
  */
 type ROLE_DOMESTIC_DEFENDER = "domesticDefender"; //
+
+interface ICreepRoleManager {
+    runCreepRole: (creep: Creep) => void;
+}
 // --------------------------------------------------------------------
 
 /**
