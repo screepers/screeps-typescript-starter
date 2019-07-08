@@ -2,6 +2,7 @@ import { C_EVENT_BUILD_COMPLETE, C_EVENT_CREEP_SPAWNED } from "utils/Constants";
 import EventHelper from "Helpers/EventHelper";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import UserException from "utils/UserException";
+import MemoryApi from "./Memory.Api";
 
 export default class EventApi {
 
@@ -102,6 +103,10 @@ export default class EventApi {
     public static processConstructionSiteEvent(room: Room, event: CustomEvent, subject: any): void {
         const siteBuilt: Structure = subject as Structure;
 
+        // Handle for all construction sites ---------
+        MemoryApi.cleanCreepDeadJobsMemory(room.name);
+
+        // Handle specifics sites --------------------
         // Handle ramparts being built
         if (siteBuilt.structureType === STRUCTURE_RAMPART) {
             EventHelper.rampartBuiltTrigger(room, event, siteBuilt);

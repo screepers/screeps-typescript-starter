@@ -17,7 +17,6 @@ export default class EventHelper {
 
         // Update upgrade jobs and fire all the creeps
         MemoryHelper_Room.updateWorkPart_buildJobs(room);
-        MemoryApi.cleanCreepDeadJobsMemory(room.name);
     }
 
     /**
@@ -34,58 +33,7 @@ export default class EventHelper {
             return;
         }
 
-        // Get all attack flag memory associated with the room (should only be 1, but plan for multiple possible in future)
-        const attackRoomFlags: AttackFlagMemory[] = MemoryApi.getAllAttackFlagMemoryForHost(room.name);
-        const creepOptions: CreepOptionsMili = creep.memory.options! as CreepOptionsMili;
-        const creepRole: RoleConstant = creep.memory.role;
-        const creepIsSquadMember: boolean = creepOptions.squadSize !== 0;
-        let requestingFlag: AttackFlagMemory | undefined;
-
-        // Find the one that requested this creep and handle it accordingly
-        // !TODO Before Merging pullrequest and finish bug fixes
-        // Move this into a function, no reason the function should be this crowded with nonsense
-        // Also, brak plz, help me find a way to standarize this so we don't have to edit some cryptic function
-        // every time we want to add a military role
-        // If not removing that entirely, at least help make it easy to edit please lol
-        for (const attackFlag of attackRoomFlags) {
-
-            const flagType = attackFlag.flagType;
-            if (creepIsSquadMember) {
-                // Find flag for the creep in a squad
-                switch (flagType) {
-
-                    case STANDARD_SQUAD:
-                        if (STANDARD_SQUAD_ARRAY.includes(creepRole)) {
-                            requestingFlag = attackFlag;
-                        }
-                        break;
-                }
-            }
-            else {
-                // Find flag for creep NOT in a squad (solo)
-                switch (flagType) {
-
-                    case ZEALOT_SOLO:
-                        if (ZEALOT_SOLO_ARRAY.includes(creepRole)) {
-                            requestingFlag = attackFlag;
-                        }
-                        break;
-
-                    // If
-                    case STALKER_SOLO:
-                        if (STALKER_SOLO_ARRAY.includes(creepRole)) {
-                            requestingFlag = attackFlag;
-                        }
-                        break;
-                }
-            }
-
-            // If we found the flag, break the loop
-            if (requestingFlag !== undefined) {
-                break;
-            }
-        } // -------------------------------------
-
+        const requestingFlag: AttackFlagMemory | undefined = this.getRequestingFlag(creep, room);
         // Throw an error if we didn't find the flag
         if (requestingFlag === undefined) {
             throw new UserException(
@@ -96,13 +44,71 @@ export default class EventHelper {
             );
         }
 
-        // Increment the current spawned, if thats the cut off, complete the associated real flag
+        // Increment the current spawned, if thats the cut off, complete the associated real flag so it will be removed
         requestingFlag!.currentSpawnCount = requestingFlag!.currentSpawnCount + 1;
-        if (requestingFlag!.currentSpawnCount >= requestingFlag!.squadSize && requestingFlag!.currentSpawnCount > 0) {
-            if (Game.flags[requestingFlag!.flagName]) {
-                Game.flags[requestingFlag!.flagName].memory.complete = true;
+        const squadSize: number = requestingFlag!.squadSize;
+        const currCount: number = requestingFlag!.currentSpawnCount;
+        const flagName: string = requestingFlag!.flagName;
+        if (currCount >= squadSize) {
+            if (Game.flags[flagName]) {
+                Game.flags[flagName].memory.complete = true;
             }
         }
+    }
+
+    /**
+     * Find the flag that requested this creep to be spawned
+     * @param creep the creep we are checking the flag for
+     * @param room the room we are in
+     * @returns the requesting flag for this creep role
+     */
+    public static getRequestingFlag(creep: Creep, room: Room): AttackFlagMemory | undefined {
+
+        // Get all attack flag memory associated with the room (should only be 1, but plan for multiple possible in future)
+        const attackRoomFlags: AttackFlagMemory[] = MemoryApi.getAllAttackFlagMemoryForHost(room.name);
+
+        // Find the one that requested this creep to be returned
+        for (const attackFlag of attackRoomFlags) {
+            if (this.isRequestFlag(creep, attackFlag)) {
+                return attackFlag;
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * returns bool if the attack flag requested the creep
+     * @param creep the creep we are checking for
+     * @param attackFlag the attack flag we are checking against
+     * @returns true if the flag requested this creep
+     */
+    public static isRequestFlag(creep: Creep, attackFlag: AttackFlagMemory): boolean {
+
+        const flagType = attackFlag.flagType;
+        const creepOptions: CreepOptionsMili = creep.memory.options! as CreepOptionsMili;
+        const creepRole: RoleConstant = creep.memory.role;
+        const creepIsSquadMember: boolean = creepOptions.squadSize !== 0;
+
+        // Split between squad member creeps and solo creeps
+        if (creepIsSquadMember) {
+            switch (flagType) {
+
+                case STANDARD_SQUAD:
+                    return STANDARD_SQUAD_ARRAY.includes(creepRole);
+            }
+        }
+        else {
+            switch (flagType) {
+
+                case ZEALOT_SOLO:
+                    return ZEALOT_SOLO_ARRAY.includes(creepRole);
+
+                case STALKER_SOLO:
+                    return STALKER_SOLO_ARRAY.includes(creepRole);
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -111,9 +117,7 @@ export default class EventHelper {
      */
     public static scanForStructureBuiltEvents(room: Room): void {
 
-        // ISSUES
-        // The structure is NOT getting set as processed
-        // Solved, defined the property for it. should be fine now
+        // Still need to check this for bugs
 
         // Get all structures in the room that have not yet been processed
         const structures: Structure[] = MemoryApi.getStructures(
