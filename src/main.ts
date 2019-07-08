@@ -20,20 +20,6 @@
  *
  * 1. Migrate some of the getJob functions from CreepManagers to Creep.Api to make code accessible by other CreepManagers
  *
- * 2. Complete Remote Miner
- * We want the remote miner to go to a source and mine it, build a container and his feet, and build/repair it during his down time.
- * We should also give remote miners 7 work parts imo. 6 wasn't enough to keep the container repaired and it was slow on building it
- * It is an extra 100 energy per creep cycle but I think its worth it to keep the remote rooms going smoother
- *
- * 3. Complete Remote Harvester
- * They are so simple, just get a container or pick up job in the remote room
- * Should be straight forward, bring the energy back and based on options, do harvester jobs with it
- *
- * 4. Complete Remote Reserver
- * Find reserve job in remote room and reserve it until death, basically a miner for the controller
- * We need to find a way to get the rooms that need to be reserver
- * Probably just put a value in room memory and simulate its down ticks like we did last code base, it worked really well
- *
  * 5. Complete Claimer
  * Find a claim job in a claim room and claim it
  * We need to find a way to get the rooms that need to be claimed (should be easier than finding ones that need to be reserved)
@@ -73,8 +59,6 @@
  * ~~ BUG FIXES ~~
  * ~~~~~~~~~~~~~~~~
  *
- * 1. Harvesters need to fill extensions more efficiently - Choose closest, then check surrounding area for extensions before retargeting
- *
  * 2. It spawns 2 reservers when a remote room is placed, due to it not detecting the first one targeting the room yet.
  *
  * 3. UpgraderLink does not set itself in room memory - It should choose the one closest to spawn
@@ -83,19 +67,9 @@
  */
 
 /**
- * local todo: short term
- *
- * fix getTargetRoom for military creeps..
- * its using attack rooms to find the target room
- * either find a way to keep attack rooms alive until the squad has all spawned, or find a way for it to use something else
- * preferably the first one, so we get to keep the attack flag up
- * would be nice also to find a way to just keep them up full time, but not feasable atm
- *
  * fix red + brown spawning squad instead of stalker solo
  *
  * start with zealot and examine its attack code, look for bugs
- *
- * switch to travelTo for military creeps, brock says its good
  *
  * fix squad stuff (after stalker examinization obv)
  */

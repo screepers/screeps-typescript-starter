@@ -28,10 +28,20 @@ Option Flags:
 
 -------- Known Bugs --------
   Remote rooms put a lot of stress on a room, and energy isn't being used effectively (a lot of dissapearing energy for some reason)
-  Military spawning rework in progress so extremely buggy
+  Found reason for this, harvesters stopped filling storage (in presence of terminal at least, not sure if ONLY in this situation)
+  Working on events_api
   Claiming not online yet
   Power upgrader not yet working
 
+-------- Horizon -----------
+  Claiming
+  Expand military intelligence
+  Market
+  -
+    Inter-room assistance
+    Possibly assimilation-like feature where our code bases act as 1?
+    Robust Ally code to help each other
+  -
 
 -------- Console Commands --------
 
