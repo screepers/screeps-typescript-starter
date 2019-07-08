@@ -170,8 +170,24 @@ type ROLE_MEDIC = "medic"; //
  */
 type ROLE_DOMESTIC_DEFENDER = "domesticDefender"; //
 
+// Role Interfaces to be implemented  -------------
+/**
+ * Interface for Creep Role Managers
+ */
 interface ICreepRoleManager {
     runCreepRole: (creep: Creep) => void;
+}
+
+/**
+ * Interface for Creep Role Helpers (for body and options)
+ */
+interface ICreepBodyOptsHelper {
+    generateCreepOptions: (
+        roomState: RoomStateConstant,
+        squadSizeParam: number,
+        squadUUIDParam: number | null,
+        rallyLocationParam: RoomPosition | null) => (CreepOptionsCiv | undefined) | (CreepOptionsMili | undefined);
+    generateCreepBody: (tier: TierConstant) => BodyPartConstant[];
 }
 // --------------------------------------------------------------------
 

@@ -36,7 +36,8 @@ import {
     TIER_8,
     STANDARD_SQUAD,
     ZEALOT_SOLO,
-    STALKER_SOLO
+    STALKER_SOLO,
+    CREEP_BODY_OPT_HELPERS
 } from "utils/Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
@@ -463,45 +464,15 @@ export default class SpawnApi {
             rallyLocation = null;
         }
 
-        // Call the correct helper function based on creep role
-        switch (role) {
-            case ROLE_MINER:
-                return SpawnHelper.generateMinerOptions(roomState);
-            case ROLE_HARVESTER:
-                return SpawnHelper.generateHarvesterOptions(roomState);
-            case ROLE_WORKER:
-                return SpawnHelper.generateWorkerOptions(roomState);
-            case ROLE_LORRY:
-                return SpawnHelper.generateLorryOptions(roomState);
-            case ROLE_POWER_UPGRADER:
-                return SpawnHelper.generatePowerUpgraderOptions(roomState);
-            case ROLE_REMOTE_MINER:
-                return SpawnHelper.generateRemoteMinerOptions(roomState);
-            case ROLE_REMOTE_HARVESTER:
-                return SpawnHelper.generateRemoteHarvesterOptions(roomState);
-            case ROLE_COLONIZER:
-                return SpawnHelper.generateRemoteColonizerOptions(roomState);
-            case ROLE_CLAIMER:
-                return SpawnHelper.generateClaimerOptions(roomState);
-            case ROLE_REMOTE_DEFENDER:
-                return SpawnHelper.generateRemoteDefenderOptions(roomState);
-            case ROLE_REMOTE_RESERVER:
-                return SpawnHelper.generateRemoteReserverOptions(roomState);
-            case ROLE_ZEALOT:
-                return SpawnHelper.generateZealotOptions(roomState, squadSize, squadUUID, rallyLocation);
-            case ROLE_MEDIC:
-                return SpawnHelper.generateMedicOptions(roomState, squadSize, squadUUID, rallyLocation);
-            case ROLE_STALKER:
-                return SpawnHelper.generateStalkerOptions(roomState, squadSize, squadUUID, rallyLocation);
-            case ROLE_DOMESTIC_DEFENDER:
-                return SpawnHelper.generateDomesticDefenderOptions(roomState);
-            default:
-                throw new UserException(
-                    "Creep body failed generating.",
-                    'The role "' + role + '" was invalid for generating the creep body.',
-                    ERROR_ERROR
-                );
+        // If no role provided, throw warning
+        if (!role) {
+            throw new UserException(
+                "Null role provided to generate creep options",
+                "Api/SpawnApi",
+                ERROR_ERROR
+            );
         }
+        return CREEP_BODY_OPT_HELPERS[role].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
     }
 
     /**
@@ -510,45 +481,15 @@ export default class SpawnApi {
      * @param role the role of the creep we want
      */
     public static generateCreepBody(tier: TierConstant, role: RoleConstant | null): BodyPartConstant[] {
-        // Call the correct helper function based on creep role
-        switch (role) {
-            case ROLE_MINER:
-                return SpawnHelper.generateMinerBody(tier);
-            case ROLE_HARVESTER:
-                return SpawnHelper.generateHarvesterBody(tier);
-            case ROLE_WORKER:
-                return SpawnHelper.generateWorkerBody(tier);
-            case ROLE_LORRY:
-                return SpawnHelper.generateLorryBody(tier);
-            case ROLE_POWER_UPGRADER:
-                return SpawnHelper.generatePowerUpgraderBody(tier);
-            case ROLE_REMOTE_MINER:
-                return SpawnHelper.generateRemoteMinerBody(tier);
-            case ROLE_REMOTE_HARVESTER:
-                return SpawnHelper.generateRemoteHarvesterBody(tier);
-            case ROLE_COLONIZER:
-                return SpawnHelper.generateRemoteColonizerBody(tier);
-            case ROLE_CLAIMER:
-                return SpawnHelper.generateClaimerBody(tier);
-            case ROLE_REMOTE_DEFENDER:
-                return SpawnHelper.generateRemoteDefenderBody(tier);
-            case ROLE_REMOTE_RESERVER:
-                return SpawnHelper.generateRemoteReserverBody(tier);
-            case ROLE_ZEALOT:
-                return SpawnHelper.generateZealotBody(tier);
-            case ROLE_MEDIC:
-                return SpawnHelper.generateMedicBody(tier);
-            case ROLE_STALKER:
-                return SpawnHelper.generateStalkerBody(tier);
-            case ROLE_DOMESTIC_DEFENDER:
-                return SpawnHelper.generateDomesticDefenderBody(tier);
-            default:
-                throw new UserException(
-                    "Creep body failed generating.",
-                    'The role "' + role + '" was invalid for generating the creep body.',
-                    ERROR_ERROR
-                );
+
+        if (!role) {
+            throw new UserException(
+                "Null role provided to generate creep options",
+                "Api/SpawnApi",
+                ERROR_ERROR
+            );
         }
+        return CREEP_BODY_OPT_HELPERS[role].generateCreepBody(tier);
     }
 
     /**
