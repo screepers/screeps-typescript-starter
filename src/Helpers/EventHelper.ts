@@ -69,7 +69,8 @@ export default class EventHelper {
 
         // Find the one that requested this creep to be returned
         for (const attackFlag of attackRoomFlags) {
-            if (this.isRequestFlag(creep, attackFlag)) {
+            const flagRoomName: string = Game.flags[attackFlag.flagName].pos.roomName;
+            if (creep.memory.targetRoom === flagRoomName && this.isRequestFlag(creep, attackFlag)) {
                 return attackFlag;
             }
         }

@@ -137,4 +137,4 @@ export const ROOM_OVERLAY_BUCKET_LIMIT = 7000;
 /**
  * List of allies
  */
-export const ALLY_LIST: string[] = ["jakesboy2", "Uhmbrock", "Apexia", "SquishProxy"];
+export const ALLY_LIST: string[] = ["jakesboy2", "Uhmbrock"];
