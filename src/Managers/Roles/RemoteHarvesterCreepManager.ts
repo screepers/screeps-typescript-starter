@@ -1,9 +1,21 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import MemoryHelper from "Helpers/MemoryHelper";
+import {
+    DEFAULT_MOVE_OPTS,
+    ROLE_REMOTE_HARVESTER,
+} from "utils/constants";
 
 // Manager for the miner creep role
 export default class RemoteHarvesterCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_REMOTE_HARVESTER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the remote harvester creep
      * @param creep the creep we are running

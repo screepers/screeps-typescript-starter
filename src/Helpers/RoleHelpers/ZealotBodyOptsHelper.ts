@@ -16,12 +16,21 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
+    ROLE_ZEALOT,
     ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
 
 export class ZealotBodyOptsHelper implements ICreepBodyOptsHelper {
+
+    public name: RoleConstant = ROLE_ZEALOT;
+
+    constructor() {
+        const self = this;
+        self.generateCreepBody = self.generateCreepBody.bind(self);
+        self.generateCreepOptions = self.generateCreepOptions.bind(this);
+    }
 
     /**
      * Generate body for zealot creep
@@ -67,7 +76,7 @@ export class ZealotBodyOptsHelper implements ICreepBodyOptsHelper {
         // Temp override
         body = { attack: 1, move: 1 };
         // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
+        return SpawnApi.createCreepBody(body, opts);
     }
 
     /**

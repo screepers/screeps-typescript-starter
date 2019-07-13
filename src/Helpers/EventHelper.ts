@@ -134,11 +134,8 @@ export default class EventHelper {
         // Create an event for each unprocesseed structure, then set it as processed
         for (const key in structures) {
             const structure: Structure<StructureConstant> = structures[key];
-            console.log(structure);
-            console.log("b4: " + structure.memory.processed);
             EventApi.createCustomEvent(room.name, structure.id, C_EVENT_BUILD_COMPLETE);
             structure.memory.processed = true;
-            console.log("after: " + structure.memory.processed);
         }
     }
 

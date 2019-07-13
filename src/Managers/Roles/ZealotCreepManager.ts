@@ -1,10 +1,18 @@
 import MiliApi from "Api/CreepMili.Api";
 import {
-    DEFAULT_MOVE_OPTS
+    DEFAULT_MOVE_OPTS,
+    ROLE_ZEALOT,
 } from "utils/constants";
 
 // Manager for the miner creep role
 export default class ZealotCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_ZEALOT;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
 
     /**
      * run the zealot creep

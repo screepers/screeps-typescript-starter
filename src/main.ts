@@ -100,8 +100,6 @@ import EventManager from "Managers/EventManager";
 import "./proto/structures.prototype";
 
 export const loop = ErrorMapper.wrapLoop(() => {
-    // Init console commands
-    ConsoleCommands.init();
 
     if (RoomHelper.excecuteEveryTicks(1000)) {
         ConsoleCommands.init();

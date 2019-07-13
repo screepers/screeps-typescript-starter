@@ -1,8 +1,20 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
+import {
+    DEFAULT_MOVE_OPTS,
+    ROLE_POWER_UPGRADER,
+} from "utils/constants";
 
 // Manager for the miner creep role
 export default class PowerUpgraderCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_POWER_UPGRADER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the power upgrader creep
      * @param creep the creep we are running

@@ -612,6 +612,9 @@ export default class MemoryApi {
     ): RemoteRoomMemory[] {
         let remoteRooms: RemoteRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: RemoteRoomMemory) => true;
@@ -653,6 +656,9 @@ export default class MemoryApi {
     ): ClaimRoomMemory[] {
         let claimRooms: ClaimRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: ClaimRoomMemory) => true;
@@ -691,6 +697,9 @@ export default class MemoryApi {
     ): AttackRoomMemory[] {
         let attackRooms: AttackRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: Room) => true;

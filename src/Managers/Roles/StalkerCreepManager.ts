@@ -1,11 +1,19 @@
 import {
-    DEFAULT_MOVE_OPTS
+    DEFAULT_MOVE_OPTS,
+    ROLE_STALKER,
 } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";
 
 
 // Manager for the miner creep role
 export default class StalkerCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_STALKER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
 
     /**
      * run the stalker creep

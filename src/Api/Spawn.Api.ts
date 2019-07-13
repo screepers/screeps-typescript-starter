@@ -37,8 +37,8 @@ import {
     STANDARD_SQUAD,
     ZEALOT_SOLO,
     STALKER_SOLO,
-    CREEP_BODY_OPT_HELPERS
 } from "utils/Constants";
+import { CREEP_BODY_OPT_HELPERS } from "../utils/Interface_Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
 import MemoryApi from "./Memory.Api";
@@ -472,7 +472,17 @@ export default class SpawnApi {
                 ERROR_ERROR
             );
         }
-        return CREEP_BODY_OPT_HELPERS[role].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
+        // CREEP_BODY_OPT_HELPERS[role].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
+        for (const index in CREEP_BODY_OPT_HELPERS) {
+            if (CREEP_BODY_OPT_HELPERS[index].name === role) {
+                return CREEP_BODY_OPT_HELPERS[index].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
+            }
+        }
+        throw new UserException(
+            "Couldn't find ICreepBodyOptsHelper implementation for the role",
+            "role: " + role + "\nCreep Options",
+            ERROR_ERROR
+        );
     }
 
     /**
@@ -489,7 +499,16 @@ export default class SpawnApi {
                 ERROR_ERROR
             );
         }
-        return CREEP_BODY_OPT_HELPERS[role].generateCreepBody(tier);
+        for (const index in CREEP_BODY_OPT_HELPERS) {
+            if (CREEP_BODY_OPT_HELPERS[index].name === role) {
+                return CREEP_BODY_OPT_HELPERS[index].generateCreepBody(tier);
+            }
+        }
+        throw new UserException(
+            "Couldn't find ICreepBodyOptsHelper implementation for the role",
+            "role: " + role + "\nCreep Options",
+            ERROR_ERROR
+        );
     }
 
     /**
@@ -497,7 +516,7 @@ export default class SpawnApi {
      * @param bodyObject The object that describes the creep's body parts
      * @param opts The options for generating the creep body from the descriptor
      */
-    public static getCreepBody(bodyObject: CreepBodyDescriptor, opts?: CreepBodyOptions): BodyPartConstant[] {
+    public static createCreepBody(bodyObject: CreepBodyDescriptor, opts?: CreepBodyOptions): BodyPartConstant[] {
         let creepBody: BodyPartConstant[] = [];
         let numHealParts = 0;
 
