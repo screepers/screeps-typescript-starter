@@ -143,7 +143,7 @@ export default class MemoryHelper_Room {
 
         Memory.rooms[roomName].structures = { data: {}, cache: null };
 
-        const allStructures: Structure[] = Game.rooms[roomName].find(FIND_STRUCTURES);
+        const allStructures: Structure[] = Game.rooms[roomName].find(FIND_STRUCTURES) as Structure[];
         const sortedStructureIDs: StringMap = {};
         // For each structureType, remove the structures from allStructures and map them to ids in the memory object.
         _.forEach(ALL_STRUCTURE_TYPES, (type: StructureConstant) => {

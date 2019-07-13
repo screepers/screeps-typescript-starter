@@ -1,15 +1,25 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import CreepHelper from "Helpers/CreepHelper";
-import { ROLE_REMOTE_MINER } from "utils/constants";
+import {
+    ROLE_REMOTE_MINER,
+} from "utils/constants";
 
 // Manager for the miner creep role
-export default class RemoteMinerCreepManager {
+export default class RemoteMinerCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_REMOTE_MINER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * Run the remote miner creep
      * @param creep The creep to run
      */
-    public static runCreepRole(creep: Creep): void {
+    public runCreepRole(creep: Creep): void {
         if (creep.spawning) {
             return; // Don't do anything until you've spawned
         }
@@ -17,7 +27,7 @@ export default class RemoteMinerCreepManager {
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
 
-        if (CreepApi.creepShouldFlee(creep)){
+        if (CreepApi.creepShouldFlee(creep)) {
             CreepApi.fleeRemoteRoom(creep, homeRoom);
             return;
         }
@@ -46,7 +56,7 @@ export default class RemoteMinerCreepManager {
     /**
      * Get new job for the creep
      */
-    public static getNewJob(creep: Creep): BaseJob | undefined {
+    public getNewJob(creep: Creep): BaseJob | undefined {
         if (creep.room.name === creep.memory.targetRoom) {
             const targetRoom = Game.rooms[creep.memory.targetRoom];
             return CreepApi.getNewSourceJob(creep, targetRoom);
@@ -60,7 +70,7 @@ export default class RemoteMinerCreepManager {
     /**
      * Handle initalizing a new job
      */
-    public static handleNewJob(creep: Creep): void {
+    public handleNewJob(creep: Creep): void {
         const targetRoom: Room = Game.rooms[creep.memory.targetRoom];
         if (creep.memory.job!.jobType === "movePartJob") {
             return;

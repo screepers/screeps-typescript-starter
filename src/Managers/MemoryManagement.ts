@@ -12,6 +12,7 @@ export default class MemoryManager {
         MemoryApi.garbageCollection();
 
         const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
+        const dependentRooms: Room[] = MemoryApi.getVisibleDependentRooms();
 
         // Init memory for all owned rooms
         _.forEach(ownedRooms, (room: Room) => {
@@ -21,7 +22,6 @@ export default class MemoryManager {
         });
 
         // Init memory for all visible dependent rooms
-        const dependentRooms: Room[] = MemoryApi.getVisibleDependentRooms();
         _.forEach(dependentRooms, (room: Room) => {
             const isOwnedRoom: boolean = false;
             MemoryApi.initRoomMemory(room.name, isOwnedRoom);

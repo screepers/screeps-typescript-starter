@@ -112,9 +112,9 @@ export const FCREEP_CACHE_TTL = 20; // Friendly Creep
 export const HCREEP_CACHE_TTL = 1; // Hostile Creep
 // GetEnergyJob Constants
 export const SOURCE_JOB_CACHE_TTL = 50; // Source jobs
-export const CONTAINER_JOB_CACHE_TTL = 50; // Container jobs
+export const CONTAINER_JOB_CACHE_TTL = 5; // Container jobs
 export const LINK_JOB_CACHE_TTL = 50; // Link Jobs
-export const BACKUP_JOB_CACHE_TTL = 50; // Backup Jobs
+export const BACKUP_JOB_CACHE_TTL = 5; // Backup Jobs
 export const PICKUP_JOB_CACHE_TTL = 50; // Pickup Jobs
 // ClaimPartJob Constants
 export const CLAIM_JOB_CACHE_TTL = 1; // Claim Jobs
@@ -175,3 +175,7 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
         return costMatrix;
     }
 };
+
+// Custom Event Type Constants
+export const C_EVENT_BUILD_COMPLETE = 1;
+export const C_EVENT_CREEP_SPAWNED = 2;

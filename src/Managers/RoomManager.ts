@@ -11,6 +11,7 @@ import {
     RUN_RESERVE_TTL_TIMER,
     RUN_RAMPART_STATUS_UPDATE,
 } from "utils/config";
+import EventApi from "Api/Event.Api";
 
 // room-wide manager
 export default class RoomManager {
@@ -80,11 +81,13 @@ export default class RoomManager {
             RoomHelper.excecuteEveryTicks(RUN_RAMPART_STATUS_UPDATE)) {
             RoomApi.runSetRampartStatus(room);
         }
+
         // Run accessory functions for dependent rooms ----
         // Update reserve timer for remote rooms
         if (RoomHelper.excecuteEveryTicks(RUN_RESERVE_TTL_TIMER)) {
             RoomApi.simulateReserveTTL(room);
         }
+
     }
 
     /**

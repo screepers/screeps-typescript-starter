@@ -134,7 +134,7 @@ export default class RoomHelper {
         return (
             TOWER_POWER_ATTACK -
             (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
-                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+            (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
         );
     }
 
@@ -199,9 +199,9 @@ export default class RoomHelper {
             throw new UserException(
                 "Tried to getUpgraderLink of a room with no controller",
                 "Get Upgrader Link was called for room [" +
-                    room.name +
-                    "]" +
-                    ", but theres no controller in this room.",
+                room.name +
+                "]" +
+                ", but theres no controller in this room.",
                 ERROR_WARN
             );
         }
@@ -452,12 +452,68 @@ export default class RoomHelper {
     public static getDomesticDefenderLimitByDefcon(defcon: number): number {
         switch (defcon) {
             case 2:
-                return 0;
-            case 3:
                 return 1;
-            case 4:
+            case 3:
                 return 2;
+            case 4:
+                return 3;
         }
         return 0;
+    }
+
+
+    /**
+     * convert a room object to a room position object
+     * @param roomObj the room object we are converting
+     */
+    public static convertRoomObjToRoomPosition(roomObj: RoomObject): RoomPosition | null {
+
+        if (roomObj.room === undefined) {
+            return null;
+        }
+        const x: number = roomObj.pos.x;
+        const y: number = roomObj.pos.y;
+        const roomName: string = roomObj.room!.name;
+        return new RoomPosition(x, y, roomName);
+    }
+
+
+    /**
+     * check if the first room is a remote room of the second
+     */
+    public static isRemoteRoomOf(dependentRoomName: string, hostRoomName?: string): boolean {
+
+        // early returns
+        if (!hostRoomName) {
+            const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
+            for (const room of ownedRooms) {
+                const remoteRooms: RemoteRoomMemory[] = MemoryApi.getRemoteRooms(room);
+                if (_.some(remoteRooms, (rr: RemoteRoomMemory) =>
+                    rr.roomName === dependentRoomName)) {
+
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (!Memory.rooms[hostRoomName]) {
+            return false;
+        }
+        if (!Game.rooms[hostRoomName]) {
+            return false;
+        }
+
+        const remoteRooms: RemoteRoomMemory[] = MemoryApi.getRemoteRooms(Game.rooms[hostRoomName]);
+        return _.some(remoteRooms, (rr: RemoteRoomMemory) =>
+            rr.roomName === dependentRoomName);
+    }
+
+    /**
+     * verify that the object exists in the game
+     * @param id the id we are checking for
+     * @returns if the object exists
+     */
+    public static verifyObjectByID(id: string): boolean {
+        return Game.getObjectById(id) !== undefined;
     }
 }

@@ -187,7 +187,7 @@ export default class RoomApi {
         }
 
         // level 3 -- 50 - 150 body parts
-        if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
+        if (hostileBodyParts < 150 && hostileBodyParts > 50) {
             room.memory.defcon = 3;
             return;
         }
@@ -252,7 +252,7 @@ export default class RoomApi {
             (e: StructureSpawn) => {
                 return e.energy < e.energyCapacity;
             }
-        ) as StructureSpawn[];
+        ) as any as StructureSpawn[];
 
         const extensionsAndSpawns: Array<StructureExtension | StructureSpawn> = [];
         _.forEach(extensionsNeedFilled, (ext: StructureExtension) => extensionsAndSpawns.push(ext));

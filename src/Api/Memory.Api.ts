@@ -189,7 +189,8 @@ export default class MemoryApi {
                 droppedResources: { data: null, cache: null },
                 jobs: {},
                 structures: { data: null, cache: null },
-                upgradeLink: ""
+                upgradeLink: "",
+                events: [],
             };
         } else {
             Memory.rooms[roomName] = {
@@ -200,7 +201,8 @@ export default class MemoryApi {
                 droppedResources: { data: null, cache: null },
                 constructionSites: { data: null, cache: null },
                 defcon: -1,
-                hostiles: { data: null, cache: null }
+                hostiles: { data: null, cache: null },
+                events: [],
             };
         }
 
@@ -610,6 +612,9 @@ export default class MemoryApi {
     ): RemoteRoomMemory[] {
         let remoteRooms: RemoteRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: RemoteRoomMemory) => true;
@@ -651,6 +656,9 @@ export default class MemoryApi {
     ): ClaimRoomMemory[] {
         let claimRooms: ClaimRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: ClaimRoomMemory) => true;
@@ -689,6 +697,9 @@ export default class MemoryApi {
     ): AttackRoomMemory[] {
         let attackRooms: AttackRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: Room) => true;
@@ -806,7 +817,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -1427,10 +1438,10 @@ export default class MemoryApi {
             throw new UserException(
                 "Error in updateJobMemory",
                 "Could not find the job in room memory to update." +
-                    "\nCreep: " +
-                    creep.name +
-                    "\nJob: " +
-                    JSON.stringify(creep.memory.job),
+                "\nCreep: " +
+                creep.name +
+                "\nJob: " +
+                JSON.stringify(creep.memory.job),
                 ERROR_ERROR
             );
         }
@@ -1736,5 +1747,43 @@ export default class MemoryApi {
             expirationLimit: limit
         };
         Memory.empire.alertMessages.push(messageNode);
+    }
+
+    /**
+     * scan over all creeps in the room and verify their jobs.
+     * Remove any unverified jobs
+     * @param roomName the room we are scanning for
+     */
+    public static cleanCreepDeadJobsMemory(roomName: string): void {
+        const creepsInRoomWhoAreHustling: Creep[] = this.getMyCreeps(
+            roomName,
+            (creep: Creep) => creep.memory.job !== undefined
+        );
+
+        for (const hustler of creepsInRoomWhoAreHustling) {
+            const job: BaseJob = hustler.memory.job!;
+            if (!RoomHelper.verifyObjectByID(job.targetID)) {
+                delete hustler.memory.job
+            }
+        }
+    }
+
+    /**
+     * Get all attack flag memory objects associated with the host room
+     * @param hostRoomName the host room we are getting the memory from
+     * @returns an array of attack flag memory
+     */
+    public static getAllAttackFlagMemoryForHost(hostRoomName: string): AttackFlagMemory[] {
+        const hostRoom: Room = Game.rooms[hostRoomName];
+        const attackRooms: AttackRoomMemory[] = this.getAttackRooms(hostRoom);
+        const attackRoomFlags: AttackFlagMemory[] = [];
+        for (const attackRoom of attackRooms) {
+            for (const attackFlag of attackRoom.flags) {
+                if (attackFlag.active) {
+                    attackRoomFlags.push(attackFlag as AttackFlagMemory);
+                }
+            }
+        }
+        return attackRoomFlags;
     }
 }

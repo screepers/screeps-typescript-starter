@@ -93,11 +93,11 @@ export default class RoomVisualApi {
         lines.push("Creep Info");
         lines.push("");
         if (spawningCreep.length === 0) {
-            lines.push("Spawning:       " + "None");
+            lines.push("Spawning: " + "None");
         }
         for (const creep of spawningCreep) {
             spawningRole = creep.memory.role;
-            lines.push("Spawning:       " + spawningRole);
+            lines.push("Spawning: [ " + spawningRole + " ]");
         }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
 
@@ -535,7 +535,7 @@ export default class RoomVisualApi {
         RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
 
         // Draw the box around the text
-        largestMessage = (largestMessage / 3) < 10 ? 10 : (largestMessage / 3);
+        largestMessage = (largestMessage / 2.5) < 10 ? 10 : (largestMessage / 2.5);
         new RoomVisual(room.name)
             .line(x - largestMessage, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
             .line(x - largestMessage, y - 1, x + .25, y - 1)                  // top line

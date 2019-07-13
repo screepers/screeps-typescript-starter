@@ -5,14 +5,26 @@ import RoomHelper from "Helpers/RoomHelper";
 import MemoryHelper from "Helpers/MemoryHelper";
 import { close } from "fs";
 import { formatWithOptions } from "util";
+import {
+    ERROR_WARN,
+    ROLE_HARVESTER,
+} from "utils/constants";
 
 // Manager for the miner creep role
-export default class HarvesterCreepManager {
+export default class HarvesterCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_HARVESTER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the harvester creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
+    public runCreepRole(creep: Creep): void {
         if (creep.spawning) {
             return; // don't do anything until spawned
         }
@@ -42,7 +54,7 @@ export default class HarvesterCreepManager {
     /**
      * Decides which kind of job to get and calls the appropriate function
      */
-    public static getNewJob(creep: Creep, room: Room): BaseJob | undefined {
+    public getNewJob(creep: Creep, room: Room): BaseJob | undefined {
         // if creep is empty, get a GetEnergyJob
         if (creep.carry.energy === 0) {
             return CreepApi.newGetEnergyJob(creep, room);
@@ -94,7 +106,7 @@ export default class HarvesterCreepManager {
     /**
      * Get a CarryPartJob for the harvester
      */
-    public static newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
+    public newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillTower || creepOptions.fillSpawn || creepOptions.fillExtension) {
@@ -155,7 +167,7 @@ export default class HarvesterCreepManager {
     /**
      * Gets a new WorkPartJob for harvester
      */
-    public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
+    public newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
         const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
 
@@ -185,7 +197,7 @@ export default class HarvesterCreepManager {
     /**
      * Handles setup for a new job
      */
-    public static handleNewJob(creep: Creep, room: Room): void {
+    public handleNewJob(creep: Creep, room: Room): void {
         MemoryApi.updateJobMemory(creep, room);
     }
 }

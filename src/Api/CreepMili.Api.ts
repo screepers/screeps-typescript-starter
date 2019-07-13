@@ -98,7 +98,7 @@ export default class CreepMili {
                         // Set walls and ramparts as unwalkable
                         costs.set(struct.pos.x, struct.pos.y, 0xff);
                     }
-                });
+                } as any);
 
                 // Set creeps as unwalkable
                 room.find(FIND_CREEPS).forEach(function (currentCreep: Creep) {
@@ -139,7 +139,7 @@ export default class CreepMili {
             goal.pos = enemySpawn.pos;
             path = PathFinder.search(creep.pos, goal, pathFinderOptions);
             if (!path.incomplete) {
-                return enemySpawn;
+                return enemySpawn as any as Structure;
             }
         }
 
