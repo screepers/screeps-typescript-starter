@@ -16,6 +16,7 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
+    ROLE_MINER,
     ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
@@ -23,11 +24,19 @@ import SpawnApi from "Api/Spawn.Api";
 
 export class MinerBodyOptsHelper implements ICreepBodyOptsHelper {
 
+    public name: RoleConstant = ROLE_MINER;
+
+    constructor() {
+        const self = this;
+        self.generateCreepBody = self.generateCreepBody.bind(self);
+        self.generateCreepOptions = self.generateCreepOptions.bind(this);
+    }
+
     /**
      * Generate body for miner creep
      * @param tier The tier of the room
      */
-    public generateCreepBody(tier: TierConstant): BodyPartConstant[] {
+    public generateCreepBody = (tier: TierConstant): BodyPartConstant[] => {
         let body: CreepBodyDescriptor = { work: 2, move: 2 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
@@ -52,14 +61,14 @@ export class MinerBodyOptsHelper implements ICreepBodyOptsHelper {
         }
 
         // Generate the creep body based on the body array and options
-        return SpawnApi.getCreepBody(body, opts);
+        return SpawnApi.createCreepBody(body, opts);
     }
 
     /**
      * Generate options for miner creep
      * @param roomState the room state of the room
      */
-    public generateCreepOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
+    public generateCreepOptions = (roomState: RoomStateConstant): CreepOptionsCiv | undefined => {
         let creepOptions: CreepOptionsCiv = SpawnHelper.getDefaultCreepOptionsCiv();
 
         switch (roomState) {

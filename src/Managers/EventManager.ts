@@ -15,12 +15,16 @@ export default class EventManager {
         _.forEach(ownedRooms, (room: Room) => {
             EventApi.scanForNewEvents(room);
             EventApi.processRoomEvents(room);
+            EventApi.removeProcessedEvents(room);
         });
 
         // Init memory for all visible dependent rooms
         _.forEach(dependentRooms, (room: Room) => {
             EventApi.scanForNewEvents(room);
             EventApi.processRoomEvents(room);
+            EventApi.removeProcessedEvents(room);
         });
+
+        // Clean processed events out of the queue
     }
 }

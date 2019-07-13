@@ -1,10 +1,18 @@
 import {
-    DEFAULT_MOVE_OPTS
+    DEFAULT_MOVE_OPTS,
+    ROLE_DOMESTIC_DEFENDER,
 } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";
 
 // Manager for the Domestic Defender Creep Role
 export default class DomesticDefenderCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_DOMESTIC_DEFENDER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
 
     /**
      * run the domestic defender creep

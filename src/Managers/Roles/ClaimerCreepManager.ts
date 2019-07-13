@@ -3,11 +3,22 @@ import MemoryApi from "../../Api/Memory.Api";
 import CreepDomesticApi from "Api/CreepDomestic.Api";
 import CreepApi from "Api/Creep.Api";
 import CreepDomestic from "Api/CreepDomestic.Api";
-import { ERROR_WARN } from "utils/constants";
+import {
+    ERROR_WARN,
+    ROLE_CLAIMER,
+} from "utils/constants";
 import UserException from "utils/UserException";
 
 // Manager for the miner creep role
 export default class ClaimerCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_CLAIMER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the claimer creep
      * @param creep the creep we are running

@@ -175,6 +175,7 @@ type ROLE_DOMESTIC_DEFENDER = "domesticDefender"; //
  * Interface for Creep Role Managers
  */
 interface ICreepRoleManager {
+    name: RoleConstant;
     runCreepRole: (creep: Creep) => void;
 }
 
@@ -182,6 +183,7 @@ interface ICreepRoleManager {
  * Interface for Creep Role Helpers (for body and options)
  */
 interface ICreepBodyOptsHelper {
+    name: RoleConstant;
     generateCreepOptions: (
         roomState: RoomStateConstant,
         squadSizeParam: number,

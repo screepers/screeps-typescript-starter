@@ -16,12 +16,21 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
+    ROLE_HARVESTER,
     ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api";
 
 export class HarvesterBodyOptsHelper implements ICreepBodyOptsHelper {
+
+    public name: RoleConstant = ROLE_HARVESTER;
+
+    constructor() {
+        const self = this;
+        self.generateCreepBody = self.generateCreepBody.bind(self);
+        self.generateCreepOptions = self.generateCreepOptions.bind(this);
+    }
 
     /**
      * Generate body for Harvester creep
@@ -61,7 +70,7 @@ export class HarvesterBodyOptsHelper implements ICreepBodyOptsHelper {
         }
 
         // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
+        return SpawnApi.createCreepBody(body, opts);
     }
 
     /**

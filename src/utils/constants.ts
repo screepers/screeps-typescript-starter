@@ -1,35 +1,3 @@
-import MinerCreepManager from "../Managers/Roles/MinerCreepManager";
-import HarvesterCreepManager from "../Managers/Roles/HarvesterCreepManager";
-import WorkerCreepManager from "../Managers/Roles/WorkerCreepManager";
-import LorryCreepManager from "../Managers/Roles/LorryCreepManager";
-import PowerUpgraderCreepManager from "../Managers/Roles/PowerUpgraderCreepManager";
-import RemoteMinerCreepManager from "../Managers/Roles/RemoteMinerCreepManager";
-import RemoteHarvesterCreepManager from "../Managers/Roles/RemoteHarvesterCreepManager";
-import RemoteColonizerCreepManager from "../Managers/Roles/RemoteColonizerCreepManager";
-import ClaimerCreepManager from "../Managers/Roles/ClaimerCreepManager";
-import RemoteDefenderCreepManager from "../Managers/Roles/RemoteDefenderCreepManager";
-import RemoteReserverCreepManager from "../Managers/Roles/RemoteReserverCreepManager";
-import ZealotCreepManager from "../Managers/Roles/ZealotCreepManager";
-import MedicCreepManager from "../Managers/Roles/MedicCreepManager";
-import StalkerCreepManager from "../Managers/Roles/StalkerCreepManager";
-import DomesticDefenderCreepManager from "../Managers/Roles/DomesticDefenderCreepManager";
-import { MinerBodyOptsHelper } from "../Helpers/RoleHelpers/MinerBodyOptsHelper";
-import { HarvesterBodyOptsHelper } from "../Helpers/RoleHelpers/HarvesterBodyOptsHelper";
-import { WorkerBodyOptsHelper } from "../Helpers/RoleHelpers/WorkerBodyOptsHelper";
-import { LorryBodyOptsHelper } from "../Helpers/RoleHelpers/LorryBodyOptsHelper";
-import { PowerUpgraderBodyOptsHelper } from "../Helpers/RoleHelpers/PowerUpgraderBodyOptsHelper";
-import { ZealotBodyOptsHelper } from "../Helpers/RoleHelpers/ZealotBodyOptsHelper";
-import { StalkerBodyOptsHelper } from "../Helpers/RoleHelpers/StalkerBodyOptsHelper";
-import { MedicBodyOptsHelper } from "../Helpers/RoleHelpers/MedicBodyOptsHelper";
-import { DomesticDefenderBodyOptsHelper } from "../Helpers/RoleHelpers/DomesticDefenderBodyOptsHelper";
-import { RemoteColonizerBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteColonizerBodyOptsHelper";
-import { RemoteDefenderBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteDefenderOptsHelper";
-import { RemoteMinerBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteMinerBodyOptsHelper";
-import { RemoteHarvesterBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteHarvesterBodyOptsHelper";
-import { ClaimerBodyOptsHelper } from "../Helpers/RoleHelpers/ClaimerBodyOptsHelper";
-import { RemoteReserverBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteReserverBodyOptsHelper";
-// ---------- End Imports ----------------------------------------------------------------------------
-
 // Room State Constants
 export const ROOM_STATE_INTRO = 0;
 export const ROOM_STATE_BEGINNER = 1;
@@ -211,41 +179,3 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
 // Custom Event Type Constants
 export const C_EVENT_BUILD_COMPLETE = 1;
 export const C_EVENT_CREEP_SPAWNED = 2;
-
-// Constant containing the manager for each role, which all implement runRole
-export const CREEP_MANAGERS: { [index: string]: ICreepRoleManager } = {
-    ROLE_MINER: new MinerCreepManager(),
-    ROLE_HARVESTER: new HarvesterCreepManager(),
-    ROLE_WORKER: new WorkerCreepManager(),
-    ROLE_LORRY: new LorryCreepManager(),
-    ROLE_POWER_UPGRADER: new PowerUpgraderCreepManager(),
-    ROLE_REMOTE_MINER: new RemoteMinerCreepManager(),
-    ROLE_REMOTE_HARVESTER: new RemoteHarvesterCreepManager(),
-    ROLE_REMOTE_RESERVER: new RemoteReserverCreepManager(),
-    ROLE_REMOTE_DEFENDER: new RemoteDefenderCreepManager(),
-    ROLE_COLONIZER: new RemoteColonizerCreepManager(),
-    ROLE_CLAIMER: new ClaimerCreepManager(),
-    ROLE_ZEALOT: new ZealotCreepManager(),
-    ROLE_STALKER: new StalkerCreepManager(),
-    ROLE_MEDIC: new MedicCreepManager(),
-    ROLE_DOMESTIC_DEFENDER: new DomesticDefenderCreepManager(),
-}
-
-// Constant containing the manager for each role, which all implement runRole
-export const CREEP_BODY_OPT_HELPERS: { [index: string]: ICreepBodyOptsHelper } = {
-    ROLE_MINER: new MinerBodyOptsHelper(),
-    ROLE_HARVESTER: new HarvesterBodyOptsHelper(),
-    ROLE_WORKER: new WorkerBodyOptsHelper(),
-    ROLE_LORRY: new LorryBodyOptsHelper(),
-    ROLE_POWER_UPGRADER: new PowerUpgraderBodyOptsHelper(),
-    ROLE_REMOTE_MINER: new RemoteMinerBodyOptsHelper(),
-    ROLE_REMOTE_HARVESTER: new RemoteHarvesterBodyOptsHelper(),
-    ROLE_REMOTE_RESERVER: new RemoteReserverBodyOptsHelper(),
-    ROLE_REMOTE_DEFENDER: new RemoteDefenderBodyOptsHelper(),
-    ROLE_COLONIZER: new RemoteColonizerBodyOptsHelper(),
-    ROLE_CLAIMER: new ClaimerBodyOptsHelper(),
-    ROLE_ZEALOT: new ZealotBodyOptsHelper(),
-    ROLE_STALKER: new StalkerBodyOptsHelper(),
-    ROLE_MEDIC: new MedicBodyOptsHelper(),
-    ROLE_DOMESTIC_DEFENDER: new DomesticDefenderBodyOptsHelper(),
-}

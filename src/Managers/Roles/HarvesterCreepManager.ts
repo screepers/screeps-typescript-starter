@@ -5,9 +5,21 @@ import RoomHelper from "Helpers/RoomHelper";
 import MemoryHelper from "Helpers/MemoryHelper";
 import { close } from "fs";
 import { formatWithOptions } from "util";
+import {
+    ERROR_WARN,
+    ROLE_HARVESTER,
+} from "utils/constants";
 
 // Manager for the miner creep role
 export default class HarvesterCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_HARVESTER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the harvester creep
      * @param creep the creep we are running

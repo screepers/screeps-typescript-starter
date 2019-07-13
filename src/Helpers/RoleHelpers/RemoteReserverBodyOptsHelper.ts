@@ -16,12 +16,21 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
+    ROLE_REMOTE_RESERVER,
     ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
 
 export class RemoteReserverBodyOptsHelper implements ICreepBodyOptsHelper {
+
+    public name: RoleConstant = ROLE_REMOTE_RESERVER;
+
+    constructor() {
+        const self = this;
+        self.generateCreepBody = self.generateCreepBody.bind(self);
+        self.generateCreepOptions = self.generateCreepOptions.bind(this);
+    }
 
     /**
      * Generate body for remote reserver creep
@@ -43,7 +52,7 @@ export class RemoteReserverBodyOptsHelper implements ICreepBodyOptsHelper {
         }
 
         // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
+        return SpawnApi.createCreepBody(body, opts);
     }
 
     /**

@@ -16,12 +16,21 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
+    ROLE_DOMESTIC_DEFENDER,
     ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
 
 export class DomesticDefenderBodyOptsHelper implements ICreepBodyOptsHelper {
+
+    public name: RoleConstant = ROLE_DOMESTIC_DEFENDER;
+
+    constructor() {
+        const self = this;
+        self.generateCreepBody = self.generateCreepBody.bind(self);
+        self.generateCreepOptions = self.generateCreepOptions.bind(this);
+    }
 
     /**
      * generate body for domestic defender creep
@@ -61,7 +70,7 @@ export class DomesticDefenderBodyOptsHelper implements ICreepBodyOptsHelper {
         }
 
         // Generate creep body based on body array and options
-        return SpawnApi.getCreepBody(body, opts);
+        return SpawnApi.createCreepBody(body, opts);
     }
 
     /**

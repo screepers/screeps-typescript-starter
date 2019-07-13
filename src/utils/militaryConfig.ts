@@ -4,7 +4,7 @@ import {
     ROLE_STALKER,
     ROLE_ZEALOT,
     ROLE_DOMESTIC_DEFENDER,
-} from "utils/Constants";
+} from "./constants";
 
 /**
  * set a zealot flag to one time use
