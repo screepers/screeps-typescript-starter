@@ -1,5 +1,5 @@
 import EventApi from "Api/Event.Api";
-import { C_EVENT_CREEP_SPAWNED, C_EVENT_BUILD_COMPLETE, STANDARD_SQUAD, STALKER_SOLO } from "utils/Constants";
+import { C_EVENT_CREEP_SPAWNED, C_EVENT_BUILD_COMPLETE, STANDARD_SQUAD, STALKER_SOLO, ZEALOT_SOLO } from "utils/Constants";
 import { STANDARD_SQUAD_ARRAY, ZEALOT_SOLO_ARRAY, STALKER_SOLO_ARRAY } from "utils/militaryConfig";
 import MemoryApi from "Api/Memory.Api";
 import MemoryHelper_Room from "./MemoryHelper_Room";
@@ -147,7 +147,7 @@ export default class EventHelper {
 
         // Get all creeps who spawned this turn
         const spawnedCreeps: Creep[] = _.filter(MemoryApi.getMyCreeps(room.name, undefined, true), (creep: Creep) =>
-            creep.ticksToLive && creep.ticksToLive === 1500
+            creep.ticksToLive && creep.ticksToLive === 1499
         );
 
         // Loop over these creeps and create an event for them

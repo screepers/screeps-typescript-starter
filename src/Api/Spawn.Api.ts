@@ -225,6 +225,9 @@ export default class SpawnApi {
                     return false;
                 }
                 const flag: FlagMemory = Memory.flags[flagMem.flagName];
+                if (!flag) {
+                    return false;
+                }
                 return flagMem.active && !flag.complete && !flag.spawnProcessed;
             });
             if (activeAttackRoomFlag) {
