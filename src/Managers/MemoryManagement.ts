@@ -47,5 +47,9 @@ export default class MemoryManager {
         if (!Memory.empire) {
             Memory.empire = {};
         }
+
+        if (!Memory.structures) {
+            Memory.structures = {};
+        }
     }
 }

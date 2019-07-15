@@ -313,7 +313,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Creep[] {
         // If we have no vision of the room, return an empty array
-        if (!Memory.rooms[roomName] || !Memory.rooms[roomName].hostiles) {
+        if (!Game.rooms[roomName]) {
             return [];
         }
 
