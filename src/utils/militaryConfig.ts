@@ -55,3 +55,9 @@ export const TIER_3_MILITARY_PRIORITY: RoleConstant[] = [ROLE_STALKER, ROLE_MEDI
  * config for all military roles
  */
 export const ALL_MILITARY_ROLES: RoleConstant[] = [ROLE_STALKER, ROLE_MEDIC, ROLE_ZEALOT, ROLE_DOMESTIC_DEFENDER];
+
+/**
+ * config for all defensive roles (no requesting flag)
+ * considering refactoring so defense drops a flag for a defender rather than special case?
+ */
+export const ALL_DEFENSIVE_ROLES: RoleConstant[] = [ROLE_DOMESTIC_DEFENDER];

@@ -1,9 +1,10 @@
 import EventApi from "Api/Event.Api";
-import { C_EVENT_CREEP_SPAWNED, C_EVENT_BUILD_COMPLETE, STANDARD_SQUAD, STALKER_SOLO, ZEALOT_SOLO } from "utils/Constants";
+import { C_EVENT_CREEP_SPAWNED, C_EVENT_BUILD_COMPLETE, STANDARD_SQUAD, STALKER_SOLO, ZEALOT_SOLO, ERROR_ERROR } from "utils/Constants";
 import { STANDARD_SQUAD_ARRAY, ZEALOT_SOLO_ARRAY, STALKER_SOLO_ARRAY } from "utils/militaryConfig";
 import MemoryApi from "Api/Memory.Api";
 import MemoryHelper_Room from "./MemoryHelper_Room";
 import UserException from "utils/UserException";
+import { SpawnHelper } from "./SpawnHelper";
 
 export default class EventHelper {
 
@@ -29,7 +30,7 @@ export default class EventHelper {
     public static miltaryCreepSpawnTrigger(room: Room, event: CustomEvent, creep: Creep): void {
 
         // Early return if creep has no options for some reason
-        if (!creep.memory.options) {
+        if (!creep.memory.options || SpawnHelper.isDefenseCreep(creep.memory.role)) {
             return;
         }
 

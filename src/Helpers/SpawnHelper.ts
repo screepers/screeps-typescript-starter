@@ -42,7 +42,8 @@ import {
     TIER_1_MILITARY_PRIORITY,
     TIER_2_MILITARY_PRIORITY,
     TIER_3_MILITARY_PRIORITY,
-    ALL_MILITARY_ROLES
+    ALL_MILITARY_ROLES,
+    ALL_DEFENSIVE_ROLES
 } from "utils/militaryConfig";
 import { RESERVER_MIN_TTL } from "utils/config";
 
@@ -195,6 +196,14 @@ export class SpawnHelper {
             }
         }
         return false;
+    }
+
+    /**
+     * check if the creep is a defenive military creep
+     * @param creepRole the creep we are checking
+     */
+    public static isDefenseCreep(creepRole: RoleConstant): boolean {
+        return ALL_DEFENSIVE_ROLES.includes(creepRole);
     }
 
     /**
