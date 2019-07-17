@@ -31,7 +31,7 @@ export default class MemoryManager {
     /**
      * Ensures the initial Memory object is defined properly
      */
-    public static initMainMemory() {
+    private static initMainMemory() {
         if (!Memory.rooms) {
             Memory.rooms = {};
         }

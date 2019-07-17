@@ -24,7 +24,5 @@ export default class EventManager {
             EventApi.processRoomEvents(room);
             EventApi.removeProcessedEvents(room);
         });
-
-        // Clean processed events out of the queue
     }
 }
