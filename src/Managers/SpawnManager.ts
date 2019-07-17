@@ -22,7 +22,7 @@ export default class SpawnManager {
      * run spawn ai for a specific room
      * @param room the room we are running spawn for
      */
-    public static runSpawnForRoom(room: Room): void {
+    private static runSpawnForRoom(room: Room): void {
         const openSpawn: StructureSpawn | null = SpawnApi.getOpenSpawn(room);
 
         // if we don't have an open spawn, return early

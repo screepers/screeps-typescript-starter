@@ -21,7 +21,7 @@ export default class CreepManager {
      * run single creep manager
      * @param creep the creep we are calling the manager for
      */
-    public static runSingleCreepManager(creep: Creep): void {
+    private static runSingleCreepManager(creep: Creep): void {
         const role = creep.memory.role;
 
         // If no role provided, throw warning

@@ -39,7 +39,7 @@ export default class RoomManager {
      * run the room for a single owned room
      * @param room the room we are running this manager function on
      */
-    public static runSingleRoom(room: Room): void {
+    private static runSingleRoom(room: Room): void {
 
         // Set Defcon and Room State (roomState relies on defcon being set first)
         if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
@@ -94,7 +94,7 @@ export default class RoomManager {
      * run the room for an unowned room
      * @param room the room we are running
      */
-    public static runSingleDependentRoom(room: Room): void {
+    private static runSingleDependentRoom(room: Room): void {
 
         // Set Defcon for the dependent room
         if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
