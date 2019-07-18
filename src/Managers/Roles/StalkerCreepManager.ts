@@ -12,7 +12,9 @@ export default class StalkerCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
+        if (creep.spawning) {
+            return;
+        }
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 3;
 
@@ -22,7 +24,8 @@ export default class StalkerCreepManager implements ICreepRoleManager {
         }
 
         // Find a target for the creep
-        const target: Creep | Structure<StructureConstant> | undefined = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        creepOptions.attackTarget = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const target: Creep | Structure<StructureConstant> | undefined = creepOptions.attackTarget;
         const isMelee: boolean = false;
         if (!target) {
             return; // idle if no current target
@@ -38,5 +41,8 @@ export default class StalkerCreepManager implements ICreepRoleManager {
 
         // We are in attack range and healthy, attack the target
         creep.attack(target);
+
+        // Reset offensive target
+        MiliApi.resetOffensiveTarget(creep);
     }
 }

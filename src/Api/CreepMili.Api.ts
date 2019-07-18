@@ -2,6 +2,7 @@ import MemoryApi from "./Memory.Api";
 import { DEFAULT_MOVE_OPTS } from "utils/constants";
 import CreepApi from "./Creep.Api";
 import MiliHelper from "Helpers/MiliHelper";
+import UserException from "utils/UserException";
 
 // Api for military creep's
 export default class CreepMili {
@@ -24,7 +25,7 @@ export default class CreepMili {
 
 
         // If we don't have the full squad spawned yet, creep is waiting
-        if (!creepsInSquad && creepsInSquad!.length < squadSize) {
+        if (creepsInSquad && creepsInSquad!.length < squadSize) {
             return true;
         }
 
@@ -42,12 +43,7 @@ export default class CreepMili {
                 _.every(creepsInSquad!, (innerC: Creep) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, 7))
             );
 
-        if (creepsWithinRallyDistance) {
-            return true;
-        }
-
-        // If we make it to here, we are done waiting
-        return false;
+        return creepsWithinRallyDistance;
     }
 
     /**
@@ -79,7 +75,33 @@ export default class CreepMili {
      * @param rangeNum the range the creep is requesting for a target
      */
     public static getAttackTarget(creep: Creep, creepOptions: CreepOptionsMili, rangeNum: number): Creep | Structure<StructureConstant> | undefined {
+        if (!creepOptions) {
+            throw new UserException(
+                "No Creep Options for mili creep",
+                "getAttackTarget/CreepMiliApi, creep name: [ " + creep.name + " ]",
+                ERROR_ERROR
+            );
+        }
 
+        // Check if a squad member already has an attack target, if so choose that (so squads stay on the same page)
+        const squadMembers: Creep[] | null = MemoryApi.getCreepsInSquad(creep.room.name, creepOptions.squadUUID!);
+        if (squadMembers) {
+            const squadOptions: CreepOptionsMili[] = _.map(squadMembers, (c: Creep) => c.memory.options as CreepOptionsMili);
+            let targetOptions: Creep | Structure<StructureConstant> | undefined;
+            for (const opt of squadOptions) {
+                if (!opt.attackTarget) {
+                    continue;
+                }
+                targetOptions = opt.attackTarget!;
+                break;
+            }
+
+            if (targetOptions) {
+                return targetOptions;
+            }
+        }
+
+        // Find a fresh target if no creep in squad has a target yet
         let path: PathFinderPath;
         const goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: rangeNum }
         const pathFinderOptions: PathFinderOpts = {
@@ -245,13 +267,12 @@ export default class CreepMili {
      * moves the creep away from the target
      */
     public static kiteEnemyCreep(creep: Creep): boolean {
-        const hostileCreep: Creep | null = creep.pos.findClosestByPath(MemoryApi.getHostileCreeps(creep.room.name));
+        const hostileCreep: Creep | null = creep.pos.findClosestByRange(MemoryApi.getHostileCreeps(creep.room.name));
         const CREEP_RANGE: number = 3;
         if (!hostileCreep) {
             return false;
         }
         let path: PathFinderPath;
-        const goal: { pos: RoomPosition, range: number } = { pos: new RoomPosition(25, 25, creep.memory.targetRoom), range: CREEP_RANGE }
         const pathFinderOptions: PathFinderOpts = { flee: true }
         path = PathFinder.search(creep.pos, hostileCreep.pos, pathFinderOptions);
         if (path.path.length > 0) {
@@ -268,12 +289,21 @@ export default class CreepMili {
      * @param creepOptions the options for the military creep
      */
     public static checkMilitaryCreepBasics(creep: Creep, creepOptions: CreepOptionsMili): boolean {
+        if (!creepOptions) {
+            throw new UserException(
+                "Mili Creep has no creep options",
+                "CreepMiliApi/CheckMiliCreepBasics, creep name: [ " + creep.name + " ]",
+                ERROR_ERROR);
+        }
         const targetRoom: string = creep.memory.targetRoom;
         // I love tenary operators
         const fleeLocation = creepOptions.rallyLocation ? creepOptions.rallyLocation.roomName : creep.memory.homeRoom;
         // Check if we need to flee
         if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
             this.fleeCreep(creep, fleeLocation);
+            if (creepOptions.healer) {
+                creep.heal(creep);
+            }
             return true;
         }
 
@@ -308,5 +338,21 @@ export default class CreepMili {
     public static getAllyCreepsInRoom(room: Room): Creep[] {
         return _.filter(room.find(FIND_CREEPS),
             (creep: Creep) => MiliHelper.isAllyCreep(creep));
+    }
+
+    /**
+     * reset the creep's attack target in memory
+     * @param creep the creep we are resetting the options for
+     */
+    public static resetOffensiveTarget(creep: Creep): void {
+        const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
+        if (!creepOptions) {
+            throw new UserException(
+                "Tried to reset attack target of a creep with no options in memory",
+                "CreepMiliApi/ResetOffensiveTarget, Creep name: [ " + creep.name + " ]",
+                ERROR_WARN
+            );
+        }
+        creepOptions.attackTarget = undefined;
     }
 };

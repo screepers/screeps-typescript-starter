@@ -24,7 +24,8 @@ export default class ZealotCreepManager implements ICreepRoleManager {
         }
 
         // Find a target for the creep
-        const target: Creep | Structure<StructureConstant> | undefined = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        creepOptions.attackTarget = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const target: Creep | Structure<StructureConstant> | undefined = creepOptions.attackTarget;
         const isMelee: boolean = true;
         if (!target) {
             return; // idle if no current target
@@ -37,5 +38,8 @@ export default class ZealotCreepManager implements ICreepRoleManager {
 
         // We are in attack range and healthy, attack the target
         creep.attack(target);
+
+        // Reset creep's target
+        MiliApi.resetOffensiveTarget(creep);
     }
 }
