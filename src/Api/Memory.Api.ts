@@ -69,6 +69,13 @@ export default class MemoryApi {
                 delete Memory.flags[flag];
             }
         }
+
+        // Remove all dead structures from memory
+        for (const struct in Memory.structures) {
+            if (!Game.getObjectById(struct)) {
+                delete Memory.structures[struct];
+            }
+        }
     }
 
     /**
