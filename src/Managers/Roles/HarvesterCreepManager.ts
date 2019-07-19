@@ -108,7 +108,6 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
                 );
 
                 const closestTarget = creep.pos.findClosestByRange(jobObjects);
-
                 let closestJob;
 
                 if (closestTarget !== null) {

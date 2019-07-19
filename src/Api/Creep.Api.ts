@@ -776,11 +776,15 @@ export default class CreepApi {
                 (job: GetEnergyJob) => !job.isTaken && job.resources!.energy >= creep.carryCapacity
             );
 
-            if (backupStructures.length > 0) {
+            // Only get from the storage if there are jobs that don't involve just putting it right back
+            const isFillJobs = MemoryApi.getFillJobs(
+                room,
+                (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link",
+                true
+            ).length > 0;
+            if (backupStructures.length > 0 && isFillJobs) {
                 return backupStructures[0];
             }
-
-            return undefined;
         }
 
         return undefined;
