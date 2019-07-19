@@ -777,7 +777,7 @@ export default class CreepApi {
             );
 
             // Only get from the storage if there are jobs that don't involve just putting it right back
-            const isFillJobs = MemoryApi.getFillJobs(
+            const isFillJobs: boolean = MemoryApi.getFillJobs(
                 room,
                 (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link",
                 true
