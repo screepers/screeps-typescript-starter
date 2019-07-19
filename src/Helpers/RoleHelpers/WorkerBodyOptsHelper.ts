@@ -55,12 +55,12 @@ export class WorkerBodyOptsHelper implements ICreepBodyOptsHelper {
                 break;
 
             case TIER_5:
-            case TIER_4: // 8 Work, 4 Carry, 6 Move - Total Cost: 1300
-                body = { work: 8, carry: 4, move: 6 };
+            case TIER_4: // 6 Work, 4 Carry, 6 Move - Total Cost: 1100
+                body = { work: 6, carry: 4, move: 6 };
                 break;
 
             case TIER_6:
-                body = { work: 14, carry: 6, move: 10 };
+                body = { work: 10, carry: 6, move: 10 };
                 break;
 
             case TIER_8:

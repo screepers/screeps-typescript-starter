@@ -60,45 +60,9 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
             return CreepApi.newGetEnergyJob(creep, room);
         } else {
             let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
-
             if (job === undefined) {
                 job = this.newWorkPartJob(creep, room);
             }
-
-            if (job !== undefined) {
-                // Reset creep options if a job is found
-                // * This prevents a creep from getting a storageFill job after getting a getFromStorage job
-                const options = creep.memory.options as CreepOptionsCiv;
-                options.fillStorage = true;
-                options.fillTerminal = true;
-            } else if (room.memory.jobs && room.memory.jobs.getEnergyJobs) {
-                // Reset creep options if storage is not full and there are getEnergyJobs
-                // * This prevents a creep from idling after getting storage if storage is not full and there are now other sources of energy in the room
-                let numberOfGetEnergyJobs = 0;
-                // Add up the number of jobs available for this creep (>= creepCapacity)
-                if (room.memory.jobs.getEnergyJobs.containerJobs) {
-                    // add the number of jobs that meet criteria
-                    numberOfGetEnergyJobs += _.filter(
-                        room.memory.jobs.getEnergyJobs.containerJobs.data,
-                        (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity
-                    ).length;
-                }
-
-                if (room.memory.jobs.getEnergyJobs.pickupJobs) {
-                    // add the number of jobs that meet criteria
-                    numberOfGetEnergyJobs += _.filter(
-                        room.memory.jobs.getEnergyJobs.pickupJobs.data,
-                        (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity
-                    ).length;
-                }
-
-                if (numberOfGetEnergyJobs > 0) {
-                    const options = creep.memory.options as CreepOptionsCiv;
-                    options.fillStorage = true;
-                    options.fillTerminal = true;
-                }
-            }
-
             return job;
         }
     }
@@ -133,8 +97,6 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
                 }
                 return closestJob;
             }
-
-            return undefined;
         }
 
         if (creepOptions.fillStorage || creepOptions.fillTerminal) {
@@ -157,8 +119,6 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
                 }
                 return closestJob;
             }
-
-            return undefined;
         }
 
         return undefined;

@@ -777,10 +777,6 @@ export default class CreepApi {
             );
 
             if (backupStructures.length > 0) {
-                // Turn off access to storage until creep gets a work/carry job
-                const options = creep.memory.options as CreepOptionsCiv;
-                options.fillStorage = false;
-                options.fillTerminal = false;
                 return backupStructures[0];
             }
 

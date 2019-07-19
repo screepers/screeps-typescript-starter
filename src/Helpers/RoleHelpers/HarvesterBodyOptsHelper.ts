@@ -50,22 +50,19 @@ export class HarvesterBodyOptsHelper implements ICreepBodyOptsHelper {
                 body = { work: 2, carry: 4, move: 3 };
                 break;
 
-            case TIER_3: // 2 Work, 6 Carry, 6 Move - Total Cost: 800
+            case TIER_3: // 2 Work, 7 Carry, 5 Move - Total Cost: 800
                 body = { work: 2, carry: 7, move: 5 };
                 break;
 
-            case TIER_4: // 2 Work, 11 Carry, 11 Move - Total Cost: 1300
+            case TIER_6:
+            case TIER_5:
+            case TIER_4: // 16 Carry, 8 Move - Total Cost: 1200
                 body = { carry: 16, move: 8 };
                 break;
 
-            case TIER_6:
-            case TIER_5: // 2 Work, 16 Carry, 16 Move - Total Cost: 1800
-                body = { carry: 24, move: 12 };
-                break;
-
             case TIER_8:
-            case TIER_7: // 2 Work, 20 Carry, 20 Move - Total Cost: 2200
-                body = { carry: 28, move: 14 };
+            case TIER_7: // 20 Carry, 20 Move - Total Cost: 1500
+                body = { carry: 20, move: 10 };
                 break;
         }
 
@@ -87,7 +84,8 @@ export class HarvesterBodyOptsHelper implements ICreepBodyOptsHelper {
                     fillExtension: true,
                     fillStorage: true,
                     fillTerminal: true,
-                    getDroppedEnergy: true
+                    getDroppedEnergy: true,
+                    getFromContainer: true, //
                 };
                 break;
 
@@ -100,7 +98,8 @@ export class HarvesterBodyOptsHelper implements ICreepBodyOptsHelper {
                     fillExtension: true,
                     fillTerminal: true,
                     fillStorage: true,
-                    getDroppedEnergy: true //
+                    getDroppedEnergy: true, //
+                    getFromContainer: true, //
                 };
 
                 break;

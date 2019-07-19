@@ -105,6 +105,15 @@ export const loop = ErrorMapper.wrapLoop(() => {
         ConsoleCommands.init();
     }
 
+    // clean up memory
+    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > MEMORY_MANAGER_BUCKET_LIMIT) {
+        try {
+            MemoryManager.runMemoryManager();
+        } catch (e) {
+            UtilHelper.printError(e);
+        }
+    }
+
     // run the empire
     if (!Game.cpu["bucket"] || Game.cpu["bucket"] > EMPIRE_MANAGER_BUCKET_LIMIT) {
         try {
@@ -141,14 +150,6 @@ export const loop = ErrorMapper.wrapLoop(() => {
         }
     }
 
-    // clean up memory
-    if (!Game.cpu["bucket"] || Game.cpu["bucket"] > MEMORY_MANAGER_BUCKET_LIMIT) {
-        try {
-            MemoryManager.runMemoryManager();
-        } catch (e) {
-            UtilHelper.printError(e);
-        }
-    }
 
     // Display room visuals if we have a fat enough bucket and config option allows it
     if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > ROOM_OVERLAY_BUCKET_LIMIT && ROOM_OVERLAY_ON)) {
