@@ -21,7 +21,9 @@ export default class MedicCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
+        if (creep.spawning) {
+            return;
+        }
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 3;
 

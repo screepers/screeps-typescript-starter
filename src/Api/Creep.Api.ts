@@ -77,10 +77,10 @@ export default class CreepApi {
                 throw new UserException(
                     "Bad job.jobType in CreepApi.travelTo",
                     "The jobtype of the job passed to CreepApi.travelTo was invalid" +
-                        "\nCreep: " +
-                        creep.name +
-                        "\n Job Type: " +
-                        job.jobType,
+                    "\nCreep: " +
+                    creep.name +
+                    "\n Job Type: " +
+                    job.jobType,
                     ERROR_FATAL
                 );
         }
@@ -107,7 +107,7 @@ export default class CreepApi {
             creep.memory._move.lastPosition = currPosition;
             creep.memory._move.stuckCount = 0;
             return false; // Creep has moved since last tick
-        } else { 
+        } else {
             // Creep hasn't moved since last tick
             if (creep.fatigue === 0) {
                 creep.memory._move.stuckCount++;
@@ -130,7 +130,7 @@ export default class CreepApi {
      * Do work on the target provided by claimPartJob
      */
     public static doWork_ClaimPartJob(creep: Creep, job: ClaimPartJob) {
-        let target;
+        let target: any;
 
         if (job.targetType === "roomName") {
             if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
@@ -184,7 +184,7 @@ export default class CreepApi {
      * Do work on the target provided by carryPartJob
      */
     public static doWork_CarryPartJob(creep: Creep, job: CarryPartJob) {
-        let target;
+        let target: any;
 
         target = Game.getObjectById(job.targetID);
 
@@ -228,7 +228,7 @@ export default class CreepApi {
      * Do work on the target provided by workPartJob
      */
     public static doWork_WorkPartJob(creep: Creep, job: WorkPartJob) {
-        const target = Game.getObjectById(job.targetID);
+        const target: any = Game.getObjectById(job.targetID);
 
         this.nullCheck_target(creep, target);
 
@@ -296,7 +296,7 @@ export default class CreepApi {
      * Do work on the target provided by a getEnergyJob
      */
     public static doWork_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
-        const target = Game.getObjectById(job.targetID);
+        const target: any = Game.getObjectById(job.targetID);
 
         this.nullCheck_target(creep, target);
 
@@ -538,10 +538,10 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-                creep.name +
-                "]" +
-                "\n Job: " +
-                JSON.stringify(job),
+            creep.name +
+            "]" +
+            "\n Job: " +
+            JSON.stringify(job),
             ERROR_ERROR
         );
     }

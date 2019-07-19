@@ -853,6 +853,10 @@ interface CreepOptionsMili {
      */
     rallyDone?: boolean;
     /**
+     * the attack target for an offensive military creep
+     */
+    attackTarget?: Creep | Structure<StructureConstant> | undefined;
+    /**
      * if the creep is meant to seige the room to attrition (tower drain, etc)
      */
     seige?: boolean;
