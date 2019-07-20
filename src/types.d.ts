@@ -78,6 +78,7 @@ declare const ROLE_HARVESTER = "harvester";
 declare const ROLE_WORKER = "worker";
 declare const ROLE_POWER_UPGRADER = "powerUpgrader";
 declare const ROLE_LORRY = "lorry";
+declare const ROLE_MINERAL_MINER = "mineralMiner";
 declare const ROLE_REMOTE_MINER = "remoteMiner";
 declare const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 declare const ROLE_REMOTE_RESERVER = "remoteReserver";
@@ -98,6 +99,7 @@ type RoleConstant =
     | ROLE_WORKER
     | ROLE_POWER_UPGRADER
     | ROLE_LORRY
+    | ROLE_MINERAL_MINER
     | ROLE_REMOTE_MINER
     | ROLE_REMOTE_HARVESTER
     | ROLE_REMOTE_RESERVER
@@ -126,9 +128,13 @@ type ROLE_WORKER = "worker"; //
  */
 type ROLE_POWER_UPGRADER = "powerUpgrader"; //
 /**
- * moves energy around the room to where it needs to be
+ * moves energy or resources around the room to where it needs to be
  */
 type ROLE_LORRY = "lorry";
+/**
+ * static miner for minerals
+ */
+type ROLE_MINERAL_MINER = "mineralMiner";
 /**
  * goes into remote room and sits on source to mine full-time
  */

@@ -2,6 +2,7 @@ import MinerCreepManager from "../Managers/Roles/MinerCreepManager";
 import HarvesterCreepManager from "../Managers/Roles/HarvesterCreepManager";
 import WorkerCreepManager from "../Managers/Roles/WorkerCreepManager";
 import LorryCreepManager from "../Managers/Roles/LorryCreepManager";
+import MineralMinerCreepManager from "Managers/Roles/MineralMinerManager";
 import PowerUpgraderCreepManager from "../Managers/Roles/PowerUpgraderCreepManager";
 import RemoteMinerCreepManager from "../Managers/Roles/RemoteMinerCreepManager";
 import RemoteHarvesterCreepManager from "../Managers/Roles/RemoteHarvesterCreepManager";
@@ -12,11 +13,13 @@ import RemoteReserverCreepManager from "../Managers/Roles/RemoteReserverCreepMan
 import ZealotCreepManager from "../Managers/Roles/ZealotCreepManager";
 import MedicCreepManager from "../Managers/Roles/MedicCreepManager";
 import StalkerCreepManager from "../Managers/Roles/StalkerCreepManager";
+// ---------------------------
 import DomesticDefenderCreepManager from "../Managers/Roles/DomesticDefenderCreepManager";
 import { MinerBodyOptsHelper } from "../Helpers/RoleHelpers/MinerBodyOptsHelper";
 import { HarvesterBodyOptsHelper } from "../Helpers/RoleHelpers/HarvesterBodyOptsHelper";
 import { WorkerBodyOptsHelper } from "../Helpers/RoleHelpers/WorkerBodyOptsHelper";
 import { LorryBodyOptsHelper } from "../Helpers/RoleHelpers/LorryBodyOptsHelper";
+import { MineralMinerBodyOptsHelper } from "../Helpers/RoleHelpers/MineralMinerBodyOptsHelper";
 import { PowerUpgraderBodyOptsHelper } from "../Helpers/RoleHelpers/PowerUpgraderBodyOptsHelper";
 import { ZealotBodyOptsHelper } from "../Helpers/RoleHelpers/ZealotBodyOptsHelper";
 import { StalkerBodyOptsHelper } from "../Helpers/RoleHelpers/StalkerBodyOptsHelper";
@@ -36,6 +39,7 @@ export const CREEP_MANAGERS: ICreepRoleManager[] = [
     new HarvesterCreepManager(),
     new WorkerCreepManager(),
     new LorryCreepManager(),
+    new MineralMinerCreepManager(),
     new PowerUpgraderCreepManager(),
     new RemoteMinerCreepManager(),
     new RemoteHarvesterCreepManager(),
@@ -55,6 +59,7 @@ export const CREEP_BODY_OPT_HELPERS: ICreepBodyOptsHelper[] = [
     new HarvesterBodyOptsHelper(),
     new WorkerBodyOptsHelper(),
     new LorryBodyOptsHelper(),
+    new MineralMinerBodyOptsHelper(),
     new PowerUpgraderBodyOptsHelper(),
     new RemoteMinerBodyOptsHelper(),
     new RemoteHarvesterBodyOptsHelper(),

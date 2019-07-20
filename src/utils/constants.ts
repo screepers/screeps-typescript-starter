@@ -13,6 +13,7 @@ export const ROLE_HARVESTER = "harvester";
 export const ROLE_WORKER = "worker";
 export const ROLE_POWER_UPGRADER = "powerUpgrader";
 export const ROLE_LORRY = "lorry";
+export const ROLE_MINERAL_MINER = "mineralMiner";
 export const ROLE_REMOTE_MINER = "remoteMiner";
 export const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 export const ROLE_REMOTE_RESERVER = "remoteReserver";
@@ -54,7 +55,8 @@ export const domesticRolePriority: RoleConstant[] = [
     ROLE_HARVESTER,
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
-    ROLE_LORRY
+    ROLE_LORRY,
+    ROLE_MINERAL_MINER,
 ];
 
 // * Keep this list ordered by spawn priority
