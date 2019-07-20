@@ -211,6 +211,7 @@ declare namespace NodeJS {
         sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void;
     }
 }
+
 /**
  * Creep Body Options Object
  */

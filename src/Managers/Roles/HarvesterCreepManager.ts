@@ -9,6 +9,7 @@ import {
     ERROR_WARN,
     ROLE_HARVESTER,
 } from "utils/constants";
+import CreepHelper from "Helpers/CreepHelper";
 
 // Manager for the miner creep role
 export default class HarvesterCreepManager implements ICreepRoleManager {
@@ -60,7 +61,7 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
             return CreepApi.newGetEnergyJob(creep, room);
         } else {
             let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
-            if (job === undefined) {
+            if (job === undefined && CreepHelper.bodyPartExists(creep, WORK)) {
                 job = this.newWorkPartJob(creep, room);
             }
             return job;

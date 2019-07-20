@@ -98,15 +98,17 @@ export default class CreepHelper {
 
     /**
      * Gets creep.memory.supplementary.moveTargetID, or falls back to creep.memory.job.
+     * @param creep the creep we are getting target for
+     * @param job the job we are getting move target for
      */
     public static getMoveTarget(creep: Creep, job: BaseJob): RoomObject | RoomPosition | null {
         // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
         if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
             return Game.getObjectById(creep.memory.supplementary.moveTargetID);
         }
-        else if(creep.memory.job && creep.memory.job.targetType === "roomName"){
+        else if (creep.memory.job && creep.memory.job.targetType === "roomName") {
             return new RoomPosition(25, 25, creep.memory.job.targetID);
-        } else if(creep.memory.job && creep.memory.job.targetType === "roomPosition"){
+        } else if (creep.memory.job && creep.memory.job.targetType === "roomPosition") {
             // TODO Handle parsing a string into a roomPosition object here
             const x = 25;
             const y = 25;
@@ -116,5 +118,14 @@ export default class CreepHelper {
         else {
             return Game.getObjectById(job.targetID);
         }
+    }
+
+    /**
+     * check if the body part exists on the creep
+     * @param creep the creep we are checking
+     * @param part the body part we are checking
+     */
+    public static bodyPartExists(creep: Creep, bodyPart: BodyPartConstant): boolean {
+        return _.some(creep.body, (part: BodyPartConstant) => part === bodyPart);
     }
 }
