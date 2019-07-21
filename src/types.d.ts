@@ -209,7 +209,12 @@ declare namespace NodeJS {
         displayRoomStatus(roomName: string): void;
         killAllCreeps(room?: Room): void;
         sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void;
+        Memory: Memory;
     }
+}
+
+interface RawMemory {
+    _parsed: Memory;
 }
 
 /**
