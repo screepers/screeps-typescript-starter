@@ -58,7 +58,7 @@ export class ZealotBodyOptsHelper implements ICreepBodyOptsHelper {
                 break;
 
             case TIER_4: // 10 Attack, 10 Move - Total Cost: 1300
-                body = { attack: 2, move: 2 };
+                body = { attack: 10, move: 10 };
                 break;
 
             case TIER_5: // 15 Attack, 12 Move - Total Cost: 1800
@@ -74,7 +74,7 @@ export class ZealotBodyOptsHelper implements ICreepBodyOptsHelper {
 
         // ! Important DONT FORGET TO CHANGE
         // Temp override
-        body = { attack: 1, move: 1 };
+        // body = { attack: 1, move: 1 };
         // Generate creep body based on body array and options
         return SpawnApi.createCreepBody(body, opts);
     }
