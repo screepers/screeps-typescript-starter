@@ -42,11 +42,11 @@ export default class RoomManager {
     private static runSingleRoom(room: Room): void {
 
         // Set Defcon and Room State (roomState relies on defcon being set first)
-        if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
+        if (RoomHelper.excecuteEveryTicks(RUN_DEFCON_TIMER)) {
             RoomApi.setDefconLevel(room);
         }
 
-        if (RoomHelper.excecuteEveryTicks(RUN_DEFCON_TIMER)) {
+        if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
             RoomApi.setRoomState(room);
         }
 

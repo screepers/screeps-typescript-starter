@@ -168,6 +168,8 @@ export default class RoomApi {
         const boostedHostileBodyParts: number = _.filter(_.flatten(_.map(hostileCreeps, "body")), (p: any) => !!p.boost)
             .length;
 
+        console.log("r: " + hostileBodyParts);
+        console.log("B: " + boostedHostileBodyParts);
         // level 6 -- nuke inbound
         if (room.find(FIND_NUKES).length > 0) {
             room.memory.defcon = 6;
@@ -201,8 +203,6 @@ export default class RoomApi {
         // level 1 -- less than 50 body parts, no attack parts
         room.memory.defcon = 1;
         return;
-
-        //
     }
 
     /**
