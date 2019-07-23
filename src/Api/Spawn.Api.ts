@@ -213,7 +213,7 @@ export default class SpawnApi {
         }
 
         // Check for Military Creeps
-        // For extra saftey, find first active flag (only 1 should be active at a time)
+        // REFACTOR HERE
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
         let activeAttackRoomFlag: ParentFlagMemory | undefined;
         for (const attackRoom of targetRoomMemoryArray) {
@@ -242,12 +242,11 @@ export default class SpawnApi {
             }
 
             // Set the flag as processed, so it's only added to the queue once
-            if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory) &&
-                Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
-
+            if (Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
                 Memory.flags[activeAttackRoomFlag.flagName].spawnProcessed = true;
             }
         }
+        // END REFACTOR HERE
 
         // Add the constructed queue to the military queue
         if (!room.memory.creepLimit!.militaryLimits) {
@@ -458,6 +457,7 @@ export default class SpawnApi {
         squadUUID?: number | null,
         rallyLocation?: RoomPosition | null
     ): CreepOptionsCiv | CreepOptionsMili | undefined {
+
         // Set default values if military options aren't provided
         // If one of these aren't provided, then the entire purpose of them is nix,
         // So we just check if any of them aren't provided and set defaults for all in that case
@@ -606,6 +606,8 @@ export default class SpawnApi {
      * @param room the room we are spawning the squad in
      */
     public static generateSquadOptions(room: Room, targetRoom: string, roleConst: RoleConstant): StringMap {
+
+        // REFACTOR HERE
         // Set to this for clarity that we aren't expecting any squad options in some cases
         const squadOptions: StringMap = {
             squadSize: 0,
@@ -661,6 +663,7 @@ export default class SpawnApi {
             squadOptions.rallyLocation = selectedFlagMemory.rallyLocation;
             return squadOptions;
         }
+        // END REFACTOR HERE
     }
 
     /**
@@ -705,6 +708,7 @@ export default class SpawnApi {
                 }
                 break;
 
+            // REFACTOR HERE
             // Military creeps going to their attack rooms
             case ROLE_STALKER:
             case ROLE_MEDIC:
@@ -714,6 +718,7 @@ export default class SpawnApi {
                     return roomMemory.roomName;
                 }
                 break;
+            // END REFACTOR HERE
 
             // Domestic creeps keep their target room as their home room
             // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)
@@ -736,9 +741,6 @@ export default class SpawnApi {
      * @param roleConst the role we are getting room for
      */
     public static getCreepHomeRoom(room: Room, roleConst: RoleConstant, targetRoom?: string): string {
-        // Okay so this might not even be needed, but I took out colonizer home room setting because
-        // That would actually take them out of the creep count for this room, spawning them in an infinite loop
-        // We will just set their target room as the claim room and it will have the desired effect
         return room.name;
     }
 

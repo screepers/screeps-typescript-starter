@@ -1090,10 +1090,6 @@ interface ClaimRoomMemory extends DepedentRoomParentMemory {
  */
 interface ParentFlagMemory {
     /**
-     * if the related flag is currently active
-     */
-    active: boolean;
-    /**
      * the name of the flag
      */
     flagName: string;

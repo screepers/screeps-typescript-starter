@@ -15,6 +15,7 @@ export default class CreepMili {
      */
     public static setWaitingForRally(creep: Creep, creepOptions: CreepOptionsMili): boolean {
 
+        // REFACTOR HERE ? Maybe
         // If these options aren't defined, creep isn't waiting for rally
         if (!creepOptions.rallyLocation || !creepOptions.squadSize || !creepOptions.rallyLocation) {
             return false;
@@ -45,6 +46,7 @@ export default class CreepMili {
             );
 
         return creepsWithinRallyDistance;
+        // END REFACTOR HERE
     }
 
     /**
