@@ -482,4 +482,22 @@ export default class RoomApi {
             rampart.setPublic(!isPublic);
         }
     }
+
+    /**
+     * get the rampart the defender should stand on when defending the room
+     * @param room the room we are looking for the rampart in
+     * @param target the target creep we are defending against
+     */
+    public static getDefenseRampart(room: Room, target: Creep | null): StructureRampart | null {
+        if (!target) {
+            return null;
+        }
+        const rampartsInRoom: StructureRampart[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_RAMPART) as StructureRampart[];
+        const openRamparts: StructureRampart[] = _.filter(rampartsInRoom, (rampart: StructureRampart) => {
+            const foundCreeps: Creep[] = rampart.pos.lookFor(LOOK_CREEPS);
+            const foundStructures: Array<Structure<StructureConstant>> = rampart.pos.lookFor(LOOK_STRUCTURES);
+            return (!foundCreeps && !foundStructures);
+        });
+        return target!.pos.findClosestByRange(openRamparts);
+    }
 }

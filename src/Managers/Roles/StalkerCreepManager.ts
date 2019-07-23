@@ -42,11 +42,11 @@ export default class StalkerCreepManager implements ICreepRoleManager {
             return;
         }
         else {
-            MiliApi.kiteEnemyCreep(creep)
+            MiliApi.kiteEnemyCreep(creep);
         }
 
         // We are in attack range and healthy, attack the target
-        creep.attack(target);
+        creep.rangedAttack(target);
 
         // Reset offensive target
         MiliApi.resetOffensiveTarget(creep);

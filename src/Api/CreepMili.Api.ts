@@ -3,6 +3,7 @@ import { DEFAULT_MOVE_OPTS } from "utils/constants";
 import CreepApi from "./Creep.Api";
 import MiliHelper from "Helpers/MiliHelper";
 import UserException from "utils/UserException";
+import RoomHelper from "Helpers/RoomHelper";
 
 // Api for military creep's
 export default class CreepMili {
