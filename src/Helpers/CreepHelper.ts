@@ -10,8 +10,9 @@ export default class CreepHelper {
      * get the mining container for a specific job
      * @param job the job we are getting the mining container from
      * @param room the room we are checking in
+     * @param isSource if we nee the mining contrainer for a source
      */
-    public static getMiningContainer(job: GetEnergyJob | undefined, room: Room): StructureContainer | undefined {
+    public static getMiningContainer(job: GetEnergyJob | undefined, room: Room, isSource: boolean): StructureContainer | undefined {
         if (!job) {
             throw new UserException(
                 "Job is undefined",
@@ -20,8 +21,15 @@ export default class CreepHelper {
             );
         }
 
-        const source: Source | null = Game.getObjectById(job.targetID);
-        if (!source) {
+        let sourceTarget: Source | StructureExtractor | null = Game.getObjectById(job.targetID);
+        if (isSource) {
+            sourceTarget = sourceTarget as Source;
+        }
+        else {
+            sourceTarget = sourceTarget as StructureExtractor;
+        }
+
+        if (!sourceTarget) {
             throw new UserException("Source null in getMiningContainer", "room: " + room.name, ERROR_WARN);
         }
 
@@ -31,13 +39,13 @@ export default class CreepHelper {
             STRUCTURE_CONTAINER
         ) as StructureContainer[];
 
-        const closestContainer = source.pos.findClosestByRange(containers);
+        const closestContainer = sourceTarget.pos.findClosestByRange(containers);
 
         if (!closestContainer) {
             return undefined;
         } else {
             // If we have a container, but its not next to the source, its not the correct container
-            if (source.pos.isNearTo(closestContainer)) {
+            if (sourceTarget.pos.isNearTo(closestContainer)) {
                 return closestContainer;
             }
             return undefined;

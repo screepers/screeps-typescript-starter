@@ -31,7 +31,8 @@ import {
     ERROR_ERROR,
     ERROR_FATAL,
     ERROR_INFO,
-    ERROR_WARN
+    ERROR_WARN,
+    MINERAL_CACHE_TTL
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import CarryPartJobs from "Jobs/CarryPartJobs";
@@ -586,22 +587,40 @@ export default class MemoryApi {
     }
 
     /**
-     * get minerals in the room -- NOT IMPLEMENTED
+     * get minerals in the room
      * @param room the room we want minerals from
      * @param filterFunction [Optional] The function to filter all mineral objects
      * @param forceUpdate [Optional] Invalidate cache by force
      * @returns Mineral[]  An array of minerals, if there are any
      */
     public static getMinerals(
-        room: Room,
+        roomName: string,
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
     ): Mineral[] {
-        //
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
 
-        // TODO Fill this out
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            Memory.rooms[roomName].minerals === undefined ||
+            Memory.rooms[roomName].minerals.cache < Game.time - MINERAL_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateMinerals(roomName);
+        }
 
-        return [];
+        const sourceIDs = Memory.rooms[roomName].minerals.data;
+
+        let minerals: Mineral[] = MemoryHelper.getOnlyObjectsFromIDs<Mineral>(sourceIDs);
+
+        if (filterFunction !== undefined) {
+            minerals = _.filter(minerals, filterFunction);
+        }
+
+        return minerals;
     }
 
     /**
@@ -849,12 +868,14 @@ export default class MemoryApi {
         const allGetEnergyJobs: GetEnergyJob[] = [];
 
         _.forEach(this.getSourceJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getMineralJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
         _.forEach(this.getContainerJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
         _.forEach(this.getLinkJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
         _.forEach(this.getBackupStructuresJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
 
         return allGetEnergyJobs;
     }
+
     /**
      * Get the list of GetEnergyJobs.sourceJobs
      * @param room The room to get the jobs from
@@ -883,6 +904,36 @@ export default class MemoryApi {
         }
 
         return sourceJobs;
+    }
+
+    /**
+     * Get the list of GetEnergyJobs.mineralJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getMineralJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs!.mineralJobs ||
+            Memory.rooms[room.name].jobs!.getEnergyJobs!.mineralJobs!.cache < Game.time - SOURCE_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateGetEnergy_mineralJobs(room);
+        }
+
+        let mineralJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs!.getEnergyJobs!.mineralJobs!.data;
+
+        if (filterFunction !== undefined) {
+            mineralJobs = _.filter(mineralJobs, filterFunction);
+        }
+
+        return mineralJobs;
     }
 
     /**

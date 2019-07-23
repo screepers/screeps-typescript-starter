@@ -65,6 +65,44 @@ export default class GetEnergyJobs {
     }
 
     /**
+     * Get a list of the getenergyjobs for minerals in the room
+     * @param room the room we are creating the job list for
+     */
+    public static createMineralJobs(room: Room): GetEnergyJob[] {
+        // List of all sources that are under optimal work capacity
+        const openMinerals = MemoryApi.getMinerals(room.name);
+
+        if (openMinerals.length === 0) {
+            return [];
+        }
+
+        const mineralJobList: GetEnergyJob[] = [];
+
+        _.forEach(openMinerals, (mineral: Mineral) => {
+
+            const mineralEnergyRemaining = mineral.mineralAmount;
+
+            // Create the StoreDefinition for the source
+            const mineralResources: StoreDefinition = { energy: mineralEnergyRemaining };
+
+            // Create the GetEnergyJob object for the source
+            const sourceJob: GetEnergyJob = {
+                jobType: "getEnergyJob",
+                targetID: mineral.id,
+                targetType: "mineral",
+                actionType: "harvest",
+                resources: mineralResources,
+                isTaken: mineralEnergyRemaining <= 0 // Taken if no energy remaining
+            };
+
+            // Append the GetEnergyJob to the main array
+            mineralJobList.push(sourceJob);
+        });
+
+        return mineralJobList;
+    }
+
+    /**
      * Gets a list of GetEnergyJobs for the containers of a room
      * @param room The room to create the job list for
      * [Accurate-Restore] Adjusts for creeps currently targeting it

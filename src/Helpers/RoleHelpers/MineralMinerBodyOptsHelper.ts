@@ -42,21 +42,13 @@ export class MineralMinerBodyOptsHelper implements ICreepBodyOptsHelper {
 
         switch (tier) {
 
-            case TIER_3:
-            case TIER_2:
-            case TIER_1:
-                body = { carry: 6, move: 6 };
-                break;
-
             case TIER_6:
-            case TIER_5:
-            case TIER_4:
-                body = { carry: 8, move: 8 };
+                body = { work: 8, move: 4 };
                 break;
 
             case TIER_8:
             case TIER_7:
-                body = { carry: 20, move: 20 }
+                body = { work: 10, move: 5 }
         }
 
         // Generate the creep body based on the body array and options
@@ -80,13 +72,6 @@ export class MineralMinerBodyOptsHelper implements ICreepBodyOptsHelper {
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
                     harvestMinerals: true,
-                    getFromContainer: true,
-                    getFromStorage: true,
-                    getFromTerminal: true,
-                    fillContainer: true,
-                    fillLab: true,
-                    fillStorage: true,
-                    fillTerminal: true
                 };
                 break;
         }

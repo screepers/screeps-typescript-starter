@@ -358,7 +358,7 @@ type GetEnergy_ValidTargets =
     | "source"
     | "tombstone"
     | "droppedResource"
-    | STRUCTURE_EXTRACTOR
+    | "mineral"
     | ResourceContainingStructureConstant;
 /**
  * Valid actions for GetEnergyJob actionType
@@ -544,6 +544,10 @@ interface GetEnergyJobListing {
      * Jobs that target sources that are not being mined optimally (RoomAPI.getOpenSources)
      */
     sourceJobs?: Cache;
+    /**
+     * Jobs that target mienrals that are not being mined
+     */
+    mineralJobs?: Cache;
     /**'
      * Jobs that target containers with resources
      */

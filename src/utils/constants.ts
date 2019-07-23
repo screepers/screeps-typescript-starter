@@ -107,6 +107,7 @@ export const WALL_LIMIT: number[] = [
 // Cache Tick Limits
 export const STRUCT_CACHE_TTL = 50; // Structures
 export const SOURCE_CACHE_TTL = -1; // Sources
+export const MINERAL_CACHE_TTL = -1 // Minerals
 export const CONSTR_CACHE_TTL = 50; // Construction Sites
 export const TOMBSTONE_CACHE_TTL = 50; // Tombstones
 export const DROPS_CACHE_TTL = 50; // Dropped Resources

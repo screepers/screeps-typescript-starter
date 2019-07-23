@@ -25,7 +25,7 @@ export default class MemoryHelper_Room {
         this.updateStructures(room.name);
         // Update sources, minerals, dropped resources, tombstones
         this.updateSources(room.name);
-        this.updateMinerals(room);
+        this.updateMinerals(room.name);
         this.updateDroppedResources(room);
         this.updateTombstones(room);
         // Update Custom Memory Components
@@ -183,13 +183,13 @@ export default class MemoryHelper_Room {
      * [Cached] Room.memory.sources
      * @param room The room to check in
      */
-    public static updateMinerals(room: Room): void {
-        Memory.rooms[room.name].minerals = { data: {}, cache: null };
+    public static updateMinerals(roomName: string): void {
+        Memory.rooms[roomName].minerals = { data: {}, cache: null };
 
-        const minerals = room.find(FIND_MINERALS);
+        const minerals = Game.rooms[roomName].find(FIND_MINERALS);
 
-        Memory.rooms[room.name].minerals.data = _.map(minerals, (mineral: Mineral) => mineral.id);
-        Memory.rooms[room.name].minerals.cache = Game.time;
+        Memory.rooms[roomName].minerals.data = _.map(minerals, (mineral: Mineral) => mineral.id);
+        Memory.rooms[roomName].minerals.cache = Game.time;
     }
 
     /**
@@ -264,6 +264,22 @@ export default class MemoryHelper_Room {
 
         Memory.rooms[room.name].jobs!.getEnergyJobs!.sourceJobs = {
             data: GetEnergyJobs.createSourceJobs(room),
+            cache: Game.time
+        };
+    }
+
+    /**
+     *
+     * @param room update the room's getEnergyJobListing_mineralJobs
+     * @param room the room to update the memory of
+     */
+    public static updateGetEnergy_mineralJobs(room: Room) {
+        if (Memory.rooms[room.name].jobs!.getEnergyJobs === undefined) {
+            Memory.rooms[room.name].jobs!.getEnergyJobs = {};
+        }
+
+        Memory.rooms[room.name].jobs!.getEnergyJobs!.mineralJobs = {
+            data: GetEnergyJobs.createMineralJobs(room),
             cache: Game.time
         };
     }
