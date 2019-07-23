@@ -307,9 +307,10 @@ export class SpawnHelper {
      */
     public static getAttackRoomWithActiveFlag(room: Room): AttackRoomMemory | undefined {
         const allAttackRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
-
+        // REFACTOR HERE
         // Return the first active flag we find (should only be 1 flag active at a time across all attack rooms)
         return _.find(allAttackRooms, attackRoom => _.some(attackRoom!.flags, (flag: AttackFlagMemory) => flag.active));
+        // END REFACTOR HERE
     }
 
     /**
@@ -441,7 +442,7 @@ export class SpawnHelper {
 
     /**
      * get the array of roles based on the attack flag type
-     * @param attackFlag the flag memory of the active attack flag
+     * @param attackFlag the flag memory of the attack flag
      */
     public static getRolesArrayFromAttackFlag(attackFlag: ParentFlagMemory): RoleConstant[] {
         // check the flag type and return the array

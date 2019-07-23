@@ -38,7 +38,7 @@ import {
     ZEALOT_SOLO,
     STALKER_SOLO,
 } from "utils/Constants";
-import { CREEP_BODY_OPT_HELPERS } from "../utils/Interface_Constants";
+import { CREEP_BODY_OPT_HELPERS, ROOM_STATE_CREEP_LIMITS } from "../utils/Interface_Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
 import MemoryApi from "./Memory.Api";
@@ -53,89 +53,20 @@ export default class SpawnApi {
      * set domestic creep limits
      * @param room the room we want limits for
      */
-    public static generateDomesticCreepLimits(room: Room): DomesticCreepLimits {
-        const domesticLimits: DomesticCreepLimits = {
-            miner: 0,
-            harvester: 0,
-            worker: 0,
-            powerUpgrader: 0,
-            lorry: 0
-        };
+    private static generateDomesticCreepLimits(room: Room): DomesticCreepLimits {
+        const roomState: RoomStateConstant = room.memory.roomState as RoomStateConstant;
 
-        const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState!);
-        const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
-        let minerLimits: number = MemoryApi.getSources(room.name).length;
-
-        // check what room state we are in
-        switch (room.memory.roomState) {
-            // Intro
-            case ROOM_STATE_INTRO:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 1;
-                domesticLimits[ROLE_HARVESTER] = 1;
-                domesticLimits[ROLE_WORKER] = 1;
-
-                break;
-
-            // Beginner
-            case ROOM_STATE_BEGINNER:
-                // Domestic Creep Definitions
-
-                if (room.energyCapacityAvailable < 550) {
-                    const numAccessTilesToSource: number = SpawnHelper.getNumAccessTilesToSources(room);
-                    minerLimits = numAccessTilesToSource < 4 ? numAccessTilesToSource : 4;
-                }
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 4;
-                domesticLimits[ROLE_WORKER] = 4;
-
-                break;
-
-            // Intermediate
-            case ROOM_STATE_INTER:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 4;
-
-                break;
-
-            // Advanced
-            case ROOM_STATE_ADVANCED:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = numRemoteRooms === 0 ? 1 : 2;
-                domesticLimits[ROLE_WORKER] = 3 + numRemoteRooms;
-                domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = numLorries;
-
-                break;
-
-            // Upgrader
-            case ROOM_STATE_UPGRADER:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 2;
-                domesticLimits[ROLE_POWER_UPGRADER] = 1;
-                domesticLimits[ROLE_LORRY] = numLorries;
-
-                break;
-
-            // Stimulate
-            case ROOM_STATE_STIMULATE:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 3;
-                domesticLimits[ROLE_POWER_UPGRADER] = 2;
-                domesticLimits[ROLE_LORRY] = numLorries;
-
-                break;
+        // Generate the room state for the specified room state
+        for (const index in ROOM_STATE_CREEP_LIMITS) {
+            if (ROOM_STATE_CREEP_LIMITS[index].roomState === roomState) {
+                return ROOM_STATE_CREEP_LIMITS[index].generateDomesticLimits(room);
+            }
         }
-
-        // Return the limits
-        return domesticLimits;
+        throw new UserException(
+            "Failed to generate domestic limits",
+            "The room state " + roomState + " doesn't have a implementation. [ " + room.name + " ].",
+            ERROR_ERROR
+        );
     }
 
     /**
@@ -143,55 +74,20 @@ export default class SpawnApi {
      * (we got shooters on deck)
      * @param room the room we want limits for
      */
-    public static generateRemoteCreepLimits(room: Room): RemoteCreepLimits {
-        const remoteLimits: RemoteCreepLimits = {
-            remoteMiner: 0,
-            remoteHarvester: 0,
-            remoteReserver: 0,
-            remoteColonizer: 0,
-            remoteDefender: 0,
-            claimer: 0
-        };
+    private static generateRemoteCreepLimits(room: Room): RemoteCreepLimits {
+        const roomState: RoomStateConstant = room.memory.roomState as RoomStateConstant;
 
-        const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
-        const numClaimRooms: number = RoomHelper.numClaimRooms(room);
-
-        // If we do not have any remote rooms, return the initial remote limits (Empty)
-        if (numRemoteRooms <= 0 && numClaimRooms <= 0) {
-            return remoteLimits;
+        // Generate the room state for the specified room state
+        for (const index in ROOM_STATE_CREEP_LIMITS) {
+            if (ROOM_STATE_CREEP_LIMITS[index].roomState === roomState) {
+                return ROOM_STATE_CREEP_LIMITS[index].generateRemoteLimits(room);
+            }
         }
-
-        // Gather the rest of the data only if we have a remote room or a claim room
-        const numRemoteDefenders: number = RoomHelper.numRemoteDefenders(room);
-        const numRemoteSources: number = RoomHelper.numRemoteSources(room);
-        const numCurrentlyUnclaimedClaimRooms: number = RoomHelper.numCurrentlyUnclaimedClaimRooms(room);
-
-        // check what room state we are in
-        switch (room.memory.roomState) {
-            // Advanced, Upgrader, and Stimulate are the only allowed states for remote mining and claiming operations currently
-            // Might change for earlier room states to allow claimers and colonizers, up for debate
-            case ROOM_STATE_ADVANCED:
-            case ROOM_STATE_UPGRADER:
-            case ROOM_STATE_STIMULATE:
-                // Remote Creep Definitions
-                remoteLimits[ROLE_REMOTE_MINER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(
-                    ROLE_REMOTE_MINER,
-                    numRemoteSources
-                );
-                remoteLimits[ROLE_REMOTE_HARVESTER] = SpawnHelper.getLimitPerRemoteRoomForRolePerSource(
-                    ROLE_REMOTE_HARVESTER,
-                    numRemoteSources
-                );
-                remoteLimits[ROLE_REMOTE_RESERVER] = SpawnHelper.getRemoteReserverLimitForRoom(room);
-                remoteLimits[ROLE_COLONIZER] = numClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_COLONIZER);
-                remoteLimits[ROLE_REMOTE_DEFENDER] = numRemoteDefenders;
-                remoteLimits[ROLE_CLAIMER] =
-                    numCurrentlyUnclaimedClaimRooms * SpawnHelper.getLimitPerClaimRoomForRole(ROLE_CLAIMER);
-
-                break;
-        }
-
-        return remoteLimits;
+        throw new UserException(
+            "Failed to generate domestic limits",
+            "The room state " + roomState + " doesn't have a implementation. [ " + room.name + " ].",
+            ERROR_ERROR
+        );
     }
 
     /**
@@ -199,7 +95,7 @@ export default class SpawnApi {
      * ! lord this function is a mess upon revisiting
      * @param room the room we want queue for
      */
-    public static generateMilitaryCreepQueue(room: Room): void {
+    private static generateMilitaryCreepQueue(room: Room): void {
         const rolesToAdd: RoleConstant[] = [];
 
         // Check for Domestic Defenders
@@ -213,7 +109,7 @@ export default class SpawnApi {
         }
 
         // Check for Military Creeps
-        // For extra saftey, find first active flag (only 1 should be active at a time)
+        // REFACTOR HERE
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
         let activeAttackRoomFlag: ParentFlagMemory | undefined;
         for (const attackRoom of targetRoomMemoryArray) {
@@ -242,12 +138,11 @@ export default class SpawnApi {
             }
 
             // Set the flag as processed, so it's only added to the queue once
-            if (EmpireApi.isAttackFlagOneTimeUse(activeAttackRoomFlag as AttackFlagMemory) &&
-                Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
-
+            if (Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
                 Memory.flags[activeAttackRoomFlag.flagName].spawnProcessed = true;
             }
         }
+        // END REFACTOR HERE
 
         // Add the constructed queue to the military queue
         if (!room.memory.creepLimit!.militaryLimits) {
@@ -458,6 +353,7 @@ export default class SpawnApi {
         squadUUID?: number | null,
         rallyLocation?: RoomPosition | null
     ): CreepOptionsCiv | CreepOptionsMili | undefined {
+
         // Set default values if military options aren't provided
         // If one of these aren't provided, then the entire purpose of them is nix,
         // So we just check if any of them aren't provided and set defaults for all in that case
@@ -475,12 +371,14 @@ export default class SpawnApi {
                 ERROR_ERROR
             );
         }
-        // CREEP_BODY_OPT_HELPERS[role].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
+
+        // Call the appropriate class to generate the creep options for the specified role
         for (const index in CREEP_BODY_OPT_HELPERS) {
             if (CREEP_BODY_OPT_HELPERS[index].name === role) {
                 return CREEP_BODY_OPT_HELPERS[index].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
             }
         }
+
         throw new UserException(
             "Couldn't find ICreepBodyOptsHelper implementation for the role",
             "role: " + role + "\nCreep Options",
@@ -606,6 +504,8 @@ export default class SpawnApi {
      * @param room the room we are spawning the squad in
      */
     public static generateSquadOptions(room: Room, targetRoom: string, roleConst: RoleConstant): StringMap {
+
+        // REFACTOR HERE
         // Set to this for clarity that we aren't expecting any squad options in some cases
         const squadOptions: StringMap = {
             squadSize: 0,
@@ -661,6 +561,7 @@ export default class SpawnApi {
             squadOptions.rallyLocation = selectedFlagMemory.rallyLocation;
             return squadOptions;
         }
+        // END REFACTOR HERE
     }
 
     /**
@@ -705,6 +606,7 @@ export default class SpawnApi {
                 }
                 break;
 
+            // REFACTOR HERE
             // Military creeps going to their attack rooms
             case ROLE_STALKER:
             case ROLE_MEDIC:
@@ -714,6 +616,7 @@ export default class SpawnApi {
                     return roomMemory.roomName;
                 }
                 break;
+            // END REFACTOR HERE
 
             // Domestic creeps keep their target room as their home room
             // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)
@@ -736,9 +639,6 @@ export default class SpawnApi {
      * @param roleConst the role we are getting room for
      */
     public static getCreepHomeRoom(room: Room, roleConst: RoleConstant, targetRoom?: string): string {
-        // Okay so this might not even be needed, but I took out colonizer home room setting because
-        // That would actually take them out of the creep count for this room, spawning them in an infinite loop
-        // We will just set their target room as the claim room and it will have the desired effect
         return room.name;
     }
 

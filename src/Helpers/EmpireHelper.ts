@@ -34,7 +34,6 @@ export default class EmpireHelper {
 
         // Create the RemoteFlagMemory object for this flag
         const remoteFlagMemory: RemoteFlagMemory = {
-            active: true,
             flagName: flag.name,
             flagType: flagTypeConst
         };
@@ -138,7 +137,6 @@ export default class EmpireHelper {
 
         // Create the ClaimFlagMemory object for this flag
         const claimFlagMemory: ClaimFlagMemory = {
-            active: true,
             flagName: flag.name,
             flagType: flagTypeConst
         };
@@ -310,8 +308,6 @@ export default class EmpireHelper {
 
         const fullPath = Game.map.findRoute(homeRoom, targetRoom) as Array<{ exit: ExitConstant; room: string; }>;
 
-        // To prevent out of bounds, only allow room paths that have as least 2 elements (should literally never occur unless we
-        // are attacking our own room (??? maybe an active defender strategy, so i won't throw an error for it tbh)
         if (fullPath.length <= 2) {
             return new RoomPosition(25, 25, homeRoom);
         }
@@ -580,7 +576,6 @@ export default class EmpireHelper {
 
         // Generate the attack flag options based on the type of flag it is
         const attackFlagMemory: AttackFlagMemory = {
-            active: false,
             squadSize: 0,
             squadUUID: 0,
             rallyLocation: null,

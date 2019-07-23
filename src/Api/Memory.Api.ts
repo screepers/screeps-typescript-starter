@@ -1832,6 +1832,7 @@ export default class MemoryApi {
      * @returns an array of attack flag memory
      */
     public static getAllAttackFlagMemoryForHost(hostRoomName: string): AttackFlagMemory[] {
+        // REFACTOR HERE
         const hostRoom: Room = Game.rooms[hostRoomName];
         const attackRooms: AttackRoomMemory[] = this.getAttackRooms(hostRoom);
         const attackRoomFlags: AttackFlagMemory[] = [];
@@ -1843,5 +1844,6 @@ export default class MemoryApi {
             }
         }
         return attackRoomFlags;
+        // END REFACTOR HERE
     }
 }
