@@ -33,6 +33,11 @@ export default class CreepManager {
             );
         }
 
+        // Don't run the creep if they are still spawning
+        if (creep.spawning) {
+            return;
+        }
+
         // Find the role's object, and call run role on it, and stop the function
         for (const index in CREEP_MANAGERS) {
             if (CREEP_MANAGERS[index].name === role) {

@@ -23,8 +23,6 @@ export default class RemoteColonizerCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return;
-        }
+        // keep
     }
 }

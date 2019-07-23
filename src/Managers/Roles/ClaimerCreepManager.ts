@@ -24,9 +24,6 @@ export default class ClaimerCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return;
-        }
 
         if (creep.room.memory.defcon > 0) {
             // flee code here

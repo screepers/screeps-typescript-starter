@@ -21,9 +21,6 @@ export default class RemoteHarvesterCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return;
-        }
 
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];

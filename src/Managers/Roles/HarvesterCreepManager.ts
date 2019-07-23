@@ -26,9 +26,6 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return; // don't do anything until spawned
-        }
 
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
 

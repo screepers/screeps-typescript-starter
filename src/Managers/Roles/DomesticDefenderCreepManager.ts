@@ -24,9 +24,6 @@ export default class DomesticDefenderCreepManager implements ICreepRoleManager {
         // Possible upgrade if this proves to be a weakness would be switching to ranged
         // creep that seeks out the nearest rampart to the closest enemy creep and camps it
 
-        if (creep.spawning) {
-            return;
-        }
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 1;
 

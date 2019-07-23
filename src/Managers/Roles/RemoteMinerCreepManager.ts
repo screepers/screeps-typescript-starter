@@ -20,9 +20,6 @@ export default class RemoteMinerCreepManager implements ICreepRoleManager {
      * @param creep The creep to run
      */
     public runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return; // Don't do anything until you've spawned
-        }
 
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
@@ -78,9 +75,11 @@ export default class RemoteMinerCreepManager implements ICreepRoleManager {
 
         MemoryApi.updateJobMemory(creep, targetRoom);
 
+        const isSource: boolean = true;
         const miningContainer = CreepHelper.getMiningContainer(
             creep.memory.job as GetEnergyJob,
-            Game.rooms[creep.memory.targetRoom]
+            Game.rooms[creep.memory.targetRoom],
+            isSource
         );
 
         if (miningContainer === undefined) {
