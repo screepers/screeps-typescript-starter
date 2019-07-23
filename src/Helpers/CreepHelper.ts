@@ -21,12 +21,12 @@ export default class CreepHelper {
             );
         }
 
-        let sourceTarget: Source | StructureExtractor | null = Game.getObjectById(job.targetID);
+        let sourceTarget: Source | Mineral | null = Game.getObjectById(job.targetID);
         if (isSource) {
             sourceTarget = sourceTarget as Source;
         }
         else {
-            sourceTarget = sourceTarget as StructureExtractor;
+            sourceTarget = sourceTarget as Mineral;
         }
 
         if (!sourceTarget) {
