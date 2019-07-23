@@ -16,6 +16,7 @@ import UtilHelper from "Helpers/UtilHelper";
 import RoomVisualApi from "Managers/RoomVisuals/RoomVisual.Api";
 import RoomVisualManager from "Managers/RoomVisuals/RoomVisualManager";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
+import { LOOK_STRUCTURES } from "../../test/unit/mock";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -302,22 +303,27 @@ export default class CreepApi {
 
         let returnCode: number;
 
-        if (job.actionType === "harvest" && (target instanceof Source || target instanceof Mineral)) {
+        if (job.actionType === "harvest" && (target instanceof Source)) {
             returnCode = creep.harvest(target);
-        } else if (job.actionType === "pickup" && target instanceof Resource) {
+        }
+        else if (job.actionType === "harvest" && (target instanceof Mineral)) {
+            const extractor: StructureExtractor = _.find(target.pos.lookFor(LOOK_STRUCTURES),
+                (s: Structure) => s.structureType === STRUCTURE_EXTRACTOR) as StructureExtractor;
+            returnCode = extractor.cooldown > 0 ? ERR_TIRED : creep.harvest(target);
+        }
+        else if (job.actionType === "pickup" && target instanceof Resource) {
             returnCode = creep.pickup(target);
-        } else if (job.actionType === "withdraw" && target instanceof Structure) {
+        }
+        else if (job.actionType === "withdraw" && target instanceof Structure) {
             returnCode = creep.withdraw(target, RESOURCE_ENERGY);
-        } else {
+        }
+        else {
             throw this.badTarget_Error(creep, job);
         }
 
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
         switch (returnCode) {
             case OK:
-                // If successful and not harvesting, delete the job from creep memory
-                // * If we run into not being able to stop harvesting minerals, my best solution is to seperate
-                // * the above "instanceof Source | Mineral" into two different if statements, and use a boolean to decide to delete when successful.
                 if (job.actionType !== "harvest") {
                     delete creep.memory.job;
                     creep.memory.working = false;
