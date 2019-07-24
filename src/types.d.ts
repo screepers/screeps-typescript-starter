@@ -42,6 +42,12 @@ type RoomStateConstant =
     | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
+interface ICreepSpawnLimits {
+    roomState: RoomStateConstant;
+    generateRemoteLimits: (room: Room) => RemoteCreepLimits;
+    generateDomesticLimits: (room: Room) => DomesticCreepLimits;
+}
+
 /**
  * right when a room is starting and nothing is built/no creeps exist
  */
