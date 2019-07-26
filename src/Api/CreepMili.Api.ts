@@ -23,11 +23,7 @@ export default class CreepMili {
         const squadUUID: number = creepOptions.squadUUID!;
         const rallyRoom: string = creepOptions.rallyLocation.roomName;
         const creepsInSquad: Creep[] | null = MemoryApi.getCreepsInSquad(creep.room.name, squadUUID);
-<<<<<<< HEAD
-        const rangeForEvery: number = creepsInSquad !== null ? creepsInSquad.length : 1;
-=======
         const rangeForEvery: number = creepsInSquad !== null ? creepsInSquad.length - 1 : 1;
->>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
 
 
         // If we don't have the full squad spawned yet, creep is waiting
