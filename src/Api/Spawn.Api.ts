@@ -100,41 +100,18 @@ export default class SpawnApi {
         }
 
         // Check for Military Creeps
-<<<<<<< HEAD
-        // REFACTOR HERE
-        const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
-        let activeAttackRoomFlag: ParentFlagMemory | undefined;
-        for (const attackRoom of targetRoomMemoryArray) {
-            if (!attackRoom) {
-                continue;
-            }
-            activeAttackRoomFlag = _.find(attackRoom!["flags"], flagMem => {
-                if (!flagMem) {
-                    return false;
-                }
-                const flag: FlagMemory = Memory.flags[flagMem.flagName];
-                if (!flag) {
-                    return false;
-=======
         const attackRoomFlags: AttackFlagMemory[] = MemoryApi.getAllAttackFlagMemoryForHost(room.name);
         for (const attackRoomFlag of attackRoomFlags) {
             if (attackRoomFlags) {
                 const attackingRoles: RoleConstant[] = SpawnHelper.getRolesArrayFromAttackFlag(attackRoomFlag);
                 for (const role of attackingRoles) {
                     rolesToAdd.push(role);
->>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
                 }
 
-<<<<<<< HEAD
-            // Set the flag as processed, so it's only added to the queue once
-            if (Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
-                Memory.flags[activeAttackRoomFlag.flagName].spawnProcessed = true;
-=======
                 // Set the flag as processed, so it's only added to the queue once
                 if (Memory.flags[attackRoomFlag.flagName] !== undefined) {
                     Memory.flags[attackRoomFlag.flagName].spawnProcessed = true;
                 }
->>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
             }
         }
         // END REFACTOR HERE
@@ -500,14 +477,8 @@ export default class SpawnApi {
      * @param roleConst the role we are checking for
      * @param creepName the name of the creep we are checking for
      */
-<<<<<<< HEAD
-    public static generateSquadOptions(room: Room, targetRoom: string, roleConst: RoleConstant): StringMap {
-
-        // REFACTOR HERE
-=======
     public static generateSquadOptions(room: Room, roleConst: RoleConstant, creepName: string): StringMap {
 
->>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
         // Set to this for clarity that we aren't expecting any squad options in some cases
         const squadOptions: StringMap = {
             squadSize: 0,
