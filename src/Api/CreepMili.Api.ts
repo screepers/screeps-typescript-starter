@@ -15,7 +15,6 @@ export default class CreepMili {
      */
     public static setWaitingForRally(creep: Creep, creepOptions: CreepOptionsMili): boolean {
 
-        // REFACTOR HERE ? Maybe
         // If these options aren't defined, creep isn't waiting for rally
         if (!creepOptions.rallyLocation || !creepOptions.squadSize || !creepOptions.rallyLocation) {
             return false;
@@ -24,6 +23,7 @@ export default class CreepMili {
         const squadUUID: number = creepOptions.squadUUID!;
         const rallyRoom: string = creepOptions.rallyLocation.roomName;
         const creepsInSquad: Creep[] | null = MemoryApi.getCreepsInSquad(creep.room.name, squadUUID);
+        const rangeForEvery: number = creepsInSquad !== null ? creepsInSquad.length : 1;
 
 
         // If we don't have the full squad spawned yet, creep is waiting
@@ -39,14 +39,13 @@ export default class CreepMili {
         // Finally, make sure every creep is within an acceptable distance of each other
         const creepsWithinRallyDistance: boolean =
             _.every(creepsInSquad!, (cis: Creep) =>  // Check that every creep is within 2 tiles of at least 1 other creep in squad
-                _.some(creepsInSquad!, (innerC: Creep) => innerC.pos.inRangeTo(cis.pos.x, cis.pos.y, 2))
+                _.some(creepsInSquad!, (innerC: Creep) => innerC.pos.inRangeTo(cis.pos.x, cis.pos.y, 1))
             ) &&
             _.every(creepsInSquad!, (c: Creep) =>    // Check that every creep is within 7 tiles of every creep in the squad
-                _.every(creepsInSquad!, (innerC: Creep) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, 7))
+                _.every(creepsInSquad!, (innerC: Creep) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, rangeForEvery))
             );
 
         return creepsWithinRallyDistance;
-        // END REFACTOR HERE
     }
 
     /**
