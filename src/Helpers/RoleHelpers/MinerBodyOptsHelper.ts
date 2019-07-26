@@ -17,7 +17,6 @@ import {
     TIER_7,
     TIER_8,
     ROLE_MINER,
-    ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api";

@@ -1124,6 +1124,10 @@ interface AttackFlagMemory extends ParentFlagMemory {
      * the number of creeps this flag has successfully spawned
      */
     currentSpawnCount: number;
+    /**
+     * array of the creep names in the squad
+     */
+    squadMembers: string[];
 }
 
 /**

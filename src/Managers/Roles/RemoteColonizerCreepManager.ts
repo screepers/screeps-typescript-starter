@@ -1,8 +1,4 @@
-import RoomApi from "../../Api/Room.Api";
-import MemoryApi from "../../Api/Memory.Api";
-import CreepApi from "Api/Creep.Api";
 import {
-    DEFAULT_MOVE_OPTS,
     ROLE_COLONIZER,
 } from "utils/constants";
 

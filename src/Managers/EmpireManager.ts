@@ -1,5 +1,4 @@
 import EmpireApi from "../Api/Empire.Api";
-import MemoryApi from "../Api/Memory.Api";
 
 // empire-wide manager
 export default class EmpireManager {

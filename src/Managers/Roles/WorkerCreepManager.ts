@@ -1,10 +1,8 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import {
-    ROOM_STATE_UPGRADER,
     ROLE_WORKER,
 } from "utils/constants";
-import { RAMPART_HITS_THRESHOLD, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
 
 // Manager for the miner creep role
 export default class WorkerCreepManager implements ICreepRoleManager {
