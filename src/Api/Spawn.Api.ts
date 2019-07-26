@@ -20,12 +20,6 @@ import {
     GROUPED,
     COLLATED,
     ROOM_STATE_INTRO,
-    ROOM_STATE_BEGINNER,
-    ROOM_STATE_INTER,
-    ROOM_STATE_ADVANCED,
-    ROOM_STATE_NUKE_INBOUND,
-    ROOM_STATE_STIMULATE,
-    ROOM_STATE_UPGRADER,
     TIER_1,
     TIER_2,
     TIER_3,
@@ -34,16 +28,13 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
-    STANDARD_SQUAD,
-    ZEALOT_SOLO,
-    STALKER_SOLO,
 } from "utils/Constants";
 import { CREEP_BODY_OPT_HELPERS, ROOM_STATE_CREEP_LIMITS } from "../utils/Interface_Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
 import RoomHelper from "../Helpers/RoomHelper";
 import MemoryApi from "./Memory.Api";
 import UserException from "utils/UserException";
-import EmpireApi from "./Empire.Api";
+import EventHelper from "Helpers/EventHelper";
 
 /**
  * The API used by the spawn manager
@@ -109,6 +100,7 @@ export default class SpawnApi {
         }
 
         // Check for Military Creeps
+<<<<<<< HEAD
         // REFACTOR HERE
         const targetRoomMemoryArray: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
         let activeAttackRoomFlag: ParentFlagMemory | undefined;
@@ -123,23 +115,26 @@ export default class SpawnApi {
                 const flag: FlagMemory = Memory.flags[flagMem.flagName];
                 if (!flag) {
                     return false;
+=======
+        const attackRoomFlags: AttackFlagMemory[] = MemoryApi.getAllAttackFlagMemoryForHost(room.name);
+        for (const attackRoomFlag of attackRoomFlags) {
+            if (attackRoomFlags) {
+                const attackingRoles: RoleConstant[] = SpawnHelper.getRolesArrayFromAttackFlag(attackRoomFlag);
+                for (const role of attackingRoles) {
+                    rolesToAdd.push(role);
+>>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
                 }
-                return flagMem.active && !flag.complete && !flag.spawnProcessed;
-            });
-            if (activeAttackRoomFlag) {
-                break;
-            }
-        }
-        // If we found an active attack flag, add it's roles to the array
-        if (activeAttackRoomFlag) {
-            const attackingRoles: RoleConstant[] = SpawnHelper.getRolesArrayFromAttackFlag(activeAttackRoomFlag);
-            for (const role of attackingRoles) {
-                rolesToAdd.push(role);
-            }
 
+<<<<<<< HEAD
             // Set the flag as processed, so it's only added to the queue once
             if (Memory.flags[activeAttackRoomFlag.flagName] !== undefined) {
                 Memory.flags[activeAttackRoomFlag.flagName].spawnProcessed = true;
+=======
+                // Set the flag as processed, so it's only added to the queue once
+                if (Memory.flags[attackRoomFlag.flagName] !== undefined) {
+                    Memory.flags[attackRoomFlag.flagName].spawnProcessed = true;
+                }
+>>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
             }
         }
         // END REFACTOR HERE
@@ -241,6 +236,7 @@ export default class SpawnApi {
      * @param creepOptions creep options we want to give to it
      * @param role RoleConstant the role of the creep
      * @param spawn spawn we are going to use to spawn the creep
+     * @param name the name of the creep
      */
     public static spawnNextCreep(
         room: Room,
@@ -249,7 +245,8 @@ export default class SpawnApi {
         role: RoleConstant,
         spawn: StructureSpawn,
         homeRoom: string,
-        targetRoom: string
+        targetRoom: string,
+        name: string
     ): number {
         // Throw error if we don't have enough energy to spawn this creep
         if (this.getEnergyCostOfBody(body) > room.energyAvailable) {
@@ -260,9 +257,8 @@ export default class SpawnApi {
             );
         }
 
-        const name: string = SpawnHelper.generateCreepName(role, this.getTier(room, role), room);
-        const creepMemory = SpawnHelper.generateDefaultCreepMemory(role, homeRoom, targetRoom, creepOptions);
 
+        const creepMemory = SpawnHelper.generateDefaultCreepMemory(role, homeRoom, targetRoom, creepOptions);
         return spawn.spawnCreep(body, name, { memory: creepMemory });
     }
 
@@ -346,7 +342,6 @@ export default class SpawnApi {
      * @param tier the tier of this creep we are spawning
      */
     public static generateCreepOptions(
-        room: Room,
         role: RoleConstant | null,
         roomState: RoomStateConstant,
         squadSize?: number,
@@ -502,10 +497,17 @@ export default class SpawnApi {
     /**
      * generates options for spawning a squad based on the attack room's specifications
      * @param room the room we are spawning the squad in
+     * @param roleConst the role we are checking for
+     * @param creepName the name of the creep we are checking for
      */
+<<<<<<< HEAD
     public static generateSquadOptions(room: Room, targetRoom: string, roleConst: RoleConstant): StringMap {
 
         // REFACTOR HERE
+=======
+    public static generateSquadOptions(room: Room, roleConst: RoleConstant, creepName: string): StringMap {
+
+>>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
         // Set to this for clarity that we aren't expecting any squad options in some cases
         const squadOptions: StringMap = {
             squadSize: 0,
@@ -513,45 +515,14 @@ export default class SpawnApi {
             rallyLocation: null
         };
 
-        // Don't actually get anything of value if it isn't a military creep. No point
+        // Don't actually get anything of value if it isn't a military creep
         if (!SpawnHelper.isMilitaryRole(roleConst)) {
             return squadOptions;
         }
 
-        // Get an appropirate attack flag for the creep, should only be 1 room returned, so grab first
-        const roomMemory: AttackRoomMemory | undefined = _.first(MemoryApi.getAttackRooms(room, targetRoom));
-
-        // Drop out early if there are no attack rooms
-        if (roomMemory === undefined) {
-            return squadOptions;
-        }
-
-        const flagMemoryArray: AttackFlagMemory[] = roomMemory!["flags"] as AttackFlagMemory[];
-        let selectedFlagMemory: AttackFlagMemory | undefined;
-        let currentHighestSquadCount: number = 0;
-        let selectedFlagActiveSquadMembers: number = 0;
-
-        // Loop over the flag memory and attach the creep to the first flag that does not have its squad size fully satisfied
-        for (const flagMemory of flagMemoryArray) {
-
-            const numActiveSquadMembers: number = SpawnHelper.getNumOfActiveSquadMembers(flagMemory, room);
-            const numRequestedSquadMembers: number = flagMemory.squadSize;
-
-            // If we find an active flag that doesn't have its squad requirements met and is currently the flag closest to being met
-            if (
-                (numActiveSquadMembers < numRequestedSquadMembers &&
-                    numActiveSquadMembers > currentHighestSquadCount &&
-                    flagMemory.active) ||
-                numRequestedSquadMembers === 0
-            ) {
-                selectedFlagMemory = flagMemory;
-                currentHighestSquadCount = numActiveSquadMembers;
-                selectedFlagActiveSquadMembers = numActiveSquadMembers;
-            }
-        }
-
+        const selectedFlagMemory: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(room, roleConst, creepName);
         // If we didn't find a squad based flag return the default squad options
-        if (selectedFlagMemory === undefined) {
+        if (!selectedFlagMemory) {
             return squadOptions;
         } else {
 
@@ -569,8 +540,9 @@ export default class SpawnApi {
      * @param room the room we are spawning the creep in
      * @param roleConst the role we are getting room for
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
+     * @param creepName the name of the creep we are checking for
      */
-    public static getCreepTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[]): string {
+    public static getCreepTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
         let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory | undefined;
 
         switch (roleConst) {
@@ -611,9 +583,9 @@ export default class SpawnApi {
             case ROLE_STALKER:
             case ROLE_MEDIC:
             case ROLE_ZEALOT:
-                roomMemory = SpawnHelper.getAttackRoomWithActiveFlag(room);
-                if (roomMemory) {
-                    return roomMemory.roomName;
+                const requestingFlag: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(room, roleConst, creepName);
+                if (requestingFlag) {
+                    return Game.flags[requestingFlag!.flagName].pos.roomName;
                 }
                 break;
             // END REFACTOR HERE
@@ -630,7 +602,12 @@ export default class SpawnApi {
                 return room.name;
         }
 
-        return "";
+        // Throw error if target room is left unhandled
+        throw new UserException(
+            "Couldn't get target room for [" + roleConst + " ]",
+            "room: [ " + room.name + " ]",
+            ERROR_ERROR
+        );
     }
 
     /**

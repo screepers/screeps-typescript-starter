@@ -11,7 +11,6 @@ import {
     RUN_RESERVE_TTL_TIMER,
     RUN_RAMPART_STATUS_UPDATE,
 } from "utils/config";
-import EventApi from "Api/Event.Api";
 
 // room-wide manager
 export default class RoomManager {

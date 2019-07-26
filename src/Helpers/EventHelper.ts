@@ -5,6 +5,7 @@ import MemoryApi from "Api/Memory.Api";
 import MemoryHelper_Room from "./MemoryHelper_Room";
 import UserException from "utils/UserException";
 import { SpawnHelper } from "./SpawnHelper";
+import Normalize from "./Normalize";
 
 export default class EventHelper {
 
@@ -34,7 +35,8 @@ export default class EventHelper {
             return;
         }
 
-        const requestingFlag: AttackFlagMemory | undefined = this.getRequestingFlag(creep, room);
+        const creepBody: BodyPartConstant[] = Normalize.convertCreepBodyToBodyPartConstant(creep.body);
+        const requestingFlag: AttackFlagMemory | undefined = this.getMiliRequestingFlag(room, creep.memory.role, creep.name);
         // Throw an error if we didn't find the flag
         if (requestingFlag === undefined) {
             throw new UserException(
@@ -61,17 +63,20 @@ export default class EventHelper {
      * Find the flag that requested this creep to be spawned
      * @param creep the creep we are checking the flag for
      * @param room the room we are in
+     * @param creepName the name of the creep for referencing
      * @returns the requesting flag for this creep role
      */
-    public static getRequestingFlag(creep: Creep, room: Room): AttackFlagMemory | undefined {
+    public static getMiliRequestingFlag(room: Room, roleConst: RoleConstant, creepName: string): AttackFlagMemory | undefined {
 
         // Get all attack flag memory associated with the room (should only be 1, but plan for multiple possible in future)
         const attackRoomFlags: AttackFlagMemory[] = MemoryApi.getAllAttackFlagMemoryForHost(room.name);
 
         // Find the one that requested this creep to be returned
         for (const attackFlag of attackRoomFlags) {
-            const flagRoomName: string = Game.flags[attackFlag.flagName].pos.roomName;
-            if (creep.memory.targetRoom === flagRoomName && this.isRequestFlag(creep, attackFlag)) {
+            if (this.isRequestFlag(roleConst, creepName, attackFlag, room.name)) {
+                if (!attackFlag.squadMembers.includes(creepName)) {
+                    attackFlag.squadMembers.push(creepName);
+                }
                 return attackFlag;
             }
         }
@@ -80,37 +85,57 @@ export default class EventHelper {
 
     /**
      * returns bool if the attack flag requested the creep
-     * @param creep the creep we are checking for
+     * @param creepRole the creep role we are checking for
+     * @param creepName the creep name we are checking for
      * @param attackFlag the attack flag we are checking against
+     * @param roomName the name of the room making the request
      * @returns true if the flag requested this creep
      */
-    public static isRequestFlag(creep: Creep, attackFlag: AttackFlagMemory): boolean {
+    public static isRequestFlag(
+        creepRole: RoleConstant,
+        creepName: string,
+        attackFlag: AttackFlagMemory,
+        roomName: string
+    ): boolean {
 
+        // If we are provided a defined creep name, check if the flag references it first
+        if (attackFlag.squadMembers.includes(creepName)) {
+            return true;
+        }
+
+        // The creep is not assigned to a flag yet, find it's flag and assign it
         const flagType = attackFlag.flagType;
-        const creepOptions: CreepOptionsMili = creep.memory.options! as CreepOptionsMili;
-        const creepRole: RoleConstant = creep.memory.role;
-        const creepIsSquadMember: boolean = creepOptions.squadSize !== 0;
+        let requestingRoleArray: RoleConstant[] = [];
+        switch (flagType) {
 
-        // Split between squad member creeps and solo creeps
-        if (creepIsSquadMember) {
-            switch (flagType) {
+            case STANDARD_SQUAD:
 
-                case STANDARD_SQUAD:
-                    return STANDARD_SQUAD_ARRAY.includes(creepRole);
-            }
+                const creepsInSquad: Creep[] | null = MemoryApi.getCreepsInSquad(roomName, attackFlag.squadUUID);
+                if (creepsInSquad) {
+                    const numRoleRequested: number = this.getNumRoleRequestedFromSquadFlag(STANDARD_SQUAD_ARRAY, creepRole);
+                    const numRoleExisting: number = _.filter(creepsInSquad, (c: Creep) => c.memory.role === creepRole).length;
+                    if (numRoleRequested < numRoleExisting) {
+                        requestingRoleArray = STANDARD_SQUAD_ARRAY;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                else {
+                    requestingRoleArray = STANDARD_SQUAD_ARRAY;
+                }
+                break;
+
+            case ZEALOT_SOLO:
+                requestingRoleArray = ZEALOT_SOLO_ARRAY;
+                break;
+
+            case STALKER_SOLO:
+                requestingRoleArray = STALKER_SOLO_ARRAY;
+                break;
         }
-        else {
-            switch (flagType) {
 
-                case ZEALOT_SOLO:
-                    return ZEALOT_SOLO_ARRAY.includes(creepRole);
-
-                case STALKER_SOLO:
-                    return STALKER_SOLO_ARRAY.includes(creepRole);
-            }
-        }
-
-        return false;
+        return requestingRoleArray.includes(creepRole);
     }
 
     /**
@@ -158,5 +183,18 @@ export default class EventHelper {
             }
             EventApi.createCustomEvent(creep.room.name, creep.id, C_EVENT_CREEP_SPAWNED);
         }
+    }
+
+    /**
+     * get the number of creeps of a role type that the flag calls for
+     */
+    public static getNumRoleRequestedFromSquadFlag(flagRoleArray: RoleConstant[], creepRole: RoleConstant): number {
+        let sum: number = 0;
+        for (const i in flagRoleArray) {
+            if (flagRoleArray[i] === creepRole) {
+                ++sum;
+            }
+        }
+        return sum;
     }
 }

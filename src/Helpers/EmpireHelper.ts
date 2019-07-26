@@ -582,6 +582,7 @@ export default class EmpireHelper {
             flagName: flag.name,
             flagType: flagTypeConst,
             currentSpawnCount: 0,
+            squadMembers: []
         }
 
         // Fill in these options based on the flag type

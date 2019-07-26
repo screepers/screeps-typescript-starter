@@ -33,6 +33,10 @@ export default class ZealotCreepManager implements ICreepRoleManager {
         const target: Creep | Structure<StructureConstant> | undefined = creepOptions.attackTarget;
         const isMelee: boolean = true;
         if (!target) {
+            // Keep the creeps together in the squad, if they're in a squad
+            if (creepOptions.squadUUID) {
+                MiliApi.moveCreepToFurthestSquadMember(creep);
+            }
             return; // idle if no current target
         }
         // If we aren't in attack range, move towards the attack target

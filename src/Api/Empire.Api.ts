@@ -1,11 +1,5 @@
 import EmpireHelper from "../Helpers/EmpireHelper";
 import MemoryApi from "./Memory.Api";
-import { ZEALOT_SOLO, STALKER_SOLO, STANDARD_SQUAD } from "utils/Constants";
-import {
-    ZEALOT_FLAG_ONE_TIME_USE,
-    STALKER_FLAG_ONE_TIME_USE,
-    STANDARD_SQUAD_FLAG_ONE_TIME_USE
-} from "utils/militaryConfig"
 
 export default class Empire {
 

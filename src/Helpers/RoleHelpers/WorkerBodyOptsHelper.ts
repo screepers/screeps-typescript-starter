@@ -1,6 +1,5 @@
 import {
     GROUPED,
-    COLLATED,
     ROOM_STATE_INTRO,
     ROOM_STATE_BEGINNER,
     ROOM_STATE_INTER,
@@ -17,7 +16,6 @@ import {
     TIER_7,
     TIER_8,
     ROLE_WORKER,
-    ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
@@ -55,18 +53,14 @@ export class WorkerBodyOptsHelper implements ICreepBodyOptsHelper {
                 break;
 
             case TIER_5:
-            case TIER_4: // 6 Work, 4 Carry, 6 Move - Total Cost: 1100
-                body = { work: 8, carry: 4, move: 6 };
-                break;
-
-            case TIER_6:
-                body = { work: 10, carry: 6, move: 10 };
+            case TIER_4: // 7 Work, 6 Carry, 6 Move - Total Cost: 1300
+                body = { work: 7, carry: 6, move: 6 };
                 break;
 
             case TIER_8:
             case TIER_7:
-                // 10 Work, 8 Carry, 8 Move - Total Cost: 1800
-                body = { work: 10, carry: 8, move: 8 };
+            case TIER_6: // 8 Work, 8 Carry, 10 Move - Total Cost: 1700
+                body = { work: 8, carry: 8, move: 10 };
                 break;
         }
 

@@ -1,4 +1,3 @@
-import EmpireHelper from "./EmpireHelper";
 import { ALLY_LIST } from "utils/config";
 
 export default class MiliHelper {

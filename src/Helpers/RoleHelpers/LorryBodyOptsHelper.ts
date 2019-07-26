@@ -1,6 +1,5 @@
 import {
     GROUPED,
-    COLLATED,
     ROOM_STATE_INTRO,
     ROOM_STATE_BEGINNER,
     ROOM_STATE_INTER,
@@ -17,7 +16,6 @@ import {
     TIER_7,
     TIER_8,
     ROLE_LORRY,
-    ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
