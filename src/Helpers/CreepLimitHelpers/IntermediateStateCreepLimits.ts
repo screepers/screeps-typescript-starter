@@ -1,4 +1,7 @@
 import {
+    ROLE_MINER,
+    ROLE_HARVESTER,
+    ROLE_WORKER,
     ROOM_STATE_INTER
 } from "utils/constants";
 import MemoryApi from "Api/Memory.Api";

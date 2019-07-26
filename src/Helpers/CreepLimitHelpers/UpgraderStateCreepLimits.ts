@@ -1,4 +1,14 @@
 import {
+    ROLE_MINER,
+    ROLE_HARVESTER,
+    ROLE_WORKER,
+    ROLE_POWER_UPGRADER,
+    ROLE_LORRY,
+    ROLE_REMOTE_MINER,
+    ROLE_REMOTE_HARVESTER,
+    ROLE_REMOTE_RESERVER,
+    ROLE_COLONIZER,
+    ROLE_REMOTE_DEFENDER,
     ROOM_STATE_UPGRADER
 } from "utils/constants";
 import RoomHelper from "Helpers/RoomHelper";
