@@ -1,3 +1,4 @@
+// Creep Managers' Implementations
 import MinerCreepManager from "../Managers/Roles/MinerCreepManager";
 import HarvesterCreepManager from "../Managers/Roles/HarvesterCreepManager";
 import WorkerCreepManager from "../Managers/Roles/WorkerCreepManager";
@@ -13,8 +14,9 @@ import RemoteReserverCreepManager from "../Managers/Roles/RemoteReserverCreepMan
 import ZealotCreepManager from "../Managers/Roles/ZealotCreepManager";
 import MedicCreepManager from "../Managers/Roles/MedicCreepManager";
 import StalkerCreepManager from "../Managers/Roles/StalkerCreepManager";
-// ---------------------------
 import DomesticDefenderCreepManager from "../Managers/Roles/DomesticDefenderCreepManager";
+// ---------------------------
+// Body/Option Helper Implementations
 import { MinerBodyOptsHelper } from "../Helpers/RoleHelpers/MinerBodyOptsHelper";
 import { HarvesterBodyOptsHelper } from "../Helpers/RoleHelpers/HarvesterBodyOptsHelper";
 import { WorkerBodyOptsHelper } from "../Helpers/RoleHelpers/WorkerBodyOptsHelper";
@@ -31,6 +33,16 @@ import { RemoteMinerBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteMinerBod
 import { RemoteHarvesterBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteHarvesterBodyOptsHelper";
 import { ClaimerBodyOptsHelper } from "../Helpers/RoleHelpers/ClaimerBodyOptsHelper";
 import { RemoteReserverBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteReserverBodyOptsHelper";
+// ---------------------------
+// Room Spawn Limit Implementations
+import { IntroStateCreepLimits } from "../Helpers/CreepLimitHelpers/IntroStateCreepLimits";
+import { BeginnerStateCreepLimits } from "../Helpers/CreepLimitHelpers/BeginnerStateCreepLimits";
+import { IntermediateStateCreepLimits } from "../Helpers/CreepLimitHelpers/IntermediateStateCreepLimits";
+import { AdvancedStateCreepLimits } from "../Helpers/CreepLimitHelpers/AdvancedStateCreepLimits";
+import { StimulateStateCreepLimits } from "../Helpers/CreepLimitHelpers/StimulateStateCreepLimits";
+import { NukeStateCreepLimits } from "../Helpers/CreepLimitHelpers/NukeStateCreepLimits";
+import { UpgraderStateCreepLimits } from "../Helpers/CreepLimitHelpers/UpgraderStateCreepLimits";
+// ----------------------------
 // ---------- End Imports ----------------------------------------------------------------------------
 
 // Constant containing the manager for each role, which all implement runRole
@@ -71,5 +83,15 @@ export const CREEP_BODY_OPT_HELPERS: ICreepBodyOptsHelper[] = [
     new StalkerBodyOptsHelper(),
     new MedicBodyOptsHelper(),
     new DomesticDefenderBodyOptsHelper(),
+];
+
+export const ROOM_STATE_CREEP_LIMITS: ICreepSpawnLimits[] = [
+    new IntroStateCreepLimits(),
+    new BeginnerStateCreepLimits(),
+    new IntermediateStateCreepLimits(),
+    new AdvancedStateCreepLimits(),
+    new UpgraderStateCreepLimits(),
+    new StimulateStateCreepLimits(),
+    new NukeStateCreepLimits(),
 ];
 

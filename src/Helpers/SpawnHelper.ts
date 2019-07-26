@@ -1,33 +1,8 @@
-import MemoryHelper from "./MemoryHelper";
-import SpawnApi from "Api/Spawn.Api";
 import {
     ROLE_COLONIZER,
     ROLE_REMOTE_MINER,
-    ROLE_REMOTE_RESERVER,
-    ROLE_MEDIC,
-    ROLE_MINER,
     ROLE_REMOTE_HARVESTER,
-    ROLE_STALKER,
-    ROLE_ZEALOT,
     ROLE_CLAIMER,
-    GROUPED,
-    COLLATED,
-    ROOM_STATE_INTRO,
-    ROOM_STATE_BEGINNER,
-    ROOM_STATE_INTER,
-    ROOM_STATE_ADVANCED,
-    ROOM_STATE_NUKE_INBOUND,
-    ROOM_STATE_STIMULATE,
-    ROOM_STATE_UPGRADER,
-    TIER_1,
-    TIER_2,
-    TIER_3,
-    TIER_4,
-    TIER_5,
-    TIER_6,
-    TIER_7,
-    TIER_8,
-    ROLE_DOMESTIC_DEFENDER,
     ERROR_WARN,
     STALKER_SOLO,
     ZEALOT_SOLO,
@@ -299,6 +274,7 @@ export class SpawnHelper {
     }
 
     /**
+<<<<<<< HEAD
      * gets the AttackRoomMemory with active flags
      * only one attack flag will be active at a time during any given tick
      * if this is not true because of some error/oversight, it is self correcting since
@@ -307,12 +283,15 @@ export class SpawnHelper {
      */
     public static getAttackRoomWithActiveFlag(room: Room): AttackRoomMemory | undefined {
         const allAttackRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
-
+        // REFACTOR HERE
         // Return the first active flag we find (should only be 1 flag active at a time across all attack rooms)
         return _.find(allAttackRooms, attackRoom => _.some(attackRoom!.flags, (flag: AttackFlagMemory) => flag.active));
+        // END REFACTOR HERE
     }
 
     /**
+=======
+>>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
      * get number of creeps of role with target room assigned to a specified room
      * @param room the room spawning the creep
      * @param roleConst the role of the creep
@@ -441,7 +420,7 @@ export class SpawnHelper {
 
     /**
      * get the array of roles based on the attack flag type
-     * @param attackFlag the flag memory of the active attack flag
+     * @param attackFlag the flag memory of the attack flag
      */
     public static getRolesArrayFromAttackFlag(attackFlag: ParentFlagMemory): RoleConstant[] {
         // check the flag type and return the array

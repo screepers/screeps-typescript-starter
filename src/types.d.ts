@@ -42,6 +42,12 @@ type RoomStateConstant =
     | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
+interface ICreepSpawnLimits {
+    roomState: RoomStateConstant;
+    generateRemoteLimits: (room: Room) => RemoteCreepLimits;
+    generateDomesticLimits: (room: Room) => DomesticCreepLimits;
+}
+
 /**
  * right when a room is starting and nothing is built/no creeps exist
  */
@@ -1090,10 +1096,6 @@ interface ClaimRoomMemory extends DepedentRoomParentMemory {
  */
 interface ParentFlagMemory {
     /**
-     * if the related flag is currently active
-     */
-    active: boolean;
-    /**
      * the name of the flag
      */
     flagName: string;
@@ -1122,6 +1124,10 @@ interface AttackFlagMemory extends ParentFlagMemory {
      * the number of creeps this flag has successfully spawned
      */
     currentSpawnCount: number;
+    /**
+     * array of the creep names in the squad
+     */
+    squadMembers: string[];
 }
 
 /**

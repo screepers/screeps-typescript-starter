@@ -1,6 +1,5 @@
 import {
     GROUPED,
-    COLLATED,
     ROOM_STATE_INTRO,
     ROOM_STATE_BEGINNER,
     ROOM_STATE_INTER,
@@ -8,8 +7,6 @@ import {
     ROOM_STATE_NUKE_INBOUND,
     ROOM_STATE_STIMULATE,
     ROOM_STATE_UPGRADER,
-    TIER_1,
-    TIER_2,
     TIER_3,
     TIER_4,
     TIER_5,
@@ -17,7 +14,6 @@ import {
     TIER_7,
     TIER_8,
     ROLE_REMOTE_MINER,
-    ERROR_WARN,
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"

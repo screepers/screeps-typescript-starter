@@ -1,7 +1,6 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import {
-    DEFAULT_MOVE_OPTS,
     ROLE_POWER_UPGRADER,
 } from "utils/constants";
 

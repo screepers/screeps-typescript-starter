@@ -2,7 +2,6 @@ import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import MemoryHelper from "Helpers/MemoryHelper";
 import {
-    DEFAULT_MOVE_OPTS,
     ROLE_REMOTE_HARVESTER,
 } from "utils/constants";
 

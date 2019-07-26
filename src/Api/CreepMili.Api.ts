@@ -3,7 +3,7 @@ import { DEFAULT_MOVE_OPTS } from "utils/constants";
 import CreepApi from "./Creep.Api";
 import MiliHelper from "Helpers/MiliHelper";
 import UserException from "utils/UserException";
-import RoomHelper from "Helpers/RoomHelper";
+import { posix } from "path";
 
 // Api for military creep's
 export default class CreepMili {
@@ -23,6 +23,11 @@ export default class CreepMili {
         const squadUUID: number = creepOptions.squadUUID!;
         const rallyRoom: string = creepOptions.rallyLocation.roomName;
         const creepsInSquad: Creep[] | null = MemoryApi.getCreepsInSquad(creep.room.name, squadUUID);
+<<<<<<< HEAD
+        const rangeForEvery: number = creepsInSquad !== null ? creepsInSquad.length : 1;
+=======
+        const rangeForEvery: number = creepsInSquad !== null ? creepsInSquad.length - 1 : 1;
+>>>>>>> 3b9a79ff4821b8c9229b503dc7bd8c759c3fc397
 
 
         // If we don't have the full squad spawned yet, creep is waiting
@@ -38,10 +43,10 @@ export default class CreepMili {
         // Finally, make sure every creep is within an acceptable distance of each other
         const creepsWithinRallyDistance: boolean =
             _.every(creepsInSquad!, (cis: Creep) =>  // Check that every creep is within 2 tiles of at least 1 other creep in squad
-                _.some(creepsInSquad!, (innerC: Creep) => innerC.pos.inRangeTo(cis.pos.x, cis.pos.y, 2))
+                _.some(creepsInSquad!, (innerC: Creep) => innerC.pos.inRangeTo(cis.pos.x, cis.pos.y, 1))
             ) &&
             _.every(creepsInSquad!, (c: Creep) =>    // Check that every creep is within 7 tiles of every creep in the squad
-                _.every(creepsInSquad!, (innerC: Creep) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, 7))
+                _.every(creepsInSquad!, (innerC: Creep) => c.pos.inRangeTo(innerC.pos.x, innerC.pos.y, rangeForEvery))
             );
 
         return creepsWithinRallyDistance;
@@ -209,7 +214,7 @@ export default class CreepMili {
         const hostileCreeps: Creep[] = MemoryApi.getHostileCreeps(creep.room.name);
 
         if (hostileCreeps.length > 0) {
-            return creep.pos.findClosestByPath(hostileCreeps);
+            return creep.pos.findClosestByRange(hostileCreeps);
         }
         return null;
     }
@@ -269,7 +274,6 @@ export default class CreepMili {
      */
     public static kiteEnemyCreep(creep: Creep): boolean {
         const hostileCreep: Creep | null = creep.pos.findClosestByRange(MemoryApi.getHostileCreeps(creep.room.name));
-        const CREEP_RANGE: number = 3;
         if (!hostileCreep) {
             return false;
         }
@@ -296,8 +300,8 @@ export default class CreepMili {
                 "CreepMiliApi/CheckMiliCreepBasics, creep name: [ " + creep.name + " ]",
                 ERROR_ERROR);
         }
+
         const targetRoom: string = creep.memory.targetRoom;
-        // I love tenary operators
         const fleeLocation = creepOptions.rallyLocation ? creepOptions.rallyLocation.roomName : creep.memory.homeRoom;
         // Check if we need to flee
         if (creepOptions.flee && creep.hits < .25 * creep.hitsMax) {
@@ -310,6 +314,8 @@ export default class CreepMili {
 
         if (!creepOptions.rallyDone) {
             if (this.setWaitingForRally(creep, creepOptions)) {
+                // Move the creeps together while waiting for rally so they move out as a team more quickly
+                this.moveCreepToFurthestSquadMember(creep);
                 return true; // idle if we are waiting on everyone to rally still
             }
             // Have the creep stop checking for rally
@@ -330,6 +336,31 @@ export default class CreepMili {
 
         // Return false if we didn't need to do any of this
         return false;
+    }
+
+    /**
+     * move the creep to the furthest squad member
+     * @param
+     */
+    public static moveCreepToFurthestSquadMember(creep: Creep): void {
+        const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
+        const creepsInSquad: Creep[] | null = MemoryApi.getCreepsInSquad(creep.room.name, creepOptions.squadUUID!);
+        let furthestSquadMember: RoomPosition | undefined;
+        for (const member of creepsInSquad!) {
+            if (member.room.name === creep.room.name) {
+                if (!furthestSquadMember) {
+                    furthestSquadMember = member.pos;
+                    continue;
+                }
+                if (creep.pos.getRangeTo(furthestSquadMember) < creep.pos.getRangeTo(member.pos)) {
+                    furthestSquadMember = member.pos;
+                }
+            }
+        }
+        // If we found a squad member in the same room, move towards it
+        if (furthestSquadMember) {
+            creep.moveTo(furthestSquadMember);
+        }
     }
 
     /**

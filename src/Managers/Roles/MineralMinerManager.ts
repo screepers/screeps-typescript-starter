@@ -4,8 +4,6 @@ import {
     ROLE_MINERAL_MINER,
 } from "utils/constants";
 import CreepHelper from "Helpers/CreepHelper";
-import MemoryHelper from "Helpers/MemoryHelper";
-import { MINERS_GET_CLOSEST_SOURCE } from "utils/config";
 
 // Manager for the miner creep role
 export default class MineralMinerCreepManager implements ICreepRoleManager {

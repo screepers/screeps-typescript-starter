@@ -1,7 +1,6 @@
 import MemoryHelper from "Helpers/MemoryHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import RoomHelper from "Helpers/RoomHelper";
-import { SpawnHelper } from "Helpers/SpawnHelper";
 import { NO_CACHING_MEMORY, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
 import {
     BACKUP_JOB_CACHE_TTL,
@@ -11,7 +10,6 @@ import {
     FCREEP_CACHE_TTL,
     HCREEP_CACHE_TTL,
     LINK_JOB_CACHE_TTL,
-    ROLE_MINER,
     ROOM_STATE_INTRO,
     SOURCE_CACHE_TTL,
     SOURCE_JOB_CACHE_TTL,
@@ -29,15 +27,9 @@ import {
     PICKUP_JOB_CACHE_TTL,
     ALL_STRUCTURE_TYPES,
     ERROR_ERROR,
-    ERROR_FATAL,
-    ERROR_INFO,
-    ERROR_WARN,
     MINERAL_CACHE_TTL
 } from "utils/Constants";
 import UserException from "utils/UserException";
-import CarryPartJobs from "Jobs/CarryPartJobs";
-import UtilHelper from "Helpers/UtilHelper";
-import WorkPartJobs from "Jobs/WorkPartJobs";
 import RoomApi from "./Room.Api";
 
 // the api for the memory class
@@ -1832,16 +1824,18 @@ export default class MemoryApi {
      * @returns an array of attack flag memory
      */
     public static getAllAttackFlagMemoryForHost(hostRoomName: string): AttackFlagMemory[] {
+        // REFACTOR HERE
         const hostRoom: Room = Game.rooms[hostRoomName];
         const attackRooms: AttackRoomMemory[] = this.getAttackRooms(hostRoom);
         const attackRoomFlags: AttackFlagMemory[] = [];
         for (const attackRoom of attackRooms) {
             for (const attackFlag of attackRoom.flags) {
-                if (attackFlag.active) {
+                if (attackFlag) {
                     attackRoomFlags.push(attackFlag as AttackFlagMemory);
                 }
             }
         }
         return attackRoomFlags;
+        // END REFACTOR HERE
     }
 }

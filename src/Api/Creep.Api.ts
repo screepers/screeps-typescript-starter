@@ -3,20 +3,13 @@ import CreepHelper from "Helpers/CreepHelper";
 import {
     DEFAULT_MOVE_OPTS,
     ERROR_ERROR,
-    ROOM_STATE_BEGINNER,
-    ROOM_STATE_INTRO,
-    ROLE_MINER,
     ERROR_WARN,
     ERROR_FATAL
 } from "utils/constants";
 import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
-import UtilHelper from "Helpers/UtilHelper";
-import RoomVisualApi from "Managers/RoomVisuals/RoomVisual.Api";
-import RoomVisualManager from "Managers/RoomVisuals/RoomVisualManager";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
-import { LOOK_STRUCTURES } from "../../test/unit/mock";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
