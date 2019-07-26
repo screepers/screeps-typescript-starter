@@ -243,9 +243,9 @@ export class SpawnHelper {
         const tickLimit = creepBody.length * 3;
         // Get all claim rooms in which the specified role does not yet have
         const unfulfilledRemoteRooms: Array<RemoteRoomMemory | undefined> = _.filter(allRemoteRooms, remoteRoom => {
-            const numSources =
+            const numSources: number =
                 !Memory.rooms[remoteRoom!.roomName] || !Memory.rooms[remoteRoom!.roomName].sources.data
-                    ? remoteRoom!.sources.data.length
+                    ? 1
                     : Memory.rooms[remoteRoom!.roomName].sources.data.length;
             return (
                 this.getNumCreepAssignedAsTargetRoom(room, roleConst, remoteRoom, tickLimit) <

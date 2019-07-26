@@ -6,6 +6,7 @@ import MemoryHelper_Room from "./MemoryHelper_Room";
 import UserException from "utils/UserException";
 import { SpawnHelper } from "./SpawnHelper";
 import Normalize from "./Normalize";
+import RoomHelper from "./RoomHelper";
 
 export default class EventHelper {
 
@@ -150,9 +151,10 @@ export default class EventHelper {
         const structures: Structure[] = MemoryApi.getStructures(
             room.name,
             (structure: Structure) =>
-                structure.structureType !== STRUCTURE_KEEPER_LAIR
-                && structure.structureType !== STRUCTURE_CONTROLLER &&
-                (structure.memory.processed === false || structure.memory.processed === undefined),
+                structure.structureType !== STRUCTURE_KEEPER_LAIR &&
+                structure.structureType !== STRUCTURE_CONTROLLER &&
+                RoomHelper.isOwnedRoom(structure.room) &&
+                (!structure.memory || structure.memory.processed === false || structure.memory.processed === undefined),
             true
         );
 
@@ -161,6 +163,9 @@ export default class EventHelper {
         for (const key in structures) {
             const structure: Structure<StructureConstant> = structures[key];
             EventApi.createCustomEvent(room.name, structure.id, C_EVENT_BUILD_COMPLETE);
+            if (!structure.memory) {
+                structure.memory = {} as StructureMemory;
+            }
             structure.memory.processed = true;
         }
     }
