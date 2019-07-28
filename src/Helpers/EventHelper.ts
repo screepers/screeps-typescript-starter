@@ -1,5 +1,5 @@
 import EventApi from "Api/Event.Api";
-import { C_EVENT_CREEP_SPAWNED, C_EVENT_BUILD_COMPLETE, STANDARD_SQUAD, STALKER_SOLO, ZEALOT_SOLO, ERROR_ERROR } from "utils/Constants";
+import { C_EVENT_CREEP_SPAWNED, STANDARD_SQUAD, STALKER_SOLO, ZEALOT_SOLO, ERROR_ERROR } from "utils/Constants";
 import { STANDARD_SQUAD_ARRAY, ZEALOT_SOLO_ARRAY, STALKER_SOLO_ARRAY } from "utils/militaryConfig";
 import MemoryApi from "Api/Memory.Api";
 import MemoryHelper_Room from "./MemoryHelper_Room";
@@ -9,18 +9,6 @@ import Normalize from "./Normalize";
 import RoomHelper from "./RoomHelper";
 
 export default class EventHelper {
-
-    /**
-     * process event triggered for ramparts built in a room
-     * @param room the room the event occured in
-     * @param event the event that occured
-     * @param constructionSite the site we are triggering the event for
-     */
-    public static rampartBuiltTrigger(room: Room, event: CustomEvent, siteBuilt: Structure): void {
-
-        // Update upgrade jobs and fire all the creeps
-        MemoryHelper_Room.updateWorkPart_buildJobs(room);
-    }
 
     /**
      * military creep successfully spawned event
@@ -137,37 +125,6 @@ export default class EventHelper {
         }
 
         return requestingRoleArray.includes(creepRole);
-    }
-
-    /**
-     * scan for structure built events
-     * @param room the room we are scanning
-     */
-    public static scanForStructureBuiltEvents(room: Room): void {
-
-        // Still need to check this for bugs
-
-        // Get all structures in the room that have not yet been processed
-        const structures: Structure[] = MemoryApi.getStructures(
-            room.name,
-            (structure: Structure) =>
-                structure.structureType !== STRUCTURE_KEEPER_LAIR &&
-                structure.structureType !== STRUCTURE_CONTROLLER &&
-                RoomHelper.isOwnedRoom(structure.room) &&
-                (!structure.memory || structure.memory.processed === false || structure.memory.processed === undefined),
-            true
-        );
-
-
-        // Create an event for each unprocesseed structure, then set it as processed
-        for (const key in structures) {
-            const structure: Structure<StructureConstant> = structures[key];
-            EventApi.createCustomEvent(room.name, structure.id, C_EVENT_BUILD_COMPLETE);
-            if (!structure.memory) {
-                structure.memory = {} as StructureMemory;
-            }
-            structure.memory.processed = true;
-        }
     }
 
     /**

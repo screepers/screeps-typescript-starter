@@ -115,7 +115,6 @@ export default class SpawnApi {
                 }
             }
         }
-        // END REFACTOR HERE
 
         // Add the constructed queue to the military queue
         if (!room.memory.creepLimit!.militaryLimits) {
@@ -504,7 +503,6 @@ export default class SpawnApi {
             squadOptions.rallyLocation = selectedFlagMemory.rallyLocation;
             return squadOptions;
         }
-        // END REFACTOR HERE
     }
 
     /**
@@ -550,7 +548,6 @@ export default class SpawnApi {
                 }
                 break;
 
-            // REFACTOR HERE
             // Military creeps going to their attack rooms
             case ROLE_STALKER:
             case ROLE_MEDIC:
@@ -559,8 +556,8 @@ export default class SpawnApi {
                 if (requestingFlag) {
                     return Game.flags[requestingFlag!.flagName].pos.roomName;
                 }
+                console.log(requestingFlag);
                 break;
-            // END REFACTOR HERE
 
             // Domestic creeps keep their target room as their home room
             // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)

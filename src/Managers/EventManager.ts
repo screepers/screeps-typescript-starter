@@ -9,17 +9,9 @@ export default class EventManager {
     public static runEventManager(): void {
 
         const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
-        const dependentRooms: Room[] = MemoryApi.getVisibleDependentRooms();
 
         // Process Events for all owned rooms
         _.forEach(ownedRooms, (room: Room) => {
-            EventApi.scanForNewEvents(room);
-            EventApi.processRoomEvents(room);
-            EventApi.removeProcessedEvents(room);
-        });
-
-        // Init memory for all visible dependent rooms
-        _.forEach(dependentRooms, (room: Room) => {
             EventApi.scanForNewEvents(room);
             EventApi.processRoomEvents(room);
             EventApi.removeProcessedEvents(room);

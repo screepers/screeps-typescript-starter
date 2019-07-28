@@ -1,4 +1,4 @@
-import { C_EVENT_BUILD_COMPLETE, C_EVENT_CREEP_SPAWNED } from "utils/Constants";
+import { C_EVENT_CREEP_SPAWNED } from "utils/Constants";
 import EventHelper from "Helpers/EventHelper";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import UserException from "utils/UserException";
@@ -40,7 +40,6 @@ export default class EventApi {
         // Call the helper functions to scan for and create new events for the room
         // ! [Disclaimer] This is scanning structures and forcing update every tick, watch cpu and we
         // Should individually profile this, it is useful but could turn out to be expensive, we'll see how it goes
-        EventHelper.scanForStructureBuiltEvents(room);
         EventHelper.scanForCreepSpawnedEvents(room);
     }
 
@@ -74,11 +73,6 @@ export default class EventApi {
         // Call the appropriate helper for each event
         switch (event.type) {
 
-            // Handle all construction site built events
-            case C_EVENT_BUILD_COMPLETE:
-                this.processConstructionSiteEvent(room, event, subject);
-                break;
-
             // Handle all creep spawned events
             case C_EVENT_CREEP_SPAWNED:
                 this.processCreepSpawnEvent(room, event, subject);
@@ -95,24 +89,6 @@ export default class EventApi {
         // Mark the event as processed
         event.processed = true;
     }
-
-
-    /**
-     * process construction site events
-     */
-    public static processConstructionSiteEvent(room: Room, event: CustomEvent, subject: any): void {
-        const siteBuilt: Structure = subject as Structure;
-
-        // Handle for all construction sites ---------
-        MemoryApi.cleanCreepDeadJobsMemory(room.name);
-
-        // Handle specifics sites --------------------
-        // Handle ramparts being built
-        if (siteBuilt.structureType === STRUCTURE_RAMPART) {
-            EventHelper.rampartBuiltTrigger(room, event, siteBuilt);
-        }
-    }
-
 
     /**
      * process creep spawning event

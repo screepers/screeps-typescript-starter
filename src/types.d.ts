@@ -633,10 +633,8 @@ interface CarryPartJobListing {
 /**
  * types of custom events
  */
-type C_EVENT_BUILD_COMPLETE = 1;
-type C_EVENT_CREEP_SPAWNED = 2;
+type C_EVENT_CREEP_SPAWNED = 1;
 type CustomEventConstant =
-    C_EVENT_BUILD_COMPLETE |
     C_EVENT_CREEP_SPAWNED;
 
 /**

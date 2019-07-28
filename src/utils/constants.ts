@@ -180,5 +180,4 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
 };
 
 // Custom Event Type Constants
-export const C_EVENT_BUILD_COMPLETE = 1;
-export const C_EVENT_CREEP_SPAWNED = 2;
+export const C_EVENT_CREEP_SPAWNED = 1;
