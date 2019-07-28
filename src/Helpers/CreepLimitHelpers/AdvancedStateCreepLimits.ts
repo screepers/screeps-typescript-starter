@@ -46,7 +46,7 @@ export class AdvancedStateCreepLimits implements ICreepSpawnLimits {
         // Generate Limits --------
         domesticLimits[ROLE_MINER] = minerLimits;
         domesticLimits[ROLE_HARVESTER] = numRemoteRooms === 0 ? 1 : 2;
-        domesticLimits[ROLE_WORKER] = 3 + numRemoteRooms;
+        domesticLimits[ROLE_WORKER] = 3; // + numRemoteRooms change this back after fixing remote rooms
         domesticLimits[ROLE_POWER_UPGRADER] = 0;
         domesticLimits[ROLE_LORRY] = numLorries;
 

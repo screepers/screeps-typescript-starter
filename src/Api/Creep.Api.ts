@@ -776,10 +776,13 @@ export default class CreepApi {
         }
 
         if (creepOptions.getDroppedEnergy) {
-            // All dropped resources with enough energy to fill creep.carry, and not taken
+            // All dropped resources with enough energy to fill creep.carry, and not taken, also accept dropped resources that are at least 60% of carry
             const dropJobs = MemoryApi.getPickupJobs(
                 room,
-                (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources!.energy >= creep.carryCapacity
+                (dJob: GetEnergyJob) =>
+                    !dJob.isTaken &&
+                    ((dJob.resources!.energy >= creep.carryCapacity) ||
+                        (dJob.targetType === "droppedResource" && dJob.resources!.energy >= creep.carryCapacity * .6))
             );
 
             if (dropJobs.length > 0) {
