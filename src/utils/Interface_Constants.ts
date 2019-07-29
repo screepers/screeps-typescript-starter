@@ -85,6 +85,8 @@ export const CREEP_BODY_OPT_HELPERS: ICreepBodyOptsHelper[] = [
     new DomesticDefenderBodyOptsHelper(),
 ];
 
+// This is where each class instance is stored to be searched through so the correct one can be selected
+// Follow advanced state creeep limits for next section
 export const ROOM_STATE_CREEP_LIMITS: ICreepSpawnLimits[] = [
     new IntroStateCreepLimits(),
     new BeginnerStateCreepLimits(),

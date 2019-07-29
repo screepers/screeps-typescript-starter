@@ -20,13 +20,22 @@ import Normalize from "Helpers/Normalize";
 
 export class AdvancedStateCreepLimits implements ICreepSpawnLimits {
 
+    // Think of this as the "key". It searched for this name to decide that this is the class instance we want to run
     public roomState: RoomStateConstant = ROOM_STATE_ADVANCED;
 
+    // This is needed because javascript doesn't bind functions to instances, we must manually do it lmao
     constructor() {
         const self = this;
         self.generateDomesticLimits = self.generateDomesticLimits.bind(self);
         self.generateRemoteLimits = self.generateRemoteLimits.bind(self);
     }
+
+    // Rest should be self explainitory, ask questions if you need
+    // go to the interface definition above to see how the interface is set up
+    // To recreate with jobs, make a folder for jobs, make an interface for each different target type or job type
+    // implement a doWork and a travelTo for each of these
+    // then replace the switch statement with the for loop search for the correct type, and call the doWork or travelTo on it
+    // The creep manager will still just have creepapi.doWork, but that function will contain the search for the class we want
 
     /**
      * generate the domestic limits for the room

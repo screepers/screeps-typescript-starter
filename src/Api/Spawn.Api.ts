@@ -48,6 +48,9 @@ export default class SpawnApi {
     private static generateDomesticCreepLimits(room: Room): DomesticCreepLimits {
         const roomState: RoomStateConstant = room.memory.roomState as RoomStateConstant;
 
+        // This used to be the big switch statement for each room state
+        // It is now seperated into a class per room state
+        // This just searches the room states, follow the definition of room_state_creep_limits for the next portion
         // Generate the room state for the specified room state
         for (const index in ROOM_STATE_CREEP_LIMITS) {
             if (ROOM_STATE_CREEP_LIMITS[index].roomState === roomState) {
