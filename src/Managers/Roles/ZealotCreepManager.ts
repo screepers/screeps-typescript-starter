@@ -1,19 +1,24 @@
 import MiliApi from "Api/CreepMili.Api";
 import {
-    DEFAULT_MOVE_OPTS
+    DEFAULT_MOVE_OPTS,
+    ROLE_ZEALOT,
 } from "utils/constants";
 
 // Manager for the miner creep role
-export default class ZealotCreepManager {
+export default class ZealotCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_ZEALOT;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
 
     /**
      * run the zealot creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return;
-        }
+    public runCreepRole(creep: Creep): void {
 
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 1;
@@ -24,9 +29,14 @@ export default class ZealotCreepManager {
         }
 
         // Find a target for the creep
-        const target: Creep | Structure<StructureConstant> | undefined = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        creepOptions.attackTarget = MiliApi.getAttackTarget(creep, creepOptions, CREEP_RANGE);
+        const target: Creep | Structure<StructureConstant> | undefined = creepOptions.attackTarget;
         const isMelee: boolean = true;
         if (!target) {
+            // Keep the creeps together in the squad, if they're in a squad
+            if (creepOptions.squadUUID) {
+                MiliApi.moveCreepToFurthestSquadMember(creep);
+            }
             return; // idle if no current target
         }
         // If we aren't in attack range, move towards the attack target
@@ -37,5 +47,8 @@ export default class ZealotCreepManager {
 
         // We are in attack range and healthy, attack the target
         creep.attack(target);
+
+        // Reset creep's target
+        MiliApi.resetOffensiveTarget(creep);
     }
 }

@@ -65,4 +65,16 @@ export default class Normalize {
         // Risks returning null instead of a creep object, but I think that is outside the scope of a normalize method
         return <Creep>obj;
     }
+
+    /**
+     * convert the creep body into an array of constants
+     * @param body the creep body object
+     */
+    public static convertCreepBodyToBodyPartConstant(body: BodyPartDefinition[]): BodyPartConstant[] {
+        const convertedBody: BodyPartConstant[] = [];
+        for (const part of body) {
+            convertedBody.push(part.type);
+        }
+        return convertedBody;
+    }
 }

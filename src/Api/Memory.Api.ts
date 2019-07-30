@@ -1,7 +1,6 @@
 import MemoryHelper from "Helpers/MemoryHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import RoomHelper from "Helpers/RoomHelper";
-import { SpawnHelper } from "Helpers/SpawnHelper";
 import { NO_CACHING_MEMORY, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
 import {
     BACKUP_JOB_CACHE_TTL,
@@ -11,7 +10,6 @@ import {
     FCREEP_CACHE_TTL,
     HCREEP_CACHE_TTL,
     LINK_JOB_CACHE_TTL,
-    ROLE_MINER,
     ROOM_STATE_INTRO,
     SOURCE_CACHE_TTL,
     SOURCE_JOB_CACHE_TTL,
@@ -29,14 +27,9 @@ import {
     PICKUP_JOB_CACHE_TTL,
     ALL_STRUCTURE_TYPES,
     ERROR_ERROR,
-    ERROR_FATAL,
-    ERROR_INFO,
-    ERROR_WARN
+    MINERAL_CACHE_TTL
 } from "utils/Constants";
 import UserException from "utils/UserException";
-import CarryPartJobs from "Jobs/CarryPartJobs";
-import UtilHelper from "Helpers/UtilHelper";
-import WorkPartJobs from "Jobs/WorkPartJobs";
 import RoomApi from "./Room.Api";
 
 // the api for the memory class
@@ -67,6 +60,13 @@ export default class MemoryApi {
         for (const flag in Memory.flags) {
             if (!_.some(Game.flags, (flagLoop: Flag) => flagLoop.name === Memory.flags[flag].flagName)) {
                 delete Memory.flags[flag];
+            }
+        }
+
+        // Remove all dead structures from memory
+        for (const struct in Memory.structures) {
+            if (!Game.getObjectById(struct)) {
+                delete Memory.structures[struct];
             }
         }
     }
@@ -189,7 +189,8 @@ export default class MemoryApi {
                 droppedResources: { data: null, cache: null },
                 jobs: {},
                 structures: { data: null, cache: null },
-                upgradeLink: ""
+                upgradeLink: "",
+                events: [],
             };
         } else {
             Memory.rooms[roomName] = {
@@ -200,7 +201,8 @@ export default class MemoryApi {
                 droppedResources: { data: null, cache: null },
                 constructionSites: { data: null, cache: null },
                 defcon: -1,
-                hostiles: { data: null, cache: null }
+                hostiles: { data: null, cache: null },
+                events: [],
             };
         }
 
@@ -311,7 +313,7 @@ export default class MemoryApi {
         forceUpdate?: boolean
     ): Creep[] {
         // If we have no vision of the room, return an empty array
-        if (!Memory.rooms[roomName] || !Memory.rooms[roomName].hostiles) {
+        if (!Game.rooms[roomName]) {
             return [];
         }
 
@@ -577,22 +579,40 @@ export default class MemoryApi {
     }
 
     /**
-     * get minerals in the room -- NOT IMPLEMENTED
+     * get minerals in the room
      * @param room the room we want minerals from
      * @param filterFunction [Optional] The function to filter all mineral objects
      * @param forceUpdate [Optional] Invalidate cache by force
      * @returns Mineral[]  An array of minerals, if there are any
      */
     public static getMinerals(
-        room: Room,
+        roomName: string,
         filterFunction?: (object: Source) => boolean,
         forceUpdate?: boolean
     ): Mineral[] {
-        //
+        // If we have no vision of the room, return an empty array
+        if (!Memory.rooms[roomName]) {
+            return [];
+        }
 
-        // TODO Fill this out
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            Memory.rooms[roomName].minerals === undefined ||
+            Memory.rooms[roomName].minerals.cache < Game.time - MINERAL_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateMinerals(roomName);
+        }
 
-        return [];
+        const sourceIDs = Memory.rooms[roomName].minerals.data;
+
+        let minerals: Mineral[] = MemoryHelper.getOnlyObjectsFromIDs<Mineral>(sourceIDs);
+
+        if (filterFunction !== undefined) {
+            minerals = _.filter(minerals, filterFunction);
+        }
+
+        return minerals;
     }
 
     /**
@@ -610,6 +630,9 @@ export default class MemoryApi {
     ): RemoteRoomMemory[] {
         let remoteRooms: RemoteRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: RemoteRoomMemory) => true;
@@ -651,6 +674,9 @@ export default class MemoryApi {
     ): ClaimRoomMemory[] {
         let claimRooms: ClaimRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: ClaimRoomMemory) => true;
@@ -689,6 +715,9 @@ export default class MemoryApi {
     ): AttackRoomMemory[] {
         let attackRooms: AttackRoomMemory[];
 
+        if (!Memory.rooms[room.name]) {
+            return [];
+        }
         // Kind of hacky, but if filter function isn't provided then its just true so that is won't effect evaulation on getting the attack rooms
         if (!filterFunction) {
             filterFunction = (badPractice: Room) => true;
@@ -806,7 +835,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -831,12 +860,14 @@ export default class MemoryApi {
         const allGetEnergyJobs: GetEnergyJob[] = [];
 
         _.forEach(this.getSourceJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
+        _.forEach(this.getMineralJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
         _.forEach(this.getContainerJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
         _.forEach(this.getLinkJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
         _.forEach(this.getBackupStructuresJobs(room, filterFunction, forceUpdate), job => allGetEnergyJobs.push(job));
 
         return allGetEnergyJobs;
     }
+
     /**
      * Get the list of GetEnergyJobs.sourceJobs
      * @param room The room to get the jobs from
@@ -865,6 +896,36 @@ export default class MemoryApi {
         }
 
         return sourceJobs;
+    }
+
+    /**
+     * Get the list of GetEnergyJobs.mineralJobs
+     * @param room The room to get the jobs from
+     * @param filterFunction [Optional] A function to filter the getEnergyjob list
+     * @param forceUpdate [Optional] Forcibly invalidate the cache
+     */
+    public static getMineralJobs(
+        room: Room,
+        filterFunction?: (object: GetEnergyJob) => boolean,
+        forceUpdate?: boolean
+    ): GetEnergyJob[] {
+        if (
+            NO_CACHING_MEMORY ||
+            forceUpdate ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs ||
+            !Memory.rooms[room.name].jobs!.getEnergyJobs!.mineralJobs ||
+            Memory.rooms[room.name].jobs!.getEnergyJobs!.mineralJobs!.cache < Game.time - SOURCE_JOB_CACHE_TTL
+        ) {
+            MemoryHelper_Room.updateGetEnergy_mineralJobs(room);
+        }
+
+        let mineralJobs: GetEnergyJob[] = Memory.rooms[room.name].jobs!.getEnergyJobs!.mineralJobs!.data;
+
+        if (filterFunction !== undefined) {
+            mineralJobs = _.filter(mineralJobs, filterFunction);
+        }
+
+        return mineralJobs;
     }
 
     /**
@@ -1427,10 +1488,10 @@ export default class MemoryApi {
             throw new UserException(
                 "Error in updateJobMemory",
                 "Could not find the job in room memory to update." +
-                    "\nCreep: " +
-                    creep.name +
-                    "\nJob: " +
-                    JSON.stringify(creep.memory.job),
+                "\nCreep: " +
+                creep.name +
+                "\nJob: " +
+                JSON.stringify(creep.memory.job),
                 ERROR_ERROR
             );
         }
@@ -1736,5 +1797,43 @@ export default class MemoryApi {
             expirationLimit: limit
         };
         Memory.empire.alertMessages.push(messageNode);
+    }
+
+    /**
+     * scan over all creeps in the room and verify their jobs.
+     * Remove any unverified jobs
+     * @param roomName the room we are scanning for
+     */
+    public static cleanCreepDeadJobsMemory(roomName: string): void {
+        const creepsInRoomWhoAreHustling: Creep[] = this.getMyCreeps(
+            roomName,
+            (creep: Creep) => creep.memory.job !== undefined
+        );
+
+        for (const hustler of creepsInRoomWhoAreHustling) {
+            const job: BaseJob = hustler.memory.job!;
+            if (!RoomHelper.verifyObjectByID(job.targetID)) {
+                delete hustler.memory.job
+            }
+        }
+    }
+
+    /**
+     * Get all attack flag memory objects associated with the host room
+     * @param hostRoomName the host room we are getting the memory from
+     * @returns an array of attack flag memory
+     */
+    public static getAllAttackFlagMemoryForHost(hostRoomName: string): AttackFlagMemory[] {
+        const hostRoom: Room = Game.rooms[hostRoomName];
+        const attackRooms: AttackRoomMemory[] = this.getAttackRooms(hostRoom);
+        const attackRoomFlags: AttackFlagMemory[] = [];
+        for (const attackRoom of attackRooms) {
+            for (const attackFlag of attackRoom.flags) {
+                if (attackFlag) {
+                    attackRoomFlags.push(attackFlag as AttackFlagMemory);
+                }
+            }
+        }
+        return attackRoomFlags;
     }
 }

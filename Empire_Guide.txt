@@ -28,10 +28,20 @@ Option Flags:
 
 -------- Known Bugs --------
   Remote rooms put a lot of stress on a room, and energy isn't being used effectively (a lot of dissapearing energy for some reason)
-  Military spawning rework in progress so extremely buggy
+  Found reason for this, harvesters stopped filling storage (in presence of terminal at least, not sure if ONLY in this situation)
+  Working on events_api
   Claiming not online yet
   Power upgrader not yet working
 
+-------- Horizon -----------
+  Claiming
+  Expand military intelligence
+  Market
+  -
+    Inter-room assistance
+    Possibly assimilation-like feature where our code bases act as 1?
+    Robust Ally code to help each other
+  -
 
 -------- Console Commands --------
 
@@ -73,35 +83,35 @@ Send 5 people in a row, one after enough, a set number of times:
 ---- Military Roles --------------------
 Zealot:
   Standard powerful melee creep, no kiting capability, but pure damage
-  
+
 Stalker:
   Standard powerful ranged creep, will kite enemies, but not as much damage as a zealot
-  
+
  Medic:
   Standard Healing type creep, non-combat, pure healing, generally moves with squad, will heal in the following order
   squad -> friendly creeps -> ally creeps
-  
+
 Domestic Defender:
   Melee + ranged + heal hybrid. Only spawned to defend the home room from attack.
-  
+
 Remote Defender:
   Melee + ranged + heal hybrid. Only spawned to defend a remote room from attack.
-  
+
 ---- How To ----------------------------
 Attack a Room --- :
   Place a Red + {secondaryColor} flag in the room you wish to attack.
   Place a rally flag where you wish for squads to rally, if no rally flag is present, squad will rally in the room before the attack     room
-  
+
 Claim a Room ---- :
   Place a White + {secondaryColor} flag in the room you wish to claim
-  
+
 Set a Remote Room --- :
   Place a Yellow + {secondaryColor} flag in the room you wish to set as your remote room
-  
+
 Override Automatic Dependent Room (Attack, Remote, Claim) Placement --- :
   Place an Override Option Flag in the Owned room you wish to set as the host room
   Place a remote, attack, or claim flag at your desired location
-  Note: 
+  Note:
     Only one dependent override room may be active at a time
     The override flag will be removed after the host room is assigned a dependent room
 
@@ -111,24 +121,24 @@ Each RCL ---:
   Build all extensions and roads leading/through them every chance you get
   Build towers every chance you get
   Build Spawn every chance you get
-  
+
 RCL 1 ---:
   No action needed
 
 RCL 2 ---:
   Build roads to sources and controller
-  
-RCL 3 ---: 
+
+RCL 3 ---:
   Build containers at the sources
   Build walls and ramparts
 
 RCL 4 ---:
   Build Extensions, roads through the extensions, and a storage
   Upon storage completion, claim a remote room
-  
-RCL 5 ---: 
+
+RCL 5 ---:
   No additional actions needed
-  
+
 RCL 6 ---:
   Build links, terminal, and labs
   Upon links' completion, power upgrader comes out
@@ -154,6 +164,7 @@ Code Instructions: ---------------------
   Create the flag to trigger spawning for the role
   Add the handling for the new role in militaryQueue spawn
   Add reference to empire guide for the flag definition/role spawned
+  Add the role to be handled in EventHelper -> getRequestingFlag
 
 ---- Adding a new Domestic Role --------
   Add the creep role constant to type list of roles, type the constant, and add the constant (just add to enum when we have that online)

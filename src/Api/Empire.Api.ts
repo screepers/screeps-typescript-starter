@@ -1,11 +1,5 @@
 import EmpireHelper from "../Helpers/EmpireHelper";
 import MemoryApi from "./Memory.Api";
-import { ZEALOT_SOLO, STALKER_SOLO, STANDARD_SQUAD } from "utils/Constants";
-import {
-    ZEALOT_FLAG_ONE_TIME_USE,
-    STALKER_FLAG_ONE_TIME_USE,
-    STANDARD_SQUAD_FLAG_ONE_TIME_USE
-} from "utils/militaryConfig"
 
 export default class Empire {
 
@@ -134,54 +128,5 @@ export default class Empire {
         EmpireHelper.cleanDeadClaimRooms(claimRooms);
         EmpireHelper.cleanDeadRemoteRooms(remoteRooms);
         EmpireHelper.cleanDeadAttackRooms(attackRooms);
-    }
-
-    /**
-     * get if the flag is considered a one time use flag
-     */
-    public static isAttackFlagOneTimeUse(flagMemory: AttackFlagMemory): boolean {
-        // Reference config file to decide what flag is considered 1 time use, assume yes by default
-        switch (flagMemory.flagType) {
-            case ZEALOT_SOLO:
-                return ZEALOT_FLAG_ONE_TIME_USE;
-            case STALKER_SOLO:
-                return STALKER_FLAG_ONE_TIME_USE;
-            case STANDARD_SQUAD:
-                return STANDARD_SQUAD_FLAG_ONE_TIME_USE;
-            default:
-                return true;
-        }
-    }
-
-    /**
-     * if there are no active attack flags for a specific room, active one
-     */
-    public static activateAttackFlags(room: Room): void {
-
-        const attackRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
-        const attackRoomWithNoActiveFlag: AttackRoomMemory | undefined = _.find(attackRooms, (attackRoom: AttackRoomMemory) => {
-            if (attackRoom) {
-                return !_.some(attackRoom!.flags, (flag: AttackFlagMemory) => flag.active);
-            }
-            return false;
-        });
-
-        // Break early if there are none
-        if (!attackRoomWithNoActiveFlag) {
-            return;
-        }
-
-        // Break early if no attack flags on this room (possible to happen from an error with cleaning)
-        if (!attackRoomWithNoActiveFlag!.flags) {
-            return;
-        }
-
-        // Activate the first one we see, possible to change later for another standard
-        for (const arf in attackRoomWithNoActiveFlag!.flags) {
-            if (attackRoomWithNoActiveFlag!.flags[arf]) {
-                attackRoomWithNoActiveFlag!.flags[arf]!.active = true;
-                break;
-            }
-        }
     }
 };

@@ -1,18 +1,24 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
-import { ROOM_STATE_UPGRADER } from "utils/constants";
-import { RAMPART_HITS_THRESHOLD, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
+import {
+    ROLE_WORKER,
+} from "utils/constants";
 
 // Manager for the miner creep role
-export default class WorkerCreepManager {
+export default class WorkerCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_WORKER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the worker creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return;
-        }
+    public runCreepRole(creep: Creep): void {
 
         const homeRoom = Game.rooms[creep.memory.homeRoom];
 
@@ -39,7 +45,7 @@ export default class WorkerCreepManager {
     /**
      * Gets a new job for the worker creep
      */
-    public static getNewJob(creep: Creep, room: Room): BaseJob | undefined {
+    public getNewJob(creep: Creep, room: Room): BaseJob | undefined {
         if (creep.carry.energy === 0) {
             return this.newGetEnergyJob(creep, room);
         } else {
@@ -55,7 +61,7 @@ export default class WorkerCreepManager {
     /**
      * Get a GetEnergyJob for the harvester
      */
-    public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
+    public newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
         if (creepOptions.getFromContainer) {
             // All container jobs with enough energy to fill creep.carry, and not taken
@@ -109,7 +115,7 @@ export default class WorkerCreepManager {
     /**
      * Get a CarryPartJob for the worker
      */
-    public static newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
+    public newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillSpawn || creepOptions.fillTower) {
@@ -137,7 +143,7 @@ export default class WorkerCreepManager {
     /**
      * Handles new job initializing
      */
-    public static handleNewJob(creep: Creep, room: Room) {
+    public handleNewJob(creep: Creep, room: Room) {
         MemoryApi.updateJobMemory(creep, room);
 
         switch (creep.memory.job!.jobType) {

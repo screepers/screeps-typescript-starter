@@ -29,7 +29,7 @@ export default class RoomVisualManager {
      * run the manager for a single room
      * @param room the room we want to run the room visual for
      */
-    public static runSingleRoomVisualManager(room: Room): void {
+    private static runSingleRoomVisualManager(room: Room): void {
 
         let endLeftLine: number = 1;
         let endRightLine: number = 1;

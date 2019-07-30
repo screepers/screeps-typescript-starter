@@ -3,18 +3,12 @@ import CreepHelper from "Helpers/CreepHelper";
 import {
     DEFAULT_MOVE_OPTS,
     ERROR_ERROR,
-    ROOM_STATE_BEGINNER,
-    ROOM_STATE_INTRO,
-    ROLE_MINER,
     ERROR_WARN,
     ERROR_FATAL
 } from "utils/constants";
 import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
-import UtilHelper from "Helpers/UtilHelper";
-import RoomVisualApi from "Managers/RoomVisuals/RoomVisual.Api";
-import RoomVisualManager from "Managers/RoomVisuals/RoomVisualManager";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 
 // Api for all types of creeps (more general stuff here)
@@ -77,10 +71,10 @@ export default class CreepApi {
                 throw new UserException(
                     "Bad job.jobType in CreepApi.travelTo",
                     "The jobtype of the job passed to CreepApi.travelTo was invalid" +
-                        "\nCreep: " +
-                        creep.name +
-                        "\n Job Type: " +
-                        job.jobType,
+                    "\nCreep: " +
+                    creep.name +
+                    "\n Job Type: " +
+                    job.jobType,
                     ERROR_FATAL
                 );
         }
@@ -107,7 +101,7 @@ export default class CreepApi {
             creep.memory._move.lastPosition = currPosition;
             creep.memory._move.stuckCount = 0;
             return false; // Creep has moved since last tick
-        } else { 
+        } else {
             // Creep hasn't moved since last tick
             if (creep.fatigue === 0) {
                 creep.memory._move.stuckCount++;
@@ -130,7 +124,7 @@ export default class CreepApi {
      * Do work on the target provided by claimPartJob
      */
     public static doWork_ClaimPartJob(creep: Creep, job: ClaimPartJob) {
-        let target;
+        let target: any;
 
         if (job.targetType === "roomName") {
             if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
@@ -184,7 +178,7 @@ export default class CreepApi {
      * Do work on the target provided by carryPartJob
      */
     public static doWork_CarryPartJob(creep: Creep, job: CarryPartJob) {
-        let target;
+        let target: any;
 
         target = Game.getObjectById(job.targetID);
 
@@ -228,7 +222,7 @@ export default class CreepApi {
      * Do work on the target provided by workPartJob
      */
     public static doWork_WorkPartJob(creep: Creep, job: WorkPartJob) {
-        const target = Game.getObjectById(job.targetID);
+        const target: any = Game.getObjectById(job.targetID);
 
         this.nullCheck_target(creep, target);
 
@@ -296,28 +290,33 @@ export default class CreepApi {
      * Do work on the target provided by a getEnergyJob
      */
     public static doWork_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
-        const target = Game.getObjectById(job.targetID);
+        const target: any = Game.getObjectById(job.targetID);
 
         this.nullCheck_target(creep, target);
 
         let returnCode: number;
 
-        if (job.actionType === "harvest" && (target instanceof Source || target instanceof Mineral)) {
+        if (job.actionType === "harvest" && (target instanceof Source)) {
             returnCode = creep.harvest(target);
-        } else if (job.actionType === "pickup" && target instanceof Resource) {
+        }
+        else if (job.actionType === "harvest" && (target instanceof Mineral)) {
+            const extractor: StructureExtractor = _.find(target.pos.lookFor(LOOK_STRUCTURES),
+                (s: Structure) => s.structureType === STRUCTURE_EXTRACTOR) as StructureExtractor;
+            returnCode = extractor.cooldown > 0 ? ERR_TIRED : creep.harvest(target);
+        }
+        else if (job.actionType === "pickup" && target instanceof Resource) {
             returnCode = creep.pickup(target);
-        } else if (job.actionType === "withdraw" && target instanceof Structure) {
+        }
+        else if (job.actionType === "withdraw" && target instanceof Structure) {
             returnCode = creep.withdraw(target, RESOURCE_ENERGY);
-        } else {
+        }
+        else {
             throw this.badTarget_Error(creep, job);
         }
 
         // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
         switch (returnCode) {
             case OK:
-                // If successful and not harvesting, delete the job from creep memory
-                // * If we run into not being able to stop harvesting minerals, my best solution is to seperate
-                // * the above "instanceof Source | Mineral" into two different if statements, and use a boolean to decide to delete when successful.
                 if (job.actionType !== "harvest") {
                     delete creep.memory.job;
                     creep.memory.working = false;
@@ -538,10 +537,10 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-                creep.name +
-                "]" +
-                "\n Job: " +
-                JSON.stringify(job),
+            creep.name +
+            "]" +
+            "\n Job: " +
+            JSON.stringify(job),
             ERROR_ERROR
         );
     }
@@ -739,7 +738,28 @@ export default class CreepApi {
     }
 
     /**
+     *
+     * @param creep the creep we are getting the job for
+     * @param roomName the room we are getting the job in
+     */
+    public static getNewMineralJob(creep: Creep, room: Room): GetEnergyJob | undefined {
+        const creepOptions = creep.memory.options as CreepOptionsCiv;
+
+        if (creepOptions.harvestMinerals) {
+            // forceUpdate to get accurate job listing
+            const mineralJobs = MemoryApi.getMineralJobs(room, (sJob: GetEnergyJob) => !sJob.isTaken, true);
+
+            if (mineralJobs.length > 0) {
+                return mineralJobs[0];
+            }
+        }
+        return undefined;
+    }
+
+    /**
      * Get a GetEnergyJob for the creep
+     * @param creep the creep we are getting the job for
+     * @param roomName the room name we are getting the job in
      */
     public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
@@ -756,10 +776,13 @@ export default class CreepApi {
         }
 
         if (creepOptions.getDroppedEnergy) {
-            // All dropped resources with enough energy to fill creep.carry, and not taken
+            // All dropped resources with enough energy to fill creep.carry, and not taken, also accept dropped resources that are at least 60% of carry
             const dropJobs = MemoryApi.getPickupJobs(
                 room,
-                (dJob: GetEnergyJob) => !dJob.isTaken && dJob.resources!.energy >= creep.carryCapacity
+                (dJob: GetEnergyJob) =>
+                    !dJob.isTaken &&
+                    ((dJob.resources!.energy >= creep.carryCapacity) ||
+                        (dJob.targetType === "droppedResource" && dJob.resources!.energy >= creep.carryCapacity * .6))
             );
 
             if (dropJobs.length > 0) {
@@ -776,15 +799,15 @@ export default class CreepApi {
                 (job: GetEnergyJob) => !job.isTaken && job.resources!.energy >= creep.carryCapacity
             );
 
-            if (backupStructures.length > 0) {
-                // Turn off access to storage until creep gets a work/carry job
-                const options = creep.memory.options as CreepOptionsCiv;
-                options.fillStorage = false;
-                options.fillTerminal = false;
+            // Only get from the storage if there are jobs that don't involve just putting it right back
+            const isFillJobs: boolean = MemoryApi.getFillJobs(
+                room,
+                (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link",
+                true
+            ).length > 0;
+            if (backupStructures.length > 0 && isFillJobs) {
                 return backupStructures[0];
             }
-
-            return undefined;
         }
 
         return undefined;

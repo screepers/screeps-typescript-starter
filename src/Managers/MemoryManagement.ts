@@ -12,7 +12,6 @@ export default class MemoryManager {
         MemoryApi.garbageCollection();
 
         const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
-
         // Init memory for all owned rooms
         _.forEach(ownedRooms, (room: Room) => {
             const isOwnedRoom: boolean = true;
@@ -20,8 +19,8 @@ export default class MemoryManager {
             MemoryApi.cleanDependentRoomMemory(room);
         });
 
-        // Init memory for all visible dependent rooms
         const dependentRooms: Room[] = MemoryApi.getVisibleDependentRooms();
+        // Init memory for all visible dependent rooms
         _.forEach(dependentRooms, (room: Room) => {
             const isOwnedRoom: boolean = false;
             MemoryApi.initRoomMemory(room.name, isOwnedRoom);
@@ -31,7 +30,7 @@ export default class MemoryManager {
     /**
      * Ensures the initial Memory object is defined properly
      */
-    public static initMainMemory() {
+    private static initMainMemory() {
         if (!Memory.rooms) {
             Memory.rooms = {};
         }
@@ -46,6 +45,10 @@ export default class MemoryManager {
 
         if (!Memory.empire) {
             Memory.empire = {};
+        }
+
+        if (!Memory.structures) {
+            Memory.structures = {};
         }
     }
 }

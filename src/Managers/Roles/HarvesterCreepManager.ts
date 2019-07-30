@@ -1,21 +1,26 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
-import UtilHelper from "Helpers/UtilHelper";
-import RoomHelper from "Helpers/RoomHelper";
 import MemoryHelper from "Helpers/MemoryHelper";
-import { close } from "fs";
-import { formatWithOptions } from "util";
+import {
+    ROLE_HARVESTER,
+} from "utils/constants";
+import CreepHelper from "Helpers/CreepHelper";
 
 // Manager for the miner creep role
-export default class HarvesterCreepManager {
+export default class HarvesterCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_HARVESTER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the harvester creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return; // don't do anything until spawned
-        }
+    public runCreepRole(creep: Creep): void {
 
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
 
@@ -42,51 +47,15 @@ export default class HarvesterCreepManager {
     /**
      * Decides which kind of job to get and calls the appropriate function
      */
-    public static getNewJob(creep: Creep, room: Room): BaseJob | undefined {
+    public getNewJob(creep: Creep, room: Room): BaseJob | undefined {
         // if creep is empty, get a GetEnergyJob
         if (creep.carry.energy === 0) {
             return CreepApi.newGetEnergyJob(creep, room);
         } else {
             let job: BaseJob | undefined = this.newCarryPartJob(creep, room);
-
-            if (job === undefined) {
+            if (job === undefined && CreepHelper.bodyPartExists(creep, WORK)) {
                 job = this.newWorkPartJob(creep, room);
             }
-
-            if (job !== undefined) {
-                // Reset creep options if a job is found
-                // * This prevents a creep from getting a storageFill job after getting a getFromStorage job
-                const options = creep.memory.options as CreepOptionsCiv;
-                options.fillStorage = true;
-                options.fillTerminal = true;
-            } else if (room.memory.jobs && room.memory.jobs.getEnergyJobs) {
-                // Reset creep options if storage is not full and there are getEnergyJobs
-                // * This prevents a creep from idling after getting storage if storage is not full and there are now other sources of energy in the room
-                let numberOfGetEnergyJobs = 0;
-                // Add up the number of jobs available for this creep (>= creepCapacity)
-                if (room.memory.jobs.getEnergyJobs.containerJobs) {
-                    // add the number of jobs that meet criteria
-                    numberOfGetEnergyJobs += _.filter(
-                        room.memory.jobs.getEnergyJobs.containerJobs.data,
-                        (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity
-                    ).length;
-                }
-
-                if (room.memory.jobs.getEnergyJobs.pickupJobs) {
-                    // add the number of jobs that meet criteria
-                    numberOfGetEnergyJobs += _.filter(
-                        room.memory.jobs.getEnergyJobs.pickupJobs.data,
-                        (job: GetEnergyJob) => job.resources.energy >= creep.carryCapacity
-                    ).length;
-                }
-
-                if (numberOfGetEnergyJobs > 0) {
-                    const options = creep.memory.options as CreepOptionsCiv;
-                    options.fillStorage = true;
-                    options.fillTerminal = true;
-                }
-            }
-
             return job;
         }
     }
@@ -94,7 +63,7 @@ export default class HarvesterCreepManager {
     /**
      * Get a CarryPartJob for the harvester
      */
-    public static newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
+    public newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillTower || creepOptions.fillSpawn || creepOptions.fillExtension) {
@@ -121,8 +90,6 @@ export default class HarvesterCreepManager {
                 }
                 return closestJob;
             }
-
-            return undefined;
         }
 
         if (creepOptions.fillStorage || creepOptions.fillTerminal) {
@@ -134,7 +101,6 @@ export default class HarvesterCreepManager {
                 );
 
                 const closestTarget = creep.pos.findClosestByRange(jobObjects);
-
                 let closestJob;
 
                 if (closestTarget !== null) {
@@ -145,8 +111,6 @@ export default class HarvesterCreepManager {
                 }
                 return closestJob;
             }
-
-            return undefined;
         }
 
         return undefined;
@@ -155,7 +119,7 @@ export default class HarvesterCreepManager {
     /**
      * Gets a new WorkPartJob for harvester
      */
-    public static newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
+    public newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
         const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
 
@@ -185,7 +149,7 @@ export default class HarvesterCreepManager {
     /**
      * Handles setup for a new job
      */
-    public static handleNewJob(creep: Creep, room: Room): void {
+    public handleNewJob(creep: Creep, room: Room): void {
         MemoryApi.updateJobMemory(creep, room);
     }
 }

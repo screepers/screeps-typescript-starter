@@ -1,17 +1,25 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import MemoryHelper from "Helpers/MemoryHelper";
+import {
+    ROLE_REMOTE_HARVESTER,
+} from "utils/constants";
 
 // Manager for the miner creep role
-export default class RemoteHarvesterCreepManager {
+export default class RemoteHarvesterCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_REMOTE_HARVESTER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the remote harvester creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return;
-        }
+    public runCreepRole(creep: Creep): void {
 
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
@@ -42,7 +50,7 @@ export default class RemoteHarvesterCreepManager {
     /**
      * Decides which kind of job to get and calls the appropriate function
      */
-    public static getNewJob(creep: Creep, homeRoom: Room, targetRoom: Room): BaseJob | undefined {
+    public getNewJob(creep: Creep, homeRoom: Room, targetRoom: Room): BaseJob | undefined {
         if (creep.carry.energy === 0 && creep.room.name === creep.memory.targetRoom) {
             // If creep is empty and in targetRoom - get energy
             return CreepApi.newGetEnergyJob(creep, targetRoom);
@@ -75,7 +83,7 @@ export default class RemoteHarvesterCreepManager {
     /**
      * Get a CarryPartJob for the harvester
      */
-    public static newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
+    public newCarryPartJob(creep: Creep, room: Room): CarryPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.fillLink) {
@@ -135,7 +143,7 @@ export default class RemoteHarvesterCreepManager {
     /**
      * Handles setup for a new job
      */
-    public static handleNewJob(creep: Creep, room: Room): void {
+    public handleNewJob(creep: Creep, room: Room): void {
         if (creep.memory.job!.jobType === "movePartJob") {
             // Avoid error due to movePartJobs not residing in memory
             return;

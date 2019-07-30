@@ -10,8 +10,9 @@ export default class CreepHelper {
      * get the mining container for a specific job
      * @param job the job we are getting the mining container from
      * @param room the room we are checking in
+     * @param isSource if we nee the mining contrainer for a source
      */
-    public static getMiningContainer(job: GetEnergyJob | undefined, room: Room): StructureContainer | undefined {
+    public static getMiningContainer(job: GetEnergyJob | undefined, room: Room, isSource: boolean): StructureContainer | undefined {
         if (!job) {
             throw new UserException(
                 "Job is undefined",
@@ -20,8 +21,15 @@ export default class CreepHelper {
             );
         }
 
-        const source: Source | null = Game.getObjectById(job.targetID);
-        if (!source) {
+        let sourceTarget: Source | Mineral | null = Game.getObjectById(job.targetID);
+        if (isSource) {
+            sourceTarget = sourceTarget as Source;
+        }
+        else {
+            sourceTarget = sourceTarget as Mineral;
+        }
+
+        if (!sourceTarget) {
             throw new UserException("Source null in getMiningContainer", "room: " + room.name, ERROR_WARN);
         }
 
@@ -31,13 +39,13 @@ export default class CreepHelper {
             STRUCTURE_CONTAINER
         ) as StructureContainer[];
 
-        const closestContainer = source.pos.findClosestByRange(containers);
+        const closestContainer = sourceTarget.pos.findClosestByRange(containers);
 
         if (!closestContainer) {
             return undefined;
         } else {
             // If we have a container, but its not next to the source, its not the correct container
-            if (source.pos.isNearTo(closestContainer)) {
+            if (sourceTarget.pos.isNearTo(closestContainer)) {
                 return closestContainer;
             }
             return undefined;
@@ -98,15 +106,17 @@ export default class CreepHelper {
 
     /**
      * Gets creep.memory.supplementary.moveTargetID, or falls back to creep.memory.job.
+     * @param creep the creep we are getting target for
+     * @param job the job we are getting move target for
      */
     public static getMoveTarget(creep: Creep, job: BaseJob): RoomObject | RoomPosition | null {
         // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
         if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
             return Game.getObjectById(creep.memory.supplementary.moveTargetID);
         }
-        else if(creep.memory.job && creep.memory.job.targetType === "roomName"){
+        else if (creep.memory.job && creep.memory.job.targetType === "roomName") {
             return new RoomPosition(25, 25, creep.memory.job.targetID);
-        } else if(creep.memory.job && creep.memory.job.targetType === "roomPosition"){
+        } else if (creep.memory.job && creep.memory.job.targetType === "roomPosition") {
             // TODO Handle parsing a string into a roomPosition object here
             const x = 25;
             const y = 25;
@@ -116,5 +126,14 @@ export default class CreepHelper {
         else {
             return Game.getObjectById(job.targetID);
         }
+    }
+
+    /**
+     * check if the body part exists on the creep
+     * @param creep the creep we are checking
+     * @param part the body part we are checking
+     */
+    public static bodyPartExists(creep: Creep, bodyPart: BodyPartConstant): boolean {
+        return _.some(creep.body, (part: BodyPartConstant) => part === bodyPart);
     }
 }

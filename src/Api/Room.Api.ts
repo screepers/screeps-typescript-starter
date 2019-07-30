@@ -187,7 +187,7 @@ export default class RoomApi {
         }
 
         // level 3 -- 50 - 150 body parts
-        if (hostileBodyParts < 150 && hostileBodyParts >= 50) {
+        if (hostileBodyParts < 150 && hostileBodyParts > 50) {
             room.memory.defcon = 3;
             return;
         }
@@ -201,8 +201,6 @@ export default class RoomApi {
         // level 1 -- less than 50 body parts, no attack parts
         room.memory.defcon = 1;
         return;
-
-        //
     }
 
     /**
@@ -252,7 +250,7 @@ export default class RoomApi {
             (e: StructureSpawn) => {
                 return e.energy < e.energyCapacity;
             }
-        ) as StructureSpawn[];
+        ) as any as StructureSpawn[];
 
         const extensionsAndSpawns: Array<StructureExtension | StructureSpawn> = [];
         _.forEach(extensionsNeedFilled, (ext: StructureExtension) => extensionsAndSpawns.push(ext));
@@ -481,5 +479,23 @@ export default class RoomApi {
             const rampart: StructureRampart = rampartsInRoom[i];
             rampart.setPublic(!isPublic);
         }
+    }
+
+    /**
+     * get the rampart the defender should stand on when defending the room
+     * @param room the room we are looking for the rampart in
+     * @param target the target creep we are defending against
+     */
+    public static getDefenseRampart(room: Room, target: Creep | null): StructureRampart | null {
+        if (!target) {
+            return null;
+        }
+        const rampartsInRoom: StructureRampart[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_RAMPART) as StructureRampart[];
+        const openRamparts: StructureRampart[] = _.filter(rampartsInRoom, (rampart: StructureRampart) => {
+            const foundCreeps: Creep[] = rampart.pos.lookFor(LOOK_CREEPS);
+            const foundStructures: Array<Structure<StructureConstant>> = rampart.pos.lookFor(LOOK_STRUCTURES);
+            return (!foundCreeps && !foundStructures);
+        });
+        return target!.pos.findClosestByRange(openRamparts);
     }
 }

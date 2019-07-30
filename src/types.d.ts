@@ -42,6 +42,12 @@ type RoomStateConstant =
     | ROOM_STATE_STIMULATE
     | ROOM_STATE_NUKE_INBOUND;
 
+interface ICreepSpawnLimits {
+    roomState: RoomStateConstant;
+    generateRemoteLimits: (room: Room) => RemoteCreepLimits;
+    generateDomesticLimits: (room: Room) => DomesticCreepLimits;
+}
+
 /**
  * right when a room is starting and nothing is built/no creeps exist
  */
@@ -78,6 +84,7 @@ declare const ROLE_HARVESTER = "harvester";
 declare const ROLE_WORKER = "worker";
 declare const ROLE_POWER_UPGRADER = "powerUpgrader";
 declare const ROLE_LORRY = "lorry";
+declare const ROLE_MINERAL_MINER = "mineralMiner";
 declare const ROLE_REMOTE_MINER = "remoteMiner";
 declare const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 declare const ROLE_REMOTE_RESERVER = "remoteReserver";
@@ -98,6 +105,7 @@ type RoleConstant =
     | ROLE_WORKER
     | ROLE_POWER_UPGRADER
     | ROLE_LORRY
+    | ROLE_MINERAL_MINER
     | ROLE_REMOTE_MINER
     | ROLE_REMOTE_HARVESTER
     | ROLE_REMOTE_RESERVER
@@ -126,9 +134,13 @@ type ROLE_WORKER = "worker"; //
  */
 type ROLE_POWER_UPGRADER = "powerUpgrader"; //
 /**
- * moves energy around the room to where it needs to be
+ * moves energy or resources around the room to where it needs to be
  */
 type ROLE_LORRY = "lorry";
+/**
+ * static miner for minerals
+ */
+type ROLE_MINERAL_MINER = "mineralMiner";
 /**
  * goes into remote room and sits on source to mine full-time
  */
@@ -169,6 +181,28 @@ type ROLE_MEDIC = "medic"; //
  * Military Creep - Defends the home room
  */
 type ROLE_DOMESTIC_DEFENDER = "domesticDefender"; //
+
+// Role Interfaces to be implemented  -------------
+/**
+ * Interface for Creep Role Managers
+ */
+interface ICreepRoleManager {
+    name: RoleConstant;
+    runCreepRole: (creep: Creep) => void;
+}
+
+/**
+ * Interface for Creep Role Helpers (for body and options)
+ */
+interface ICreepBodyOptsHelper {
+    name: RoleConstant;
+    generateCreepOptions: (
+        roomState: RoomStateConstant,
+        squadSizeParam: number,
+        squadUUIDParam: number | null,
+        rallyLocationParam: RoomPosition | null) => (CreepOptionsCiv | undefined) | (CreepOptionsMili | undefined);
+    generateCreepBody: (tier: TierConstant) => BodyPartConstant[];
+}
 // --------------------------------------------------------------------
 
 /**
@@ -181,8 +215,14 @@ declare namespace NodeJS {
         displayRoomStatus(roomName: string): void;
         killAllCreeps(room?: Room): void;
         sendResource(sendingRoom: Room, receivingRoom: Room, resourceType: ResourceConstant, amount: number): void;
+        Memory: Memory;
     }
 }
+
+interface RawMemory {
+    _parsed: Memory;
+}
+
 /**
  * Creep Body Options Object
  */
@@ -233,6 +273,19 @@ interface StringMap {
 // ----------------------------------------
 
 // custom memory objects ------------
+
+/**
+ * add memory to the structure for the compiler
+ */
+interface Structure {
+    memory: StructureMemory;
+}
+
+// Define the structure memory
+interface StructureMemory {
+    processed: boolean
+}
+
 // main memory modules --------------
 interface CreepMemory {
     /**
@@ -311,7 +364,7 @@ type GetEnergy_ValidTargets =
     | "source"
     | "tombstone"
     | "droppedResource"
-    | STRUCTURE_EXTRACTOR
+    | "mineral"
     | ResourceContainingStructureConstant;
 /**
  * Valid actions for GetEnergyJob actionType
@@ -497,6 +550,10 @@ interface GetEnergyJobListing {
      * Jobs that target sources that are not being mined optimally (RoomAPI.getOpenSources)
      */
     sourceJobs?: Cache;
+    /**
+     * Jobs that target mienrals that are not being mined
+     */
+    mineralJobs?: Cache;
     /**'
      * Jobs that target containers with resources
      */
@@ -573,6 +630,35 @@ interface CarryPartJobListing {
     storeJobs?: Cache;
 }
 
+/**
+ * types of custom events
+ */
+type C_EVENT_CREEP_SPAWNED = 1;
+type CustomEventConstant =
+    C_EVENT_CREEP_SPAWNED;
+
+/**
+ * a custom event that signals something notable that occured in a room
+ */
+interface CustomEvent {
+    /**
+     * the constant of the type of event that occured
+     */
+    type: CustomEventConstant;
+    /**
+     * the target id that the event occured on
+     */
+    targetId: string;
+    /**
+     * the room name the event occured in
+     */
+    roomName: string;
+    /**
+     * to mark the event as processed (ie done)
+     */
+    processed: boolean;
+}
+
 interface RoomMemory {
     roomState?: RoomStateConstant;
     /**
@@ -640,10 +726,15 @@ interface RoomMemory {
      * extra memory for visual function
      */
     visual?: VisualMemory;
+    /**
+     * memory for the custom in room events
+     */
+    events: CustomEvent[];
 }
 
 interface Memory {
-    empire: EmpireMemory
+    empire: EmpireMemory;
+    structures: { [structureID: string]: StructureMemory };
 }
 interface EmpireMemory {
     /**
@@ -651,6 +742,10 @@ interface EmpireMemory {
      */
     alertMessages?: AlertMessageNode[];
 }
+
+/**
+ * override structure type
+ */
 
 /**
  * a node for an alert message
@@ -777,6 +872,10 @@ interface CreepOptionsMili {
      * if the rally conditions have already been met
      */
     rallyDone?: boolean;
+    /**
+     * the attack target for an offensive military creep
+     */
+    attackTarget?: Creep | Structure<StructureConstant> | undefined;
     /**
      * if the creep is meant to seige the room to attrition (tower drain, etc)
      */
@@ -995,10 +1094,6 @@ interface ClaimRoomMemory extends DepedentRoomParentMemory {
  */
 interface ParentFlagMemory {
     /**
-     * if the related flag is currently active
-     */
-    active: boolean;
-    /**
      * the name of the flag
      */
     flagName: string;
@@ -1023,6 +1118,14 @@ interface AttackFlagMemory extends ParentFlagMemory {
      * the location creeps are going to meet
      */
     rallyLocation: RoomPosition | null;
+    /**
+     * the number of creeps this flag has successfully spawned
+     */
+    currentSpawnCount: number;
+    /**
+     * array of the creep names in the squad
+     */
+    squadMembers: string[];
 }
 
 /**

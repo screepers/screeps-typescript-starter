@@ -1,21 +1,26 @@
-import RoomApi from "../../Api/Room.Api";
 import MemoryApi from "../../Api/Memory.Api";
-import CreepDomesticApi from "Api/CreepDomestic.Api";
 import CreepApi from "Api/Creep.Api";
-import CreepDomestic from "Api/CreepDomestic.Api";
-import { ERROR_WARN } from "utils/constants";
+import {
+    ERROR_WARN,
+    ROLE_CLAIMER,
+} from "utils/constants";
 import UserException from "utils/UserException";
 
 // Manager for the miner creep role
-export default class ClaimerCreepManager {
+export default class ClaimerCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_CLAIMER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the claimer creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return;
-        }
+    public runCreepRole(creep: Creep): void {
 
         if (creep.room.memory.defcon > 0) {
             // flee code here
@@ -40,7 +45,7 @@ export default class ClaimerCreepManager {
         CreepApi.travelTo(creep, creep.memory.job);
     }
 
-    public static getClaimJob(creep: Creep, room: Room): ClaimPartJob | undefined {
+    public getClaimJob(creep: Creep, room: Room): ClaimPartJob | undefined {
         const creepOptions = creep.memory.options as CreepOptionsCiv;
 
         if (creepOptions.claim) {
@@ -54,7 +59,7 @@ export default class ClaimerCreepManager {
         return undefined;
     }
 
-    public static handleNewJob(creep: Creep, room: Room, job: ClaimPartJob): void {
+    public handleNewJob(creep: Creep, room: Room, job: ClaimPartJob): void {
         const newJob = MemoryApi.searchClaimPartJobs(job, room);
 
         if (newJob === undefined) {

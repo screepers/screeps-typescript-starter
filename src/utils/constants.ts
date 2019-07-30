@@ -13,6 +13,7 @@ export const ROLE_HARVESTER = "harvester";
 export const ROLE_WORKER = "worker";
 export const ROLE_POWER_UPGRADER = "powerUpgrader";
 export const ROLE_LORRY = "lorry";
+export const ROLE_MINERAL_MINER = "mineralMiner";
 export const ROLE_REMOTE_MINER = "remoteMiner";
 export const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 export const ROLE_REMOTE_RESERVER = "remoteReserver";
@@ -54,7 +55,8 @@ export const domesticRolePriority: RoleConstant[] = [
     ROLE_HARVESTER,
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
-    ROLE_LORRY
+    ROLE_LORRY,
+    ROLE_MINERAL_MINER,
 ];
 
 // * Keep this list ordered by spawn priority
@@ -105,6 +107,7 @@ export const WALL_LIMIT: number[] = [
 // Cache Tick Limits
 export const STRUCT_CACHE_TTL = 50; // Structures
 export const SOURCE_CACHE_TTL = -1; // Sources
+export const MINERAL_CACHE_TTL = -1 // Minerals
 export const CONSTR_CACHE_TTL = 50; // Construction Sites
 export const TOMBSTONE_CACHE_TTL = 50; // Tombstones
 export const DROPS_CACHE_TTL = 50; // Dropped Resources
@@ -112,9 +115,9 @@ export const FCREEP_CACHE_TTL = 20; // Friendly Creep
 export const HCREEP_CACHE_TTL = 1; // Hostile Creep
 // GetEnergyJob Constants
 export const SOURCE_JOB_CACHE_TTL = 50; // Source jobs
-export const CONTAINER_JOB_CACHE_TTL = 50; // Container jobs
+export const CONTAINER_JOB_CACHE_TTL = 5; // Container jobs
 export const LINK_JOB_CACHE_TTL = 50; // Link Jobs
-export const BACKUP_JOB_CACHE_TTL = 50; // Backup Jobs
+export const BACKUP_JOB_CACHE_TTL = 5; // Backup Jobs
 export const PICKUP_JOB_CACHE_TTL = 50; // Pickup Jobs
 // ClaimPartJob Constants
 export const CLAIM_JOB_CACHE_TTL = 1; // Claim Jobs
@@ -175,3 +178,6 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
         return costMatrix;
     }
 };
+
+// Custom Event Type Constants
+export const C_EVENT_CREEP_SPAWNED = 1;

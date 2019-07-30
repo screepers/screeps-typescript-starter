@@ -1,16 +1,24 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
+import {
+    ROLE_POWER_UPGRADER,
+} from "utils/constants";
 
 // Manager for the miner creep role
-export default class PowerUpgraderCreepManager {
+export default class PowerUpgraderCreepManager implements ICreepRoleManager {
+
+    public name: RoleConstant = ROLE_POWER_UPGRADER;
+
+    constructor() {
+        const self = this;
+        self.runCreepRole = self.runCreepRole.bind(this);
+    }
+
     /**
      * run the power upgrader creep
      * @param creep the creep we are running
      */
-    public static runCreepRole(creep: Creep): void {
-        if (creep.spawning) {
-            return; // don't do anything until spawned
-        }
+    public runCreepRole(creep: Creep): void {
 
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
 
@@ -37,7 +45,7 @@ export default class PowerUpgraderCreepManager {
     /**
      * Decides which kind of job to get and calls the appropriate function
      */
-    public static getNewJob(creep: Creep, room: Room): BaseJob | undefined {
+    public getNewJob(creep: Creep, room: Room): BaseJob | undefined {
         // if creep is empty, get a GetEnergyJob
         if (creep.carry.energy === 0) {
             return this.newGetEnergyJob(creep, room);
@@ -50,7 +58,7 @@ export default class PowerUpgraderCreepManager {
     /**
      * get an upgrading job
      */
-    public static newUpgradeJob(creep: Creep, room: Room): WorkPartJob | undefined {
+    public newUpgradeJob(creep: Creep, room: Room): WorkPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
         if (creepOptions.upgrade) {
             // All link jobs with enough energy to fill creep.carry, and not taken
@@ -68,7 +76,7 @@ export default class PowerUpgraderCreepManager {
     /**
      * Get a GetEnergyJob for the power upgrader
      */
-    public static newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
+    public newGetEnergyJob(creep: Creep, room: Room): GetEnergyJob | undefined {
         // All link jobs with enough energy to fill creep.carry, and not taken
         const linkJobs = MemoryApi.getLinkJobs(room, (job: GetEnergyJob) => !job.isTaken);
 
@@ -82,7 +90,7 @@ export default class PowerUpgraderCreepManager {
     /**
      * Handles setup for a new job
      */
-    public static handleNewJob(creep: Creep, room: Room): void {
+    public handleNewJob(creep: Creep, room: Room): void {
         MemoryApi.updateJobMemory(creep, room);
     }
 }

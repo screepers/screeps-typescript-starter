@@ -38,14 +38,14 @@ export default class RoomManager {
      * run the room for a single owned room
      * @param room the room we are running this manager function on
      */
-    public static runSingleRoom(room: Room): void {
+    private static runSingleRoom(room: Room): void {
 
         // Set Defcon and Room State (roomState relies on defcon being set first)
-        if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
+        if (RoomHelper.excecuteEveryTicks(RUN_DEFCON_TIMER)) {
             RoomApi.setDefconLevel(room);
         }
 
-        if (RoomHelper.excecuteEveryTicks(RUN_DEFCON_TIMER)) {
+        if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
             RoomApi.setRoomState(room);
         }
 
@@ -80,18 +80,20 @@ export default class RoomManager {
             RoomHelper.excecuteEveryTicks(RUN_RAMPART_STATUS_UPDATE)) {
             RoomApi.runSetRampartStatus(room);
         }
+
         // Run accessory functions for dependent rooms ----
         // Update reserve timer for remote rooms
         if (RoomHelper.excecuteEveryTicks(RUN_RESERVE_TTL_TIMER)) {
             RoomApi.simulateReserveTTL(room);
         }
+
     }
 
     /**
      * run the room for an unowned room
      * @param room the room we are running
      */
-    public static runSingleDependentRoom(room: Room): void {
+    private static runSingleDependentRoom(room: Room): void {
 
         // Set Defcon for the dependent room
         if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
