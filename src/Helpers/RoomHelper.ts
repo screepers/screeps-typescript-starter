@@ -312,6 +312,23 @@ export default class RoomHelper {
         return undefined;
     }
 
+    // Get the number of non-terrain-wall tiles around a RoomObject
+    public static getNumAccessTilesForTarget(target: RoomObject): number{
+        let accessibleTiles = 0;
+        const roomTerrain: RoomTerrain = new Room.Terrain(target.pos.roomName);
+        for (let y = target.pos.y - 1; y <= target.pos.y + 1; y++) {
+            for (let x = target.pos.x - 1; x <= target.pos.x + 1; x++) {
+                if (target.pos.x === x && target.pos.y === y) {
+                    continue;
+                }
+                if (roomTerrain.get(x, y) !== TERRAIN_MASK_WALL) {
+                    accessibleTiles++;
+                }
+            }
+        }
+        return accessibleTiles;
+    }
+
     /**
      * Get the difference in Wall/Rampart HP between the current and previous RCL
      * @param controllerLevel the level of the controller in the room

@@ -10,6 +10,7 @@ import {
 } from "utils/Constants";
 import UserException from "utils/UserException";
 import MemoryApi from "Api/Memory.Api";
+import RoomHelper from "Helpers/RoomHelper";
 import {
     ZEALOT_SOLO_ARRAY,
     STANDARD_SQUAD_ARRAY,
@@ -386,16 +387,7 @@ export class SpawnHelper {
         let accessibleTiles: number = 0;
         const roomTerrain: RoomTerrain = new Room.Terrain(room.name);
         _.forEach(sources, (source: Source) => {
-            for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
-                for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
-                    if (source.pos.x === x && source.pos.y === y) {
-                        continue;
-                    }
-                    if (roomTerrain.get(x, y) !== TERRAIN_MASK_WALL) {
-                        accessibleTiles++;
-                    }
-                }
-            }
+            accessibleTiles += RoomHelper.getNumAccessTilesForTarget(source);
         });
         return accessibleTiles;
     }

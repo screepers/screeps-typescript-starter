@@ -45,87 +45,6 @@ export default class SpawnApi {
      * set domestic creep limits
      * @param room the room we want limits for
      */
-<<<<<<< HEAD
-    public static generateDomesticCreepLimits(room: Room): DomesticCreepLimits {
-        const domesticLimits: DomesticCreepLimits = {
-            miner: 0,
-            harvester: 0,
-            worker: 0,
-            powerUpgrader: 0,
-            lorry: 0
-        };
-
-        const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState!);
-        const numRemoteRooms: number = RoomHelper.numRemoteRooms(room);
-        let minerLimits: number = MemoryApi.getSources(room.name).length;
-
-        // check what room state we are in
-        switch (room.memory.roomState) {
-            // Intro
-            case ROOM_STATE_INTRO:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = 1;
-                domesticLimits[ROLE_HARVESTER] = 1;
-                domesticLimits[ROLE_WORKER] = 1;
-
-                break;
-
-            // Beginner
-            case ROOM_STATE_BEGINNER:
-                // Domestic Creep Definitions
-
-                if (room.energyCapacityAvailable < 550) {
-                    const numAccessTilesToSource: number = SpawnHelper.getNumAccessTilesToSources(room);
-                    minerLimits = numAccessTilesToSource < 4 ? numAccessTilesToSource : 4;
-                }
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 4;
-                domesticLimits[ROLE_WORKER] = 4;
-
-                break;
-
-            // Intermediate
-            case ROOM_STATE_INTER:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 4;
-
-                break;
-
-            // Advanced
-            case ROOM_STATE_ADVANCED:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 2 + numRemoteRooms;
-                domesticLimits[ROLE_POWER_UPGRADER] = 0;
-                domesticLimits[ROLE_LORRY] = numLorries;
-
-                break;
-
-            // Upgrader
-            case ROOM_STATE_UPGRADER:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 2;
-                domesticLimits[ROLE_WORKER] = 2;
-                domesticLimits[ROLE_POWER_UPGRADER] = 1;
-                domesticLimits[ROLE_LORRY] = numLorries;
-
-                break;
-
-            // Stimulate
-            case ROOM_STATE_STIMULATE:
-                // Domestic Creep Definitions
-                domesticLimits[ROLE_MINER] = minerLimits;
-                domesticLimits[ROLE_HARVESTER] = 3;
-                domesticLimits[ROLE_WORKER] = 3;
-                domesticLimits[ROLE_POWER_UPGRADER] = 2;
-                domesticLimits[ROLE_LORRY] = numLorries;
-
-                break;
-=======
     private static generateDomesticCreepLimits(room: Room): DomesticCreepLimits {
         const roomState: RoomStateConstant = room.memory.roomState as RoomStateConstant;
 
@@ -137,7 +56,6 @@ export default class SpawnApi {
             if (ROOM_STATE_CREEP_LIMITS[index].roomState === roomState) {
                 return ROOM_STATE_CREEP_LIMITS[index].generateDomesticLimits(room);
             }
->>>>>>> 81391b9ddb4d3f859b86d9f94e6250562ceda5b3
         }
         throw new UserException(
             "Failed to generate domestic limits",

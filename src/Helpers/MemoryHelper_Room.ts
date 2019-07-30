@@ -5,6 +5,7 @@ import RoomApi from "Api/Room.Api";
 import WorkPartJobs from "Jobs/WorkPartJobs";
 import CarryPartJobs from "Jobs/CarryPartJobs";
 import MiliHelper from "./MiliHelper";
+import RoomHelper from "./RoomHelper";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -172,8 +173,12 @@ export default class MemoryHelper_Room {
         Memory.rooms[roomName].sources = { data: {}, cache: null };
 
         const sources = Game.rooms[roomName].find(FIND_SOURCES);
-
-        Memory.rooms[roomName].sources.data = _.map(sources, (source: Source) => source.id);
+        Memory.rooms[roomName].sources.data = _.map(sources, (source: Source) => {
+            return {
+                id: source.id,
+                numAccessTiles: RoomHelper.getNumAccessTilesForTarget(source)
+            };
+        });
         Memory.rooms[roomName].sources.cache = Game.time;
     }
 

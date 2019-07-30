@@ -10,6 +10,7 @@ import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
+import RoomHelper from "Helpers/RoomHelper";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -717,8 +718,25 @@ export default class CreepApi {
 
                     // Find the closest source
                     const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
+                    const accessibleSourceObjects: Source[] = []
+                    // Get rid of any sources that are out of access tiles
+                    _.forEach(sourceObjects, (source: Source) => {
+                        const numAccessTiles = RoomHelper.getNumAccessTilesForTarget(source);
+                        const numCreepsTargeting = MemoryApi.getMyCreeps(room.name, (creep: Creep) => {
+                            return (
+                                creep.memory.job !== undefined &&
+                                (creep.memory.role === "remoteMiner" || creep.memory.role === "miner") &&
+                                creep.memory.job.targetID === source.id
+                            );
+                        }).length;
 
-                    const closestAvailableSource: Source = creep.pos.findClosestByRange(sourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
+                        if(numCreepsTargeting < numAccessTiles){
+                            accessibleSourceObjects.push(source);
+                        }
+                    });
+
+
+                    const closestAvailableSource: Source = creep.pos.findClosestByRange(accessibleSourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
 
                     // return the job that corresponds with the closest source
                     return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === closestAvailableSource.id);

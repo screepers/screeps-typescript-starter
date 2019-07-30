@@ -541,6 +541,10 @@ export default class MemoryApi {
         return droppedResources;
     }
 
+    public static getSourceIds(roomName: string): string[] {
+        return _.map(Memory.rooms[roomName].sources.data, (sourceMemory: StringMap) => sourceMemory.id);
+    }
+
     /**
      * get sources in the room
      * @param room the room we want sources from
@@ -567,7 +571,7 @@ export default class MemoryApi {
             MemoryHelper_Room.updateSources(roomName);
         }
 
-        const sourceIDs = Memory.rooms[roomName].sources.data;
+        const sourceIDs = this.getSourceIds(roomName);
 
         let sources: Source[] = MemoryHelper.getOnlyObjectsFromIDs<Source>(sourceIDs);
 
