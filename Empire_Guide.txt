@@ -92,10 +92,11 @@ Stalker:
   squad -> friendly creeps -> ally creeps
 
 Domestic Defender:
-  Melee + ranged + heal hybrid. Only spawned to defend the home room from attack.
+  Ranged attacker. Only spawned to defend the home room from attack.
+  travels to closest rampart to the defender and defends from there
 
 Remote Defender:
-  Melee + ranged + heal hybrid. Only spawned to defend a remote room from attack.
+  Ranged Attacker. Only spawned to defend a remote room from attack.
 
 ---- How To ----------------------------
 Attack a Room --- :
