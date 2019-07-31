@@ -47,8 +47,21 @@ export default class RoomManager {
 
         const defcon: number = MemoryApi.getDefconLevel(room);
 
+        // TODO move these safe mode triggers into a function
+        // if(room..controller!.safeModeAvailable) {
+        //      RoomApi.runSafeMode(room);
+        // }
+
         // If we are under attack before we have a tower, trigger a safe mode
         if (defcon >= 2 && !RoomHelper.isExistInRoom(room, STRUCTURE_TOWER)) {
+            if (room.controller!.safeModeAvailable) {
+                room.controller!.activateSafeMode();
+            }
+        }
+
+        // If we are under attack and our towers have no energy, trigger a safe mode
+        const towerEnergy = _.sum(MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER), 'energy');
+        if (defcon >= 3 && towerEnergy === 0) {
             if (room.controller!.safeModeAvailable) {
                 room.controller!.activateSafeMode();
             }

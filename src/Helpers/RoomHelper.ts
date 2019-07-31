@@ -467,6 +467,7 @@ export default class RoomHelper {
      * get the number of domestic defenders by the defcon number
      */
     public static getDomesticDefenderLimitByDefcon(defcon: number): number {
+
         switch (defcon) {
             case 2:
                 return 1;
