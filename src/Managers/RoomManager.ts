@@ -9,17 +9,15 @@ import {
     RUN_ROOM_STATE_TIMER,
     RUN_DEFCON_TIMER,
     RUN_RESERVE_TTL_TIMER,
-    RUN_RAMPART_STATUS_UPDATE,
+    RUN_RAMPART_STATUS_UPDATE
 } from "utils/config";
 
 // room-wide manager
 export default class RoomManager {
-
     /**
      * run the room for every room
      */
     public static runRoomManager(): void {
-
         // Run all owned rooms
         const ownedRooms: Room[] = MemoryApi.getOwnedRooms();
         _.forEach(ownedRooms, (room: Room) => {
@@ -30,8 +28,7 @@ export default class RoomManager {
         const dependentRooms: Room[] = MemoryApi.getVisibleDependentRooms();
         _.forEach(dependentRooms, (room: Room) => {
             this.runSingleDependentRoom(room);
-        })
-
+        });
     }
 
     /**
@@ -39,7 +36,6 @@ export default class RoomManager {
      * @param room the room we are running this manager function on
      */
     private static runSingleRoom(room: Room): void {
-
         // Set Defcon and Room State (roomState relies on defcon being set first)
         if (RoomHelper.excecuteEveryTicks(RUN_DEFCON_TIMER)) {
             RoomApi.setDefconLevel(room);
@@ -49,35 +45,41 @@ export default class RoomManager {
             RoomApi.setRoomState(room);
         }
 
+        const defcon: number = MemoryApi.getDefconLevel(room);
+
+        // If we are under attack before we have a tower, trigger a safe mode
+        if (defcon >= 2 && !RoomHelper.isExistInRoom(room, STRUCTURE_TOWER)) {
+            if (room.controller!.safeModeAvailable) {
+                room.controller!.activateSafeMode();
+            }
+        }
+
         // Run all structures in the room if they exist
         // Run Towers
-        const defcon: number = MemoryApi.getDefconLevel(room);
-        if (defcon >= 1 &&
-            RoomHelper.excecuteEveryTicks(RUN_TOWER_TIMER)) {
+        if (defcon >= 1 && RoomHelper.excecuteEveryTicks(RUN_TOWER_TIMER)) {
             RoomApi.runTowers(room);
         }
 
         // Run Labs
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_LAB) &&
-            RoomHelper.excecuteEveryTicks(RUN_LAB_TIMER)) {
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LAB) && RoomHelper.excecuteEveryTicks(RUN_LAB_TIMER)) {
             RoomApi.runLabs(room);
         }
 
         // Run Links
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK) &&
-            RoomHelper.excecuteEveryTicks(RUN_LINKS_TIMER)) {
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_LINK) && RoomHelper.excecuteEveryTicks(RUN_LINKS_TIMER)) {
             RoomApi.runLinks(room);
         }
 
         // Run Terminals
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL) &&
-            RoomHelper.excecuteEveryTicks(RUN_TERMINAL_TIMER)) {
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL) && RoomHelper.excecuteEveryTicks(RUN_TERMINAL_TIMER)) {
             RoomApi.runTerminal(room);
         }
 
         // Set Rampart access status
-        if (RoomHelper.isExistInRoom(room, STRUCTURE_RAMPART) &&
-            RoomHelper.excecuteEveryTicks(RUN_RAMPART_STATUS_UPDATE)) {
+        if (
+            RoomHelper.isExistInRoom(room, STRUCTURE_RAMPART) &&
+            RoomHelper.excecuteEveryTicks(RUN_RAMPART_STATUS_UPDATE)
+        ) {
             RoomApi.runSetRampartStatus(room);
         }
 
@@ -86,7 +88,6 @@ export default class RoomManager {
         if (RoomHelper.excecuteEveryTicks(RUN_RESERVE_TTL_TIMER)) {
             RoomApi.simulateReserveTTL(room);
         }
-
     }
 
     /**
@@ -94,7 +95,6 @@ export default class RoomManager {
      * @param room the room we are running
      */
     private static runSingleDependentRoom(room: Room): void {
-
         // Set Defcon for the dependent room
         if (RoomHelper.excecuteEveryTicks(RUN_ROOM_STATE_TIMER)) {
             RoomApi.setDefconLevel(room);
