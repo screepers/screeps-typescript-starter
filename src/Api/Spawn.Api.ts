@@ -97,6 +97,7 @@ export default class SpawnApi {
         const defconLevel: number = MemoryApi.getDefconLevel(room);
         const limit: number = RoomHelper.getDomesticDefenderLimitByDefcon(defconLevel)
         if (
+            // Need to not spawn defenders at beginner roomstate
             defconLevel >= 3 &&
             !SpawnHelper.isCreepCountSpawnedAndQueueAtLimit(room, ROLE_DOMESTIC_DEFENDER, limit)
         ) {

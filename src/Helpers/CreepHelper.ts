@@ -134,6 +134,6 @@ export default class CreepHelper {
      * @param part the body part we are checking
      */
     public static bodyPartExists(creep: Creep, bodyPart: BodyPartConstant): boolean {
-        return _.some(creep.body, (part: BodyPartConstant) => part === bodyPart);
+        return _.some(creep.body, (part: BodyPartDefinition) => part.type === bodyPart);
     }
 }

@@ -121,9 +121,9 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
      */
     public newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
-        const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
-
+        
         if (creepOptions.upgrade) {
+            const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
             if (upgradeJobs.length > 0) {
                 return upgradeJobs[0];
             }
