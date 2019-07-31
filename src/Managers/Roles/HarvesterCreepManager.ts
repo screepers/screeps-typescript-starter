@@ -1,14 +1,11 @@
 import MemoryApi from "../../Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import MemoryHelper from "Helpers/MemoryHelper";
-import {
-    ROLE_HARVESTER,
-} from "utils/constants";
+import { ROLE_HARVESTER } from "utils/constants";
 import CreepHelper from "Helpers/CreepHelper";
 
 // Manager for the miner creep role
 export default class HarvesterCreepManager implements ICreepRoleManager {
-
     public name: RoleConstant = ROLE_HARVESTER;
 
     constructor() {
@@ -21,7 +18,6 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         const homeRoom: Room = Game.rooms[creep.memory.homeRoom];
 
         if (creep.memory.job === undefined) {
@@ -121,13 +117,6 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
      */
     public newWorkPartJob(creep: Creep, room: Room): WorkPartJob | undefined {
         const creepOptions: CreepOptionsCiv = creep.memory.options as CreepOptionsCiv;
-        
-        if (creepOptions.upgrade) {
-            const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
-            if (upgradeJobs.length > 0) {
-                return upgradeJobs[0];
-            }
-        }
 
         if (creepOptions.build) {
             const buildJobs = MemoryApi.getBuildJobs(room, (job: WorkPartJob) => !job.isTaken);
@@ -140,6 +129,13 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
             const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
             if (priorityRepairJobs.length > 0) {
                 return priorityRepairJobs[0];
+            }
+        }
+
+        if (creepOptions.upgrade) {
+            const upgradeJobs = MemoryApi.getUpgradeJobs(room, (job: WorkPartJob) => !job.isTaken);
+            if (upgradeJobs.length > 0) {
+                return upgradeJobs[0];
             }
         }
 
