@@ -11,6 +11,7 @@ import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, U
 import MemoryHelper from "Helpers/MemoryHelper";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 import RoomHelper from "Helpers/RoomHelper";
+import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -513,6 +514,12 @@ export default class CreepApi {
      */
     public static nullCheck_target(creep: Creep, target: object | null) {
         if (target === null) {
+
+            // If it was a construction job, update work part jobs to ensure ramparts are repaired swiftly
+            if (creep.memory.job && creep.memory.job!.actionType === "build") {
+                MemoryHelper_Room.updateWorkPart_repairJobs(creep.room);
+            }
+
             // preserve for the error message
             const jobAsString: string = JSON.stringify(creep.memory.job);
 
@@ -522,6 +529,7 @@ export default class CreepApi {
             if (creep.memory.supplementary && creep.memory.supplementary.moveTarget) {
                 delete creep.memory.supplementary.moveTarget;
             }
+
 
             throw new UserException(
                 "Null Job Target",
@@ -730,7 +738,7 @@ export default class CreepApi {
                             );
                         }).length;
 
-                        if(numCreepsTargeting < numAccessTiles){
+                        if (numCreepsTargeting < numAccessTiles) {
                             accessibleSourceObjects.push(source);
                         }
                     });
