@@ -517,7 +517,9 @@ export default class CreepApi {
 
             // If it was a construction job, update work part jobs to ensure ramparts are repaired swiftly
             if (creep.memory.job && creep.memory.job!.actionType === "build") {
-                MemoryHelper_Room.updateWorkPart_repairJobs(creep.room);
+                console.log("Testing updating job when construction site finished");
+                MemoryHelper_Room.updateWorkPart_buildJobs(creep.room)
+                MemoryApi.
             }
 
             // preserve for the error message
@@ -530,12 +532,12 @@ export default class CreepApi {
                 delete creep.memory.supplementary.moveTarget;
             }
 
-
-            throw new UserException(
-                "Null Job Target",
-                "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString,
-                ERROR_WARN
-            );
+// Commented out for the moment, want to get the hook working first and add it as an info log
+//             //throw new UserException(
+//                 "Null Job Target",
+//                 "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString,
+//                 ERROR_INFO
+//             );
         }
     }
 
