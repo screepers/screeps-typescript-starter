@@ -517,9 +517,7 @@ export default class CreepApi {
 
             // If it was a construction job, update work part jobs to ensure ramparts are repaired swiftly
             if (creep.memory.job && creep.memory.job!.actionType === "build") {
-                console.log("Testing updating job when construction site finished");
-                MemoryHelper_Room.updateWorkPart_buildJobs(creep.room)
-                MemoryApi.
+                MemoryHelper_Room.updateWorkPart_repairJobs(creep.room)
             }
 
             // preserve for the error message
@@ -532,12 +530,11 @@ export default class CreepApi {
                 delete creep.memory.supplementary.moveTarget;
             }
 
-// Commented out for the moment, want to get the hook working first and add it as an info log
-//             //throw new UserException(
-//                 "Null Job Target",
-//                 "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString,
-//                 ERROR_INFO
-//             );
+            throw new UserException(
+                "Null Job Target",
+                "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString,
+                ERROR_INFO
+            );
         }
     }
 
@@ -655,7 +652,7 @@ export default class CreepApi {
 
         // Startup On Ramparts
         if (creepOptions.repair) {
-            const defenseRepairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => {
+            const defenseRepairJobs: WorkPartJob[] = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => {
                 const target = Game.getObjectById(job.targetID) as Structure;
                 if (target.structureType === STRUCTURE_RAMPART) {
                     return target.hits <= RAMPART_HITS_THRESHOLD;
@@ -664,7 +661,17 @@ export default class CreepApi {
             });
 
             if (defenseRepairJobs.length > 0) {
-                return defenseRepairJobs[0];
+                const rampartsToBeRepaired: StructureRampart[] = _.map(defenseRepairJobs,
+                    (j: WorkPartJob) => Game.getObjectById(j.targetID) as StructureRampart);
+                const closestRampart: StructureRampart = creep.pos.findClosestByRange(rampartsToBeRepaired) as StructureRampart;
+                return {
+                    targetID: closestRampart.id,
+                    targetType: "rampart",
+                    actionType: "repair",
+                    jobType: "workPartJob",
+                    isTaken: false,
+                    remaining: closestRampart.hitsMax - closestRampart.hits
+                };
             }
         }
 
