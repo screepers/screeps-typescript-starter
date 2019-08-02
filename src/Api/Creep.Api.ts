@@ -4,7 +4,8 @@ import {
     DEFAULT_MOVE_OPTS,
     ERROR_ERROR,
     ERROR_WARN,
-    ERROR_FATAL
+    ERROR_FATAL,
+    ERROR_INFO,
 } from "utils/constants";
 import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";

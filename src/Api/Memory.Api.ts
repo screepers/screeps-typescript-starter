@@ -1832,6 +1832,9 @@ export default class MemoryApi {
         const attackRooms: AttackRoomMemory[] = this.getAttackRooms(hostRoom);
         const attackRoomFlags: AttackFlagMemory[] = [];
         for (const attackRoom of attackRooms) {
+            if (!attackRoom) {
+                continue;
+            }
             for (const attackFlag of attackRoom.flags) {
                 if (attackFlag) {
                     attackRoomFlags.push(attackFlag as AttackFlagMemory);

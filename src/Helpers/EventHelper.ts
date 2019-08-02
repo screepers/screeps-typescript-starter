@@ -24,7 +24,6 @@ export default class EventHelper {
             return;
         }
 
-        const creepBody: BodyPartConstant[] = Normalize.convertCreepBodyToBodyPartConstant(creep.body);
         const requestingFlag: AttackFlagMemory | undefined = this.getMiliRequestingFlag(room, creep.memory.role, creep.name);
         // Throw an error if we didn't find the flag
         if (requestingFlag === undefined) {
