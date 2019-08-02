@@ -152,8 +152,8 @@ COLORS[ERROR_INFO] = "#0045FF";
 export const DEFAULT_MOVE_OPTS: MoveToOpts = {
     heuristicWeight: 1.5, // TODO Test this to see if we can afford to raise it ( higher number = less CPU use, lower number = more likely to get best path each time)
     range: 0, // Assume we want to go to the location, if not told otherwise
-    ignoreCreeps: false, // TODO Change this to true, and set up a type of collision avoidance/collision handling
-    reusePath: 10, // TODO Change this value to be much higher, and set up a type of 'stuck detection'
+    ignoreCreeps: true, 
+    reusePath: 999, 
     // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
     visualizePathStyle: {}, // Empty object for now, just uses default visualization
     costCallback(roomName: string, costMatrix: CostMatrix) {
@@ -161,7 +161,8 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
             if (creep.my && creep.pos.roomName === roomName) {
                 let matrixValue;
 
-                if (creep.memory.working === true || creep.memory.job === undefined) {
+                // ! Testing to see if walking around fatigued creeps is optimal or not
+                if (creep.memory.working === true || creep.memory.job === undefined || creep.fatigue > 0) {
                     // Walk around working creeps or idling creeps
                     matrixValue = 255;
                 } else {

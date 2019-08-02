@@ -349,7 +349,6 @@ export default class CreepApi {
 
         // Move options target
         const moveOpts: MoveToOpts = DEFAULT_MOVE_OPTS;
-        moveOpts.reusePath = 999;
 
         // In this case all actions are complete with a range of 1, but keeping for structure
         if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
@@ -380,7 +379,6 @@ export default class CreepApi {
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
-        moveOpts.reusePath = 999;
 
         if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
             moveOpts.range = 1;
@@ -413,7 +411,6 @@ export default class CreepApi {
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
-        moveOpts.reusePath = 999;
 
         // All actiontypes that affect controller have range of 1
         if (moveTarget instanceof StructureController) {
@@ -465,7 +462,6 @@ export default class CreepApi {
 
         // Move options for target
         const moveOpts = DEFAULT_MOVE_OPTS;
-        moveOpts.reusePath = 999;
 
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
             moveOpts.range = 3;
@@ -493,7 +489,6 @@ export default class CreepApi {
         this.nullCheck_target(creep, moveTarget);
 
         const moveOpts = DEFAULT_MOVE_OPTS;
-        moveOpts.reusePath = 999;
 
         if (job.targetType === "roomName") {
             // 23 should get us inside the room and off the exit
