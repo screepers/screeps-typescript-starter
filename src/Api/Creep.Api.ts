@@ -466,9 +466,9 @@ export default class CreepApi {
         moveOpts.reusePath = 999;
 
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
-            moveOpts.range = 1;
+            moveOpts.range = 3;
         } else if (job.actionType === "repair" && moveTarget instanceof Structure) {
-            moveOpts.range = 1;
+            moveOpts.range = 3;
         } else if (job.actionType === "upgrade" && moveTarget instanceof StructureController) {
             moveOpts.range = 3;
         }
@@ -719,6 +719,10 @@ export default class CreepApi {
                     // Find the closest source
                     const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
                     const accessibleSourceObjects: Source[] = []
+
+                    // ! Known issue - Multiple Sources, but the one with enough access tiles is not "suitable"
+                    // ! e.g. 2 sources, 1 access tile and 3 access tiles -- Only the 1 access tile will be "suitable"
+                    // ! but will not have enough accessTiles to be assigned. Creep needs to target the "not suitable" source in this case. 
                     // Get rid of any sources that are out of access tiles
                     _.forEach(sourceObjects, (source: Source) => {
                         const numAccessTiles = RoomHelper.getNumAccessTilesForTarget(source);
@@ -735,9 +739,8 @@ export default class CreepApi {
                         }
                     });
 
-
                     const closestAvailableSource: Source = creep.pos.findClosestByRange(accessibleSourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
-
+                    
                     // return the job that corresponds with the closest source
                     return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === closestAvailableSource.id);
                 } else {
