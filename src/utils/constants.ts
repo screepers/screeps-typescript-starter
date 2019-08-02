@@ -152,15 +152,21 @@ COLORS[ERROR_INFO] = "#0045FF";
 export const DEFAULT_MOVE_OPTS: MoveToOpts = {
     heuristicWeight: 1.5, // TODO Test this to see if we can afford to raise it ( higher number = less CPU use, lower number = more likely to get best path each time)
     range: 0, // Assume we want to go to the location, if not told otherwise
-    ignoreCreeps: true, 
+    ignoreCreeps: true, // ! Might need to change this back to false if we have issues with enemy creeps
     reusePath: 999, 
     // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
     visualizePathStyle: {}, // Empty object for now, just uses default visualization
     costCallback(roomName: string, costMatrix: CostMatrix) {
         _.forEach(Game.creeps, (creep: Creep) => {
-            if (creep.my && creep.pos.roomName === roomName) {
-                let matrixValue;
+            
+            // If not in the room, do nothing
+            if(creep.pos.roomName !== roomName){
+                return;
+            }
+            
+            let matrixValue;
 
+            if (creep.my) {
                 // ! Testing to see if walking around fatigued creeps is optimal or not
                 if (creep.memory.working === true || creep.memory.job === undefined || creep.fatigue > 0) {
                     // Walk around working creeps or idling creeps
@@ -171,9 +177,17 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
                     // Match the terrain underneath the creep to avoid preferring going under creeps
                     matrixValue = terrainValue > 0 ? 5 : 1;
                 }
-
-                costMatrix.set(creep.pos.x, creep.pos.y, matrixValue);
+            } else {
+                // If creep is not ours, we can only walk on it if we are in safe mode
+                if(creep.room.controller && creep.room.controller.safeMode !== undefined) {
+                    const terrainValue = new Room.Terrain(roomName).get(creep.pos.x, creep.pos.y);
+                    matrixValue = terrainValue > 0 ? 5 : 1;
+                } else {
+                    matrixValue = 255;
+                }
             }
+            
+            costMatrix.set(creep.pos.x, creep.pos.y, matrixValue);
         });
 
         return costMatrix;

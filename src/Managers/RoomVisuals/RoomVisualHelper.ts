@@ -16,6 +16,7 @@ import {
 } from "utils/constants";
 import RoomHelper from "Helpers/RoomHelper";
 import { STUCK_COUNT_LIMIT, STUCK_VISUAL_COLORS } from "utils/config";
+import RoomManager from "Managers/RoomManager";
 
 const textColor = "#bab8ba";
 const textSize = 0.8;
@@ -238,16 +239,26 @@ export default class RoomVisualHelper {
             } as VisualMemory;
         }
 
+        const etaMemory = Memory.rooms[room.name].visual!.etaMemory;
+
         // Reset rolling average so that values remain significant instead of being watered down over time
-        if (Memory.rooms[room.name].visual!.etaMemory.rcl !== room.controller!.level) {
-            Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick = 0;
-            Memory.rooms[room.name].visual!.etaMemory.ticksMeasured = 0;
-            Memory.rooms[room.name].visual!.etaMemory.rcl = room.controller!.level;
+        if (etaMemory.rcl !== room.controller!.level) {
+            etaMemory.avgPointsPerTick = 0;
+            etaMemory.ticksMeasured = 0;
+            etaMemory.rcl = room.controller!.level;
         }
 
         // Increment Tick Count
-        Memory.rooms[room.name].visual!.etaMemory.ticksMeasured++;
+        etaMemory.ticksMeasured++;
 
+        // ! TEMPORARY - NEEDS MOVED TO CONFIG
+        let ticksConsidered = 1000 // should be about 1 hour of activity
+
+        // Old Avg + (difference) / (lesser of ticksMeasure or ticksConsidered)
+        const newAverage = etaMemory.avgPointsPerTick + (newValue - etaMemory.avgPointsPerTick) / Math.min(ticksConsidered, etaMemory.ticksMeasured);
+
+        etaMemory.avgPointsPerTick = newAverage;
+        /*
         // The difference this newValue adds/subtracts to the average
         const differential =
             (newValue - Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick) /
@@ -256,6 +267,7 @@ export default class RoomVisualHelper {
         // The new average is OldAverage + Differential
         Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick =
             Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick + differential;
+        **/
     }
 
     /**

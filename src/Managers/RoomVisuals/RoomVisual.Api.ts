@@ -195,7 +195,7 @@ export default class RoomVisualApi {
         if (ROOM_OVERLAY_GRAPH_ON) {
             // ! Disabled due to error in calculations.
             // TODO Fix this function
-            // lines.push("Est TTL:        " + RoomVisualHelper.getEstimatedTimeToNextLevel(room));
+            lines.push("Est TTL:        " + RoomVisualHelper.getEstimatedTimeToNextLevel(room));
         }
         lines.push("");
         RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
