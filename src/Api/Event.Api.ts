@@ -64,6 +64,8 @@ export default class EventApi {
      */
     public static processSingleEvent(room: Room, event: CustomEvent): void {
 
+        // Mark the event as processed
+        event.processed = true;
         // Handle saftey and early returns
         const subject = Game.getObjectById(event.targetId);
         if (!subject) {
@@ -85,9 +87,6 @@ export default class EventApi {
                     ERROR_WARN
                 );
         }
-
-        // Mark the event as processed
-        event.processed = true;
     }
 
     /**

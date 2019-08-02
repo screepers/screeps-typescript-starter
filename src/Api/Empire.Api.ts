@@ -15,6 +15,9 @@ export default class Empire {
 
         // Create an array of all unprocessed flags
         for (const flag of allFlags) {
+            if (!flag) {
+                continue;
+            }
             if (!flag.memory.processed || flag.memory.processed === undefined) {
                 newFlags.push(flag);
             }
@@ -100,7 +103,6 @@ export default class Empire {
         for (const flag of completeFlags) {
             MemoryApi.createEmpireAlertNode("Removing flag [" + flag.name + "]", 10);
             flag.remove();
-            delete Memory.flags[flag.name];
         }
     }
 

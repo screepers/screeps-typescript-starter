@@ -4,13 +4,15 @@ import {
     DEFAULT_MOVE_OPTS,
     ERROR_ERROR,
     ERROR_WARN,
-    ERROR_FATAL
+    ERROR_FATAL,
+    ERROR_INFO,
 } from "utils/constants";
 import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 import RoomHelper from "Helpers/RoomHelper";
+import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -513,6 +515,12 @@ export default class CreepApi {
      */
     public static nullCheck_target(creep: Creep, target: object | null) {
         if (target === null) {
+
+            // If it was a construction job, update work part jobs to ensure ramparts are repaired swiftly
+            if (creep.memory.job && creep.memory.job!.actionType === "build") {
+                MemoryHelper_Room.updateWorkPart_repairJobs(creep.room)
+            }
+
             // preserve for the error message
             const jobAsString: string = JSON.stringify(creep.memory.job);
 
@@ -526,7 +534,7 @@ export default class CreepApi {
             throw new UserException(
                 "Null Job Target",
                 "Null Job Target for creep: " + creep.name + "\nJob: " + jobAsString,
-                ERROR_WARN
+                ERROR_INFO
             );
         }
     }
@@ -645,7 +653,7 @@ export default class CreepApi {
 
         // Startup On Ramparts
         if (creepOptions.repair) {
-            const defenseRepairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => {
+            const defenseRepairJobs: WorkPartJob[] = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => {
                 const target = Game.getObjectById(job.targetID) as Structure;
                 if (target.structureType === STRUCTURE_RAMPART) {
                     return target.hits <= RAMPART_HITS_THRESHOLD;
@@ -654,7 +662,17 @@ export default class CreepApi {
             });
 
             if (defenseRepairJobs.length > 0) {
-                return defenseRepairJobs[0];
+                const rampartsToBeRepaired: StructureRampart[] = _.map(defenseRepairJobs,
+                    (j: WorkPartJob) => Game.getObjectById(j.targetID) as StructureRampart);
+                const closestRampart: StructureRampart = creep.pos.findClosestByRange(rampartsToBeRepaired) as StructureRampart;
+                return {
+                    targetID: closestRampart.id,
+                    targetType: "rampart",
+                    actionType: "repair",
+                    jobType: "workPartJob",
+                    isTaken: false,
+                    remaining: closestRampart.hitsMax - closestRampart.hits
+                };
             }
         }
 
@@ -734,7 +752,7 @@ export default class CreepApi {
                             );
                         }).length;
 
-                        if(numCreepsTargeting < numAccessTiles){
+                        if (numCreepsTargeting < numAccessTiles) {
                             accessibleSourceObjects.push(source);
                         }
                     });

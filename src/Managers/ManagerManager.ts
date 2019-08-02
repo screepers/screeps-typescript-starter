@@ -36,15 +36,6 @@ export default class ManagerManager {
             }
         }
 
-        // run the empire
-        if (!Game.cpu["bucket"] || Game.cpu["bucket"] > EMPIRE_MANAGER_BUCKET_LIMIT) {
-            try {
-                EmpireManager.runEmpireManager();
-            } catch (e) {
-                UtilHelper.printError(e);
-            }
-        }
-
         // run rooms
         if (!Game.cpu["bucket"] || Game.cpu["bucket"] > ROOM_MANAGER_BUCKET_LIMIT) {
             try {
@@ -86,6 +77,15 @@ export default class ManagerManager {
         if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > EVENT_MANAGER_BUCKET_LIMIT)) {
             try {
                 EventManager.runEventManager();
+            } catch (e) {
+                UtilHelper.printError(e);
+            }
+        }
+
+        // run the empire
+        if (!Game.cpu["bucket"] || Game.cpu["bucket"] > EMPIRE_MANAGER_BUCKET_LIMIT) {
+            try {
+                EmpireManager.runEmpireManager();
             } catch (e) {
                 UtilHelper.printError(e);
             }

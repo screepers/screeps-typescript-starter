@@ -107,7 +107,10 @@ export default class SpawnApi {
         // Check for Military Creeps
         const attackRoomFlags: AttackFlagMemory[] = MemoryApi.getAllAttackFlagMemoryForHost(room.name);
         for (const attackRoomFlag of attackRoomFlags) {
-            if (attackRoomFlags) {
+            if (attackRoomFlag && Memory.flags[attackRoomFlag.flagName]) {
+                if (Memory.flags[attackRoomFlag.flagName].spawnProcessed) {
+                    continue;
+                }
                 const attackingRoles: RoleConstant[] = SpawnHelper.getRolesArrayFromAttackFlag(attackRoomFlag);
                 for (const role of attackingRoles) {
                     rolesToAdd.push(role);
@@ -560,7 +563,6 @@ export default class SpawnApi {
                 if (requestingFlag) {
                     return Game.flags[requestingFlag!.flagName].pos.roomName;
                 }
-                console.log(requestingFlag);
                 break;
 
             // Domestic creeps keep their target room as their home room
