@@ -46,7 +46,7 @@ export default class ManagerManager {
         }
 
         // run spawning
-        if (!Game.cpu["bucket"] || Game.cpu["bucket"] > SPAWN_MANAGER_BUCKET_LIMIT) {
+        if (!Game.cpu["bucket"] || Game.cpu["bucket"] > SPAWN_MANAGER_BUCKET_LIMIT && RoomHelper.excecuteEveryTicks(3)) {
             try {
                 SpawnManager.runSpawnManager();
             } catch (e) {
