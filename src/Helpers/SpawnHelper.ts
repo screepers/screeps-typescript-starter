@@ -517,4 +517,25 @@ export class SpawnHelper {
             })
         );
     }
+
+    /**
+     * check if we need a harvester as the highest priority
+     * @param room the room we are in
+     * @returns boolean that represents if we need a harvester as priority
+     */
+    public static needPriorityHarvester(room: Room): boolean {
+        if (room.memory.creepLimit !== undefined
+            && room.memory.creepLimit.domesticLimits !== undefined
+            && room.memory.creepLimit.domesticLimits.harvester === 1
+        ) {
+            const harvester: Creep | undefined = _.find(MemoryApi.getMyCreeps(room.name, (c: Creep) => c.memory.role === ROLE_HARVESTER));
+
+            // If theres no harvester then we def need one
+            if (!harvester) {
+                return true;
+            }
+            return harvester.ticksToLive !== undefined && harvester.ticksToLive <= (harvester.body.length * 3);
+        }
+        return false;
+    }
 }

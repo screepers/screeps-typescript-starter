@@ -3,6 +3,7 @@ import MemoryApi from "../Api/Memory.Api";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import UserException from "utils/UserException";
 import { ERROR_ERROR } from "utils/constants";
+import RoomHelper from "Helpers/RoomHelper";
 
 // handles spawning for every room
 export default class SpawnManager {
@@ -31,7 +32,9 @@ export default class SpawnManager {
         }
 
         // If we have a spawn, generate creep limits for the room
-        SpawnApi.setCreepLimits(room);
+        if (RoomHelper.excecuteEveryTicks(5)) {
+            SpawnApi.setCreepLimits(room);
+        }
 
         // add method to generate the over ride values from flags for the military creeps
         const nextCreepRole: RoleConstant | null = SpawnApi.getNextCreep(room);

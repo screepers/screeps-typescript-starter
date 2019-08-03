@@ -182,6 +182,11 @@ export default class SpawnApi {
         const creepLimits: CreepLimits = MemoryApi.getCreepLimits(room);
         let militaryRole: RoleConstant | null;
 
+        // Check for a priority harvester
+        if (SpawnHelper.needPriorityHarvester(room)) {
+            return ROLE_HARVESTER;
+        }
+
         // Spawn High Priority military
         militaryRole = SpawnHelper.spawnMiliQueue(1, room);
         if (militaryRole !== null) {
