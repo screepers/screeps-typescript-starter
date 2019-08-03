@@ -252,22 +252,14 @@ export default class RoomVisualHelper {
         etaMemory.ticksMeasured++;
 
         // ! TEMPORARY - NEEDS MOVED TO CONFIG
-        let ticksConsidered = 1000 // should be about 1 hour of activity
+        let ticksConsidered = 1000; // should be about 1 hour of activity
 
         // Old Avg + (difference) / (lesser of ticksMeasure or ticksConsidered)
-        const newAverage = etaMemory.avgPointsPerTick + (newValue - etaMemory.avgPointsPerTick) / Math.min(ticksConsidered, etaMemory.ticksMeasured);
+        const newAverage =
+            etaMemory.avgPointsPerTick +
+            (newValue - etaMemory.avgPointsPerTick) / Math.min(ticksConsidered, etaMemory.ticksMeasured);
 
         etaMemory.avgPointsPerTick = newAverage;
-        /*
-        // The difference this newValue adds/subtracts to the average
-        const differential =
-            (newValue - Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick) /
-            Memory.rooms[room.name].visual!.etaMemory.ticksMeasured;
-
-        // The new average is OldAverage + Differential
-        Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick =
-            Memory.rooms[room.name].visual!.etaMemory.avgPointsPerTick + differential;
-        **/
     }
 
     /**
@@ -297,9 +289,16 @@ export default class RoomVisualHelper {
             return "No Data";
         }
 
-        const pointsThisTick =
-            Memory.rooms[room.name].visual!.controllerProgressArray[ticksTracked - 1] -
-            Memory.rooms[room.name].visual!.controllerProgressArray[ticksTracked - 2];
+        const lastTickControllerProgress = Memory.rooms[room.name].visual!.controllerProgressArray[ticksTracked - 2];
+        const currTickControllerProgress = Memory.rooms[room.name].visual!.controllerProgressArray[ticksTracked - 1];
+        let pointsThisTick;
+
+        // If lastTick > thisTick then we know that we have rolled over to the next level
+        if (lastTickControllerProgress > currTickControllerProgress) {
+            pointsThisTick = currTickControllerProgress;
+        } else {
+            pointsThisTick = lastTickControllerProgress - currTickControllerProgress;
+        }
 
         // Calculate the rolling average and store it back in memory
         this.updateRollingAverage(pointsThisTick, room);
@@ -322,7 +321,7 @@ export default class RoomVisualHelper {
      * @param creep Creep The creep to visualize
      */
     public static visualizeStuckCreep(creep: Creep): void {
-        if(creep.memory._move === undefined || creep.memory._move.stuckCount === undefined) {
+        if (creep.memory._move === undefined || creep.memory._move.stuckCount === undefined) {
             return; // Do nothing if no stuck count
         }
 
@@ -330,16 +329,16 @@ export default class RoomVisualHelper {
 
         let circleColor;
 
-        if(percentStuck >= 1) {
+        if (percentStuck >= 1) {
             // Creep is stuck
             circleColor = STUCK_VISUAL_COLORS[0];
-        } else if (percentStuck >= .75) {
+        } else if (percentStuck >= 0.75) {
             // Almost stuck
             circleColor = STUCK_VISUAL_COLORS[1];
-        } else if (percentStuck >= .50) {
+        } else if (percentStuck >= 0.5) {
             // Halfway to stuck
             circleColor = STUCK_VISUAL_COLORS[2];
-        } else if (percentStuck >= .25) {
+        } else if (percentStuck >= 0.25) {
             // Starting to get stuck
             circleColor = STUCK_VISUAL_COLORS[3];
         } else {
@@ -347,6 +346,6 @@ export default class RoomVisualHelper {
             return;
         }
 
-        creep.room.visual.circle(creep.pos, { radius: .55, fill: circleColor, opacity: .10})
+        creep.room.visual.circle(creep.pos, { radius: 0.55, fill: circleColor, opacity: 0.1 });
     }
 }
