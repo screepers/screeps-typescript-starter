@@ -98,7 +98,7 @@ export default class SpawnApi {
         const limit: number = RoomHelper.getDomesticDefenderLimitByDefcon(defconLevel)
         if (
             // Need to not spawn defenders at beginner roomstate
-            defconLevel >= 3 &&
+            defconLevel > 3 &&
             !SpawnHelper.isCreepCountSpawnedAndQueueAtLimit(room, ROLE_DOMESTIC_DEFENDER, limit)
         ) {
             rolesToAdd.push(ROLE_DOMESTIC_DEFENDER);

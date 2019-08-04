@@ -313,7 +313,7 @@ export default class RoomHelper {
     }
 
     // Get the number of non-terrain-wall tiles around a RoomObject
-    public static getNumAccessTilesForTarget(target: RoomObject): number{
+    public static getNumAccessTilesForTarget(target: RoomObject): number {
         let accessibleTiles = 0;
         const roomTerrain: RoomTerrain = new Room.Terrain(target.pos.roomName);
         for (let y = target.pos.y - 1; y <= target.pos.y + 1; y++) {
@@ -470,11 +470,11 @@ export default class RoomHelper {
 
         switch (defcon) {
             case 2:
-                return 1;
+                return 0;
             case 3:
-                return 2;
+                return 0;
             case 4:
-                return 3;
+                return 1;
         }
         return 0;
     }
