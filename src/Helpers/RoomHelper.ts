@@ -465,16 +465,19 @@ export default class RoomHelper {
 
     /**
      * get the number of domestic defenders by the defcon number
+     * @param defcon the defcon level of the room
+     * @param isTowers boolean representing if tower exists in room
+     * @returns the number of defenders to spawn
      */
-    public static getDomesticDefenderLimitByDefcon(defcon: number): number {
+    public static getDomesticDefenderLimitByDefcon(defcon: number, isTowers: boolean): number {
 
         switch (defcon) {
             case 2:
-                return 0;
+                return isTowers === true ? 0 : 2;
             case 3:
-                return 0;
+                return isTowers === true ? 0 : 2;
             case 4:
-                return 1;
+                return isTowers === true ? 1 : 2;
         }
         return 0;
     }

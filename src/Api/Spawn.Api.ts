@@ -95,7 +95,9 @@ export default class SpawnApi {
 
         // Check for Domestic Defenders
         const defconLevel: number = MemoryApi.getDefconLevel(room);
-        const limit: number = RoomHelper.getDomesticDefenderLimitByDefcon(defconLevel)
+        const isTowers: boolean = RoomHelper.isExistInRoom(room, STRUCTURE_TOWER);
+        const limit: number = RoomHelper.getDomesticDefenderLimitByDefcon(defconLevel, isTowers);
+
         if (
             // Need to not spawn defenders at beginner roomstate
             defconLevel > 3 &&
