@@ -40,29 +40,29 @@ export class DomesticDefenderBodyOptsHelper implements ICreepBodyOptsHelper {
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
-            case TIER_1: // 2 Attack, 2 Move - Total Cost: 260
-                body = { ranged_attack: 1, move: 2 };
+            case TIER_1: // Total Cost: 200
+                body = { ranged_attack: 1, move: 1 };
                 break;
 
-            case TIER_2: // 3 Attack, 2 Move - Total Cost: 340
+            case TIER_2: // Total Cost: 550
                 body = { ranged_attack: 3, move: 2 };
                 break;
 
-            case TIER_3: // 5 Attack, 5 Move - Total Cost: 650
+            case TIER_3: // Total Cost: 650
                 body = { ranged_attack: 4, move: 4 };
                 break;
 
-            case TIER_4: // 8 Attack, 8 Move - Total Cost: 880
+            case TIER_4: // Total Cost: 1200
                 body = { ranged_attack: 6, move: 6 };
                 break;
 
             case TIER_6:
-            case TIER_5: // 10 Attack, 10 Move - Total Cost: 1300
-                body = { ranged_attack: 10, move: 10 };
+            case TIER_5: // Total Cost: 1600
+                body = { ranged_attack: 8, move: 8 };
                 break;
 
             case TIER_8:
-            case TIER_7: // 15 Attack, 15 Move - Total Cost: 1950
+            case TIER_7: // Total Cost: 3000
                 body = { ranged_attack: 15, move: 15 };
                 break;
         }

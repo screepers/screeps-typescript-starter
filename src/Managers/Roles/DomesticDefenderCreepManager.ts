@@ -49,7 +49,7 @@ export default class DomesticDefenderCreepManager implements ICreepRoleManager {
         else {
             // If we aren't in attack range, move towards the attack target
             if (!MiliApi.isInAttackRange(creep, target.pos, isMelee)) {
-                creep.moveTo(target, DEFAULT_MOVE_OPTS);
+                creep.moveTo(target);
                 return;
             }
             else {

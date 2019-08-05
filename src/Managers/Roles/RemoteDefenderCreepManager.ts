@@ -46,7 +46,7 @@ export default class RemoteDefenderCreepManager implements ICreepRoleManager {
         }
         // If we aren't in attack range, move towards the attack target
         if (!MiliApi.isInAttackRange(creep, target.pos, isMelee)) {
-            creep.moveTo(target, DEFAULT_MOVE_OPTS);
+            creep.moveTo(target);
             if (creep.hits < creep.hitsMax) {
                 creep.heal(creep);
             }

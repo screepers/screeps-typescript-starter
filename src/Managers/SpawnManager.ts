@@ -39,13 +39,12 @@ export default class SpawnManager {
 
         // If we are spawning a creep this tick, continue from here
         if (nextCreepRole) {
-            const energyAvailable: number = room.energyAvailable;
             const roomTier: TierConstant = SpawnApi.getTier(room, nextCreepRole);
             const creepBody: BodyPartConstant[] = SpawnApi.generateCreepBody(roomTier, nextCreepRole);
             const bodyEnergyCost: number = SpawnApi.getEnergyCostOfBody(creepBody);
 
             // Check if we even have enough energy to even spawn this potential monstrosity
-            if (energyAvailable >= bodyEnergyCost) {
+            if (room.energyAvailable >= bodyEnergyCost) {
                 // Get all the information we will need to spawn the next creep
                 const roomState: RoomStateConstant = room.memory.roomState!;
                 // TODO fix target room for military creeps, attack room dissapears so we need to know where to go
@@ -79,6 +78,15 @@ export default class SpawnManager {
                     // On successful creep spawn of a military creep, remove that role from the military spawn queue
                     SpawnApi.removeSpawnedCreepFromMiliQueue(nextCreepRole!, room);
                 }
+            }
+
+            // Throw error if the energy cost is more than the capacity of the room for the room
+            if (bodyEnergyCost > room.energyCapacityAvailable) {
+                throw new UserException(
+                    "Trying to spawn a creeep thats more expensive than we can possibly spawn",
+                    "Cost: " + bodyEnergyCost + ". \nAvailable: " + room.energyCapacityAvailable + ".",
+                    ERROR_ERROR
+                );
             }
         }
     }

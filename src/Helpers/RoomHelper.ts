@@ -313,7 +313,7 @@ export default class RoomHelper {
     }
 
     // Get the number of non-terrain-wall tiles around a RoomObject
-    public static getNumAccessTilesForTarget(target: RoomObject): number{
+    public static getNumAccessTilesForTarget(target: RoomObject): number {
         let accessibleTiles = 0;
         const roomTerrain: RoomTerrain = new Room.Terrain(target.pos.roomName);
         for (let y = target.pos.y - 1; y <= target.pos.y + 1; y++) {
@@ -465,16 +465,19 @@ export default class RoomHelper {
 
     /**
      * get the number of domestic defenders by the defcon number
+     * @param defcon the defcon level of the room
+     * @param isTowers boolean representing if tower exists in room
+     * @returns the number of defenders to spawn
      */
-    public static getDomesticDefenderLimitByDefcon(defcon: number): number {
+    public static getDomesticDefenderLimitByDefcon(defcon: number, isTowers: boolean): number {
 
         switch (defcon) {
             case 2:
-                return 1;
+                return isTowers === true ? 0 : 2;
             case 3:
-                return 2;
+                return isTowers === true ? 0 : 2;
             case 4:
-                return 3;
+                return isTowers === true ? 1 : 2;
         }
         return 0;
     }

@@ -37,7 +37,7 @@ export default class MedicCreepManager implements ICreepRoleManager {
             if (!healingTarget && squadMembers) {
                 const closestSquadMember: Creep | null = creep.pos.findClosestByRange(squadMembers);
                 if (closestSquadMember && !creep.pos.isNearTo(closestSquadMember)) {
-                    creep.moveTo(closestSquadMember, DEFAULT_MOVE_OPTS);
+                    creep.moveTo(closestSquadMember);
                 }
                 MiliApi.fleeCreep(creep, creep.memory.homeRoom);
                 return;
