@@ -332,7 +332,7 @@ export class SpawnHelper {
 
         switch (roleConst) {
             case ROLE_REMOTE_HARVESTER:
-                creepNum = 1 * numSources;
+                creepNum = Math.ceil(1.5 * numSources);
                 break;
             case ROLE_REMOTE_MINER:
                 creepNum = 1 * numSources;
