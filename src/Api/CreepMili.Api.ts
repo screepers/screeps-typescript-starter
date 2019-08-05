@@ -196,6 +196,22 @@ export default class CreepMili {
             }
         }
 
+        // Neutral structures
+        const neutralStructure: Structure<StructureConstant> = creep.pos.findClosestByRange(FIND_STRUCTURES,
+            {
+                filter: (struct: Structure) =>
+                    struct.structureType === STRUCTURE_CONTAINER ||
+                    struct.structureType === STRUCTURE_ROAD
+            }
+        ) as Structure<StructureConstant>;
+        if (neutralStructure) {
+            goal.pos = neutralStructure.pos;
+            path = PathFinder.search(creep.pos, goal, pathFinderOptions);
+            if (!path.incomplete) {
+                return neutralStructure;
+            }
+        }
+
         // Get a wall target
         return this.getIdealWallTarget(creep);
     }
