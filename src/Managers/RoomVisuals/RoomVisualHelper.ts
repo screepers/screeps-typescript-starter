@@ -199,7 +199,7 @@ export default class RoomVisualHelper {
         const hours = Math.floor(seconds / 3600);
         seconds = seconds % 3600;
         const minutes = Math.floor(seconds / 60);
-        seconds = Math.floor(seconds % 60);
+        seconds = seconds % 60;
 
         let timeString = "";
         if (days > 0) {
@@ -254,12 +254,11 @@ export default class RoomVisualHelper {
         // ! TEMPORARY - NEEDS MOVED TO CONFIG
         let ticksConsidered = 1000; // should be about 1 hour of activity
 
-        // Old Avg + (difference) / (lesser of ticksMeasure or ticksConsidered)
-        const newAverage =
-            etaMemory.avgPointsPerTick +
-            (newValue - etaMemory.avgPointsPerTick) / Math.min(ticksConsidered, etaMemory.ticksMeasured);
+        // newAvg = oldAvg + (newValue - oldAvg) / min(counter, FACTOR)
+        const oldAvg = etaMemory.avgPointsPerTick;
+        const newAvg = oldAvg + (newValue - oldAvg) / Math.min(ticksConsidered, etaMemory.ticksMeasured);
 
-        etaMemory.avgPointsPerTick = newAverage;
+        etaMemory.avgPointsPerTick = newAvg;
     }
 
     /**
@@ -297,7 +296,7 @@ export default class RoomVisualHelper {
         if (lastTickControllerProgress > currTickControllerProgress) {
             pointsThisTick = currTickControllerProgress;
         } else {
-            pointsThisTick = lastTickControllerProgress - currTickControllerProgress;
+            pointsThisTick = currTickControllerProgress - lastTickControllerProgress;
         }
 
         // Calculate the rolling average and store it back in memory
