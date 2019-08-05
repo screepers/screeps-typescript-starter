@@ -200,7 +200,8 @@ interface ICreepBodyOptsHelper {
         roomState: RoomStateConstant,
         squadSizeParam: number,
         squadUUIDParam: number | null,
-        rallyLocationParam: RoomPosition | null) => (CreepOptionsCiv | undefined) | (CreepOptionsMili | undefined);
+        rallyLocationParam: RoomPosition | null
+    ) => (CreepOptionsCiv | undefined) | (CreepOptionsMili | undefined);
     generateCreepBody: (tier: TierConstant) => BodyPartConstant[];
 }
 // --------------------------------------------------------------------
@@ -282,7 +283,7 @@ interface Structure {
 
 // Define the structure memory
 interface StructureMemory {
-    processed: boolean
+    processed: boolean;
 }
 
 // main memory modules --------------
@@ -405,7 +406,7 @@ type MovePart_ValidTargets = "roomPosition" | "roomName";
 /**
  * Valid actions for MovePartJob actionType
  */
-type MovePart_ValidActions = "move"
+type MovePart_ValidActions = "move";
 
 /**
  * Acceptable ValidTargets Lists for BaseJob
@@ -633,8 +634,7 @@ interface CarryPartJobListing {
  * types of custom events
  */
 type C_EVENT_CREEP_SPAWNED = 1;
-type CustomEventConstant =
-    C_EVENT_CREEP_SPAWNED;
+type CustomEventConstant = C_EVENT_CREEP_SPAWNED;
 
 /**
  * a custom event that signals something notable that occured in a room
@@ -740,7 +740,41 @@ interface EmpireMemory {
      * messages to display in each room's alert box
      */
     alertMessages?: AlertMessageNode[];
+    /**
+     * MovementApi empire-wide memory
+     */
+    movementData?: RoomMovementData[];
 }
+
+/**
+ * Contains pathfinding information about a room
+ */
+interface RoomMovementData {
+    /**
+     * Name of the room
+     */
+    roomName: string;
+    /**
+     * Status of the room
+     */
+    roomStatus: RoomStatusType;
+    /**
+     * Last tick this room was scouted
+     */
+    lastSeen: number;
+    /**
+     * Optional SERIALIZED costMatrix data to be used with PathFinder.CostMatrix.deserialize()
+     * -- Useful for storing data to be shared between multiple creeps
+     */
+    costMatrix?: number[];
+}
+
+type ROOM_STATUS_ALLY = "ally";
+type ROOM_STATUS_NEUTRAL = "neutral";
+type ROOM_STATUS_HIGHWAY = "highway";
+type ROOM_STATUS_SOURCE_KEEPER = "sourceKeeper";
+type ROOM_STATUS_HOSTILE = "hostile";
+type RoomStatusType = ROOM_STATUS_ALLY | ROOM_STATUS_NEUTRAL | ROOM_STATUS_HIGHWAY | ROOM_STATUS_SOURCE_KEEPER | ROOM_STATUS_HOSTILE;
 
 /**
  * override structure type

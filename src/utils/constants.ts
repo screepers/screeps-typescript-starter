@@ -194,5 +194,13 @@ export const DEFAULT_MOVE_OPTS: MoveToOpts = {
     }
 };
 
+// Movement API Data Types
+export const ROOM_STATUS_ALLY = "ally";
+export const ROOM_STATUS_NEUTRAL = "neutral";
+export const ROOM_STATUS_HIGHWAY = "highway";
+export const ROOM_STATUS_SOURCE_KEEPER = "sourceKeeper";
+export const ROOM_STATUS_HOSTILE = "hostile";
+
+
 // Custom Event Type Constants
 export const C_EVENT_CREEP_SPAWNED = 1;
