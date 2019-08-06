@@ -148,58 +148,13 @@ COLORS[ERROR_ERROR] = "#E300FF";
 COLORS[ERROR_WARN] = "#F0FF00";
 COLORS[ERROR_INFO] = "#0045FF";
 
-// Our default moveOpts object. Assign this to a new object and then adjust the values for the situation
-export const DEFAULT_MOVE_OPTS: MoveToOpts = {
-    heuristicWeight: 1.5, // TODO Test this to see if we can afford to raise it ( higher number = less CPU use, lower number = more likely to get best path each time)
-    range: 0, // Assume we want to go to the location, if not told otherwise
-    ignoreCreeps: true, // ! Might need to change this back to false if we have issues with enemy creeps
-    reusePath: 999, 
-    // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
-    visualizePathStyle: {}, // Empty object for now, just uses default visualization
-    costCallback(roomName: string, costMatrix: CostMatrix) {
-        _.forEach(Game.creeps, (creep: Creep) => {
-            
-            // If not in the room, do nothing
-            if(creep.pos.roomName !== roomName){
-                return;
-            }
-            
-            let matrixValue;
-
-            if (creep.my) {
-                // ! Testing to see if walking around fatigued creeps is optimal or not
-                if (creep.memory.working === true || creep.memory.job === undefined || creep.fatigue > 0) {
-                    // Walk around working creeps or idling creeps
-                    matrixValue = 255;
-                } else {
-                    // Walk through creeps with a job, but not working (AKA traveling)
-                    const terrainValue = new Room.Terrain(roomName).get(creep.pos.x, creep.pos.y);
-                    // Match the terrain underneath the creep to avoid preferring going under creeps
-                    matrixValue = terrainValue > 0 ? 5 : 1;
-                }
-            } else {
-                // If creep is not ours, we can only walk on it if we are in safe mode
-                if(creep.room.controller && creep.room.controller.safeMode !== undefined) {
-                    const terrainValue = new Room.Terrain(roomName).get(creep.pos.x, creep.pos.y);
-                    matrixValue = terrainValue > 0 ? 5 : 1;
-                } else {
-                    matrixValue = 255;
-                }
-            }
-            
-            costMatrix.set(creep.pos.x, creep.pos.y, matrixValue);
-        });
-
-        return costMatrix;
-    }
-};
-
 // Movement API Data Types
 export const ROOM_STATUS_ALLY = "ally";
 export const ROOM_STATUS_NEUTRAL = "neutral";
 export const ROOM_STATUS_HIGHWAY = "highway";
 export const ROOM_STATUS_SOURCE_KEEPER = "sourceKeeper";
 export const ROOM_STATUS_HOSTILE = "hostile";
+export const ROOM_STATUS_UNKNOWN = "unknown";
 
 
 // Custom Event Type Constants

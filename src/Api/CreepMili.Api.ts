@@ -1,10 +1,10 @@
 import MemoryApi from "./Memory.Api";
-import { DEFAULT_MOVE_OPTS } from "utils/constants";
 import CreepApi from "./Creep.Api";
 import MiliHelper from "Helpers/MiliHelper";
 import UserException from "utils/UserException";
 import { posix } from "path";
 import RoomHelper from "Helpers/RoomHelper";
+import MovementApi from "./Movement.Api";
 
 // Api for military creep's
 export default class CreepMili {
@@ -67,7 +67,7 @@ export default class CreepMili {
      * @param fleeRoom the room the creep is running too
      */
     public static fleeCreep(creep: Creep, fleeRoom: string): void {
-        creep.moveTo(new RoomPosition(25, 25, fleeRoom), DEFAULT_MOVE_OPTS);
+        creep.moveTo(new RoomPosition(25, 25, fleeRoom), MovementApi.GetDefaultMoveOpts());
     }
 
     /**
@@ -298,7 +298,7 @@ export default class CreepMili {
         const pathFinderOptions: PathFinderOpts = { flee: true };
         path = PathFinder.search(creep.pos, hostileCreep.pos, pathFinderOptions);
         if (path.path.length > 0) {
-            creep.moveTo(path.path[0], DEFAULT_MOVE_OPTS);
+            creep.moveTo(path.path[0]);
             return true;
         }
         return false;
@@ -343,7 +343,7 @@ export default class CreepMili {
 
         // Everyone is rallied, time to move out into the target room as a group if not already there
         if (creep.room.name !== targetRoom) {
-            creep.moveTo(new RoomPosition(25, 25, targetRoom), DEFAULT_MOVE_OPTS);
+            creep.moveTo(new RoomPosition(25, 25, targetRoom));
             return true;
         }
 

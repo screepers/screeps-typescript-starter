@@ -24,10 +24,10 @@ export default class RoomHelper {
         // returns true if a room has one of our names or is reserved by us
         if (room.controller === undefined) {
             return false;
-        } else if (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2") {
+        } else if (room.controller.owner !== undefined && (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2")) {
             return true;
         } else if (
-            room.controller.reservation &&
+            room.controller.reservation !== undefined && room.controller.reservation.username !== undefined &&
             (room.controller.reservation!.username === "UhmBrock" ||
                 room.controller.reservation!.username === "Jakesboy2")
         ) {

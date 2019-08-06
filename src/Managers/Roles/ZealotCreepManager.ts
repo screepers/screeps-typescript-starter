@@ -1,6 +1,5 @@
 import MiliApi from "Api/CreepMili.Api";
 import {
-    DEFAULT_MOVE_OPTS,
     ROLE_ZEALOT,
 } from "utils/constants";
 

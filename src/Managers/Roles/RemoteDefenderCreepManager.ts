@@ -1,5 +1,4 @@
 import {
-    DEFAULT_MOVE_OPTS,
     ROLE_REMOTE_DEFENDER,
 } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";

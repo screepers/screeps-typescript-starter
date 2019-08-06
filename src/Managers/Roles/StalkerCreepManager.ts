@@ -1,5 +1,4 @@
 import {
-    DEFAULT_MOVE_OPTS,
     ROLE_STALKER,
 } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";

@@ -4,7 +4,8 @@ import {
     ROOM_STATUS_HIGHWAY,
     ROOM_STATUS_ALLY,
     ROOM_STATUS_HOSTILE,
-    ROOM_STATUS_NEUTRAL
+    ROOM_STATUS_NEUTRAL,
+    ROOM_STATUS_UNKNOWN
 } from "utils/constants";
 
 export default class MovementApi {
@@ -75,6 +76,25 @@ export default class MovementApi {
     }
 
     /**
+     * Retrieve the RoomStatus from memory
+     * @param roomName The name of the room to retrieve
+     * @returns RoomStatusType The type of room, or unknown if we have no data
+     */
+    public static retrieveRoomStatus(roomName: string): RoomStatusType {
+        if (!Memory.empire || !Memory.empire.movementData) {
+            this.initializeEmpireMovementMemory();
+        }
+
+        const roomData = _.find(Memory.empire.movementData!, (data: RoomMovementData) => data.roomName === roomName);
+
+        if (roomData) {
+            return roomData.roomStatus;
+        } else {
+            return ROOM_STATUS_UNKNOWN;
+        }
+    }
+
+    /**
      * TODO Go through and replace all use of the constant from constants.ts with this method call
      * Use this function to get the DEFAULT_MOVE_OPTS object for use in pathing
      * @returns MoveToOpts The object used for pathfinding
@@ -88,8 +108,10 @@ export default class MovementApi {
             // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
             visualizePathStyle: {}, // Empty object for now, just uses default visualization
             costCallback(roomName: string, costMatrix: CostMatrix) {
+                if (MovementApi.SetRoomCostMatrix(roomName, costMatrix) === false) {
+                    return false;
+                }
                 MovementApi.SetCreepCostMatrix(roomName, costMatrix);
-                MovementApi.SetRoomCostMatrix(roomName, costMatrix);
                 return costMatrix;
             }
         };
@@ -140,7 +162,24 @@ export default class MovementApi {
      * @param roomName The roomname being processed
      * @param costMatrx The costMatrix object to set the values on
      */
-    public static SetRoomCostMatrix(roomName: string, costMatrix: CostMatrix): void {
-        // TODO Figure out how to skip rooms based on conditions. E.g. skip hostile rooms, prefer ally rooms, allow neutral etc
+    public static SetRoomCostMatrix(roomName: string, costMatrix: CostMatrix): boolean {
+        const roomStatus = this.retrieveRoomStatus(roomName);
+
+        // Todo - Retrieve the lastSeen for the room as well for decisions about rooms that haven't been seen in a while
+
+        switch (roomStatus) {
+            case ROOM_STATUS_ALLY:
+                return true;
+            case ROOM_STATUS_HIGHWAY:
+                return true;
+            case ROOM_STATUS_NEUTRAL:
+                return true;
+            case ROOM_STATUS_HOSTILE:
+                return false;
+            case ROOM_STATUS_UNKNOWN:
+                return true;
+            case ROOM_STATUS_SOURCE_KEEPER:
+                return false;
+        }
     }
 }

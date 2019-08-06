@@ -1,7 +1,6 @@
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
 import {
-    DEFAULT_MOVE_OPTS,
     ERROR_ERROR,
     ERROR_WARN,
     ERROR_FATAL,
@@ -13,6 +12,7 @@ import MemoryHelper from "Helpers/MemoryHelper";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 import RoomHelper from "Helpers/RoomHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+import MovementApi from "./Movement.Api";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -348,7 +348,7 @@ export default class CreepApi {
         this.nullCheck_target(creep, moveTarget);
 
         // Move options target
-        const moveOpts: MoveToOpts = DEFAULT_MOVE_OPTS;
+        const moveOpts: MoveToOpts = MovementApi.GetDefaultMoveOpts();
 
         // In this case all actions are complete with a range of 1, but keeping for structure
         if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
@@ -378,7 +378,7 @@ export default class CreepApi {
         this.nullCheck_target(creep, moveTarget);
 
         // Move options for target
-        const moveOpts = DEFAULT_MOVE_OPTS;
+        const moveOpts = MovementApi.GetDefaultMoveOpts();
 
         if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
             moveOpts.range = 1;
@@ -410,7 +410,7 @@ export default class CreepApi {
         this.nullCheck_target(creep, moveTarget);
 
         // Move options for target
-        const moveOpts = DEFAULT_MOVE_OPTS;
+        const moveOpts = MovementApi.GetDefaultMoveOpts();
 
         // All actiontypes that affect controller have range of 1
         if (moveTarget instanceof StructureController) {
@@ -461,7 +461,7 @@ export default class CreepApi {
         this.nullCheck_target(creep, moveTarget);
 
         // Move options for target
-        const moveOpts = DEFAULT_MOVE_OPTS;
+        const moveOpts = MovementApi.GetDefaultMoveOpts();
 
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
             moveOpts.range = 3;
@@ -488,7 +488,7 @@ export default class CreepApi {
 
         this.nullCheck_target(creep, moveTarget);
 
-        const moveOpts = DEFAULT_MOVE_OPTS;
+        const moveOpts = MovementApi.GetDefaultMoveOpts();
 
         if (job.targetType === "roomName") {
             // 23 should get us inside the room and off the exit
