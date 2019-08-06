@@ -49,10 +49,16 @@ export default class CreepApi {
      * Call the proper travelTo function based on job.jobType
      */
     public static travelTo(creep: Creep, job: BaseJob) {
+        // Update MovementData for empire if creep changed rooms
+        if(MovementApi.CreepChangedRooms(creep)){
+            MovementApi.updateRoomData(creep.room);
+        }
+
         // Perform Stuck Detection - Delete old path if stuck
         if (this.isCreepStuck(creep)) {
             delete creep.memory._move;
         }
+
 
         switch (job.jobType) {
             case "getEnergyJob":

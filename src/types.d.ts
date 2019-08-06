@@ -85,6 +85,7 @@ declare const ROLE_WORKER = "worker";
 declare const ROLE_POWER_UPGRADER = "powerUpgrader";
 declare const ROLE_LORRY = "lorry";
 declare const ROLE_MINERAL_MINER = "mineralMiner";
+declare const ROLE_SCOUT = "scout";
 declare const ROLE_REMOTE_MINER = "remoteMiner";
 declare const ROLE_REMOTE_HARVESTER = "remoteHarvester";
 declare const ROLE_REMOTE_RESERVER = "remoteReserver";
@@ -106,6 +107,7 @@ type RoleConstant =
     | ROLE_POWER_UPGRADER
     | ROLE_LORRY
     | ROLE_MINERAL_MINER
+    | ROLE_SCOUT
     | ROLE_REMOTE_MINER
     | ROLE_REMOTE_HARVESTER
     | ROLE_REMOTE_RESERVER
@@ -141,6 +143,10 @@ type ROLE_LORRY = "lorry";
  * static miner for minerals
  */
 type ROLE_MINERAL_MINER = "mineralMiner";
+/**
+ * scout used to populate empire movement data
+ */
+type ROLE_SCOUT = "scout"; 
 /**
  * goes into remote room and sits on source to mine full-time
  */

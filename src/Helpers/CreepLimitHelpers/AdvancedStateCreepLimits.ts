@@ -10,7 +10,8 @@ import {
     ROLE_COLONIZER,
     ROLE_CLAIMER,
     ROLE_REMOTE_DEFENDER,
-    ROOM_STATE_ADVANCED
+    ROOM_STATE_ADVANCED,
+    ROLE_SCOUT
 } from "utils/constants";
 import MemoryApi from "Api/Memory.Api";
 import RoomHelper from "Helpers/RoomHelper";
@@ -71,6 +72,9 @@ export class AdvancedStateCreepLimits implements ICreepSpawnLimits {
         domesticLimits[ROLE_WORKER] = 3;
         domesticLimits[ROLE_POWER_UPGRADER] = 0;
         domesticLimits[ROLE_LORRY] = numLorries;
+
+        // temp for testing
+        domesticLimits[ROLE_SCOUT] = 0;
 
         return domesticLimits;
     }

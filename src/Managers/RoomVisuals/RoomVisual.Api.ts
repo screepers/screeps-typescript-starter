@@ -193,8 +193,6 @@ export default class RoomVisualApi {
         // Adding this disclaimer, beacuse some of the information you need is actually calculated in the graph function
         // Consider decoupling these so you could use them independently
         if (ROOM_OVERLAY_GRAPH_ON) {
-            // ! Disabled due to error in calculations.
-            // TODO Fix this function
             lines.push("Est TTL:        " + RoomVisualHelper.getEstimatedTimeToNextLevel(room));
         }
         lines.push("");

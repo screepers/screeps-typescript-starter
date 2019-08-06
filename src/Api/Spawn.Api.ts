@@ -28,7 +28,8 @@ import {
     TIER_6,
     TIER_7,
     TIER_8,
-    ERROR_ERROR
+    ERROR_ERROR,
+    ROLE_SCOUT
 } from "utils/Constants";
 import { CREEP_BODY_OPT_HELPERS, ROOM_STATE_CREEP_LIMITS } from "../utils/Interface_Constants";
 import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
@@ -571,6 +572,11 @@ export default class SpawnApi {
                     return Game.flags[requestingFlag!.flagName].pos.roomName;
                 }
                 break;
+
+            // Scout for movementData
+            case ROLE_SCOUT:
+                // ! Temp test value - Replace with an algorithm
+                return "W39N43";
 
             // Domestic creeps keep their target room as their home room
             // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)

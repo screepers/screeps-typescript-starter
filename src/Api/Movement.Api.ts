@@ -68,7 +68,7 @@ export default class MovementApi {
             lastSeen: Game.time
         };
 
-        if (roomDataIndex < 0) {
+        if (roomDataIndex === -1) {
             Memory.empire.movementData!.push(roomData);
         } else {
             Memory.empire.movementData![roomDataIndex] = roomData;
@@ -108,10 +108,11 @@ export default class MovementApi {
             // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
             visualizePathStyle: {}, // Empty object for now, just uses default visualization
             costCallback(roomName: string, costMatrix: CostMatrix) {
-                if (MovementApi.SetRoomCostMatrix(roomName, costMatrix) === false) {
-                    return false;
+                if(MovementApi.UseRoomForCostMatrix(roomName, costMatrix)) {
+                    MovementApi.SetCreepCostMatrix(roomName, costMatrix);
+                } else {
+                    MovementApi.BlockRoomForCostMatrix(roomName, costMatrix);
                 }
-                MovementApi.SetCreepCostMatrix(roomName, costMatrix);
                 return costMatrix;
             }
         };
@@ -162,7 +163,7 @@ export default class MovementApi {
      * @param roomName The roomname being processed
      * @param costMatrx The costMatrix object to set the values on
      */
-    public static SetRoomCostMatrix(roomName: string, costMatrix: CostMatrix): boolean {
+    public static UseRoomForCostMatrix(roomName: string, costMatrix?: CostMatrix): boolean {
         const roomStatus = this.retrieveRoomStatus(roomName);
 
         // Todo - Retrieve the lastSeen for the room as well for decisions about rooms that haven't been seen in a while
@@ -181,5 +182,35 @@ export default class MovementApi {
             case ROOM_STATUS_SOURCE_KEEPER:
                 return false;
         }
+    }
+
+    /**
+     * Creates a room where all sides are considered unwalkable
+     */
+    public static BlockRoomForCostMatrix(roomName:string, costMatrix: CostMatrix): void {
+        
+        // x = 0 y = 0-49
+        // x = 49, y = 0-49
+        for(let i = 0; i < 50; i++){
+            costMatrix.set(i, 0, 255);
+            costMatrix.set(i, 49, 255);
+            costMatrix.set(0, i, 255);
+            costMatrix.set(49, i, 255);
+        }
+    }
+
+    /**
+     * Use this to decide if we should update room status
+     * @param Creep The creep to use for updating the room
+     */
+    public static CreepChangedRooms(creep: Creep): boolean {
+        // Creep either doesn't use our method of movement, or is not moving.
+        if (!creep.memory._move || !creep.memory._move.lastPosition) {
+            return false;
+        }
+
+        const lastRoomName = creep.memory._move.lastPosition.substr(-6);
+
+        return lastRoomName !== creep.pos.roomName;
     }
 }

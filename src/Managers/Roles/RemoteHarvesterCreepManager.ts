@@ -4,6 +4,7 @@ import MemoryHelper from "Helpers/MemoryHelper";
 import {
     ROLE_REMOTE_HARVESTER,
 } from "utils/constants";
+import MovementApi from "Api/Movement.Api";
 
 // Manager for the miner creep role
 export default class RemoteHarvesterCreepManager implements ICreepRoleManager {
