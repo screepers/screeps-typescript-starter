@@ -704,6 +704,10 @@ interface RoomMemory {
      */
     upgradeLink?: string;
     /**
+     * the center of the bunker for auto construction and spawn referencing
+     */
+    bunkerCenter?: RoomPosition;
+    /**
      * Cache of all creeps
      */
     creeps?: Cache;
