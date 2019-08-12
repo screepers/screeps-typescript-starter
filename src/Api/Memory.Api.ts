@@ -230,6 +230,7 @@ export default class MemoryApi {
         this.getAllGetEnergyJobs(room, undefined, forceUpdate);
         this.getAllClaimPartJobs(room, undefined, forceUpdate);
         this.getAllWorkPartJobs(room, undefined, forceUpdate);
+        this.getBunkerCenter(room, forceUpdate);
     }
 
     /**
@@ -1842,5 +1843,19 @@ export default class MemoryApi {
             }
         }
         return attackRoomFlags;
+    }
+
+    /**
+     * Get the center of the bunker
+     * @param room the room we are in
+     * @param forceUpdate boolean representing if we need to update this
+     * @returns the room position of the center of the room
+     */
+    public static getBunkerCenter(room: Room, forceUpdate?: boolean): RoomPosition {
+        if (forceUpdate || !room.memory.bunkerCenter) {
+            MemoryHelper_Room.updateBunkerCenter(room);
+        }
+
+        return room.memory.bunkerCenter!;
     }
 }

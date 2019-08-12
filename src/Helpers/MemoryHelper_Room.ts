@@ -6,6 +6,7 @@ import WorkPartJobs from "Jobs/WorkPartJobs";
 import CarryPartJobs from "Jobs/CarryPartJobs";
 import MiliHelper from "./MiliHelper";
 import RoomHelper from "./RoomHelper";
+import { memoryHackLoop } from "proto/MemHack";
 
 /**
  * Contains all functions for initializing and updating room memory
@@ -36,6 +37,7 @@ export default class MemoryHelper_Room {
         this.updateCarryPart_allJobs(room);
         this.updateWorkPart_allJobs(room);
         this.updateClaimPart_allJobs(room);
+        this.updateBunkerCenter(room);
         // Calling the below function is equivalent to calling all of the above updateGetEnergy_xxxxxJobs functions
         // this.updateGetEnergy_allJobs(room);
     }
@@ -54,6 +56,7 @@ export default class MemoryHelper_Room {
         // ? and the room it assigns to, it removes the assignment flag and could optionally remove
         // ? the remoteFlag as well (but I think it would be more clear to leave the flag in the room)
     }
+
     /**
      * Find all hostile creeps in room
      * TODO Check for boosted creeps
@@ -532,5 +535,46 @@ export default class MemoryHelper_Room {
     public static updateRemoteLimits(room: Room, newLimits: RemoteCreepLimits): void {
         // * Optionally apply a filter or otherwise check the limits before assigning them
         Memory.rooms[room.name].creepLimit!.remoteLimits = newLimits;
+    }
+
+    /**
+     * update the memory which contains the center of the bunker for the room
+     * @param room the room we are in
+     */
+    public static updateBunkerCenter(room: Room): void {
+        const spawns: StructureSpawn[] = _.filter(Game.spawns, (spawn: StructureSpawn) => spawn.room.name === room.name);
+        const centerSpawn: StructureSpawn | null = this.getCenterSpawn(room, spawns);
+        if (!centerSpawn) {
+            return;
+        }
+        const x: number = centerSpawn.pos.x - 1;
+        const y: number = centerSpawn.pos.y + 1;
+        room.memory.bunkerCenter = new RoomPosition(x, y, room.name);
+    }
+
+    /**
+     * Return the center spawn for the bunker in the room so we can decide the center point of the room
+     * @param room the room we are in
+     * @param spawns an array of the spawns in the room
+     * @returns the center spawn
+     */
+    public static getCenterSpawn(room: Room, spawns: StructureSpawn[]): StructureSpawn | null {
+        const rcl: number = room.controller!.level;
+        if (spawns.length < 1) {
+            return null;
+        }
+        // If rcl 6 and below its just the only spawn we have
+        if (rcl <= 6) {
+            return spawns[0];
+        }
+        // If there can be multiple spawns, try as many ways as we can to find the center spawn
+        if (RoomHelper.isExistInRoom(room, STRUCTURE_TERMINAL)) {
+            return room.terminal!.pos.findClosestByRange(spawns);
+        }
+        // TODO
+        // Add additional ways to get the center spawn. This should be good enough for now
+        // But its bug exposed if certain edge cases occur.
+        // This shouldn't ever really return null
+        return null;
     }
 }

@@ -146,7 +146,7 @@ type ROLE_MINERAL_MINER = "mineralMiner";
 /**
  * scout used to populate empire movement data
  */
-type ROLE_SCOUT = "scout"; 
+type ROLE_SCOUT = "scout";
 /**
  * goes into remote room and sits on source to mine full-time
  */
@@ -695,6 +695,10 @@ interface RoomMemory {
      * IDs of the link the power upgrader pulls from
      */
     upgradeLink?: string;
+    /**
+     * the center of the bunker for auto construction and spawn referencing
+     */
+    bunkerCenter?: RoomPosition;
     /**
      * Cache of all creeps
      */
