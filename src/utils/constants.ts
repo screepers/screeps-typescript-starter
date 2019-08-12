@@ -25,6 +25,7 @@ export const ROLE_STALKER = "stalker";
 export const ROLE_MEDIC = "medic";
 export const ROLE_DOMESTIC_DEFENDER = "domesticDefender";
 export const ROLE_SCOUT = "scout";
+export const ROLE_MANAGER = "manager";
 
 // Tier Constants
 export const TIER_1 = 300;
@@ -52,13 +53,14 @@ export const COLLATED = "collated";
 // Role Priority List
 // * Keep this list ordered by spawn priority
 export const domesticRolePriority: RoleConstant[] = [
-    ROLE_SCOUT,
     ROLE_MINER,
     ROLE_HARVESTER,
+    ROLE_MANAGER,
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
     ROLE_LORRY,
     ROLE_MINERAL_MINER,
+    ROLE_SCOUT,
 ];
 
 // * Keep this list ordered by spawn priority
