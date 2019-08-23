@@ -15,7 +15,8 @@ import ZealotCreepManager from "../Managers/Roles/ZealotCreepManager";
 import MedicCreepManager from "../Managers/Roles/MedicCreepManager";
 import StalkerCreepManager from "../Managers/Roles/StalkerCreepManager";
 import DomesticDefenderCreepManager from "../Managers/Roles/DomesticDefenderCreepManager";
-import ScoutCreepManager from "../Managers/Roles/ScoutCreepManager"
+// ! NEED TO ADD UNTRACKED FILE FOR SCOUT
+// import ScoutCreepManager from "../Managers/Roles/ScoutCreepManager";
 // ---------------------------
 // Body/Option Helper Implementations
 import { MinerBodyOptsHelper } from "../Helpers/RoleHelpers/MinerBodyOptsHelper";
@@ -34,7 +35,8 @@ import { RemoteMinerBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteMinerBod
 import { RemoteHarvesterBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteHarvesterBodyOptsHelper";
 import { ClaimerBodyOptsHelper } from "../Helpers/RoleHelpers/ClaimerBodyOptsHelper";
 import { RemoteReserverBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteReserverBodyOptsHelper";
-import { ScoutBodyOptsHelper } from "../Helpers/RoleHelpers/ScoutBodyOptsHelper";
+// ! NEED TO ADD UNTRACKED FILE FOR SCOUT;
+// import { ScoutBodyOptsHelper } from "../Helpers/RoleHelpers/ScoutBodyOptsHelper";
 // ---------------------------
 // Room Spawn Limit Implementations
 import { IntroStateCreepLimits } from "../Helpers/CreepLimitHelpers/IntroStateCreepLimits";
@@ -45,7 +47,22 @@ import { StimulateStateCreepLimits } from "../Helpers/CreepLimitHelpers/Stimulat
 import { NukeStateCreepLimits } from "../Helpers/CreepLimitHelpers/NukeStateCreepLimits";
 import { UpgraderStateCreepLimits } from "../Helpers/CreepLimitHelpers/UpgraderStateCreepLimits";
 // ----------------------------
+// Job Use implementations
+import { CarryPartJobs } from "Jobs/CarryPartJobs";
+import { ClaimPartJobs } from "Jobs/ClaimPartJobs";
+import { GetEnergyJobs } from "Jobs/GetEnergyJobs";
+import { MovePartJobs } from "Jobs/MovePartJobs";
+import { WorkPartJobs } from "Jobs/WorkPartJobs";
 // ---------- End Imports ----------------------------------------------------------------------------
+
+// Constant containing the manager for each job, which all implement doWork & travelTo
+export const JobTypes: IJobTypeHelper[] = [
+    new CarryPartJobs(),
+    new ClaimPartJobs(),
+    new GetEnergyJobs(),
+    new MovePartJobs(),
+    new WorkPartJobs()
+];
 
 // Constant containing the manager for each role, which all implement runRole
 export const CREEP_MANAGERS: ICreepRoleManager[] = [
@@ -64,9 +81,10 @@ export const CREEP_MANAGERS: ICreepRoleManager[] = [
     new ZealotCreepManager(),
     new StalkerCreepManager(),
     new MedicCreepManager(),
-    new DomesticDefenderCreepManager(),
-    new ScoutCreepManager(),
-]
+    new DomesticDefenderCreepManager()
+    // ! NEED TO ADD UNTRACKED FILE FOR SCOUT
+    // new ScoutCreepManager()
+];
 
 // Constant containing the body and options helper for a creep, which implement these helper functions
 export const CREEP_BODY_OPT_HELPERS: ICreepBodyOptsHelper[] = [
@@ -85,8 +103,9 @@ export const CREEP_BODY_OPT_HELPERS: ICreepBodyOptsHelper[] = [
     new ZealotBodyOptsHelper(),
     new StalkerBodyOptsHelper(),
     new MedicBodyOptsHelper(),
-    new DomesticDefenderBodyOptsHelper(),
-    new ScoutBodyOptsHelper(),
+    new DomesticDefenderBodyOptsHelper()
+    // ! NEED TO ADD UNTRACKED FILE FOR SCOUT
+    // new ScoutBodyOptsHelper()
 ];
 
 // This is where each class instance is stored to be searched through so the correct one can be selected
@@ -98,6 +117,5 @@ export const ROOM_STATE_CREEP_LIMITS: ICreepSpawnLimits[] = [
     new AdvancedStateCreepLimits(),
     new UpgraderStateCreepLimits(),
     new StimulateStateCreepLimits(),
-    new NukeStateCreepLimits(),
+    new NukeStateCreepLimits()
 ];
-

@@ -2,9 +2,97 @@ import RoomApi from "Api/Room.Api";
 import { CONTAINER_MINIMUM_ENERGY } from "utils/config";
 import MemoryApi from "Api/Memory.Api";
 import { ROLE_MINER, ROLE_REMOTE_MINER } from "utils/Constants";
+import CreepApi from "Api/Creep.Api";
+import CreepHelper from "Helpers/CreepHelper";
+import MovementApi from "Api/Movement.Api";
 
 // TODO Create jobs for tombstones and dropped resources if wanted
-export default class GetEnergyJobs {
+export class GetEnergyJobs implements IJobTypeHelper {
+    public jobType: Valid_JobTypes = "getEnergyJob";
+
+    constructor() {
+        const self = this;
+        self.doWork = self.doWork.bind(self);
+        self.travelTo = self.travelTo.bind(this);
+    }
+    /**
+     * Do work on the target provided by a getEnergyJob
+     */
+    public doWork(creep: Creep, job: BaseJob) {
+        const target: any = Game.getObjectById(job.targetID);
+
+        CreepApi.nullCheck_target(creep, target);
+
+        let returnCode: number;
+
+        if (job.actionType === "harvest" && target instanceof Source) {
+            returnCode = creep.harvest(target);
+        } else if (job.actionType === "harvest" && target instanceof Mineral) {
+            const extractor: StructureExtractor = _.find(
+                target.pos.lookFor(LOOK_STRUCTURES),
+                (s: Structure) => s.structureType === STRUCTURE_EXTRACTOR
+            ) as StructureExtractor;
+            returnCode = extractor.cooldown > 0 ? ERR_TIRED : creep.harvest(target);
+        } else if (job.actionType === "pickup" && target instanceof Resource) {
+            returnCode = creep.pickup(target);
+        } else if (job.actionType === "withdraw" && target instanceof Structure) {
+            returnCode = creep.withdraw(target, RESOURCE_ENERGY);
+        } else {
+            throw CreepApi.badTarget_Error(creep, job);
+        }
+
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                if (job.actionType !== "harvest") {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            case ERR_FULL:
+                delete creep.memory.job;
+                creep.memory.working = false;
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Travel to the target provided by GetEnergyJob in creep.memory.job
+     */
+    public travelTo(creep: Creep, job: BaseJob) {
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
+
+        CreepApi.nullCheck_target(creep, moveTarget);
+
+        // Move options target
+        const moveOpts: MoveToOpts = MovementApi.GetDefaultMoveOpts();
+
+        // In this case all actions are complete with a range of 1, but keeping for structure
+        if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
+            moveOpts.range = 1;
+        } else if (job.actionType === "harvest" && moveTarget instanceof StructureContainer) {
+            moveOpts.range = 0;
+        } else if (job.actionType === "withdraw" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
+            moveOpts.range = 1;
+        } else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
+            moveOpts.range = 1;
+        }
+
+        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
+            creep.memory.working = true;
+            return; // If we are in range to the target, then we do not need to move again, and next tick we will begin work
+        }
+
+        creep.moveTo(moveTarget!, moveOpts);
+    }
+
     /**
      * Gets a list of GetEnergyJobs for the sources of a room
      * @param room The room to create the job list for
@@ -76,7 +164,6 @@ export default class GetEnergyJobs {
         const mineralJobList: GetEnergyJob[] = [];
 
         _.forEach(openMinerals, (mineral: Mineral) => {
-
             const mineralEnergyRemaining = mineral.mineralAmount;
 
             // Create the StoreDefinition for the source

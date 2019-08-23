@@ -1,7 +1,89 @@
 import RoomApi from "Api/Room.Api";
 import MemoryApi from "Api/Memory.Api";
+import CreepHelper from "Helpers/CreepHelper";
+import CreepApi from "Api/Creep.Api";
+import MovementApi from "Api/Movement.Api";
 
-export default class CarryPartJobs {
+export class CarryPartJobs implements IJobTypeHelper {
+    public jobType: Valid_JobTypes = "carryPartJob";
+
+    constructor() {
+        const self = this;
+        self.doWork = self.doWork.bind(self);
+        self.travelTo = self.travelTo.bind(this);
+    }
+    /**
+     * Implementation of the doWork for CarryPartJobs
+     * @param creep Creep to do the work
+     * @param job Job to perform
+     */
+    public doWork(creep: Creep, job: BaseJob): void {
+        let target: any;
+
+        target = Game.getObjectById(job.targetID);
+
+        CreepApi.nullCheck_target(creep, target);
+
+        let returnCode: number;
+        let deleteOnSuccess: boolean = false;
+
+        if (job.actionType === "transfer" && (target instanceof Structure || target instanceof Creep)) {
+            deleteOnSuccess = true;
+            returnCode = creep.transfer(target, RESOURCE_ENERGY);
+        } else {
+            throw CreepApi.badTarget_Error(creep, job);
+        }
+
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                // If successful, delete the job from creep memory
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
+                break;
+            case ERR_NOT_FOUND:
+                break;
+            case ERR_NOT_ENOUGH_ENERGY:
+            case ERR_FULL:
+                delete creep.memory.job;
+                creep.memory.working = false;
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Implementation of travelTo for CarryPartJob
+     * @param creep
+     * @param job
+     */
+    public travelTo(creep: Creep, job: BaseJob): void {
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
+
+        CreepApi.nullCheck_target(creep, moveTarget);
+
+        // Move options for target
+        const moveOpts = MovementApi.GetDefaultMoveOpts();
+
+        if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
+            moveOpts.range = 1;
+        } // else range = 0;
+
+        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
+            creep.memory.working = true;
+            return;
+        }
+
+        creep.moveTo(moveTarget!, moveOpts);
+        return;
+    }
+
     /**
      * Gets a list of fill jobs for the room
      * @param room The room to get the jobs for

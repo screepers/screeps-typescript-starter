@@ -1,11 +1,6 @@
 import UserException from "utils/UserException";
 import CreepHelper from "Helpers/CreepHelper";
-import {
-    ERROR_ERROR,
-    ERROR_WARN,
-    ERROR_FATAL,
-    ERROR_INFO,
-} from "utils/constants";
+import { ERROR_ERROR, ERROR_WARN, ERROR_FATAL, ERROR_INFO } from "utils/constants";
 import MemoryApi from "./Memory.Api";
 import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";
 import MemoryHelper from "Helpers/MemoryHelper";
@@ -13,6 +8,7 @@ import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 import RoomHelper from "Helpers/RoomHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
 import MovementApi from "./Movement.Api";
+import { JobTypes } from "utils/Interface_Constants";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -20,29 +16,18 @@ export default class CreepApi {
      * Call the proper doWork function based on job.jobType
      */
     public static doWork(creep: Creep, job: BaseJob) {
-        switch (job.jobType) {
-            case "getEnergyJob":
-                this.doWork_GetEnergyJob(creep, job as GetEnergyJob);
-                break;
-            case "carryPartJob":
-                this.doWork_CarryPartJob(creep, job as CarryPartJob);
-                break;
-            case "claimPartJob":
-                this.doWork_ClaimPartJob(creep, job as ClaimPartJob);
-                break;
-            case "workPartJob":
-                this.doWork_WorkPartJob(creep, job as WorkPartJob);
-                break;
-            case "movePartJob":
-                this.doWork_MovePartJob(creep, job as MovePartJob);
-                break;
-            default:
-                throw new UserException(
-                    "Bad job.jobType in CreepApi.doWork",
-                    "The jobtype of the job passed to CreepApi.doWork was invalid.",
-                    ERROR_FATAL
-                );
+        for (const index in JobTypes) {
+            if (JobTypes[index].jobType === job.jobType) {
+                return JobTypes[index].doWork(creep, job);
+            }
         }
+        throw new UserException(
+            "Bad jobType in CreepApi.doWork",
+            "The jobtype of the job passed to CreepApi.doWork was invalid, or there is no implementation of that job type." +
+                "\n Job Type: " +
+                job.jobType,
+            ERROR_FATAL
+        );
     }
 
     /**
@@ -50,7 +35,7 @@ export default class CreepApi {
      */
     public static travelTo(creep: Creep, job: BaseJob) {
         // Update MovementData for empire if creep changed rooms
-        if(MovementApi.CreepChangedRooms(creep)){
+        if (MovementApi.CreepChangedRooms(creep)) {
             MovementApi.updateRoomData(creep.room);
         }
 
@@ -59,34 +44,19 @@ export default class CreepApi {
             delete creep.memory._move;
         }
 
-
-        switch (job.jobType) {
-            case "getEnergyJob":
-                this.travelTo_GetEnergyJob(creep, job as GetEnergyJob);
-                break;
-            case "carryPartJob":
-                this.travelTo_CarryPartJob(creep, job as CarryPartJob);
-                break;
-            case "claimPartJob":
-                this.travelTo_ClaimPartJob(creep, job as ClaimPartJob);
-                break;
-            case "workPartJob":
-                this.travelTo_WorkPartJob(creep, job as WorkPartJob);
-                break;
-            case "movePartJob":
-                this.travelTo_MovePartJob(creep, job as MovePartJob);
-                break;
-            default:
-                throw new UserException(
-                    "Bad job.jobType in CreepApi.travelTo",
-                    "The jobtype of the job passed to CreepApi.travelTo was invalid" +
-                    "\nCreep: " +
-                    creep.name +
-                    "\n Job Type: " +
-                    job.jobType,
-                    ERROR_FATAL
-                );
+        for (const index in JobTypes) {
+            if (JobTypes[index].jobType === job.jobType) {
+                return JobTypes[index].travelTo(creep, job);
+            }
         }
+
+        throw new UserException(
+            "Bad jobType in CreepApi.travelTo",
+            "The jobtype of the job passed to CreepApi.travelTo was invalid, or there is no implementation of this job type" +
+                "\n Job Type: " +
+                job.jobType,
+            ERROR_FATAL
+        );
     }
 
     /**
@@ -130,396 +100,13 @@ export default class CreepApi {
     }
 
     /**
-     * Do work on the target provided by claimPartJob
-     */
-    public static doWork_ClaimPartJob(creep: Creep, job: ClaimPartJob) {
-        let target: any;
-
-        if (job.targetType === "roomName") {
-            if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
-                target = Game.getObjectById(creep.memory.supplementary.moveTargetID);
-            } else {
-                target = null;
-            }
-        } else {
-            target = Game.getObjectById(job.targetID);
-        }
-
-        this.nullCheck_target(creep, target);
-
-        let deleteOnSuccess = true;
-
-        let returnCode: number;
-
-        if (job.actionType === "claim" && target instanceof StructureController) {
-            returnCode = creep.claimController(target);
-        } else if (job.actionType === "reserve" && target instanceof StructureController) {
-            returnCode = creep.reserveController(target);
-            deleteOnSuccess = false; // don't delete job since we do this until death
-        } else if (job.actionType === "sign" && target instanceof StructureController) {
-            returnCode = creep.signController(target, CreepHelper.getSigningText());
-        } else if (job.actionType === "attack" && target instanceof StructureController) {
-            returnCode = creep.attackController(target);
-            deleteOnSuccess = false; // Do this until death
-        } else {
-            throw this.badTarget_Error(creep, job);
-        }
-
-        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
-        switch (returnCode) {
-            case OK:
-                if (deleteOnSuccess) {
-                    delete creep.memory.job;
-                    creep.memory.working = false;
-                }
-                break;
-            case ERR_NOT_IN_RANGE:
-                creep.memory.working = false;
-                break;
-            case ERR_NOT_FOUND:
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Do work on the target provided by carryPartJob
-     */
-    public static doWork_CarryPartJob(creep: Creep, job: CarryPartJob) {
-        let target: any;
-
-        target = Game.getObjectById(job.targetID);
-
-        this.nullCheck_target(creep, target);
-
-        let returnCode: number;
-        let deleteOnSuccess: boolean = false;
-
-        if (job.actionType === "transfer" && (target instanceof Structure || target instanceof Creep)) {
-            deleteOnSuccess = true;
-            returnCode = creep.transfer(target, RESOURCE_ENERGY);
-        } else {
-            throw this.badTarget_Error(creep, job);
-        }
-
-        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
-        switch (returnCode) {
-            case OK:
-                // If successful, delete the job from creep memory
-                if (deleteOnSuccess) {
-                    delete creep.memory.job;
-                    creep.memory.working = false;
-                }
-                break;
-            case ERR_NOT_IN_RANGE:
-                creep.memory.working = false;
-                break;
-            case ERR_NOT_FOUND:
-                break;
-            case ERR_NOT_ENOUGH_ENERGY:
-            case ERR_FULL:
-                delete creep.memory.job;
-                creep.memory.working = false;
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Do work on the target provided by workPartJob
-     */
-    public static doWork_WorkPartJob(creep: Creep, job: WorkPartJob) {
-        const target: any = Game.getObjectById(job.targetID);
-
-        this.nullCheck_target(creep, target);
-
-        let returnCode: number;
-        let deleteOnSuccess: boolean = false;
-
-        if (job.actionType === "build" && target instanceof ConstructionSite) {
-            returnCode = creep.build(target);
-            if (!target || creep.carry.energy === 0) {
-                deleteOnSuccess = true;
-            }
-        } else if (job.actionType === "repair" && target instanceof Structure) {
-            returnCode = creep.repair(target);
-            if (target.hits === target.hitsMax || creep.carry.energy === 0) {
-                deleteOnSuccess = true;
-            }
-        } else if (job.actionType === "upgrade" && target instanceof StructureController) {
-            returnCode = creep.upgradeController(target);
-            if (creep.carry.energy === 0) {
-                deleteOnSuccess = true;
-            }
-        } else {
-            throw this.badTarget_Error(creep, job);
-        }
-
-        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
-        switch (returnCode) {
-            case OK:
-                // If successful and creep is empty, delete the job from creep memory
-                if (deleteOnSuccess) {
-                    delete creep.memory.job;
-                    creep.memory.working = false;
-                }
-                break;
-            case ERR_NOT_IN_RANGE:
-                creep.memory.working = false;
-                break;
-            case ERR_NOT_FOUND:
-                delete creep.memory.job;
-                creep.memory.working = false;
-                break;
-            default:
-                if (deleteOnSuccess) {
-                    delete creep.memory.job;
-                    creep.memory.working = false;
-                }
-                break;
-        }
-    }
-
-    /**
-     * Do work on the target provided by workPartJob
-     * * We may need to flesh this method out to accomodate future usage
-     * @param creep The creep to do the work
-     * @param job The job to perform work on
-     */
-    public static doWork_MovePartJob(creep: Creep, job: MovePartJob) {
-        // If we are in here then that means that we have either reached the roomPosition
-        // or are in the specified roomName
-        delete creep.memory.job;
-        creep.memory.working = false;
-    }
-
-    /**
-     * Do work on the target provided by a getEnergyJob
-     */
-    public static doWork_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
-        const target: any = Game.getObjectById(job.targetID);
-
-        this.nullCheck_target(creep, target);
-
-        let returnCode: number;
-
-        if (job.actionType === "harvest" && (target instanceof Source)) {
-            returnCode = creep.harvest(target);
-        }
-        else if (job.actionType === "harvest" && (target instanceof Mineral)) {
-            const extractor: StructureExtractor = _.find(target.pos.lookFor(LOOK_STRUCTURES),
-                (s: Structure) => s.structureType === STRUCTURE_EXTRACTOR) as StructureExtractor;
-            returnCode = extractor.cooldown > 0 ? ERR_TIRED : creep.harvest(target);
-        }
-        else if (job.actionType === "pickup" && target instanceof Resource) {
-            returnCode = creep.pickup(target);
-        }
-        else if (job.actionType === "withdraw" && target instanceof Structure) {
-            returnCode = creep.withdraw(target, RESOURCE_ENERGY);
-        }
-        else {
-            throw this.badTarget_Error(creep, job);
-        }
-
-        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
-        switch (returnCode) {
-            case OK:
-                if (job.actionType !== "harvest") {
-                    delete creep.memory.job;
-                    creep.memory.working = false;
-                }
-                break;
-            case ERR_NOT_IN_RANGE:
-                creep.memory.working = false;
-                break;
-            case ERR_NOT_FOUND:
-                break;
-            case ERR_FULL:
-                delete creep.memory.job;
-                creep.memory.working = false;
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Travel to the target provided by GetEnergyJob in creep.memory.job
-     */
-    public static travelTo_GetEnergyJob(creep: Creep, job: GetEnergyJob) {
-        const moveTarget = CreepHelper.getMoveTarget(creep, job);
-
-        this.nullCheck_target(creep, moveTarget);
-
-        // Move options target
-        const moveOpts: MoveToOpts = MovementApi.GetDefaultMoveOpts();
-
-        // In this case all actions are complete with a range of 1, but keeping for structure
-        if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {
-            moveOpts.range = 1;
-        } else if (job.actionType === "harvest" && moveTarget instanceof StructureContainer) {
-            moveOpts.range = 0;
-        } else if (job.actionType === "withdraw" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
-            moveOpts.range = 1;
-        } else if (job.actionType === "pickup" && moveTarget instanceof Resource) {
-            moveOpts.range = 1;
-        }
-
-        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
-            creep.memory.working = true;
-            return; // If we are in range to the target, then we do not need to move again, and next tick we will begin work
-        }
-
-        creep.moveTo(moveTarget!, moveOpts);
-    }
-
-    /**
-     * Travel to the target provided by CarryPartJob in creep.memory.job
-     */
-    public static travelTo_CarryPartJob(creep: Creep, job: CarryPartJob) {
-        const moveTarget = CreepHelper.getMoveTarget(creep, job);
-
-        this.nullCheck_target(creep, moveTarget);
-
-        // Move options for target
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
-
-        if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
-            moveOpts.range = 1;
-        } // else range = 0;
-
-        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
-            creep.memory.working = true;
-            return;
-        }
-
-        creep.moveTo(moveTarget!, moveOpts);
-        return;
-    }
-
-    /**
-     * Travel to the target provided by ClaimPartJob in creep.memory.job
-     */
-    public static travelTo_ClaimPartJob(creep: Creep, job: ClaimPartJob) {
-        // Remove supplementary.moveTarget if we are not in room with controller - Safety
-        if (job.targetType === "roomName" && job.targetID !== creep.pos.roomName) {
-            if (creep.memory.supplementary) {
-                delete creep.memory.supplementary!.moveTarget;
-            }
-        }
-
-        // Will return a roomPosition in this case, or controller if we have that targeted instead
-        const moveTarget = CreepHelper.getMoveTarget(creep, job);
-
-        this.nullCheck_target(creep, moveTarget);
-
-        // Move options for target
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
-
-        // All actiontypes that affect controller have range of 1
-        if (moveTarget instanceof StructureController) {
-            moveOpts.range = 1;
-        } else if (moveTarget instanceof RoomPosition) {
-            moveOpts.range = 0;
-        }
-
-        // If target is roomPosition then we know we want the controller
-        // So as soon as we get in room we set supplementaryTarget
-        if (job.targetType === "roomName" && creep.pos.roomName === job.targetID) {
-            if (CreepApi.moveCreepOffExit(creep)) {
-                return;
-            }
-
-            const targetRoom = Game.rooms[job.targetID];
-
-            // If there is a controller, set it as supplementary room target
-            if (targetRoom.controller) {
-                if (!creep.memory.supplementary) {
-                    creep.memory.supplementary = {};
-                }
-                creep.memory.supplementary.moveTargetID = targetRoom.controller.id;
-            } else {
-                throw new UserException(
-                    "No controller in room",
-                    "There is no controller in room: " + job.targetID + "\nCreep: " + creep.name,
-                    ERROR_WARN
-                );
-            }
-        }
-
-        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
-            creep.memory.working = true;
-            return;
-        }
-
-        creep.moveTo(moveTarget!, moveOpts);
-        return;
-    }
-
-    /**
-     * Travel to the target provided by WorkPartJob in creep.memory.job
-     */
-    public static travelTo_WorkPartJob(creep: Creep, job: WorkPartJob) {
-        const moveTarget = CreepHelper.getMoveTarget(creep, job);
-
-        this.nullCheck_target(creep, moveTarget);
-
-        // Move options for target
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
-
-        if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
-            moveOpts.range = 3;
-        } else if (job.actionType === "repair" && moveTarget instanceof Structure) {
-            moveOpts.range = 3;
-        } else if (job.actionType === "upgrade" && moveTarget instanceof StructureController) {
-            moveOpts.range = 3;
-        }
-
-        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
-            creep.memory.working = true;
-            return;
-        }
-
-        creep.moveTo(moveTarget!, moveOpts);
-        return;
-    }
-
-    /**
-     * Travel to the target provided by MovePartJob in creep.memory.job
-     */
-    public static travelTo_MovePartJob(creep: Creep, job: MovePartJob) {
-        const moveTarget = CreepHelper.getMoveTarget(creep, job);
-
-        this.nullCheck_target(creep, moveTarget);
-
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
-
-        if (job.targetType === "roomName") {
-            // 23 should get us inside the room and off the exit
-            moveOpts.range = 23;
-        } else if (job.targetType === "roomPosition") {
-            moveOpts.range = 0;
-        }
-
-        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
-            creep.memory.working = true;
-            return;
-        }
-
-        creep.moveTo(moveTarget!, moveOpts);
-        return;
-    }
-    /**
      * Checks if the target is null and throws the appropriate error
      */
     public static nullCheck_target(creep: Creep, target: object | null) {
         if (target === null) {
-
             // If it was a construction job, update work part jobs to ensure ramparts are repaired swiftly
             if (creep.memory.job && creep.memory.job!.actionType === "build") {
-                MemoryHelper_Room.updateWorkPart_repairJobs(creep.room)
+                MemoryHelper_Room.updateWorkPart_repairJobs(creep.room);
             }
 
             // preserve for the error message
@@ -547,10 +134,10 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-            creep.name +
-            "]" +
-            "\n Job: " +
-            JSON.stringify(job),
+                creep.name +
+                "]" +
+                "\n Job: " +
+                JSON.stringify(job),
             ERROR_ERROR
         );
     }
@@ -663,9 +250,13 @@ export default class CreepApi {
             });
 
             if (defenseRepairJobs.length > 0) {
-                const rampartsToBeRepaired: StructureRampart[] = _.map(defenseRepairJobs,
-                    (j: WorkPartJob) => Game.getObjectById(j.targetID) as StructureRampart);
-                const closestRampart: StructureRampart = creep.pos.findClosestByRange(rampartsToBeRepaired) as StructureRampart;
+                const rampartsToBeRepaired: StructureRampart[] = _.map(
+                    defenseRepairJobs,
+                    (j: WorkPartJob) => Game.getObjectById(j.targetID) as StructureRampart
+                );
+                const closestRampart: StructureRampart = creep.pos.findClosestByRange(
+                    rampartsToBeRepaired
+                ) as StructureRampart;
                 return {
                     targetID: closestRampart.id,
                     targetType: "rampart",
@@ -737,11 +328,11 @@ export default class CreepApi {
 
                     // Find the closest source
                     const sourceObjects: Source[] = MemoryHelper.getOnlyObjectsFromIDs(sourceIDs);
-                    const accessibleSourceObjects: Source[] = []
+                    const accessibleSourceObjects: Source[] = [];
 
                     // ! Known issue - Multiple Sources, but the one with enough access tiles is not "suitable"
                     // ! e.g. 2 sources, 1 access tile and 3 access tiles -- Only the 1 access tile will be "suitable"
-                    // ! but will not have enough accessTiles to be assigned. Creep needs to target the "not suitable" source in this case. 
+                    // ! but will not have enough accessTiles to be assigned. Creep needs to target the "not suitable" source in this case.
                     // Get rid of any sources that are out of access tiles
                     _.forEach(sourceObjects, (source: Source) => {
                         const numAccessTiles = RoomHelper.getNumAccessTilesForTarget(source);
@@ -759,7 +350,7 @@ export default class CreepApi {
                     });
 
                     const closestAvailableSource: Source = creep.pos.findClosestByRange(accessibleSourceObjects)!; // Force not null since we used MemoryHelper.getOnlyObjectsFromIds;
-                    
+
                     // return the job that corresponds with the closest source
                     return _.find(sourceJobs, (job: GetEnergyJob) => job.targetID === closestAvailableSource.id);
                 } else {
@@ -821,8 +412,8 @@ export default class CreepApi {
                 room,
                 (dJob: GetEnergyJob) =>
                     !dJob.isTaken &&
-                    ((dJob.resources!.energy >= creep.carryCapacity) ||
-                        (dJob.targetType === "droppedResource" && dJob.resources!.energy >= creep.carryCapacity * .6))
+                    (dJob.resources!.energy >= creep.carryCapacity ||
+                        (dJob.targetType === "droppedResource" && dJob.resources!.energy >= creep.carryCapacity * 0.6))
             );
 
             if (dropJobs.length > 0) {
@@ -840,11 +431,9 @@ export default class CreepApi {
             );
 
             // Only get from the storage if there are jobs that don't involve just putting it right back
-            const isFillJobs: boolean = MemoryApi.getFillJobs(
-                room,
-                (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link",
-                true
-            ).length > 0;
+            const isFillJobs: boolean =
+                MemoryApi.getFillJobs(room, (fJob: CarryPartJob) => !fJob.isTaken && fJob.targetType !== "link", true)
+                    .length > 0;
             if (backupStructures.length > 0 && isFillJobs) {
                 return backupStructures[0];
             }
