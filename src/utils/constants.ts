@@ -152,10 +152,12 @@ COLORS[ERROR_INFO] = "#0045FF";
 
 // Movement API Data Types
 export const ROOM_STATUS_ALLY = "ally";
+export const ROOM_STATUS_ALLY_REMOTE = "allyRemote";
 export const ROOM_STATUS_NEUTRAL = "neutral";
 export const ROOM_STATUS_HIGHWAY = "highway";
 export const ROOM_STATUS_SOURCE_KEEPER = "sourceKeeper";
 export const ROOM_STATUS_HOSTILE = "hostile";
+export const ROOM_STATUS_HOSTILE_REMOTE = "hostileRemote";
 export const ROOM_STATUS_UNKNOWN = "unknown";
 
 // Custom Event Type Constants

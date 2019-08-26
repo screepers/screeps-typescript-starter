@@ -755,7 +755,7 @@ interface EmpireMemory {
      */
     alertMessages?: AlertMessageNode[];
     /**
-     * MovementApi empire-wide memory
+     * PathfindingApi empire-wide memory
      */
     movementData?: RoomMovementData[];
 }
@@ -784,17 +784,21 @@ interface RoomMovementData {
 }
 
 type ROOM_STATUS_ALLY = "ally";
+type ROOM_STATUS_ALLY_REMOTE = "allyRemote";
 type ROOM_STATUS_NEUTRAL = "neutral";
 type ROOM_STATUS_HIGHWAY = "highway";
 type ROOM_STATUS_SOURCE_KEEPER = "sourceKeeper";
 type ROOM_STATUS_HOSTILE = "hostile";
+type ROOM_STATUS_HOSTILE_REMOTE = "hostileRemote";
 type ROOM_STATUS_UNKNOWN = "unknown";
 type RoomStatusType =
     | ROOM_STATUS_ALLY
+    | ROOM_STATUS_ALLY_REMOTE
     | ROOM_STATUS_NEUTRAL
     | ROOM_STATUS_HIGHWAY
     | ROOM_STATUS_SOURCE_KEEPER
     | ROOM_STATUS_HOSTILE
+    | ROOM_STATUS_HOSTILE_REMOTE
     | ROOM_STATUS_UNKNOWN;
 
 /**

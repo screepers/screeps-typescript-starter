@@ -5,10 +5,11 @@ import {
     ROOM_STATUS_ALLY,
     ROOM_STATUS_HOSTILE,
     ROOM_STATUS_NEUTRAL,
-    ROOM_STATUS_UNKNOWN
+    ROOM_STATUS_UNKNOWN,
+    ROOM_STATUS_HOSTILE_REMOTE
 } from "utils/constants";
 
-export default class MovementApi {
+export default class PathfindingApi {
     /**
      * Call this method to ensure that Memory.empire.movementData exists in a usable state
      */
@@ -39,8 +40,10 @@ export default class MovementApi {
             }
         } else if (room.controller.my || RoomHelper.isAllyRoom(room)) {
             roomStatus = ROOM_STATUS_ALLY;
-        } else if (!room.controller.my) {
+        } else if (!room.controller.my && room.controller.owner) {
             roomStatus = ROOM_STATUS_HOSTILE;
+        } else if (!room.controller.my && room.controller.reservation !== undefined) {
+            roomStatus = ROOM_STATUS_HOSTILE_REMOTE;
         } else {
             roomStatus = ROOM_STATUS_NEUTRAL;
         }
@@ -108,10 +111,10 @@ export default class MovementApi {
             // swampCost: 5, // Putting this here as a reminder that we can make bigger creeps that can move on swamps
             visualizePathStyle: {}, // Empty object for now, just uses default visualization
             costCallback(roomName: string, costMatrix: CostMatrix) {
-                if(MovementApi.UseRoomForCostMatrix(roomName, costMatrix)) {
-                    MovementApi.SetCreepCostMatrix(roomName, costMatrix);
+                if (PathfindingApi.UseRoomForCostMatrix(roomName, costMatrix)) {
+                    PathfindingApi.SetCreepCostMatrix(roomName, costMatrix);
                 } else {
-                    MovementApi.BlockRoomForCostMatrix(roomName, costMatrix);
+                    PathfindingApi.BlockRoomForCostMatrix(roomName, costMatrix);
                 }
                 return costMatrix;
             }
@@ -182,16 +185,17 @@ export default class MovementApi {
             case ROOM_STATUS_SOURCE_KEEPER:
                 return false;
         }
+
+        return true;
     }
 
     /**
      * Creates a room where all sides are considered unwalkable
      */
-    public static BlockRoomForCostMatrix(roomName:string, costMatrix: CostMatrix): void {
-        
+    public static BlockRoomForCostMatrix(roomName: string, costMatrix: CostMatrix): void {
         // x = 0 y = 0-49
         // x = 49, y = 0-49
-        for(let i = 0; i < 50; i++){
+        for (let i = 0; i < 50; i++) {
             costMatrix.set(i, 0, 255);
             costMatrix.set(i, 49, 255);
             costMatrix.set(0, i, 255);

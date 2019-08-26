@@ -7,8 +7,8 @@ import MemoryHelper from "Helpers/MemoryHelper";
 import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
 import RoomHelper from "Helpers/RoomHelper";
 import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
-import MovementApi from "./Movement.Api";
 import { JobTypes } from "utils/Interface_Constants";
+import PathfindingApi from "./Pathfinding.Api";
 
 // Api for all types of creeps (more general stuff here)
 export default class CreepApi {
@@ -35,8 +35,8 @@ export default class CreepApi {
      */
     public static travelTo(creep: Creep, job: BaseJob) {
         // Update MovementData for empire if creep changed rooms
-        if (MovementApi.CreepChangedRooms(creep)) {
-            MovementApi.updateRoomData(creep.room);
+        if(PathfindingApi.CreepChangedRooms(creep)){
+            PathfindingApi.updateRoomData(creep.room);
         }
 
         // Perform Stuck Detection - Delete old path if stuck
