@@ -4,7 +4,7 @@ import MiliHelper from "Helpers/MiliHelper";
 import UserException from "utils/UserException";
 import { posix } from "path";
 import RoomHelper from "Helpers/RoomHelper";
-import MovementApi from "./Movement.Api";
+import PathfindingApi from "./Pathfinding.Api";
 
 // Api for military creep's
 export default class CreepMili {
@@ -67,7 +67,7 @@ export default class CreepMili {
      * @param fleeRoom the room the creep is running too
      */
     public static fleeCreep(creep: Creep, fleeRoom: string): void {
-        creep.moveTo(new RoomPosition(25, 25, fleeRoom), MovementApi.GetDefaultMoveOpts());
+        creep.moveTo(new RoomPosition(25, 25, fleeRoom), PathfindingApi.GetDefaultMoveOpts());
     }
 
     /**

@@ -2,7 +2,7 @@ import MemoryApi from "Api/Memory.Api";
 import { RESERVER_MIN_TTL } from "utils/config";
 import CreepHelper from "Helpers/CreepHelper";
 import CreepApi from "Api/Creep.Api";
-import MovementApi from "Api/Movement.Api";
+import PathfindingApi from "Api/Pathfinding.Api";
 import UserException from "utils/UserException";
 
 export class ClaimPartJobs implements IJobTypeHelper {
@@ -84,7 +84,7 @@ export class ClaimPartJobs implements IJobTypeHelper {
         CreepApi.nullCheck_target(creep, moveTarget);
 
         // Move options for target
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
+        const moveOpts = PathfindingApi.GetDefaultMoveOpts();
 
         // All actiontypes that affect controller have range of 1
         if (moveTarget instanceof StructureController) {

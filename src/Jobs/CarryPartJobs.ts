@@ -2,7 +2,7 @@ import RoomApi from "Api/Room.Api";
 import MemoryApi from "Api/Memory.Api";
 import CreepHelper from "Helpers/CreepHelper";
 import CreepApi from "Api/Creep.Api";
-import MovementApi from "Api/Movement.Api";
+import PathfindingApi from "Api/Pathfinding.Api";
 
 export class CarryPartJobs implements IJobTypeHelper {
     public jobType: Valid_JobTypes = "carryPartJob";
@@ -69,7 +69,7 @@ export class CarryPartJobs implements IJobTypeHelper {
         CreepApi.nullCheck_target(creep, moveTarget);
 
         // Move options for target
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
+        const moveOpts = PathfindingApi.GetDefaultMoveOpts();
 
         if (job.actionType === "transfer" && (moveTarget instanceof Structure || moveTarget instanceof Creep)) {
             moveOpts.range = 1;

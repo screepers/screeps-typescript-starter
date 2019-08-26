@@ -4,7 +4,7 @@ import MemoryApi from "Api/Memory.Api";
 import { ROLE_MINER, ROLE_REMOTE_MINER } from "utils/Constants";
 import CreepApi from "Api/Creep.Api";
 import CreepHelper from "Helpers/CreepHelper";
-import MovementApi from "Api/Movement.Api";
+import PathfindingApi from "Api/Pathfinding.Api";
 
 // TODO Create jobs for tombstones and dropped resources if wanted
 export class GetEnergyJobs implements IJobTypeHelper {
@@ -72,7 +72,7 @@ export class GetEnergyJobs implements IJobTypeHelper {
         CreepApi.nullCheck_target(creep, moveTarget);
 
         // Move options target
-        const moveOpts: MoveToOpts = MovementApi.GetDefaultMoveOpts();
+        const moveOpts: MoveToOpts = PathfindingApi.GetDefaultMoveOpts();
 
         // In this case all actions are complete with a range of 1, but keeping for structure
         if (job.actionType === "harvest" && (moveTarget instanceof Source || moveTarget instanceof Mineral)) {

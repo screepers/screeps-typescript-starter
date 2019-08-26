@@ -2,7 +2,7 @@ import RoomApi from "Api/Room.Api";
 import MemoryApi from "Api/Memory.Api";
 import CreepApi from "Api/Creep.Api";
 import CreepHelper from "Helpers/CreepHelper";
-import MovementApi from "Api/Movement.Api";
+import PathfindingApi from "Api/Pathfinding.Api";
 
 export class WorkPartJobs implements IJobTypeHelper {
     public jobType: Valid_JobTypes = "workPartJob";
@@ -76,7 +76,7 @@ export class WorkPartJobs implements IJobTypeHelper {
         CreepApi.nullCheck_target(creep, moveTarget);
 
         // Move options for target
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
+        const moveOpts = PathfindingApi.GetDefaultMoveOpts();
 
         if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
             moveOpts.range = 3;

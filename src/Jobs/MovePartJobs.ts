@@ -1,6 +1,6 @@
 import CreepHelper from "Helpers/CreepHelper";
 import CreepApi from "Api/Creep.Api";
-import MovementApi from "Api/Movement.Api";
+import PathfindingApi from "Api/Pathfinding.Api";
 
 export class MovePartJobs implements IJobTypeHelper {
     public jobType: Valid_JobTypes = "movePartJob";
@@ -18,7 +18,7 @@ export class MovePartJobs implements IJobTypeHelper {
 
         CreepApi.nullCheck_target(creep, moveTarget);
 
-        const moveOpts = MovementApi.GetDefaultMoveOpts();
+        const moveOpts = PathfindingApi.GetDefaultMoveOpts();
 
         if (job.targetType === "roomName") {
             // 23 should get us inside the room and off the exit
