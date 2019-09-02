@@ -15,11 +15,7 @@ import ZealotCreepManager from "../Managers/Roles/ZealotCreepManager";
 import MedicCreepManager from "../Managers/Roles/MedicCreepManager";
 import StalkerCreepManager from "../Managers/Roles/StalkerCreepManager";
 import DomesticDefenderCreepManager from "../Managers/Roles/DomesticDefenderCreepManager";
-<<<<<<< HEAD
 import ScoutCreepManager from "../Managers/Roles/ScoutCreepManager";
-=======
-// import ScoutCreepManager from "../Managers/Roles/ScoutCreepManager"
->>>>>>> took out scout manager
 // ---------------------------
 // Body/Option Helper Implementations
 import { MinerBodyOptsHelper } from "../Helpers/RoleHelpers/MinerBodyOptsHelper";
@@ -38,7 +34,7 @@ import { RemoteMinerBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteMinerBod
 import { RemoteHarvesterBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteHarvesterBodyOptsHelper";
 import { ClaimerBodyOptsHelper } from "../Helpers/RoleHelpers/ClaimerBodyOptsHelper";
 import { RemoteReserverBodyOptsHelper } from "../Helpers/RoleHelpers/RemoteReserverBodyOptsHelper";
-// import { ScoutBodyOptsHelper } from "../Helpers/RoleHelpers/ScoutBodyOptsHelper";
+import { ScoutBodyOptsHelper } from "../Helpers/RoleHelpers/ScoutBodyOptsHelper";
 // ---------------------------
 // Room Spawn Limit Implementations
 import { IntroStateCreepLimits } from "../Helpers/CreepLimitHelpers/IntroStateCreepLimits";
@@ -105,11 +101,7 @@ export const CREEP_BODY_OPT_HELPERS: ICreepBodyOptsHelper[] = [
     new StalkerBodyOptsHelper(),
     new MedicBodyOptsHelper(),
     new DomesticDefenderBodyOptsHelper(),
-<<<<<<< HEAD
     new ScoutBodyOptsHelper()
-=======
-    // new ScoutBodyOptsHelper(),
->>>>>>> took out scout manager
 ];
 
 // This is where each class instance is stored to be searched through so the correct one can be selected
