@@ -59,12 +59,8 @@ export const domesticRolePriority: RoleConstant[] = [
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
     ROLE_LORRY,
-<<<<<<< HEAD
     ROLE_MINERAL_MINER,
-    ROLE_SCOUT,
-=======
-    ROLE_MINERAL_MINER
->>>>>>> 037d19e1d16fdeda9385edb6c1908543858956e6
+    ROLE_SCOUT
 ];
 
 // * Keep this list ordered by spawn priority
