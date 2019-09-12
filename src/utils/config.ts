@@ -138,3 +138,8 @@ export const ROOM_OVERLAY_BUCKET_LIMIT = 7000;
  * List of allies
  */
 export const ALLY_LIST: string[] = ["jakesboy2", "Uhmbrock"];
+
+/**
+ * List of structures a tower in a bunker is allowed to repair
+ */
+export const TOWER_ALLOWED_TO_REPAIR: StructureConstant[] = [STRUCTURE_CONTAINER, STRUCTURE_ROAD];

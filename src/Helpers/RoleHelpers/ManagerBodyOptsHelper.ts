@@ -55,11 +55,6 @@ export class MedicBodyOptsHelper implements ICreepBodyOptsHelper {
         let creepOptions: CreepOptionsCiv = SpawnHelper.getDefaultCreepOptionsCiv();
 
         switch (roomState) {
-            case ROOM_STATE_INTRO:
-            case ROOM_STATE_BEGINNER:
-            case ROOM_STATE_INTER:
-            case ROOM_STATE_ADVANCED:
-            case ROOM_STATE_STIMULATE:
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
