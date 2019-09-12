@@ -143,3 +143,5 @@ export const ALLY_LIST: string[] = ["jakesboy2", "Uhmbrock"];
  * List of structures a tower in a bunker is allowed to repair
  */
 export const TOWER_ALLOWED_TO_REPAIR: StructureConstant[] = [STRUCTURE_CONTAINER, STRUCTURE_ROAD];
+
+export const TOWER_THRESHOLD: number = 0.85;

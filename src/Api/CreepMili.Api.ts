@@ -125,7 +125,7 @@ export default class CreepMili {
                 }
 
                 // Set walls and ramparts as unwalkable
-                room.find(FIND_STRUCTURES).forEach(function(struct: Structure<StructureConstant>) {
+                room.find(FIND_STRUCTURES).forEach(function (struct: Structure<StructureConstant>) {
                     if (struct.structureType === STRUCTURE_WALL || struct.structureType === STRUCTURE_RAMPART) {
                         // Set walls and ramparts as unwalkable
                         costs.set(struct.pos.x, struct.pos.y, 0xff);
@@ -133,7 +133,7 @@ export default class CreepMili {
                 } as any);
 
                 // Set creeps as unwalkable
-                room.find(FIND_CREEPS).forEach(function(currentCreep: Creep) {
+                room.find(FIND_CREEPS).forEach(function (currentCreep: Creep) {
                     costs.set(currentCreep.pos.x, currentCreep.pos.y, 0xff);
                 });
 
@@ -265,10 +265,15 @@ export default class CreepMili {
 
     /**
      * find the ideal wall to attack
-     * TODO make this balance between distance and health (ie if a 9m wall is 2 tiles closer than a 2m wall)
      * @param creep the creep we are checking for
      */
     public static getIdealWallTarget(creep: Creep): StructureWall | StructureRampart | undefined {
+
+        // Check for any significantly lower walls first (ie 25% lower than other walls, and also accessible)
+        // TODO
+        // Look for ALL enemy walls/ramparts, average them, then find the closest one by path that is also X% below the average
+        // If none found, just target the closest as normally occurs below
+
         const rampart: StructureRampart = creep.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
             filter: (struct: Structure) => struct.structureType === STRUCTURE_RAMPART
         }) as StructureRampart;

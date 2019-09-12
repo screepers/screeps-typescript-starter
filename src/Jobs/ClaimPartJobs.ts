@@ -188,9 +188,13 @@ export class ClaimPartJobs implements IJobTypeHelper {
     /**
      * Gets a list of SignJobs for the room (signing the controller)
      * @param room The room to get the jobs for
+     *
      */
     public static createSignJobs(room: Room): ClaimPartJob[] {
         // TODO Get a list of controllers to be signed
+        // Every controller we have vision of the room in the scouting structure,
+        // its not owned by another player,
+        // and its not signed
         const controllers: StructureController[] = [];
 
         if (controllers.length === 0) {

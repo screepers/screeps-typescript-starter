@@ -6,7 +6,6 @@ import CreepApi from "Api/Creep.Api";
 import CreepHelper from "Helpers/CreepHelper";
 import PathfindingApi from "Api/Pathfinding.Api";
 
-// TODO Create jobs for tombstones and dropped resources if wanted
 export class GetEnergyJobs implements IJobTypeHelper {
     public jobType: Valid_JobTypes = "getEnergyJob";
 

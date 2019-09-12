@@ -98,7 +98,6 @@ export default class PathfindingApi {
     }
 
     /**
-     * TODO Go through and replace all use of the constant from constants.ts with this method call
      * Use this function to get the DEFAULT_MOVE_OPTS object for use in pathing
      * @returns MoveToOpts The object used for pathfinding
      */

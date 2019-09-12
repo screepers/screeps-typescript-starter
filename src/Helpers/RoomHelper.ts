@@ -177,7 +177,6 @@ export default class RoomHelper {
 
     /**
      * check if the link is an upgrader link
-     * TODO Complete this
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
@@ -235,7 +234,6 @@ export default class RoomHelper {
 
     /**
      * Check if the stimulate flag is present for a room
-     * TODO Complete this
      * @param room the room we are checking for
      */
     public static isStimulateRoom(room: Room): boolean {

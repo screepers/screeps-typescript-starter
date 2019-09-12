@@ -15,7 +15,7 @@ import {
 } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "./Memory.Api";
-import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD, RUN_RESERVE_TTL_TIMER } from "utils/config";
+import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD, RUN_RESERVE_TTL_TIMER, TOWER_THRESHOLD } from "utils/config";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -283,15 +283,15 @@ export default class RoomApi {
 
     /**
      * get towers that need to be filled for the room
-     * TODO order by ascending
      * @param room the room we are getting towers that need to be filled from
      */
     public static getTowersNeedFilled(room: Room): StructureTower[] {
-        const TOWER_THRESHOLD: number = 0.85;
 
-        return <StructureTower[]>MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER, (t: StructureTower) => {
+        const unsortedTowerList: StructureTower[] = <StructureTower[]>MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER, (t: StructureTower) => {
             return t.energy < t.energyCapacity * TOWER_THRESHOLD;
         });
+        // Sort by lowest to highest towers, so the most needed gets filled first
+        return _.sortBy(unsortedTowerList, (tower: StructureTower) => tower.energy);
     }
 
     /**
