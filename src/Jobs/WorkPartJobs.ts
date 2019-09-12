@@ -1,7 +1,100 @@
 import RoomApi from "Api/Room.Api";
 import MemoryApi from "Api/Memory.Api";
+import CreepApi from "Api/Creep.Api";
+import CreepHelper from "Helpers/CreepHelper";
+import PathfindingApi from "Api/Pathfinding.Api";
 
-export default class WorkPartJobs {
+export class WorkPartJobs implements IJobTypeHelper {
+    public jobType: Valid_JobTypes = "workPartJob";
+
+    constructor() {
+        const self = this;
+        self.doWork = self.doWork.bind(self);
+        self.travelTo = self.travelTo.bind(this);
+    }
+    /**
+     * Do work on the target provided by workPartJob
+     */
+    public doWork(creep: Creep, job: BaseJob) {
+        const target: any = Game.getObjectById(job.targetID);
+
+        CreepApi.nullCheck_target(creep, target);
+
+        let returnCode: number;
+        let deleteOnSuccess: boolean = false;
+
+        if (job.actionType === "build" && target instanceof ConstructionSite) {
+            returnCode = creep.build(target);
+            if (!target || creep.carry.energy === 0) {
+                deleteOnSuccess = true;
+            }
+        } else if (job.actionType === "repair" && target instanceof Structure) {
+            returnCode = creep.repair(target);
+            if (target.hits === target.hitsMax || creep.carry.energy === 0) {
+                deleteOnSuccess = true;
+            }
+        } else if (job.actionType === "upgrade" && target instanceof StructureController) {
+            returnCode = creep.upgradeController(target);
+            if (creep.carry.energy === 0) {
+                deleteOnSuccess = true;
+            }
+        } else {
+            throw CreepApi.badTarget_Error(creep, job);
+        }
+
+        // Can handle the return code here - e.g. display an error if we expect creep to be in range but it's not
+        switch (returnCode) {
+            case OK:
+                // If successful and creep is empty, delete the job from creep memory
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.memory.working = false;
+                break;
+            case ERR_NOT_FOUND:
+                delete creep.memory.job;
+                creep.memory.working = false;
+                break;
+            default:
+                if (deleteOnSuccess) {
+                    delete creep.memory.job;
+                    creep.memory.working = false;
+                }
+                break;
+        }
+    }
+
+    /**
+     * Travel to the target provided by WorkPartJob in creep.memory.job
+     */
+    public travelTo(creep: Creep, job: BaseJob) {
+        const moveTarget = CreepHelper.getMoveTarget(creep, job);
+
+        CreepApi.nullCheck_target(creep, moveTarget);
+
+        // Move options for target
+        const moveOpts = PathfindingApi.GetDefaultMoveOpts();
+
+        if (job.actionType === "build" && moveTarget instanceof ConstructionSite) {
+            moveOpts.range = 3;
+        } else if (job.actionType === "repair" && moveTarget instanceof Structure) {
+            moveOpts.range = 3;
+        } else if (job.actionType === "upgrade" && moveTarget instanceof StructureController) {
+            moveOpts.range = 3;
+        }
+
+        if (creep.pos.getRangeTo(moveTarget!) <= moveOpts.range!) {
+            creep.memory.working = true;
+            return;
+        }
+
+        creep.moveTo(moveTarget!, moveOpts);
+        return;
+    }
+
     /**
      * Gets a list of repairJobs for the room
      * @param room The room to get jobs for

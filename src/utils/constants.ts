@@ -59,8 +59,12 @@ export const domesticRolePriority: RoleConstant[] = [
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
     ROLE_LORRY,
+<<<<<<< HEAD
     ROLE_MINERAL_MINER,
     ROLE_SCOUT,
+=======
+    ROLE_MINERAL_MINER
+>>>>>>> 037d19e1d16fdeda9385edb6c1908543858956e6
 ];
 
 // * Keep this list ordered by spawn priority
@@ -111,7 +115,7 @@ export const WALL_LIMIT: number[] = [
 // Cache Tick Limits
 export const STRUCT_CACHE_TTL = 50; // Structures
 export const SOURCE_CACHE_TTL = -1; // Sources
-export const MINERAL_CACHE_TTL = -1 // Minerals
+export const MINERAL_CACHE_TTL = -1; // Minerals
 export const CONSTR_CACHE_TTL = 50; // Construction Sites
 export const TOMBSTONE_CACHE_TTL = 50; // Tombstones
 export const DROPS_CACHE_TTL = 50; // Dropped Resources
@@ -154,12 +158,13 @@ COLORS[ERROR_INFO] = "#0045FF";
 
 // Movement API Data Types
 export const ROOM_STATUS_ALLY = "ally";
+export const ROOM_STATUS_ALLY_REMOTE = "allyRemote";
 export const ROOM_STATUS_NEUTRAL = "neutral";
 export const ROOM_STATUS_HIGHWAY = "highway";
 export const ROOM_STATUS_SOURCE_KEEPER = "sourceKeeper";
 export const ROOM_STATUS_HOSTILE = "hostile";
+export const ROOM_STATUS_HOSTILE_REMOTE = "hostileRemote";
 export const ROOM_STATUS_UNKNOWN = "unknown";
-
 
 // Custom Event Type Constants
 export const C_EVENT_CREEP_SPAWNED = 1;

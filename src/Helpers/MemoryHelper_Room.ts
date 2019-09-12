@@ -1,9 +1,9 @@
-import GetEnergyJobs from "Jobs/GetEnergyJobs";
+import { GetEnergyJobs } from "Jobs/GetEnergyJobs";
 import { ALL_STRUCTURE_TYPES } from "utils/Constants";
-import ClaimPartJobs from "Jobs/ClaimPartJobs";
+import { ClaimPartJobs } from "Jobs/ClaimPartJobs";
 import RoomApi from "Api/Room.Api";
-import WorkPartJobs from "Jobs/WorkPartJobs";
-import CarryPartJobs from "Jobs/CarryPartJobs";
+import { WorkPartJobs } from "Jobs/WorkPartJobs";
+import { CarryPartJobs } from "Jobs/CarryPartJobs";
 import MiliHelper from "./MiliHelper";
 import RoomHelper from "./RoomHelper";
 import { memoryHackLoop } from "proto/MemHack";
@@ -70,12 +70,14 @@ export default class MemoryHelper_Room {
         }
 
         const enemies = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS, {
-            filter:
-                (creep: Creep) => !MiliHelper.isAllyCreep(creep)
+            filter: (creep: Creep) => !MiliHelper.isAllyCreep(creep)
         });
 
         // Sort creeps into categories
-        Memory.rooms[roomName].hostiles = { data: { ranged: [], melee: [], heal: [], boosted: [], civilian: [] }, cache: null };
+        Memory.rooms[roomName].hostiles = {
+            data: { ranged: [], melee: [], heal: [], boosted: [], civilian: [] },
+            cache: null
+        };
         _.forEach(enemies, (enemy: Creep) => {
             // * Check for boosted creeps and put them at the front of the if else stack
             if (enemy.getActiveBodyparts(HEAL) > 0) {

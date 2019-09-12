@@ -3,7 +3,7 @@ import {
     ROLE_MEDIC,
 } from "utils/constants";
 import MiliApi from "Api/CreepMili.Api";
-import MovementApi from "Api/Movement.Api";
+import PathfindingApi from "Api/Pathfinding.Api";
 
 
 // Manager for the miner creep role
@@ -48,7 +48,7 @@ export default class MedicCreepManager implements ICreepRoleManager {
         if (!healingTarget) {
             const closestFriendlyCreep: Creep | null = creep.pos.findClosestByRange(FIND_MY_CREEPS);
             if (closestFriendlyCreep) {
-                creep.moveTo(closestFriendlyCreep, MovementApi.GetDefaultMoveOpts());
+                creep.moveTo(closestFriendlyCreep, PathfindingApi.GetDefaultMoveOpts());
             }
             // Heal self if missing any health
             if (creep.hits < creep.hitsMax) {
