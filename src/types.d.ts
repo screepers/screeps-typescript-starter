@@ -1299,3 +1299,12 @@ interface ETAMemory {
     avgPointsPerTick: number;
     ticksMeasured: number;
 }
+
+/**
+ * object containing the count of each creep by role
+ * key = role
+ * value = number representing value
+ */
+type AllCreepCount = {
+    [key in RoleConstant]: number;
+};

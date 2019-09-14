@@ -184,6 +184,7 @@ export default class SpawnApi {
         // Get Limits for each creep department
         const creepLimits: CreepLimits = MemoryApi.getCreepLimits(room);
         let militaryRole: RoleConstant | null;
+        const creepCount: AllCreepCount = MemoryApi.getAllCreepCount(room);
 
         // Check for a priority harvester
         if (SpawnHelper.needPriorityHarvester(room)) {
@@ -197,7 +198,7 @@ export default class SpawnApi {
         }
         // Check if we need a domestic creep -- Return role if one is found
         for (const role of domesticRolePriority) {
-            if (MemoryApi.getCreepCount(room, role) < creepLimits.domesticLimits[role]) {
+            if (creepCount[role] < creepLimits.domesticLimits[role]) {
                 return role;
             }
         }
@@ -209,7 +210,7 @@ export default class SpawnApi {
         }
         // Check if we need a remote creep -- Return role if one is found
         for (const role of remoteRolePriority) {
-            if (MemoryApi.getCreepCount(room, role) < creepLimits.remoteLimits[role]) {
+            if (creepCount[role] < creepLimits.remoteLimits[role]) {
                 return role;
             }
         }

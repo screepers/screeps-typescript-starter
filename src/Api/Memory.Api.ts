@@ -1858,4 +1858,19 @@ export default class MemoryApi {
 
         return room.memory.bunkerCenter!;
     }
+
+    /**
+     * Get the creep count split up by role : count pairs
+     * @param room the room we are in
+     */
+    public static getAllCreepCount(room: Room): AllCreepCount {
+        const creepsInRoom: Creep[] = this.getMyCreeps(room.name);
+        const allCreepCount: AllCreepCount = MemoryHelper.generateDefaultAllCreepCountObject();
+
+        // sum up the number of each role we come across
+        for (const creep of creepsInRoom) {
+            allCreepCount[creep.memory.role] = allCreepCount[creep.memory.role] + 1;
+        }
+        return allCreepCount;
+    }
 }
