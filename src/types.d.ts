@@ -219,6 +219,15 @@ interface IJobTypeHelper {
     doWork: (creep: Creep, job: BaseJob) => void;
     jobType: Valid_JobTypes;
 }
+
+/**
+ * Interface for Flag Types
+ */
+interface IFlagProcesser {
+    primaryColor: ColorConstant;
+    secondaryColor: ColorConstant | undefined;
+    processFlag: (flag: Flag) => void;
+}
 // --------------------------------------------------------------------
 /**
  * global console functions
