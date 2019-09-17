@@ -88,4 +88,30 @@ export default class MemoryHelper {
             delete room.memory;
         }
     }
+
+    /**
+     * Generate default memory for the "AllCreepCount" type
+     */
+    public static generateDefaultAllCreepCountObject(): AllCreepCount {
+        return {
+            'claimer': 0,
+            'domesticDefender': 0,
+            'harvester': 0,
+            'lorry': 0,
+            'manager': 0,
+            'medic': 0,
+            'miner': 0,
+            'mineralMiner': 0,
+            'powerUpgrader': 0,
+            'remoteColonizer': 0,
+            'remoteDefender': 0,
+            'remoteHarvester': 0,
+            'remoteMiner': 0,
+            'remoteReserver': 0,
+            'scout': 0,
+            'stalker': 0,
+            'worker': 0,
+            'zealot': 0
+        };
+    }
 }

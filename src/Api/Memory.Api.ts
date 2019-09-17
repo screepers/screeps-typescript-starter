@@ -230,6 +230,7 @@ export default class MemoryApi {
         this.getAllGetEnergyJobs(room, undefined, forceUpdate);
         this.getAllClaimPartJobs(room, undefined, forceUpdate);
         this.getAllWorkPartJobs(room, undefined, forceUpdate);
+        this.getBunkerCenter(room, forceUpdate);
     }
 
     /**
@@ -1842,5 +1843,34 @@ export default class MemoryApi {
             }
         }
         return attackRoomFlags;
+    }
+
+    /**
+     * Get the center of the bunker
+     * @param room the room we are in
+     * @param forceUpdate boolean representing if we need to update this
+     * @returns the room position of the center of the room
+     */
+    public static getBunkerCenter(room: Room, forceUpdate?: boolean): RoomPosition {
+        if (forceUpdate || !room.memory.bunkerCenter) {
+            MemoryHelper_Room.updateBunkerCenter(room);
+        }
+
+        return room.memory.bunkerCenter!;
+    }
+
+    /**
+     * Get the creep count split up by role : count pairs
+     * @param room the room we are in
+     */
+    public static getAllCreepCount(room: Room): AllCreepCount {
+        const creepsInRoom: Creep[] = this.getMyCreeps(room.name);
+        const allCreepCount: AllCreepCount = MemoryHelper.generateDefaultAllCreepCountObject();
+
+        // sum up the number of each role we come across
+        for (const creep of creepsInRoom) {
+            allCreepCount[creep.memory.role] = allCreepCount[creep.memory.role] + 1;
+        }
+        return allCreepCount;
     }
 }

@@ -1,6 +1,7 @@
 import MemoryApi from "Api/Memory.Api";
 import { WALL_LIMIT, ERROR_WARN, STIMULATE_FLAG } from "utils/Constants";
 import UserException from "utils/UserException";
+import { TOWER_ALLOWED_TO_REPAIR } from "utils/config";
 
 // helper functions for rooms
 export default class RoomHelper {
@@ -139,7 +140,7 @@ export default class RoomHelper {
         return (
             TOWER_POWER_ATTACK -
             (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
-                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+            (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
         );
     }
 
@@ -176,7 +177,6 @@ export default class RoomHelper {
 
     /**
      * check if the link is an upgrader link
-     * TODO Complete this
      * @param room the room we are checking
      * @param sources the sources we are checking
      * @param containers the containers we are checking
@@ -204,9 +204,9 @@ export default class RoomHelper {
             throw new UserException(
                 "Tried to getUpgraderLink of a room with no controller",
                 "Get Upgrader Link was called for room [" +
-                    room.name +
-                    "]" +
-                    ", but theres no controller in this room.",
+                room.name +
+                "]" +
+                ", but theres no controller in this room.",
                 ERROR_WARN
             );
         }
@@ -234,7 +234,6 @@ export default class RoomHelper {
 
     /**
      * Check if the stimulate flag is present for a room
-     * TODO Complete this
      * @param room the room we are checking for
      */
     public static isStimulateRoom(room: Room): boolean {
@@ -262,7 +261,7 @@ export default class RoomHelper {
      * TODO actually choose an ideal target not just the first one lol
      * @param room the room we are in
      */
-    public static chooseTowerTarget(room: Room): Creep | null | undefined {
+    public static chooseTowerTargetDefense(room: Room): AnyCreep | null | undefined {
         // get the creep we will do the most damage to
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room.name);
         const isHealers: boolean = _.some(hostileCreeps, (c: Creep) =>
@@ -281,11 +280,6 @@ export default class RoomHelper {
                 !_.some(creep.body, (b: BodyPartDefinition) => b.type === "attack" || b.type === "ranged_attack") &&
                 !_.some(creep.body, (b: BodyPartDefinition) => b.type === "work")
         );
-
-        //        // If only healers are present, don't waste ammo
-        //        if (isHealers && !isAttackers && !isWorkers) {
-        //            return undefined;
-        //        }
 
         // If healers are present with attackers, target healers
         if (isHealers && isAttackers && !isWorkers) {
@@ -315,6 +309,51 @@ export default class RoomHelper {
 
         // If there are no hostile creeps, or we didn't find a valid target, return undefined
         return undefined;
+    }
+
+    /**
+     * Search for the ideal repair target for the tower
+     * @param room the room we are searching for repair targets in
+     */
+    public static chooseTowerTargetRepair(room: Room): Structure | undefined | null {
+
+        // Check for priority repair job of an allowed type
+        const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
+        if (priorityRepairJobs.length > 0) {
+            for (const job of priorityRepairJobs) {
+                const target: Structure = Game.getObjectById(job.targetID) as Structure;
+                if (this.isTowerAllowedToRepair(target.structureType)) {
+                    return target;
+                }
+            }
+        }
+
+        // Check for non-priority repair jobs of an allowed type
+        const repairJobs = MemoryApi.getRepairJobs(room, (job: WorkPartJob) => !job.isTaken);
+        if (repairJobs.length > 0) {
+            for (const job of priorityRepairJobs) {
+                const target: Structure = Game.getObjectById(job.targetID) as Structure;
+                if (this.isTowerAllowedToRepair(target.structureType)) {
+                    return target;
+                }
+            }
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Decide if a structure type is allowed for the tower to repair
+     * @param target the target we are checking for
+     */
+    public static isTowerAllowedToRepair(structureType: StructureConstant): boolean {
+        for (const i in TOWER_ALLOWED_TO_REPAIR) {
+            const currentStructureType = TOWER_ALLOWED_TO_REPAIR[i];
+            if (currentStructureType === structureType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Get the number of non-terrain-wall tiles around a RoomObject

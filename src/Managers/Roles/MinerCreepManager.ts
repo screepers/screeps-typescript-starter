@@ -46,6 +46,8 @@ export default class MinerCreepManager implements ICreepRoleManager {
 
     /**
      * Handle initalizing a new job
+     * @param creep the creep we are using
+     * @param room the room we are in
      */
     public handleNewJob(creep: Creep, room: Room): void {
         // Update room memory to reflect the new job

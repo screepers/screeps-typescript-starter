@@ -96,6 +96,7 @@ declare const ROLE_ZEALOT = "zealot";
 declare const ROLE_STALKER = "stalker";
 declare const ROLE_MEDIC = "medic";
 declare const ROLE_DOMESTIC_DEFENDER = "domesticDefender";
+declare const ROLE_MANAGER = "manager";
 
 /**
  * role constants
@@ -117,6 +118,7 @@ type RoleConstant =
     | ROLE_ZEALOT
     | ROLE_STALKER
     | ROLE_MEDIC
+    | ROLE_MANAGER
     | ROLE_DOMESTIC_DEFENDER;
 
 /**
@@ -187,6 +189,10 @@ type ROLE_MEDIC = "medic"; //
  * Military Creep - Defends the home room
  */
 type ROLE_DOMESTIC_DEFENDER = "domesticDefender"; //
+/**
+ * Domestic Creep, manages energy flow in the room
+ */
+type ROLE_MANAGER = "manager"; //
 
 // Role Interfaces to be implemented  -------------
 /**
@@ -703,6 +709,10 @@ interface RoomMemory {
      * IDs of the link the power upgrader pulls from
      */
     upgradeLink?: string;
+    /**
+     * the center of the bunker for auto construction and spawn referencing
+     */
+    bunkerCenter?: RoomPosition;
     /**
      * Cache of all creeps
      */
@@ -1289,3 +1299,12 @@ interface ETAMemory {
     avgPointsPerTick: number;
     ticksMeasured: number;
 }
+
+/**
+ * object containing the count of each creep by role
+ * key = role
+ * value = number representing value
+ */
+type AllCreepCount = {
+    [key in RoleConstant]: number;
+};

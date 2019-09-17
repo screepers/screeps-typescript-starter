@@ -93,6 +93,7 @@ export default class CreepHelper {
 
         // Check if curr_dest = targetPosition
         // TODO Change this so that it checks if it is in a variable range
+        // ? Is this done? It seems to be as far as I can tell, but explain further if its not
 
         if (currentDestination.roomName !== targetPosition.roomName) {
             return false;
@@ -118,6 +119,7 @@ export default class CreepHelper {
             return new RoomPosition(25, 25, creep.memory.job.targetID);
         } else if (creep.memory.job && creep.memory.job.targetType === "roomPosition") {
             // TODO Handle parsing a string into a roomPosition object here
+            // what the hell is line 125 lmfao. Also is this done? If not explain further
             const x = 25;
             const y = 25;
             const roomName = "X##Y##";

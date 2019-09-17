@@ -42,6 +42,9 @@ export default class HarvesterCreepManager implements ICreepRoleManager {
 
     /**
      * Decides which kind of job to get and calls the appropriate function
+     * @param creep the creep we are getting the job for
+     * @param room the room we are in
+     * @returns BaseJob of the new job we recieved (undefined if none)
      */
     public getNewJob(creep: Creep, room: Room): BaseJob | undefined {
         // if creep is empty, get a GetEnergyJob

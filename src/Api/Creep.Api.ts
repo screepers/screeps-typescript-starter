@@ -24,8 +24,8 @@ export default class CreepApi {
         throw new UserException(
             "Bad jobType in CreepApi.doWork",
             "The jobtype of the job passed to CreepApi.doWork was invalid, or there is no implementation of that job type." +
-                "\n Job Type: " +
-                job.jobType,
+            "\n Job Type: " +
+            job.jobType,
             ERROR_FATAL
         );
     }
@@ -35,7 +35,7 @@ export default class CreepApi {
      */
     public static travelTo(creep: Creep, job: BaseJob) {
         // Update MovementData for empire if creep changed rooms
-        if(PathfindingApi.CreepChangedRooms(creep)){
+        if (PathfindingApi.CreepChangedRooms(creep)) {
             PathfindingApi.updateRoomData(creep.room);
         }
 
@@ -53,8 +53,8 @@ export default class CreepApi {
         throw new UserException(
             "Bad jobType in CreepApi.travelTo",
             "The jobtype of the job passed to CreepApi.travelTo was invalid, or there is no implementation of this job type" +
-                "\n Job Type: " +
-                job.jobType,
+            "\n Job Type: " +
+            job.jobType,
             ERROR_FATAL
         );
     }
@@ -134,10 +134,10 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-                creep.name +
-                "]" +
-                "\n Job: " +
-                JSON.stringify(job),
+            creep.name +
+            "]" +
+            "\n Job: " +
+            JSON.stringify(job),
             ERROR_ERROR
         );
     }
@@ -419,9 +419,9 @@ export default class CreepApi {
             if (dropJobs.length > 0) {
                 return dropJobs[0];
             }
-        }
 
-        // TODO Get Tombstones Here
+            // TODO consider tombstones dropped energy and get them here
+        }
 
         if (creepOptions.getFromStorage || creepOptions.getFromTerminal) {
             // All backupStructures with enough energy to fill creep.carry, and not taken

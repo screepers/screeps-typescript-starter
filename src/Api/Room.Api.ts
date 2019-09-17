@@ -15,7 +15,7 @@ import {
 } from "utils/constants";
 import UserException from "utils/UserException";
 import MemoryApi from "./Memory.Api";
-import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD, RUN_RESERVE_TTL_TIMER } from "utils/config";
+import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD, RUN_RESERVE_TTL_TIMER, TOWER_THRESHOLD } from "utils/config";
 
 // an api used for functions related to the room
 export default class RoomApi {
@@ -125,18 +125,41 @@ export default class RoomApi {
     }
 
     /**
-     * run the towers in the room
+     * run the towers in the room for the purpose of defense
      * @param room the room we are defending
      */
-    public static runTowers(room: Room): void {
-        const towers = MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER);
+    public static runTowersDefense(room: Room): void {
+        const towers: StructureTower[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER) as StructureTower[];
         // choose the most ideal target and have every tower attack it
-        const idealTarget: Creep | undefined | null = RoomHelper.chooseTowerTarget(room);
+        const idealTarget: AnyCreep | undefined | null = RoomHelper.chooseTowerTargetDefense(room);
+        if (!idealTarget) {
+            return;
+        }
 
         // have each tower attack this target
-        towers.forEach((t: any) => {
+        towers.forEach((t: StructureTower) => {
             if (t) {
                 t.attack(idealTarget);
+            }
+        });
+    }
+
+    /**
+     * run the towers in the room for the purpose of repairing
+     * @param room the room we are repairing structures in
+     */
+    public static runTowersRepair(room: Room): void {
+        const towers: StructureTower[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER) as StructureTower[];
+        // choose the most ideal target and have every tower attack it
+        const idealTarget: Structure | undefined | null = RoomHelper.chooseTowerTargetRepair(room);
+        if (!idealTarget) {
+            return;
+        }
+
+        // have each tower attack this target
+        towers.forEach((t: StructureTower) => {
+            if (t) {
+                t.repair(idealTarget);
             }
         });
     }
@@ -260,15 +283,15 @@ export default class RoomApi {
 
     /**
      * get towers that need to be filled for the room
-     * TODO order by ascending
      * @param room the room we are getting towers that need to be filled from
      */
     public static getTowersNeedFilled(room: Room): StructureTower[] {
-        const TOWER_THRESHOLD: number = 0.85;
 
-        return <StructureTower[]>MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER, (t: StructureTower) => {
+        const unsortedTowerList: StructureTower[] = <StructureTower[]>MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER, (t: StructureTower) => {
             return t.energy < t.energyCapacity * TOWER_THRESHOLD;
         });
+        // Sort by lowest to highest towers, so the most needed gets filled first
+        return _.sortBy(unsortedTowerList, (tower: StructureTower) => tower.energy);
     }
 
     /**
@@ -497,5 +520,27 @@ export default class RoomApi {
             return (!foundCreeps && !foundStructures);
         });
         return target!.pos.findClosestByRange(openRamparts);
+    }
+
+    /**
+     * Activate safemode if we need to
+     * @param room the room we are checking safemode for
+     * @param defcon the defcon level of the room
+     */
+    public static runSafeMode(room: Room, defcon: number): void {
+        // If we are under attack before we have a tower, trigger a safe mode
+        if (defcon >= 2 && !RoomHelper.isExistInRoom(room, STRUCTURE_TOWER)) {
+            if (room.controller!.safeModeAvailable) {
+                room.controller!.activateSafeMode();
+            }
+        }
+
+        // If we are under attack and our towers have no energy, trigger a safe mode
+        const towerEnergy = _.sum(MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER), 'energy');
+        if (defcon >= 3 && towerEnergy === 0) {
+            if (room.controller!.safeModeAvailable) {
+                room.controller!.activateSafeMode();
+            }
+        }
     }
 }
