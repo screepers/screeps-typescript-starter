@@ -1,5 +1,6 @@
 import EmpireHelper from "../Helpers/EmpireHelper";
 import MemoryApi from "./Memory.Api";
+import { PROCESS_FLAG_HELPERS } from "utils/Interface_Constants";
 
 export default class Empire {
 
@@ -37,52 +38,24 @@ export default class Empire {
             return;
         }
 
-        // Loop over all new flags and call the proper helper
         for (const flag of newFlags) {
-
-            switch (flag.color) {
-
-                // Remote Flags
-                case COLOR_YELLOW:
-
-                    EmpireHelper.processNewRemoteFlag(flag);
-                    break;
-
-                // Attack Flags
-                case COLOR_RED:
-
-                    EmpireHelper.processNewAttackFlag(flag);
-                    break;
-
-                // Claim Flags
-                case COLOR_WHITE:
-
-                    EmpireHelper.processNewClaimFlag(flag);
-                    break;
-
-                // Option flags
-                case COLOR_GREEN:
-
-                    // Dependent Room override flag
-                    if (flag.secondaryColor === COLOR_WHITE) {
-                        EmpireHelper.processNewDependentRoomOverrideFlag(flag);
+            // Find the proper implementation of the flag processer we need
+            for (const i in PROCESS_FLAG_HELPERS) {
+                const currentHelper: IFlagProcesser = PROCESS_FLAG_HELPERS[i];
+                if (currentHelper.primaryColor === flag.color) {
+                    // We've found primary color, search for undefined or matching secondary color
+                    if (!currentHelper.secondaryColor || currentHelper.secondaryColor === flag.secondaryColor) {
+                        currentHelper.processFlag(flag);
+                        break;
                     }
-                    else if (flag.secondaryColor === COLOR_YELLOW) {
-                        EmpireHelper.processNewStimulateFlag(flag);
-                    }
-                    break;
-
-                // Unhandled Flag, print warning to console
-                // Set to processed to prevent the flag from attempting processization every tick
-                default:
-
-                    MemoryApi.createEmpireAlertNode("Attempted to process flag of an unhandled type.", 10);
-                    flag.memory.processed = true;
-                    flag.memory.complete = true;
-                    break;
+                }
+                // If we make it here, we didn't find a match for the flag type, delete the flag and carry on
+                MemoryApi.createEmpireAlertNode("Attempted to process flag of an unhandled type.", 10);
+                flag.memory.processed = true;
+                flag.memory.complete = true;
             }
 
-            // Set up the memory for the room if it doesn't already exist
+            // Create room memory for the dependent room to prevent errors in accessing the rooms memory for spawning and traveling
             const roomName = flag.pos.roomName;
             if (!Memory.rooms[roomName]) {
                 const isOwnedRoom: boolean = false;

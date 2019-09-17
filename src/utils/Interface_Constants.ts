@@ -51,6 +51,13 @@ import { ClaimPartJobs } from "Jobs/ClaimPartJobs";
 import { GetEnergyJobs } from "Jobs/GetEnergyJobs";
 import { MovePartJobs } from "Jobs/MovePartJobs";
 import { WorkPartJobs } from "Jobs/WorkPartJobs";
+// -----------------------------
+// Flag Processing Implementations
+import { ProcessDefaultAttackFlag } from "../Helpers/ProcessFlagHelpers/ProcessDefaultAttackFlag";
+import { ProcessDefaultClaimRoom } from "../Helpers/ProcessFlagHelpers/ProcessDefaultClaimRoom";
+import { ProcessDefaultRemoteRoom } from "../Helpers/ProcessFlagHelpers/ProcessDefaultRemoteRoom";
+import { ProcessDependentRoomOverride } from "../Helpers/ProcessFlagHelpers/ProcessDependentRoomOverride";
+import { ProcessDefaultStimulateFlag } from "../Helpers/ProcessFlagHelpers/ProcessStimulateFlag";
 // ---------- End Imports ----------------------------------------------------------------------------
 
 // Constant containing the manager for each job, which all implement doWork & travelTo
@@ -114,4 +121,13 @@ export const ROOM_STATE_CREEP_LIMITS: ICreepSpawnLimits[] = [
     new UpgraderStateCreepLimits(),
     new StimulateStateCreepLimits(),
     new NukeStateCreepLimits()
+];
+
+// Constant containing all instances of the class related to processing flags
+export const PROCESS_FLAG_HELPERS: IFlagProcesser[] = [
+    new ProcessDefaultAttackFlag(),
+    new ProcessDefaultClaimRoom(),
+    new ProcessDefaultRemoteRoom(),
+    new ProcessDefaultStimulateFlag(),
+    new ProcessDependentRoomOverride()
 ];
