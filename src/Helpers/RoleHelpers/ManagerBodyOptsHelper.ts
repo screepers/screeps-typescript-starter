@@ -15,7 +15,7 @@ import {
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
 
-export class MedicBodyOptsHelper implements ICreepBodyOptsHelper {
+export class ManagerBodyOptsHelper implements ICreepBodyOptsHelper {
 
     public name: RoleConstant = ROLE_MANAGER;
 
