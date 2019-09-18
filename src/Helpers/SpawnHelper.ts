@@ -105,7 +105,7 @@ export class SpawnHelper {
      */
     public static generateCreepName(role: RoleConstant, tier: TierConstant, room: Room): string {
         const modifier: string = Game.time.toString().slice(-4);
-        const name = role + "_" + tier + "_" + room.name + "_" + modifier;
+        const name = role + "_" + tier + "_" + room.name + "_" + modifier + "_" + Math.random() * 99;
         return name;
     }
 
