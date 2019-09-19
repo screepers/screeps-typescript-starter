@@ -5,7 +5,7 @@ import {
 } from "utils/constants";
 
 // Manager for the miner creep role
-export default class MinerCreepManager implements ICreepRoleManager {
+export default class ManagerCreepManager implements ICreepRoleManager {
 
     public name: RoleConstant = ROLE_MANAGER;
 

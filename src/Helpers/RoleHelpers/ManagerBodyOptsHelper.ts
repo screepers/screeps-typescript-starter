@@ -15,7 +15,7 @@ import {
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
 
-export class MedicBodyOptsHelper implements ICreepBodyOptsHelper {
+export class ManagerBodyOptsHelper implements ICreepBodyOptsHelper {
 
     public name: RoleConstant = ROLE_MANAGER;
 
@@ -71,5 +71,24 @@ export class MedicBodyOptsHelper implements ICreepBodyOptsHelper {
         }
 
         return creepOptions;
+    }
+
+    /**
+     * Get the home room for the creep
+     * @param room the room we are spawning the creep from
+     */
+    public getHomeRoom(room: Room): string {
+        return room.name;
+    }
+
+    /**
+     * Get the target room for the creep
+     * @param room the room we are spawning the creep in
+     * @param roleConst the role we are getting room for
+     * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
+     * @param creepName the name of the creep we are checking for
+     */
+    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+        return room.name;
     }
 }
