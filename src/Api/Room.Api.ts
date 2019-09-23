@@ -131,7 +131,7 @@ export default class RoomApi {
     public static runTowersDefense(room: Room): void {
         const towers: StructureTower[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER) as StructureTower[];
         // choose the most ideal target and have every tower attack it
-        const idealTarget: AnyCreep | undefined | null = RoomHelper.chooseTowerTargetDefense(room);
+        const idealTarget: Creep | undefined | null = RoomHelper.chooseTowerTargetDefense(room);
         if (!idealTarget) {
             return;
         }

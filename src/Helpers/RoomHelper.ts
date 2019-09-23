@@ -261,7 +261,7 @@ export default class RoomHelper {
      * TODO actually choose an ideal target not just the first one lol
      * @param room the room we are in
      */
-    public static chooseTowerTargetDefense(room: Room): AnyCreep | null | undefined {
+    public static chooseTowerTargetDefense(room: Room): Creep | null | undefined {
         // get the creep we will do the most damage to
         const hostileCreeps: Array<Creep | null> = MemoryApi.getHostileCreeps(room.name);
         const isHealers: boolean = _.some(hostileCreeps, (c: Creep) =>
