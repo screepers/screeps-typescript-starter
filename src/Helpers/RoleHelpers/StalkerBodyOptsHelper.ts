@@ -16,9 +16,12 @@ import {
     TIER_7,
     TIER_8,
     ROLE_STALKER,
+    ERROR_ERROR
 } from "utils/Constants";
 import { SpawnHelper } from "Helpers/SpawnHelper";
 import SpawnApi from "Api/Spawn.Api"
+import UserException from "utils/UserException";
+import EventHelper from "Helpers/EventHelper";
 
 export class StalkerBodyOptsHelper implements ICreepBodyOptsHelper {
 
@@ -108,5 +111,34 @@ export class StalkerBodyOptsHelper implements ICreepBodyOptsHelper {
         }
 
         return creepOptions;
+    }
+
+    /**
+     * Get the home room for the creep
+     * @param room the room we are spawning the creep from
+     */
+    public getHomeRoom(room: Room): string {
+        return room.name;
+    }
+
+    /**
+     * Get the target room for the creep
+     * @param room the room we are spawning the creep in
+     * @param roleConst the role we are getting room for
+     * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
+     * @param creepName the name of the creep we are checking for
+     */
+    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+        const requestingFlag: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(room, roleConst, creepName);
+        if (requestingFlag) {
+            return Game.flags[requestingFlag!.flagName].pos.roomName;
+        }
+
+        // Throw exception if we couldn't find a definite room memory
+        throw new UserException(
+            "Couldn't get target room for [" + roleConst + " ]",
+            "room: [ " + room.name + " ]",
+            ERROR_ERROR
+        );
     }
 }

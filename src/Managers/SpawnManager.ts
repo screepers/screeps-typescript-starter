@@ -50,13 +50,11 @@ export default class SpawnManager {
                 const name: string = SpawnHelper.generateCreepName(nextCreepRole, roomTier, room);
                 const targetRoom: string = SpawnApi.getCreepTargetRoom(room, nextCreepRole, creepBody, name);
                 const militarySquadOptions: StringMap = SpawnApi.generateSquadOptions(room, nextCreepRole, name);
-                const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole, targetRoom);
+                const homeRoom: string = SpawnApi.getCreepHomeRoom(room, nextCreepRole);
                 const creepOptions: CreepOptionsCiv | CreepOptionsMili | undefined = SpawnApi.generateCreepOptions(
                     nextCreepRole,
                     roomState,
-                    militarySquadOptions["squadSize"],
-                    militarySquadOptions["squadUUID"],
-                    militarySquadOptions["rallyLocation"]
+                    militarySquadOptions
                 );
 
                 // If anything in the spawn came out unexpectedly, throw an error

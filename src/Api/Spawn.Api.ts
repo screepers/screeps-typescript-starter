@@ -337,14 +337,14 @@ export default class SpawnApi {
     public static generateCreepOptions(
         role: RoleConstant | null,
         roomState: RoomStateConstant,
-        squadSize?: number,
-        squadUUID?: number | null,
-        rallyLocation?: RoomPosition | null
+        squadMemory: StringMap
     ): CreepOptionsCiv | CreepOptionsMili | undefined {
-
         // Set default values if military options aren't provided
         // If one of these aren't provided, then the entire purpose of them is nix,
         // So we just check if any of them aren't provided and set defaults for all in that case
+        let squadSize: number = squadMemory['squadSize'];
+        let squadUUID: number | null = squadMemory['squadUUID'];
+        let rallyLocation: RoomPosition | null = squadMemory['rallyLocation'];
         if (!squadSize || !squadUUID || !rallyLocation) {
             squadSize = 0;
             squadUUID = null;
@@ -366,7 +366,6 @@ export default class SpawnApi {
                 return CREEP_BODY_OPT_HELPERS[index].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
             }
         }
-
         throw new UserException(
             "Couldn't find ICreepBodyOptsHelper implementation for the role",
             "role: " + role + "\nCreep Options",
@@ -529,72 +528,14 @@ export default class SpawnApi {
      * @param creepName the name of the creep we are checking for
      */
     public static getCreepTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
-        let roomMemory: RemoteRoomMemory | ClaimRoomMemory | AttackRoomMemory | undefined;
-
-        switch (roleConst) {
-            // Colonizing creeps going to their claim rooms
-            case ROLE_COLONIZER:
-            case ROLE_CLAIMER:
-                roomMemory = SpawnHelper.getLowestNumRoleAssignedClaimRoom(room, roleConst, creepBody);
-                if (roomMemory) {
-                    return roomMemory.roomName;
-                }
-                break;
-
-            // Remote creeps going to their remote rooms
-            case ROLE_REMOTE_HARVESTER:
-            case ROLE_REMOTE_MINER:
-                roomMemory = SpawnHelper.getLowestNumRoleAssignedRemoteRoom(room, roleConst, creepBody);
-                if (roomMemory) {
-                    return roomMemory.roomName;
-                }
-                break;
-
-            case ROLE_REMOTE_RESERVER:
-                roomMemory = SpawnHelper.getRemoteRoomNeedingRemoteReserver(room);
-                if (roomMemory) {
-                    return roomMemory.roomName;
-                }
-                break;
-
-            case ROLE_REMOTE_DEFENDER:
-                roomMemory = SpawnHelper.getRemoteRoomNeedingRemoteDefender(room);
-                if (roomMemory) {
-                    return roomMemory.roomName;
-                }
-                break;
-
-            // Military creeps going to their attack rooms
-            case ROLE_STALKER:
-            case ROLE_MEDIC:
-            case ROLE_ZEALOT:
-                const requestingFlag: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(room, roleConst, creepName);
-                if (requestingFlag) {
-                    return Game.flags[requestingFlag!.flagName].pos.roomName;
-                }
-                break;
-
-            // Scout for movementData
-            case ROLE_SCOUT:
-                // ! Temp test value - Replace with an algorithm
-                return "W39N43";
-
-            // Domestic creeps keep their target room as their home room
-            // Reason we're using case over default is to increase fail-first paradigm (idk what the word means)
-            // If an non-existing role then an error will occur here
-            case ROLE_DOMESTIC_DEFENDER:
-            case ROLE_MINER:
-            case ROLE_HARVESTER:
-            case ROLE_WORKER:
-            case ROLE_LORRY:
-            case ROLE_POWER_UPGRADER:
-                return room.name;
+        for (const index in CREEP_BODY_OPT_HELPERS) {
+            if (CREEP_BODY_OPT_HELPERS[index].name === roleConst) {
+                return CREEP_BODY_OPT_HELPERS[index].getTargetRoom(room, roleConst, creepBody, creepName);
+            }
         }
-
-        // Throw error if target room is left unhandled
         throw new UserException(
-            "Couldn't get target room for [" + roleConst + " ]",
-            "room: [ " + room.name + " ]",
+            "Couldn't find ICreepBodyOptsHelper implementation for the role",
+            "role: " + roleConst + "\nCreep Target Room",
             ERROR_ERROR
         );
     }
@@ -604,8 +545,17 @@ export default class SpawnApi {
      * @param room the room the creep is spawning in
      * @param roleConst the role we are getting room for
      */
-    public static getCreepHomeRoom(room: Room, roleConst: RoleConstant, targetRoom?: string): string {
-        return room.name;
+    public static getCreepHomeRoom(room: Room, roleConst: RoleConstant): string {
+        for (const index in CREEP_BODY_OPT_HELPERS) {
+            if (CREEP_BODY_OPT_HELPERS[index].name === roleConst) {
+                return CREEP_BODY_OPT_HELPERS[index].getHomeRoom(room);
+            }
+        }
+        throw new UserException(
+            "Couldn't find ICreepBodyOptsHelper implementation for the role",
+            "role: " + roleConst + "\nCreep HomeRoom",
+            ERROR_ERROR
+        );
     }
 
     /**

@@ -36,7 +36,7 @@ export class ScoutBodyOptsHelper implements ICreepBodyOptsHelper {
      */
     public generateCreepBody(tier: TierConstant): BodyPartConstant[] {
         // Default Values for harvester
-        let body: CreepBodyDescriptor = { move: 1 };
+        const body: CreepBodyDescriptor = { move: 1 };
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         // Generate creep body based on body array and options
@@ -48,7 +48,28 @@ export class ScoutBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param roomState the room state of the room
      */
     public generateCreepOptions(roomState: RoomStateConstant): CreepOptionsCiv | undefined {
-        let creepOptions: CreepOptionsCiv = {};
+        const creepOptions: CreepOptionsCiv = {};
         return creepOptions;
+    }
+
+    /**
+     * Get the home room for the creep
+     * @param room the room we are spawning the creep from
+     */
+    public getHomeRoom(room: Room): string {
+        return room.name;
+    }
+
+    /**
+     * Get the target room for the creep
+     * @param room the room we are spawning the creep in
+     * @param roleConst the role we are getting room for
+     * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
+     * @param creepName the name of the creep we are checking for
+     */
+    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+        // temporary value until we get an alg for this
+        // TODO write this function for scout
+        return room.name;
     }
 }

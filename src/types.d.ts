@@ -215,6 +215,13 @@ interface ICreepBodyOptsHelper {
         rallyLocationParam: RoomPosition | null
     ) => (CreepOptionsCiv | undefined) | (CreepOptionsMili | undefined);
     generateCreepBody: (tier: TierConstant) => BodyPartConstant[];
+    getTargetRoom: (
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ) => string;
+    getHomeRoom: (room: Room) => string;
 }
 
 /**
