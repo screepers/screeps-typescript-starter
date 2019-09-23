@@ -16,15 +16,14 @@ import {
     TIER_7,
     TIER_8,
     ROLE_STALKER,
-    ERROR_ERROR
-} from "utils/Constants";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api"
-import UserException from "utils/UserException";
-import EventHelper from "Helpers/EventHelper";
+    ERROR_ERROR,
+    SpawnHelper,
+    SpawnApi,
+    UserException,
+    EventHelper
+} from "utils/internals";
 
 export class StalkerBodyOptsHelper implements ICreepBodyOptsHelper {
-
     public name: RoleConstant = ROLE_STALKER;
 
     constructor() {
@@ -128,8 +127,17 @@ export class StalkerBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
-        const requestingFlag: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(room, roleConst, creepName);
+    public getTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
+        const requestingFlag: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(
+            room,
+            roleConst,
+            creepName
+        );
         if (requestingFlag) {
             return Game.flags[requestingFlag!.flagName].pos.roomName;
         }

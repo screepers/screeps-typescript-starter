@@ -12,12 +12,11 @@ import {
     TIER_7,
     TIER_8,
     ROLE_MINERAL_MINER,
-} from "utils/Constants";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api";
+    SpawnHelper,
+    SpawnApi
+} from "utils/internals";
 
 export class MineralMinerBodyOptsHelper implements ICreepBodyOptsHelper {
-
     public name: RoleConstant = ROLE_MINERAL_MINER;
 
     constructor() {
@@ -35,19 +34,18 @@ export class MineralMinerBodyOptsHelper implements ICreepBodyOptsHelper {
         const opts: CreepBodyOptions = { mixType: GROUPED };
 
         switch (tier) {
-
             case TIER_6:
                 body = { work: 8, move: 4 };
                 break;
 
             case TIER_8:
             case TIER_7:
-                body = { work: 10, move: 5 }
+                body = { work: 10, move: 5 };
         }
 
         // Generate the creep body based on the body array and options
         return SpawnApi.createCreepBody(body, opts);
-    }
+    };
 
     /**
      * Generate options for miner creep
@@ -65,13 +63,13 @@ export class MineralMinerBodyOptsHelper implements ICreepBodyOptsHelper {
             case ROOM_STATE_UPGRADER:
             case ROOM_STATE_NUKE_INBOUND:
                 creepOptions = {
-                    harvestMinerals: true,
+                    harvestMinerals: true
                 };
                 break;
         }
 
         return creepOptions;
-    }
+    };
 
     /**
      * Get the home room for the creep
@@ -88,7 +86,12 @@ export class MineralMinerBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+    public getTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
         return room.name;
     }
 }

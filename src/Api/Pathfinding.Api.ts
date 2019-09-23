@@ -1,5 +1,5 @@
-import RoomHelper from "Helpers/RoomHelper";
 import {
+    RoomHelper,
     ROOM_STATUS_SOURCE_KEEPER,
     ROOM_STATUS_HIGHWAY,
     ROOM_STATUS_ALLY,
@@ -7,9 +7,9 @@ import {
     ROOM_STATUS_NEUTRAL,
     ROOM_STATUS_UNKNOWN,
     ROOM_STATUS_HOSTILE_REMOTE
-} from "utils/constants";
+} from "utils/internals";
 
-export default class PathfindingApi {
+export class PathfindingApi {
     /**
      * Call this method to ensure that Memory.empire.movementData exists in a usable state
      */

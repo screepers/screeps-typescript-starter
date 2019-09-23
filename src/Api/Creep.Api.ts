@@ -1,17 +1,25 @@
-import UserException from "utils/UserException";
-import CreepHelper from "Helpers/CreepHelper";
-import { ERROR_ERROR, ERROR_WARN, ERROR_FATAL, ERROR_INFO } from "utils/constants";
-import MemoryApi from "./Memory.Api";
-import { MINERS_GET_CLOSEST_SOURCE, RAMPART_HITS_THRESHOLD, STUCK_COUNT_LIMIT, USE_STUCK_VISUAL } from "utils/config";
-import MemoryHelper from "Helpers/MemoryHelper";
-import RoomVisualHelper from "Managers/RoomVisuals/RoomVisualHelper";
-import RoomHelper from "Helpers/RoomHelper";
-import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
-import { JobTypes } from "utils/Interface_Constants";
-import PathfindingApi from "./Pathfinding.Api";
+import {
+    JobTypes,
+    UserException,
+    CreepHelper,
+    ERROR_ERROR,
+    ERROR_WARN,
+    ERROR_FATAL,
+    ERROR_INFO,
+    MemoryApi,
+    MINERS_GET_CLOSEST_SOURCE,
+    RAMPART_HITS_THRESHOLD,
+    STUCK_COUNT_LIMIT,
+    USE_STUCK_VISUAL,
+    MemoryHelper,
+    RoomVisualHelper,
+    RoomHelper,
+    MemoryHelper_Room,
+    PathfindingApi
+} from "utils/internals";
 
 // Api for all types of creeps (more general stuff here)
-export default class CreepApi {
+export class CreepApi {
     /**
      * Call the proper doWork function based on job.jobType
      */
@@ -24,8 +32,8 @@ export default class CreepApi {
         throw new UserException(
             "Bad jobType in CreepApi.doWork",
             "The jobtype of the job passed to CreepApi.doWork was invalid, or there is no implementation of that job type." +
-            "\n Job Type: " +
-            job.jobType,
+                "\n Job Type: " +
+                job.jobType,
             ERROR_FATAL
         );
     }
@@ -53,8 +61,8 @@ export default class CreepApi {
         throw new UserException(
             "Bad jobType in CreepApi.travelTo",
             "The jobtype of the job passed to CreepApi.travelTo was invalid, or there is no implementation of this job type" +
-            "\n Job Type: " +
-            job.jobType,
+                "\n Job Type: " +
+                job.jobType,
             ERROR_FATAL
         );
     }
@@ -134,10 +142,10 @@ export default class CreepApi {
         return new UserException(
             "Invalid Job actionType or targetType",
             "An invalid actionType or structureType has been provided by creep [" +
-            creep.name +
-            "]" +
-            "\n Job: " +
-            JSON.stringify(job),
+                creep.name +
+                "]" +
+                "\n Job: " +
+                JSON.stringify(job),
             ERROR_ERROR
         );
     }

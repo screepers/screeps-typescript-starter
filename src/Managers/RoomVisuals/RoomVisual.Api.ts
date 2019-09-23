@@ -1,5 +1,3 @@
-import RoomVisualHelper from "./RoomVisualHelper";
-import MemoryApi from "Api/Memory.Api";
 import {
     ROLE_MINER,
     ROLE_CLAIMER,
@@ -12,13 +10,14 @@ import {
     ROLE_WORKER,
     ROLE_POWER_UPGRADER,
     OVERRIDE_D_ROOM_FLAG,
-    STIMULATE_FLAG
-} from "utils/constants";
-import { ROOM_OVERLAY_GRAPH_ON } from "utils/config";
+    STIMULATE_FLAG,
+    ROOM_OVERLAY_GRAPH_ON,
+    MemoryApi,
+    RoomVisualHelper
+} from "utils/internals";
 
 // Api for room visuals
-export default class RoomVisualApi {
-
+export class RoomVisualApi {
     /**
      * draws the information that is empire wide (will be same for every room)
      * @param room the room we are displaying it in
@@ -26,38 +25,37 @@ export default class RoomVisualApi {
      * @param y the y coord for the visual
      */
     public static createEmpireInfoVisual(room: Room, x: number, y: number): number {
-
         // Get all the information we will need to display in the box
         const usedCpu: number = Game.cpu.getUsed();
-        const cpuLimit: number = Game.cpu['limit'];
-        const bucket: number = Game.cpu['bucket'];
+        const cpuLimit: number = Game.cpu["limit"];
+        const bucket: number = Game.cpu["bucket"];
         const BUCKET_LIMIT: number = 10000;
-        const gclProgress: number = Game.gcl['progress'];
-        const gclTotal: number = Game.gcl['progressTotal'];
+        const gclProgress: number = Game.gcl["progress"];
+        const gclTotal: number = Game.gcl["progressTotal"];
 
-        const cpuPercent = Math.floor((usedCpu / cpuLimit * 100) * 10) / 10;
-        const bucketPercent = Math.floor((bucket / BUCKET_LIMIT * 100) * 10) / 10;
-        const gclPercent = Math.floor((gclProgress / gclTotal * 100) * 10) / 10;
+        const cpuPercent = Math.floor((usedCpu / cpuLimit) * 100 * 10) / 10;
+        const bucketPercent = Math.floor((bucket / BUCKET_LIMIT) * 100 * 10) / 10;
+        const gclPercent = Math.floor((gclProgress / gclTotal) * 100 * 10) / 10;
 
         // Draw the text
         const lines: string[] = [];
         lines.push("");
-        lines.push("Empire Info")
+        lines.push("Empire Info");
         lines.push("");
         lines.push("CPU:   " + cpuPercent + "%");
         lines.push("BKT:   " + bucketPercent + "%");
         lines.push("GCL:   " + gclPercent + "%");
-        lines.push("LVL:    " + Game.gcl['level']);
+        lines.push("LVL:    " + Game.gcl["level"]);
         lines.push("");
         lines.push("Viewing:  [ " + room.name + " ]");
         RoomVisualHelper.multiLineText(lines, x, y, room.name, true);
 
         // Draw a box around the text
         new RoomVisual(room.name)
-            .line(x - 1, y + lines.length - 1, x + 7.5, y + lines.length - 1)    // bottom line
-            .line(x - 1, y - 1, x + 7.5, y - 1)                  // top line
-            .line(x - 1, y - 1, x - 1, y + lines.length - 1)   // left line
-            .line(x + 7.5, y - 1, x + 7.5, y + lines.length - 1);  // right line
+            .line(x - 1, y + lines.length - 1, x + 7.5, y + lines.length - 1) // bottom line
+            .line(x - 1, y - 1, x + 7.5, y - 1) // top line
+            .line(x - 1, y - 1, x - 1, y + lines.length - 1) // left line
+            .line(x + 7.5, y - 1, x + 7.5, y + lines.length - 1); // right line
 
         // Return where the next box should start
         return y + lines.length;
@@ -70,7 +68,6 @@ export default class RoomVisualApi {
      * @param y the y coord for the visual
      */
     public static createCreepCountVisual(room: Room, x: number, y: number): number {
-
         // Get the info we need to display
         const creepsInRoom = MemoryApi.getMyCreeps(room.name);
         const creepLimits = MemoryApi.getCreepLimits(room);
@@ -101,8 +98,7 @@ export default class RoomVisualApi {
         }
         lines.push("Creeps in Room:     " + MemoryApi.getCreepCount(room));
 
-        if (creepLimits['domesticLimits']) {
-
+        if (creepLimits["domesticLimits"]) {
             // Add creeps to the lines array
             if (creepLimits.domesticLimits.miner > 0) {
                 lines.push("Miners:     " + roles[ROLE_MINER] + " / " + creepLimits.domesticLimits.miner);
@@ -117,26 +113,49 @@ export default class RoomVisualApi {
                 lines.push("Lorries:    " + roles[ROLE_LORRY] + " / " + creepLimits.domesticLimits.lorry);
             }
             if (creepLimits.domesticLimits.powerUpgrader > 0) {
-                lines.push("Power Upgraders:    " + roles[ROLE_POWER_UPGRADER] + " / " + creepLimits.domesticLimits.powerUpgrader);
+                lines.push(
+                    "Power Upgraders:    " +
+                        roles[ROLE_POWER_UPGRADER] +
+                        " / " +
+                        creepLimits.domesticLimits.powerUpgrader
+                );
             }
         }
 
-        if (creepLimits['remoteLimits']) {
-
+        if (creepLimits["remoteLimits"]) {
             if (creepLimits.remoteLimits.remoteMiner > 0) {
-                lines.push("Remote Miners:      " + roles[ROLE_REMOTE_MINER] + " / " + creepLimits.remoteLimits.remoteMiner);
+                lines.push(
+                    "Remote Miners:      " + roles[ROLE_REMOTE_MINER] + " / " + creepLimits.remoteLimits.remoteMiner
+                );
             }
             if (creepLimits.remoteLimits.remoteHarvester > 0) {
-                lines.push("Remote Harvesters:    " + roles[ROLE_REMOTE_HARVESTER] + " / " + creepLimits.remoteLimits.remoteHarvester);
+                lines.push(
+                    "Remote Harvesters:    " +
+                        roles[ROLE_REMOTE_HARVESTER] +
+                        " / " +
+                        creepLimits.remoteLimits.remoteHarvester
+                );
             }
             if (creepLimits.remoteLimits.remoteReserver > 0) {
-                lines.push("Remote Reservers:    " + roles[ROLE_REMOTE_RESERVER] + " / " + creepLimits.remoteLimits.remoteReserver);
+                lines.push(
+                    "Remote Reservers:    " +
+                        roles[ROLE_REMOTE_RESERVER] +
+                        " / " +
+                        creepLimits.remoteLimits.remoteReserver
+                );
             }
             if (creepLimits.remoteLimits.remoteColonizer > 0) {
-                lines.push("Remote Colonizers:    " + roles[ROLE_COLONIZER] + " / " + creepLimits.remoteLimits.remoteColonizer);
+                lines.push(
+                    "Remote Colonizers:    " + roles[ROLE_COLONIZER] + " / " + creepLimits.remoteLimits.remoteColonizer
+                );
             }
             if (creepLimits.remoteLimits.remoteDefender > 0) {
-                lines.push("Remote Defenders:    " + roles[ROLE_REMOTE_DEFENDER] + " / " + creepLimits.remoteLimits.remoteDefender);
+                lines.push(
+                    "Remote Defenders:    " +
+                        roles[ROLE_REMOTE_DEFENDER] +
+                        " / " +
+                        creepLimits.remoteLimits.remoteDefender
+                );
             }
             if (creepLimits.remoteLimits.claimer > 0) {
                 lines.push("Claimers:       " + roles[ROLE_CLAIMER] + " / " + creepLimits.remoteLimits.claimer);
@@ -148,10 +167,10 @@ export default class RoomVisualApi {
 
         // Draw a box around the text
         new RoomVisual(room.name)
-            .line(x - 1, y + lines.length - 1, x + 10, y + lines.length - 1)    // bottom line
-            .line(x - 1, y - 1, x + 10, y - 1)                  // top line
-            .line(x - 1, y - 1, x - 1, y + lines.length - 1)   // left line
-            .line(x + 10, y - 1, x + 10, y + lines.length - 1);  // right line
+            .line(x - 1, y + lines.length - 1, x + 10, y + lines.length - 1) // bottom line
+            .line(x - 1, y - 1, x + 10, y - 1) // top line
+            .line(x - 1, y - 1, x - 1, y + lines.length - 1) // left line
+            .line(x + 10, y - 1, x + 10, y + lines.length - 1); // right line
 
         // Return the end of this box
         return y + lines.length;
@@ -164,13 +183,12 @@ export default class RoomVisualApi {
      * @param y the y coord for the visual
      */
     public static createRoomInfoVisual(room: Room, x: number, y: number): number {
-
         // Get the info we need
         const roomState: string = RoomVisualHelper.convertRoomStateToString(room.memory.roomState!);
         const level: number = room.controller!.level;
         const controllerProgress: number = room.controller!.progress;
         const controllerTotal: number = room.controller!.progressTotal;
-        const controllerPercent: number = Math.floor((controllerProgress / controllerTotal * 100) * 10) / 10;
+        const controllerPercent: number = Math.floor((controllerProgress / controllerTotal) * 100 * 10) / 10;
         const defconLevel: number = room.memory.defcon;
 
         // Draw the text
@@ -184,11 +202,15 @@ export default class RoomVisualApi {
         lines.push("DEFCON:         " + defconLevel);
         if (room.storage) {
             // Regex adds commas
-            lines.push("Storage:         " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            lines.push(
+                "Storage:         " + room.storage.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            );
         }
         if (room.terminal) {
             // Regex adds commas
-            lines.push("Terminal:       " + room.terminal.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            lines.push(
+                "Terminal:       " + room.terminal.store.energy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            );
         }
         // Adding this disclaimer, beacuse some of the information you need is actually calculated in the graph function
         // Consider decoupling these so you could use them independently
@@ -200,10 +222,10 @@ export default class RoomVisualApi {
 
         // Draw a box around the text
         new RoomVisual(room.name)
-            .line(x - 1, y + lines.length - 1, x + 10, y + lines.length - 1)    // bottom line
-            .line(x - 1, y - 1, x + 10, y - 1)                  // top line
-            .line(x - 1, y - 1, x - 1, y + lines.length - 1)   // left line
-            .line(x + 10, y - 1, x + 10, y + lines.length - 1);  // right line
+            .line(x - 1, y + lines.length - 1, x + 10, y + lines.length - 1) // bottom line
+            .line(x - 1, y - 1, x + 10, y - 1) // top line
+            .line(x - 1, y - 1, x - 1, y + lines.length - 1) // left line
+            .line(x + 10, y - 1, x + 10, y + lines.length - 1); // right line
 
         // Return where the next box should start
         return y + lines.length;
@@ -216,13 +238,12 @@ export default class RoomVisualApi {
      * @param y the y coord for the visual
      */
     public static createRemoteFlagVisual(room: Room, x: number, y: number): number {
-
         const dependentRemoteRooms: Array<RemoteRoomMemory | undefined> = MemoryApi.getRemoteRooms(room);
 
         // Draw the text
         const lines: string[] = [];
         lines.push("");
-        lines.push("Remote Rooms ")
+        lines.push("Remote Rooms ");
         lines.push("");
         for (const dr of dependentRemoteRooms) {
             if (!dr) {
@@ -244,10 +265,10 @@ export default class RoomVisualApi {
         // Draw the box around the text
         // Draw a box around the text
         new RoomVisual(room.name)
-            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
-            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
-            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
-            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+            .line(x - 10, y + lines.length - 1, x + 0.25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + 0.25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + 0.25, y - 1, x + 0.25, y + lines.length - 1); // right line
 
         // Return where the next box should start
         return y + lines.length;
@@ -260,13 +281,12 @@ export default class RoomVisualApi {
      * @param y the y coord for the visual
      */
     public static createClaimFlagVisual(room: Room, x: number, y: number): number {
-
         const dependentRemoteRooms: Array<ClaimRoomMemory | undefined> = MemoryApi.getClaimRooms(room);
 
         // Draw the text
         const lines: string[] = [];
         lines.push("");
-        lines.push("Claim Rooms ")
+        lines.push("Claim Rooms ");
         lines.push("");
         for (const dr of dependentRemoteRooms) {
             if (!dr) {
@@ -288,10 +308,10 @@ export default class RoomVisualApi {
         // Draw the box around the text
         // Draw a box around the text
         new RoomVisual(room.name)
-            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
-            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
-            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
-            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+            .line(x - 10, y + lines.length - 1, x + 0.25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + 0.25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + 0.25, y - 1, x + 0.25, y + lines.length - 1); // right line
 
         // Return where the next box should start
         return y + lines.length;
@@ -304,12 +324,11 @@ export default class RoomVisualApi {
      * @param y the y coord for the visual
      */
     public static createAttackFlagVisual(room: Room, x: number, y: number): number {
-
         const dependentRemoteRooms: Array<AttackRoomMemory | undefined> = MemoryApi.getAttackRooms(room);
         // Draw the text
         const lines: string[] = [];
         lines.push("");
-        lines.push("Attack Rooms ")
+        lines.push("Attack Rooms ");
         lines.push("");
         for (const dr of dependentRemoteRooms) {
             if (!dr) {
@@ -337,10 +356,10 @@ export default class RoomVisualApi {
         // Draw the box around the text
         // Draw a box around the text
         new RoomVisual(room.name)
-            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
-            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
-            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
-            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+            .line(x - 10, y + lines.length - 1, x + 0.25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + 0.25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + 0.25, y - 1, x + 0.25, y + lines.length - 1); // right line
 
         // Return where the next box should start
         return y + lines.length;
@@ -353,16 +372,16 @@ export default class RoomVisualApi {
      * @param y the y coord for the visual
      */
     public static createOptionFlagVisual(room: Room, x: number, y: number): number {
-
         const allFlagsMemory: FlagMemory[] = _.map(Game.flags, (flag: Flag) => flag.memory);
-        const optionFlags: FlagMemory[] = _.filter(allFlagsMemory,
-            (flag: FlagMemory) => (flag.flagType === OVERRIDE_D_ROOM_FLAG) || flag.flagType === STIMULATE_FLAG
+        const optionFlags: FlagMemory[] = _.filter(
+            allFlagsMemory,
+            (flag: FlagMemory) => flag.flagType === OVERRIDE_D_ROOM_FLAG || flag.flagType === STIMULATE_FLAG
         );
 
         // Draw the text
         const lines: string[] = [];
         lines.push("");
-        lines.push("Option Flags ")
+        lines.push("Option Flags ");
         lines.push("");
         for (const optionFlag in optionFlags) {
             if (!optionFlags[optionFlag]) {
@@ -370,7 +389,9 @@ export default class RoomVisualApi {
             }
 
             lines.push("Flag:   [ " + optionFlags[optionFlag].flagName + " ] ");
-            lines.push("Type:   [ " + RoomVisualHelper.convertFlagTypeToString(optionFlags[optionFlag].flagType) + " ] ");
+            lines.push(
+                "Type:   [ " + RoomVisualHelper.convertFlagTypeToString(optionFlags[optionFlag].flagType) + " ] "
+            );
             lines.push("");
         }
 
@@ -383,10 +404,10 @@ export default class RoomVisualApi {
 
         // Draw the box around the text
         new RoomVisual(room.name)
-            .line(x - 10, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
-            .line(x - 10, y - 1, x + .25, y - 1)                  // top line
-            .line(x - 10, y - 1, x - 10, y + lines.length - 1)   // left line
-            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+            .line(x - 10, y + lines.length - 1, x + 0.25, y + lines.length - 1) // bottom line
+            .line(x - 10, y - 1, x + 0.25, y - 1) // top line
+            .line(x - 10, y - 1, x - 10, y + lines.length - 1) // left line
+            .line(x + 0.25, y - 1, x + 0.25, y + lines.length - 1); // right line
 
         // Return where the next box should start
         return y + lines.length;
@@ -399,14 +420,13 @@ export default class RoomVisualApi {
      * @param y the y value for the starting point of the graph
      */
     public static createUpgradeGraphVisual(room: Room, x: number, y: number): void {
-
-        const textColor = '#bab8ba';
+        const textColor = "#bab8ba";
         const X_VALS: GraphTickMarkMemory[] = [
-            { 'start': x, 'end': x + 3 },       // 0
-            { 'start': x + 3, 'end': x + 6 },   // 1
-            { 'start': x + 6, 'end': x + 9 },   // 2
-            { 'start': x + 9, 'end': x + 12 },  // 3
-            { 'start': x + 12, 'end': x + 15 }, // 4
+            { start: x, end: x + 3 }, // 0
+            { start: x + 3, end: x + 6 }, // 1
+            { start: x + 6, end: x + 9 }, // 2
+            { start: x + 9, end: x + 12 }, // 3
+            { start: x + 12, end: x + 15 } // 4
         ];
         const Y_SCALE = 7.5;
         const X_SCALE = 15;
@@ -424,24 +444,27 @@ export default class RoomVisualApi {
                 secondsPerTick: 0,
                 room: {},
                 etaMemory: { rcl: room.controller!.level, avgPointsPerTick: 0, ticksMeasured: 0 }
-            }
+            };
         }
 
         const avgControlPointsPerHourSize: number = Memory.rooms[room.name].visual!.avgControlPointsPerHourArray.length;
         if (avgControlPointsPerHourSize < 5) {
             Memory.rooms[room.name].visual!.avgControlPointsPerHourArray.push(controlPointsPerHourEstimate);
-        }
-        else {
+        } else {
             for (let i = 0; i < avgControlPointsPerHourSize - 1; ++i) {
-                Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[i] = Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[i + 1]
+                Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[i] = Memory.rooms[
+                    room.name
+                ].visual!.avgControlPointsPerHourArray[i + 1];
             }
-            Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[avgControlPointsPerHourSize - 1] = controlPointsPerHourEstimate;
+            Memory.rooms[room.name].visual!.avgControlPointsPerHourArray[
+                avgControlPointsPerHourSize - 1
+            ] = controlPointsPerHourEstimate;
         }
 
         // Collect values and functions needed to draw the lines on the graph
         const minVal: number = _.min(Memory.rooms[room.name].visual!.avgControlPointsPerHourArray);
         const maxVal: number = _.max(Memory.rooms[room.name].visual!.avgControlPointsPerHourArray);
-        const minRange: number = minVal * .75;
+        const minRange: number = minVal * 0.75;
         const maxRange: number = maxVal * 1.25;
         const getY2Coord = (raw: number) => {
             const range: number = maxRange - minRange;
@@ -456,23 +479,23 @@ export default class RoomVisualApi {
 
         // Draw the graph outline and the scale text
         new RoomVisual(room.name)
-            .line(x, y, x, y - Y_SCALE)    // bottom line
-            .line(x, y, x + X_SCALE, y)   // left line
-            .line(X_VALS[1].start, y - .25, X_VALS[1].start, y + .25) // tick marks
-            .line(X_VALS[2].start, y - .25, X_VALS[2].start, y + .25)
-            .line(X_VALS[3].start, y - .25, X_VALS[3].start, y + .25)
-            .line(X_VALS[4].start, y - .25, X_VALS[4].start, y + .25)
-            .text(displayMaxRange, x - 2.2, y - Y_SCALE + .5, {
-                align: 'left',
+            .line(x, y, x, y - Y_SCALE) // bottom line
+            .line(x, y, x + X_SCALE, y) // left line
+            .line(X_VALS[1].start, y - 0.25, X_VALS[1].start, y + 0.25) // tick marks
+            .line(X_VALS[2].start, y - 0.25, X_VALS[2].start, y + 0.25)
+            .line(X_VALS[3].start, y - 0.25, X_VALS[3].start, y + 0.25)
+            .line(X_VALS[4].start, y - 0.25, X_VALS[4].start, y + 0.25)
+            .text(displayMaxRange, x - 2.2, y - Y_SCALE + 0.5, {
+                align: "left",
                 color: textColor,
-                opacity: .8,
-                font: ' .7 Trebuchet MS'
+                opacity: 0.8,
+                font: " .7 Trebuchet MS"
             })
             .text(displayMinRange, x - 2.2, y, {
-                align: 'left',
+                align: "left",
                 color: textColor,
-                opacity: .8,
-                font: ' .7 Trebuchet MS'
+                opacity: 0.8,
+                font: " .7 Trebuchet MS"
             });
 
         // Draw the lines for the graph
@@ -500,7 +523,6 @@ export default class RoomVisualApi {
      * @param y the y value for the visual
      */
     public static createMessageBoxVisual(room: Room, x: number, y: number): number {
-
         // Make sure the message structure exists in memory
         if (!Memory.empire.alertMessages) {
             Memory.empire.alertMessages = [];
@@ -509,7 +531,7 @@ export default class RoomVisualApi {
         // Draw the title
         const lines: string[] = [];
         lines.push("");
-        lines.push("Alerts ")
+        lines.push("Alerts ");
         lines.push("");
 
         // Remove expired messages and add valid messages to the lines array
@@ -523,7 +545,8 @@ export default class RoomVisualApi {
                 newArray.push(messageNode);
                 lines.push(messageNode.message);
                 lines.push("");
-                largestMessage = largestMessage < messageNode.message.length ? messageNode.message.length : largestMessage;
+                largestMessage =
+                    largestMessage < messageNode.message.length ? messageNode.message.length : largestMessage;
             }
         }
         Memory.empire.alertMessages = newArray;
@@ -536,12 +559,12 @@ export default class RoomVisualApi {
         RoomVisualHelper.multiLineText(lines, x, y, room.name, false);
 
         // Draw the box around the text
-        largestMessage = (largestMessage / 2.5) < 10 ? 10 : (largestMessage / 2.5);
+        largestMessage = largestMessage / 2.5 < 10 ? 10 : largestMessage / 2.5;
         new RoomVisual(room.name)
-            .line(x - largestMessage, y + lines.length - 1, x + .25, y + lines.length - 1)    // bottom line
-            .line(x - largestMessage, y - 1, x + .25, y - 1)                  // top line
-            .line(x - largestMessage, y - 1, x - largestMessage, y + lines.length - 1)   // left line
-            .line(x + .25, y - 1, x + .25, y + lines.length - 1);  // right line
+            .line(x - largestMessage, y + lines.length - 1, x + 0.25, y + lines.length - 1) // bottom line
+            .line(x - largestMessage, y - 1, x + 0.25, y - 1) // top line
+            .line(x - largestMessage, y - 1, x - largestMessage, y + lines.length - 1) // left line
+            .line(x + 0.25, y - 1, x + 0.25, y + lines.length - 1); // right line
 
         // Return where the next box should start
         return y + lines.length;

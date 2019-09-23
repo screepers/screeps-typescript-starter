@@ -7,12 +7,11 @@ import {
     TIER_7,
     TIER_8,
     ROLE_POWER_UPGRADER,
-} from "utils/Constants";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api"
+    SpawnHelper,
+    SpawnApi
+} from "utils/internals";
 
 export class PowerUpgraderBodyOptsHelper implements ICreepBodyOptsHelper {
-
     public name: RoleConstant = ROLE_POWER_UPGRADER;
 
     constructor() {
@@ -88,7 +87,12 @@ export class PowerUpgraderBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+    public getTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
         return room.name;
     }
 }

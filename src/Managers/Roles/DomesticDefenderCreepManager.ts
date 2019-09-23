@@ -1,12 +1,7 @@
-import {
-    ROLE_DOMESTIC_DEFENDER,
-} from "utils/constants";
-import MiliApi from "Api/CreepMili.Api";
-import RoomApi from "Api/Room.Api";
+import { ROLE_DOMESTIC_DEFENDER, MiliApi, RoomApi } from "utils/internals";
 
 // Manager for the Domestic Defender Creep Role
-export default class DomesticDefenderCreepManager implements ICreepRoleManager {
-
+export class DomesticDefenderCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_DOMESTIC_DEFENDER;
 
     constructor() {
@@ -19,7 +14,6 @@ export default class DomesticDefenderCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         // This iteration of domestic defender is a melee creep that bee-lines to the enemy.
         // Possible upgrade if this proves to be a weakness would be switching to ranged
         // creep that seeks out the nearest rampart to the closest enemy creep and camps it
@@ -44,14 +38,12 @@ export default class DomesticDefenderCreepManager implements ICreepRoleManager {
             if (creep.pos !== defendingRampart!.pos) {
                 creep.moveTo(defendingRampart);
             }
-        }
-        else {
+        } else {
             // If we aren't in attack range, move towards the attack target
             if (!MiliApi.isInAttackRange(creep, target.pos, isMelee)) {
                 creep.moveTo(target);
                 return;
-            }
-            else {
+            } else {
                 MiliApi.kiteEnemyCreep(creep);
             }
         }

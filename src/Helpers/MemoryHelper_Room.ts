@@ -1,17 +1,18 @@
-import { GetEnergyJobs } from "Jobs/GetEnergyJobs";
-import { ALL_STRUCTURE_TYPES } from "utils/Constants";
-import { ClaimPartJobs } from "Jobs/ClaimPartJobs";
-import RoomApi from "Api/Room.Api";
-import { WorkPartJobs } from "Jobs/WorkPartJobs";
-import { CarryPartJobs } from "Jobs/CarryPartJobs";
-import MiliHelper from "./MiliHelper";
-import RoomHelper from "./RoomHelper";
-import { memoryHackLoop } from "proto/MemHack";
+import {
+    GetEnergyJobs,
+    ALL_STRUCTURE_TYPES,
+    ClaimPartJobs,
+    RoomApi,
+    WorkPartJobs,
+    CarryPartJobs,
+    MiliHelper,
+    RoomHelper
+} from "utils/internals";
 
 /**
  * Contains all functions for initializing and updating room memory
  */
-export default class MemoryHelper_Room {
+export class MemoryHelper_Room {
     /**
      * Calls all the helper functions (that don't need additional input) to update room.memory.
      * NOTE: This will update the entire memory tree, so use this function sparingly
@@ -38,8 +39,6 @@ export default class MemoryHelper_Room {
         this.updateWorkPart_allJobs(room);
         this.updateClaimPart_allJobs(room);
         this.updateBunkerCenter(room);
-        // Calling the below function is equivalent to calling all of the above updateGetEnergy_xxxxxJobs functions
-        // this.updateGetEnergy_allJobs(room);
     }
 
     /**
@@ -544,7 +543,10 @@ export default class MemoryHelper_Room {
      * @param room the room we are in
      */
     public static updateBunkerCenter(room: Room): void {
-        const spawns: StructureSpawn[] = _.filter(Game.spawns, (spawn: StructureSpawn) => spawn.room.name === room.name);
+        const spawns: StructureSpawn[] = _.filter(
+            Game.spawns,
+            (spawn: StructureSpawn) => spawn.room.name === room.name
+        );
         const centerSpawn: StructureSpawn | null = this.getCenterSpawn(room, spawns);
         if (!centerSpawn) {
             return;

@@ -1,10 +1,14 @@
-import MemoryApi from "Api/Memory.Api";
-import { WALL_LIMIT, ERROR_WARN, STIMULATE_FLAG } from "utils/Constants";
-import UserException from "utils/UserException";
-import { TOWER_ALLOWED_TO_REPAIR } from "utils/config";
+import {
+    MemoryApi,
+    WALL_LIMIT,
+    ERROR_WARN,
+    STIMULATE_FLAG,
+    UserException,
+    TOWER_ALLOWED_TO_REPAIR
+} from "utils/internals";
 
 // helper functions for rooms
-export default class RoomHelper {
+export class RoomHelper {
     /**
      * check if a specified room is owned by you
      * @param room the room we want to check
@@ -25,10 +29,14 @@ export default class RoomHelper {
         // returns true if a room has one of our names or is reserved by us
         if (room.controller === undefined) {
             return false;
-        } else if (room.controller.owner !== undefined && (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2")) {
+        } else if (
+            room.controller.owner !== undefined &&
+            (room.controller.owner.username === "UhmBrock" || room.controller.owner.username === "Jakesboy2")
+        ) {
             return true;
         } else if (
-            room.controller.reservation !== undefined && room.controller.reservation.username !== undefined &&
+            room.controller.reservation !== undefined &&
+            room.controller.reservation.username !== undefined &&
             (room.controller.reservation!.username === "UhmBrock" ||
                 room.controller.reservation!.username === "Jakesboy2")
         ) {
@@ -140,7 +148,7 @@ export default class RoomHelper {
         return (
             TOWER_POWER_ATTACK -
             (TOWER_POWER_ATTACK * TOWER_FALLOFF * (range - TOWER_OPTIMAL_RANGE)) /
-            (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+                (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
         );
     }
 
@@ -204,9 +212,9 @@ export default class RoomHelper {
             throw new UserException(
                 "Tried to getUpgraderLink of a room with no controller",
                 "Get Upgrader Link was called for room [" +
-                room.name +
-                "]" +
-                ", but theres no controller in this room.",
+                    room.name +
+                    "]" +
+                    ", but theres no controller in this room.",
                 ERROR_WARN
             );
         }
@@ -316,7 +324,6 @@ export default class RoomHelper {
      * @param room the room we are searching for repair targets in
      */
     public static chooseTowerTargetRepair(room: Room): Structure | undefined | null {
-
         // Check for priority repair job of an allowed type
         const priorityRepairJobs = MemoryApi.getPriorityRepairJobs(room);
         if (priorityRepairJobs.length > 0) {

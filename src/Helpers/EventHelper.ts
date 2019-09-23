@@ -1,15 +1,22 @@
-import EventApi from "Api/Event.Api";
-import { C_EVENT_CREEP_SPAWNED, STANDARD_SQUAD, STALKER_SOLO, ZEALOT_SOLO, ERROR_ERROR } from "utils/Constants";
-import { STANDARD_SQUAD_ARRAY, ZEALOT_SOLO_ARRAY, STALKER_SOLO_ARRAY } from "utils/militaryConfig";
-import MemoryApi from "Api/Memory.Api";
-import MemoryHelper_Room from "./MemoryHelper_Room";
-import UserException from "utils/UserException";
-import { SpawnHelper } from "./SpawnHelper";
-import Normalize from "./Normalize";
-import RoomHelper from "./RoomHelper";
+import {
+    C_EVENT_CREEP_SPAWNED,
+    STANDARD_SQUAD,
+    STALKER_SOLO,
+    ZEALOT_SOLO,
+    ERROR_ERROR,
+    EventApi,
+    STANDARD_SQUAD_ARRAY,
+    ZEALOT_SOLO_ARRAY,
+    STALKER_SOLO_ARRAY,
+    MemoryApi,
+    MemoryHelper_Room,
+    UserException,
+    SpawnHelper,
+    Normalize,
+    RoomHelper
+} from "utils/internals";
 
-export default class EventHelper {
-
+export class EventHelper {
     /**
      * military creep successfully spawned event
      * this function is a straight mess, will need refactoring once bugs are ironed out
@@ -18,19 +25,24 @@ export default class EventHelper {
      * @param creep the creep thaat just spawned
      */
     public static miltaryCreepSpawnTrigger(room: Room, event: CustomEvent, creep: Creep): void {
-
         // Early return if creep has no options for some reason
         if (!creep.memory.options || SpawnHelper.isDefenseCreep(creep.memory.role)) {
             return;
         }
 
-        const requestingFlag: AttackFlagMemory | undefined = this.getMiliRequestingFlag(room, creep.memory.role, creep.name);
+        const requestingFlag: AttackFlagMemory | undefined = this.getMiliRequestingFlag(
+            room,
+            creep.memory.role,
+            creep.name
+        );
         // Throw an error if we didn't find the flag
         if (requestingFlag === undefined) {
             throw new UserException(
                 "The event for spawning a military creep was improperly handled.",
                 "The creep couldn't increment the correct flags memory, meaning the attack flag\n" +
-                "will not be removed properly and must be done manually. [ " + creep.name + " ].",
+                    "will not be removed properly and must be done manually. [ " +
+                    creep.name +
+                    " ].",
                 ERROR_ERROR
             );
         }
@@ -54,8 +66,11 @@ export default class EventHelper {
      * @param creepName the name of the creep for referencing
      * @returns the requesting flag for this creep role
      */
-    public static getMiliRequestingFlag(room: Room, roleConst: RoleConstant, creepName: string): AttackFlagMemory | undefined {
-
+    public static getMiliRequestingFlag(
+        room: Room,
+        roleConst: RoleConstant,
+        creepName: string
+    ): AttackFlagMemory | undefined {
         // Get all attack flag memory associated with the room (should only be 1, but plan for multiple possible in future)
         const attackRoomFlags: AttackFlagMemory[] = MemoryApi.getAllAttackFlagMemoryForHost(room.name);
 
@@ -85,7 +100,6 @@ export default class EventHelper {
         attackFlag: AttackFlagMemory,
         roomName: string
     ): boolean {
-
         // If we are provided a defined creep name, check if the flag references it first
         if (attackFlag.squadMembers.includes(creepName)) {
             return true;
@@ -95,21 +109,21 @@ export default class EventHelper {
         const flagType = attackFlag.flagType;
         let requestingRoleArray: RoleConstant[] = [];
         switch (flagType) {
-
             case STANDARD_SQUAD:
-
                 const creepsInSquad: Creep[] | null = MemoryApi.getCreepsInSquad(roomName, attackFlag.squadUUID);
                 if (creepsInSquad) {
-                    const numRoleRequested: number = this.getNumRoleRequestedFromSquadFlag(STANDARD_SQUAD_ARRAY, creepRole);
-                    const numRoleExisting: number = _.filter(creepsInSquad, (c: Creep) => c.memory.role === creepRole).length;
+                    const numRoleRequested: number = this.getNumRoleRequestedFromSquadFlag(
+                        STANDARD_SQUAD_ARRAY,
+                        creepRole
+                    );
+                    const numRoleExisting: number = _.filter(creepsInSquad, (c: Creep) => c.memory.role === creepRole)
+                        .length;
                     if (numRoleRequested < numRoleExisting) {
                         requestingRoleArray = STANDARD_SQUAD_ARRAY;
-                    }
-                    else {
+                    } else {
                         return false;
                     }
-                }
-                else {
+                } else {
                     requestingRoleArray = STANDARD_SQUAD_ARRAY;
                 }
                 break;
@@ -131,10 +145,10 @@ export default class EventHelper {
      * @param room the room we are scanning
      */
     public static scanForCreepSpawnedEvents(room: Room): void {
-
         // Get all creeps who spawned this turn
-        const spawnedCreeps: Creep[] = _.filter(MemoryApi.getMyCreeps(room.name, undefined, true), (creep: Creep) =>
-            creep.ticksToLive && creep.ticksToLive === 1499
+        const spawnedCreeps: Creep[] = _.filter(
+            MemoryApi.getMyCreeps(room.name, undefined, true),
+            (creep: Creep) => creep.ticksToLive && creep.ticksToLive === 1499
         );
 
         // Loop over these creeps and create an event for them

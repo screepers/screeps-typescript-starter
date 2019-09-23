@@ -12,18 +12,19 @@ import {
     CLAIM_FLAG,
     REMOTE_FLAG,
     OVERRIDE_D_ROOM_FLAG,
-    STIMULATE_FLAG
-} from "utils/constants";
-import RoomHelper from "Helpers/RoomHelper";
-import { STUCK_COUNT_LIMIT, STUCK_VISUAL_COLORS } from "utils/config";
-import RoomManager from "Managers/RoomManager";
+    STIMULATE_FLAG,
+    RoomHelper,
+    STUCK_COUNT_LIMIT,
+    STUCK_VISUAL_COLORS,
+    RoomManager
+} from "utils/internals";
 
 const textColor = "#bab8ba";
 const textSize = 0.8;
 const charHeight = textSize * 1.1;
 
 // Helper for room visuals
-export default class RoomVisualHelper {
+export class RoomVisualHelper {
     /**
      * display m
      * @param lines the array of text we want to display

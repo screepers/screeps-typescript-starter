@@ -1,13 +1,6 @@
-import {
-    ROLE_MINER,
-    ROLE_HARVESTER,
-    ROLE_WORKER,
-    ROOM_STATE_INTER
-} from "utils/constants";
-import MemoryApi from "Api/Memory.Api";
+import { ROLE_MINER, ROLE_HARVESTER, ROLE_WORKER, ROOM_STATE_INTER, MemoryApi } from "utils/internals";
 
 export class IntermediateStateCreepLimits implements ICreepSpawnLimits {
-
     public roomState: RoomStateConstant = ROOM_STATE_INTER;
 
     constructor() {

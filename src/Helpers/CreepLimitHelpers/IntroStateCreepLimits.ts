@@ -1,12 +1,6 @@
-import {
-    ROLE_MINER,
-    ROLE_HARVESTER,
-    ROLE_WORKER,
-    ROOM_STATE_INTRO
-} from "utils/constants";
+import { ROLE_MINER, ROLE_HARVESTER, ROLE_WORKER, ROOM_STATE_INTRO } from "utils/internals";
 
 export class IntroStateCreepLimits implements ICreepSpawnLimits {
-
     public roomState: RoomStateConstant = ROOM_STATE_INTRO;
 
     constructor() {

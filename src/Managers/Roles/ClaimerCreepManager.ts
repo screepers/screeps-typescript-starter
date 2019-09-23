@@ -1,14 +1,7 @@
-import MemoryApi from "../../Api/Memory.Api";
-import CreepApi from "Api/Creep.Api";
-import {
-    ERROR_WARN,
-    ROLE_CLAIMER,
-} from "utils/constants";
-import UserException from "utils/UserException";
+import { CreepApi, MemoryApi, UserException } from "utils/internals";
 
 // Manager for the miner creep role
-export default class ClaimerCreepManager implements ICreepRoleManager {
-
+export class ClaimerCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_CLAIMER;
 
     constructor() {
@@ -21,7 +14,6 @@ export default class ClaimerCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         if (creep.room.memory.defcon > 0) {
             // flee code here
         }

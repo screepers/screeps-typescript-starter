@@ -1,9 +1,8 @@
-import { COLORS } from "utils/constants";
+import { COLORS } from "utils/internals";
 /**
  * Custom error class
  */
-class UserException extends Error {
-
+export class UserException extends Error {
     public title: string;
     public body: string;
     public severity: number;
@@ -22,5 +21,3 @@ class UserException extends Error {
         this.bodyColor = useBodyColor !== undefined ? useBodyColor : "#ff1113";
     }
 }
-
-export default UserException;

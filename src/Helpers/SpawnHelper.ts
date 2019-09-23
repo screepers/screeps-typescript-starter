@@ -7,12 +7,10 @@ import {
     ERROR_WARN,
     STALKER_SOLO,
     ZEALOT_SOLO,
-    STANDARD_SQUAD
-} from "utils/Constants";
-import UserException from "utils/UserException";
-import MemoryApi from "Api/Memory.Api";
-import RoomHelper from "Helpers/RoomHelper";
-import {
+    STANDARD_SQUAD,
+    UserException,
+    MemoryApi,
+    RoomHelper,
     ZEALOT_SOLO_ARRAY,
     STANDARD_SQUAD_ARRAY,
     STALKER_SOLO_ARRAY,
@@ -20,9 +18,9 @@ import {
     TIER_2_MILITARY_PRIORITY,
     TIER_3_MILITARY_PRIORITY,
     ALL_MILITARY_ROLES,
-    ALL_DEFENSIVE_ROLES
-} from "utils/militaryConfig";
-import { RESERVER_MIN_TTL } from "utils/config";
+    ALL_DEFENSIVE_ROLES,
+    RESERVER_MIN_TTL
+} from "utils/internals";
 
 /**
  * Functions to help keep Spawn.Api clean go here
@@ -525,17 +523,20 @@ export class SpawnHelper {
      * @returns boolean that represents if we need a harvester as priority
      */
     public static needPriorityHarvester(room: Room): boolean {
-        if (room.memory.creepLimit !== undefined
-            && room.memory.creepLimit.domesticLimits !== undefined
-            && room.memory.creepLimit.domesticLimits.harvester === 1
+        if (
+            room.memory.creepLimit !== undefined &&
+            room.memory.creepLimit.domesticLimits !== undefined &&
+            room.memory.creepLimit.domesticLimits.harvester === 1
         ) {
-            const harvester: Creep | undefined = _.find(MemoryApi.getMyCreeps(room.name, (c: Creep) => c.memory.role === ROLE_HARVESTER));
+            const harvester: Creep | undefined = _.find(
+                MemoryApi.getMyCreeps(room.name, (c: Creep) => c.memory.role === ROLE_HARVESTER)
+            );
 
             // If theres no harvester then we def need one
             if (!harvester) {
                 return true;
             }
-            return harvester.ticksToLive !== undefined && harvester.ticksToLive <= (harvester.body.length * 3);
+            return harvester.ticksToLive !== undefined && harvester.ticksToLive <= harvester.body.length * 3;
         }
         return false;
     }

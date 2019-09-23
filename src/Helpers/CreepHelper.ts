@@ -1,18 +1,18 @@
-import { ERROR_WARN } from "utils/constants";
-import UserException from "utils/UserException";
-import MemoryApi from "Api/Memory.Api";
-import { CONTROLLER_SIGNING_TEXT } from "utils/config";
-import Normalize from "./Normalize";
+import { ERROR_WARN, UserException, MemoryApi, CONTROLLER_SIGNING_TEXT, Normalize } from "utils/internals";
 
 // helper function for creeps
-export default class CreepHelper {
+export class CreepHelper {
     /**
      * get the mining container for a specific job
      * @param job the job we are getting the mining container from
      * @param room the room we are checking in
      * @param isSource if we nee the mining contrainer for a source
      */
-    public static getMiningContainer(job: GetEnergyJob | undefined, room: Room, isSource: boolean): StructureContainer | undefined {
+    public static getMiningContainer(
+        job: GetEnergyJob | undefined,
+        room: Room,
+        isSource: boolean
+    ): StructureContainer | undefined {
         if (!job) {
             throw new UserException(
                 "Job is undefined",
@@ -24,8 +24,7 @@ export default class CreepHelper {
         let sourceTarget: Source | Mineral | null = Game.getObjectById(job.targetID);
         if (isSource) {
             sourceTarget = sourceTarget as Source;
-        }
-        else {
+        } else {
             sourceTarget = sourceTarget as Mineral;
         }
 
@@ -81,10 +80,10 @@ export default class CreepHelper {
             throw new UserException(
                 "Error in targetIsCurrentDestination",
                 "Creep [" +
-                creep.name +
-                "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
-                JSON.stringify(target) +
-                "]",
+                    creep.name +
+                    "] tried to check if targetIsCurrentDestination on a target with no pos property. \n Target: [" +
+                    JSON.stringify(target) +
+                    "]",
                 ERROR_ERROR
             );
         }
@@ -114,8 +113,7 @@ export default class CreepHelper {
         // Get target to move to, using supplementary.moveTargetID if available, job.targetID if not.
         if (creep.memory.supplementary && creep.memory.supplementary.moveTargetID) {
             return Game.getObjectById(creep.memory.supplementary.moveTargetID);
-        }
-        else if (creep.memory.job && creep.memory.job.targetType === "roomName") {
+        } else if (creep.memory.job && creep.memory.job.targetType === "roomName") {
             return new RoomPosition(25, 25, creep.memory.job.targetID);
         } else if (creep.memory.job && creep.memory.job.targetType === "roomPosition") {
             // TODO Handle parsing a string into a roomPosition object here
@@ -124,8 +122,7 @@ export default class CreepHelper {
             const y = 25;
             const roomName = "X##Y##";
             return new RoomPosition(x, y, roomName);
-        }
-        else {
+        } else {
             return Game.getObjectById(job.targetID);
         }
     }

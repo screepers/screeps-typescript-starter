@@ -1,12 +1,7 @@
-import {
-    ROLE_STALKER,
-} from "utils/constants";
-import MiliApi from "Api/CreepMili.Api";
-
+import { ROLE_STALKER, MiliApi } from "utils/internals";
 
 // Manager for the miner creep role
-export default class StalkerCreepManager implements ICreepRoleManager {
-
+export class StalkerCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_STALKER;
 
     constructor() {
@@ -19,7 +14,6 @@ export default class StalkerCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 3;
 
@@ -43,8 +37,7 @@ export default class StalkerCreepManager implements ICreepRoleManager {
         if (!MiliApi.isInAttackRange(creep, target.pos, isMelee)) {
             creep.moveTo(target);
             return;
-        }
-        else {
+        } else {
             MiliApi.kiteEnemyCreep(creep);
         }
 

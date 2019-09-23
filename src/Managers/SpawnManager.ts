@@ -1,12 +1,7 @@
-import SpawnApi from "../Api/Spawn.Api";
-import MemoryApi from "../Api/Memory.Api";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import UserException from "utils/UserException";
-import { ERROR_ERROR } from "utils/constants";
-import RoomHelper from "Helpers/RoomHelper";
+import { ERROR_ERROR, RoomHelper, UserException, SpawnHelper, MemoryApi, SpawnApi } from "utils/internals";
 
 // handles spawning for every room
-export default class SpawnManager {
+export class SpawnManager {
     /**
      * run the spawning for the AI for each room
      */
@@ -61,17 +56,35 @@ export default class SpawnManager {
                 if (targetRoom === "" || homeRoom === "" || !creepOptions) {
                     throw new UserException(
                         "Failure in Spawn Manager for [ " + name + " ]",
-                        "Role: [ " + nextCreepRole + " ]\n" +
-                        "homeRoom: [ " + homeRoom + " ]\n" +
-                        "targetRoom: [ " + targetRoom + " ]\n" +
-                        "creepOptions: [ " + JSON.stringify(creepOptions) + " ]\n",
+                        "Role: [ " +
+                            nextCreepRole +
+                            " ]\n" +
+                            "homeRoom: [ " +
+                            homeRoom +
+                            " ]\n" +
+                            "targetRoom: [ " +
+                            targetRoom +
+                            " ]\n" +
+                            "creepOptions: [ " +
+                            JSON.stringify(creepOptions) +
+                            " ]\n",
                         ERROR_ERROR
                     );
                 }
 
-
                 // Spawn the creep
-                if (SpawnApi.spawnNextCreep(room, creepBody, creepOptions!, nextCreepRole!, openSpawn!, homeRoom, targetRoom, name) === OK) {
+                if (
+                    SpawnApi.spawnNextCreep(
+                        room,
+                        creepBody,
+                        creepOptions!,
+                        nextCreepRole!,
+                        openSpawn!,
+                        homeRoom,
+                        targetRoom,
+                        name
+                    ) === OK
+                ) {
                     // On successful creep spawn of a military creep, remove that role from the military spawn queue
                     SpawnApi.removeSpawnedCreepFromMiliQueue(nextCreepRole!, room);
                 }

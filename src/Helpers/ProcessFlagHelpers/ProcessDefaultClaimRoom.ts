@@ -1,9 +1,6 @@
-import MemoryApi from "Api/Memory.Api";
-import EmpireHelper from "Helpers/EmpireHelper";
-import UserException from "utils/UserException";
+import { MemoryApi, EmpireHelper, UserException } from "utils/internals";
 
 export class ProcessDefaultClaimRoom implements IFlagProcesser {
-
     public primaryColor: ColorConstant = COLOR_WHITE;
     public secondaryColor: ColorConstant = COLOR_WHITE;
 
@@ -35,29 +32,36 @@ export class ProcessDefaultClaimRoom implements IFlagProcesser {
         };
 
         // If the dependent room already has this room covered, set the flag to be deleted and throw a warning
-        const existingDepedentClaimRoomMem: ClaimRoomMemory | undefined = _.find(MemoryApi.getClaimRooms(dependentRoom),
+        const existingDepedentClaimRoomMem: ClaimRoomMemory | undefined = _.find(
+            MemoryApi.getClaimRooms(dependentRoom),
             (rr: ClaimRoomMemory) => {
                 if (rr) {
                     return rr.roomName === roomName;
                 }
                 return false;
-            });
+            }
+        );
 
         if (existingDepedentClaimRoomMem) {
             Memory.flags[flag.name].complete = true;
             throw new UserException(
                 "Already working this dependent room!",
-                "The room you placed the claim flag in is already being worked by " + existingDepedentClaimRoomMem.roomName,
-                ERROR_WARN);
+                "The room you placed the claim flag in is already being worked by " +
+                    existingDepedentClaimRoomMem.roomName,
+                ERROR_WARN
+            );
         }
 
         // Otherwise, add a brand new memory structure onto it
         const claimRoomMemory: ClaimRoomMemory = {
             roomName: flag.pos.roomName,
-            flags: [claimFlagMemory],
+            flags: [claimFlagMemory]
         };
 
-        MemoryApi.createEmpireAlertNode("Claim Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]", 10);
+        MemoryApi.createEmpireAlertNode(
+            "Claim Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]",
+            10
+        );
         dependentRoom.memory.claimRooms!.push(claimRoomMemory);
     }
 }

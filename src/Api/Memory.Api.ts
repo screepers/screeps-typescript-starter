@@ -1,8 +1,9 @@
-import MemoryHelper from "Helpers/MemoryHelper";
-import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
-import RoomHelper from "Helpers/RoomHelper";
-import { NO_CACHING_MEMORY, PRIORITY_REPAIR_THRESHOLD } from "utils/config";
 import {
+    MemoryHelper,
+    MemoryHelper_Room,
+    RoomHelper,
+    NO_CACHING_MEMORY,
+    PRIORITY_REPAIR_THRESHOLD,
     BACKUP_JOB_CACHE_TTL,
     CONSTR_CACHE_TTL,
     CONTAINER_JOB_CACHE_TTL,
@@ -27,13 +28,13 @@ import {
     PICKUP_JOB_CACHE_TTL,
     ALL_STRUCTURE_TYPES,
     ERROR_ERROR,
-    MINERAL_CACHE_TTL
-} from "utils/Constants";
-import UserException from "utils/UserException";
-import RoomApi from "./Room.Api";
+    MINERAL_CACHE_TTL,
+    UserException,
+    RoomApi
+} from "utils/internals";
 
 // the api for the memory class
-export default class MemoryApi {
+export class MemoryApi {
     /**
      * Remove all memory objects that are dead
      */
@@ -190,7 +191,7 @@ export default class MemoryApi {
                 jobs: {},
                 structures: { data: null, cache: null },
                 upgradeLink: "",
-                events: [],
+                events: []
             };
         } else {
             Memory.rooms[roomName] = {
@@ -202,7 +203,7 @@ export default class MemoryApi {
                 constructionSites: { data: null, cache: null },
                 defcon: -1,
                 hostiles: { data: null, cache: null },
-                events: [],
+                events: []
             };
         }
 
@@ -840,7 +841,7 @@ export default class MemoryApi {
      * @returns Flag[] an array of all flags
      */
     public static getAllFlags(filterFunction?: (flag: Flag) => boolean): Flag[] {
-        const allFlags: Flag[] = Object.keys(Game.flags).map(function (flagIndex) {
+        const allFlags: Flag[] = Object.keys(Game.flags).map(function(flagIndex) {
             return Game.flags[flagIndex];
         });
 
@@ -1493,10 +1494,10 @@ export default class MemoryApi {
             throw new UserException(
                 "Error in updateJobMemory",
                 "Could not find the job in room memory to update." +
-                "\nCreep: " +
-                creep.name +
-                "\nJob: " +
-                JSON.stringify(creep.memory.job),
+                    "\nCreep: " +
+                    creep.name +
+                    "\nJob: " +
+                    JSON.stringify(creep.memory.job),
                 ERROR_ERROR
             );
         }
@@ -1818,7 +1819,7 @@ export default class MemoryApi {
         for (const hustler of creepsInRoomWhoAreHustling) {
             const job: BaseJob = hustler.memory.job!;
             if (!RoomHelper.verifyObjectByID(job.targetID)) {
-                delete hustler.memory.job
+                delete hustler.memory.job;
             }
         }
     }

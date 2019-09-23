@@ -1,8 +1,4 @@
-import RoomApi from "Api/Room.Api";
-import MemoryApi from "Api/Memory.Api";
-import CreepApi from "Api/Creep.Api";
-import CreepHelper from "Helpers/CreepHelper";
-import PathfindingApi from "Api/Pathfinding.Api";
+import { RoomApi, MemoryApi, CreepApi, CreepHelper, PathfindingApi } from "utils/internals";
 
 export class WorkPartJobs implements IJobTypeHelper {
     public jobType: Valid_JobTypes = "workPartJob";

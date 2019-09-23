@@ -1,13 +1,7 @@
-import MemoryApi from "./Memory.Api";
-import CreepApi from "./Creep.Api";
-import MiliHelper from "Helpers/MiliHelper";
-import UserException from "utils/UserException";
-import { posix } from "path";
-import RoomHelper from "Helpers/RoomHelper";
-import PathfindingApi from "./Pathfinding.Api";
+import { MemoryApi, CreepApi, MiliHelper, UserException, RoomHelper, PathfindingApi } from "utils/internals";
 
 // Api for military creep's
-export default class CreepMili {
+export class MiliApi {
     /**
      * check if we're still waiting on creeps to rally
      * @param creepOptions the options for the military creep
@@ -125,7 +119,7 @@ export default class CreepMili {
                 }
 
                 // Set walls and ramparts as unwalkable
-                room.find(FIND_STRUCTURES).forEach(function (struct: Structure<StructureConstant>) {
+                room.find(FIND_STRUCTURES).forEach(function(struct: Structure<StructureConstant>) {
                     if (struct.structureType === STRUCTURE_WALL || struct.structureType === STRUCTURE_RAMPART) {
                         // Set walls and ramparts as unwalkable
                         costs.set(struct.pos.x, struct.pos.y, 0xff);
@@ -133,7 +127,7 @@ export default class CreepMili {
                 } as any);
 
                 // Set creeps as unwalkable
-                room.find(FIND_CREEPS).forEach(function (currentCreep: Creep) {
+                room.find(FIND_CREEPS).forEach(function(currentCreep: Creep) {
                     costs.set(currentCreep.pos.x, currentCreep.pos.y, 0xff);
                 });
 
@@ -259,7 +253,7 @@ export default class CreepMili {
         }
 
         // No squad members, find closest creep
-        const creepsInRoom: Creep[] = CreepMili.getAllyCreepsInRoom(creep.room);
+        const creepsInRoom: Creep[] = MiliApi.getAllyCreepsInRoom(creep.room);
         return creep.pos.findClosestByPath(creepsInRoom, { filter: (c: Creep) => c.hits < c.hitsMax });
     }
 
@@ -268,7 +262,6 @@ export default class CreepMili {
      * @param creep the creep we are checking for
      */
     public static getIdealWallTarget(creep: Creep): StructureWall | StructureRampart | undefined {
-
         // Check for any significantly lower walls first (ie 25% lower than other walls, and also accessible)
         // TODO
         // Look for ALL enemy walls/ramparts, average them, then find the closest one by path that is also X% below the average

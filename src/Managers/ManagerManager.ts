@@ -1,9 +1,3 @@
-import EmpireManager from "Managers/EmpireManager";
-import MemoryManager from "Managers/MemoryManagement";
-import RoomManager from "Managers/RoomManager";
-import SpawnManager from "Managers/SpawnManager";
-import UtilHelper from "Helpers/UtilHelper";
-import RoomVisualManager from "Managers/RoomVisuals/RoomVisualManager";
 import {
     ROOM_OVERLAY_ON,
     CREEP_MANAGER_BUCKET_LIMIT,
@@ -12,17 +6,21 @@ import {
     ROOM_MANAGER_BUCKET_LIMIT,
     MEMORY_MANAGER_BUCKET_LIMIT,
     EVENT_MANAGER_BUCKET_LIMIT,
-    ROOM_OVERLAY_BUCKET_LIMIT
-} from "utils/config";
-import CreepManager from "Managers/CreepManager";
-import { ConsoleCommands } from "Helpers/ConsoleCommands";
-import RoomHelper from "Helpers/RoomHelper";
-import EventManager from "Managers/EventManager";
+    ROOM_OVERLAY_BUCKET_LIMIT,
+    EventManager,
+    RoomHelper,
+    ConsoleCommands,
+    CreepManager,
+    RoomVisualManager,
+    UtilHelper,
+    SpawnManager,
+    RoomManager,
+    MemoryManager,
+    EmpireManager
+} from "utils/internals";
 
-
-export default class ManagerManager {
+export class ManagerManager {
     public static runManagerManager(): void {
-
         if (RoomHelper.excecuteEveryTicks(1000)) {
             ConsoleCommands.init();
         }
@@ -46,7 +44,10 @@ export default class ManagerManager {
         }
 
         // run spawning
-        if (!Game.cpu["bucket"] || Game.cpu["bucket"] > SPAWN_MANAGER_BUCKET_LIMIT && RoomHelper.excecuteEveryTicks(3)) {
+        if (
+            !Game.cpu["bucket"] ||
+            (Game.cpu["bucket"] > SPAWN_MANAGER_BUCKET_LIMIT && RoomHelper.excecuteEveryTicks(3))
+        ) {
             try {
                 SpawnManager.runSpawnManager();
             } catch (e) {
@@ -63,7 +64,6 @@ export default class ManagerManager {
             }
         }
 
-
         // Display room visuals if we have a fat enough bucket and config option allows it
         if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > ROOM_OVERLAY_BUCKET_LIMIT && ROOM_OVERLAY_ON)) {
             try {
@@ -74,7 +74,7 @@ export default class ManagerManager {
         }
 
         // Display room visuals if we have a fat enough bucket and config option allows it
-        if (!Game.cpu["bucket"] || (Game.cpu["bucket"] > EVENT_MANAGER_BUCKET_LIMIT)) {
+        if (!Game.cpu["bucket"] || Game.cpu["bucket"] > EVENT_MANAGER_BUCKET_LIMIT) {
             try {
                 EventManager.runEventManager();
             } catch (e) {

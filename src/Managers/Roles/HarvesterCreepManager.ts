@@ -1,11 +1,7 @@
-import MemoryApi from "../../Api/Memory.Api";
-import CreepApi from "Api/Creep.Api";
-import MemoryHelper from "Helpers/MemoryHelper";
-import { ROLE_HARVESTER } from "utils/constants";
-import CreepHelper from "Helpers/CreepHelper";
+import { ROLE_HARVESTER, MemoryApi, CreepApi, MemoryHelper, CreepHelper } from "utils/internals";
 
 // Manager for the miner creep role
-export default class HarvesterCreepManager implements ICreepRoleManager {
+export class HarvesterCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_HARVESTER;
 
     constructor() {

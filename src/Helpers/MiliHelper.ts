@@ -1,7 +1,6 @@
-import { ALLY_LIST } from "utils/config";
+import { ALLY_LIST } from "utils/internals";
 
-export default class MiliHelper {
-
+export class MiliHelper {
     /**
      * check if the creep belongs to an alliance member
      * @param creep the creep we are evaluating

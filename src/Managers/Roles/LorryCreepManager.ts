@@ -1,10 +1,7 @@
-import {
-    ROLE_LORRY,
-} from "utils/constants";
+import { ROLE_LORRY } from "utils/internals";
 
 // Manager for the miner creep role
-export default class LorryCreepManager implements ICreepRoleManager {
-
+export class LorryCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_LORRY;
 
     constructor() {

@@ -1,6 +1,3 @@
-import RoomApi from "../Api/Room.Api";
-import MemoryApi from "../Api/Memory.Api";
-import RoomHelper from "Helpers/RoomHelper";
 import {
     RUN_TOWER_TIMER,
     RUN_LAB_TIMER,
@@ -9,12 +6,15 @@ import {
     RUN_ROOM_STATE_TIMER,
     RUN_DEFCON_TIMER,
     RUN_RESERVE_TTL_TIMER,
-    RUN_RAMPART_STATUS_UPDATE
-} from "utils/config";
-import MemoryHelper_Room from "Helpers/MemoryHelper_Room";
+    RUN_RAMPART_STATUS_UPDATE,
+    MemoryHelper_Room,
+    RoomHelper,
+    MemoryApi,
+    RoomApi
+} from "utils/internals";
 
 // room-wide manager
-export default class RoomManager {
+export class RoomManager {
     /**
      * run the room for every room
      */
@@ -57,8 +57,7 @@ export default class RoomManager {
         if (RoomHelper.excecuteEveryTicks(RUN_TOWER_TIMER) && RoomHelper.isExistInRoom(room, STRUCTURE_TOWER)) {
             if (defcon >= 1) {
                 RoomApi.runTowersDefense(room);
-            }
-            else if (roomState === ROOM_STATE_UPGRADER || roomState === ROOM_STATE_NUKE_INBOUND) {
+            } else if (roomState === ROOM_STATE_UPGRADER || roomState === ROOM_STATE_NUKE_INBOUND) {
                 RoomApi.runTowersRepair(room);
             }
         }

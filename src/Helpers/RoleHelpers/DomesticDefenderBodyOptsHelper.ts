@@ -16,14 +16,13 @@ import {
     TIER_7,
     TIER_8,
     ROLE_DOMESTIC_DEFENDER,
-    ERROR_ERROR
-} from "utils/Constants";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api"
-import UserException from "utils/UserException";
+    ERROR_ERROR,
+    SpawnHelper,
+    SpawnApi,
+    UserException
+} from "utils/internals";
 
 export class DomesticDefenderBodyOptsHelper implements ICreepBodyOptsHelper {
-
     public name: RoleConstant = ROLE_DOMESTIC_DEFENDER;
 
     constructor() {
@@ -116,7 +115,12 @@ export class DomesticDefenderBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+    public getTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
         return room.name;
     }
 }

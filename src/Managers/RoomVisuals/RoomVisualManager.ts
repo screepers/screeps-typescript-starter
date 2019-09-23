@@ -1,12 +1,7 @@
-import MemoryApi from "../../Api/Memory.Api";
-import RoomVisualApi from "./RoomVisual.Api";
-import {
-    ROOM_OVERLAY_GRAPH_ON
-} from "utils/config";
+import { ROOM_OVERLAY_GRAPH_ON, MemoryApi, RoomVisualApi } from "utils/internals";
 
 // Manager for room visuals
-export default class RoomVisualManager {
-
+export class RoomVisualManager {
     /**
      * FUTURE PLANS FOR THIS MANAGER
      *
@@ -17,12 +12,9 @@ export default class RoomVisualManager {
      * run the manager for each room
      */
     public static runRoomVisualManager(): void {
-
         const ownedRooms = MemoryApi.getOwnedRooms();
 
-        _.forEach(ownedRooms,
-            (room: Room) => this.runSingleRoomVisualManager(room)
-        );
+        _.forEach(ownedRooms, (room: Room) => this.runSingleRoomVisualManager(room));
     }
 
     /**
@@ -30,7 +22,6 @@ export default class RoomVisualManager {
      * @param room the room we want to run the room visual for
      */
     private static runSingleRoomVisualManager(room: Room): void {
-
         let endLeftLine: number = 1;
         let endRightLine: number = 1;
         const LEFT_START_X = 1;

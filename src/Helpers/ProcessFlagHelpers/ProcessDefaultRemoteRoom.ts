@@ -1,9 +1,6 @@
-import MemoryApi from "Api/Memory.Api";
-import UserException from "utils/UserException";
-import EmpireHelper from "Helpers/EmpireHelper";
+import { MemoryApi, UserException, EmpireHelper } from "utils/internals";
 
 export class ProcessDefaultRemoteRoom implements IFlagProcesser {
-
     public primaryColor: ColorConstant = COLOR_YELLOW;
     public secondaryColor: ColorConstant = COLOR_YELLOW;
 
@@ -34,22 +31,25 @@ export class ProcessDefaultRemoteRoom implements IFlagProcesser {
             flagType: flagTypeConst
         };
 
-
         // If the dependent room already has this room covered, set the flag to be deleted and throw a warning
-        const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(MemoryApi.getRemoteRooms(dependentRoom),
+        const existingDepedentRemoteRoomMem: RemoteRoomMemory | undefined = _.find(
+            MemoryApi.getRemoteRooms(dependentRoom),
             (rr: RemoteRoomMemory) => {
                 if (rr) {
                     return rr.roomName === roomName;
                 }
                 return false;
-            });
+            }
+        );
 
         if (existingDepedentRemoteRoomMem) {
             Memory.flags[flag.name].complete = true;
             throw new UserException(
                 "Already working this dependent room!",
-                "The room you placed the remote flag in is already being worked by " + existingDepedentRemoteRoomMem.roomName,
-                ERROR_WARN);
+                "The room you placed the remote flag in is already being worked by " +
+                    existingDepedentRemoteRoomMem.roomName,
+                ERROR_WARN
+            );
         }
 
         // Otherwise, add a brand new memory structure onto it
@@ -59,10 +59,13 @@ export class ProcessDefaultRemoteRoom implements IFlagProcesser {
             structures: { cache: Game.time, data: null },
             roomName: flag.pos.roomName,
             flags: [remoteFlagMemory],
-            reserveTTL: 0,
+            reserveTTL: 0
         };
 
-        MemoryApi.createEmpireAlertNode("Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]", 10);
+        MemoryApi.createEmpireAlertNode(
+            "Remote Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]",
+            10
+        );
         dependentRoom.memory.remoteRooms!.push(remoteRoomMemory);
     }
 }

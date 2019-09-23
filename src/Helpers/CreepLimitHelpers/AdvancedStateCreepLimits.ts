@@ -11,16 +11,15 @@ import {
     ROLE_CLAIMER,
     ROLE_REMOTE_DEFENDER,
     ROOM_STATE_ADVANCED,
-    ROLE_SCOUT
-} from "utils/constants";
-import MemoryApi from "Api/Memory.Api";
-import RoomHelper from "Helpers/RoomHelper";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api";
-import Normalize from "Helpers/Normalize";
+    ROLE_SCOUT,
+    MemoryApi,
+    RoomHelper,
+    SpawnHelper,
+    SpawnApi,
+    Normalize
+} from "utils/internals";
 
 export class AdvancedStateCreepLimits implements ICreepSpawnLimits {
-
     // Think of this as the "key". It searched for this name to decide that this is the class instance we want to run
     public roomState: RoomStateConstant = ROOM_STATE_ADVANCED;
 
@@ -58,7 +57,9 @@ export class AdvancedStateCreepLimits implements ICreepSpawnLimits {
 
         // [Special Case], if we recovered a room and only have 1 harvester (they would be too small to keep up with room)
         if (numHarvesters === 1 && RoomHelper.excecuteEveryTicks(40)) {
-            const harvester: Creep | undefined = _.find(MemoryApi.getMyCreeps(room.name, (c: Creep) => c.memory.role === ROLE_HARVESTER));
+            const harvester: Creep | undefined = _.find(
+                MemoryApi.getMyCreeps(room.name, (c: Creep) => c.memory.role === ROLE_HARVESTER)
+            );
             if (harvester) {
                 if (SpawnApi.getEnergyCostOfBody(Normalize.convertCreepBodyToBodyPartConstant(harvester.body)) <= 300) {
                     numHarvesters = 2;

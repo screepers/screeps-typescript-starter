@@ -1,14 +1,7 @@
-import MemoryApi from "../../Api/Memory.Api";
-import CreepApi from "Api/Creep.Api";
-import MemoryHelper from "Helpers/MemoryHelper";
-import {
-    ROLE_REMOTE_HARVESTER,
-} from "utils/constants";
-import PathfindingApi from "Api/Pathfinding.Api";
+import { ROLE_REMOTE_HARVESTER, MemoryApi, CreepApi, MemoryHelper, PathfindingApi } from "utils/internals";
 
 // Manager for the miner creep role
-export default class RemoteHarvesterCreepManager implements ICreepRoleManager {
-
+export class RemoteHarvesterCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_REMOTE_HARVESTER;
 
     constructor() {
@@ -21,7 +14,6 @@ export default class RemoteHarvesterCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
 

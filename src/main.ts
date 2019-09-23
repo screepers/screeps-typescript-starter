@@ -8,9 +8,8 @@
 */
 
 // Define prototypes
-import { ErrorMapper } from "utils/ErrorMapper";
-import ManagerManager from "Managers/ManagerManager";
+import { ErrorMapper, ManagerManager } from "utils/internals";
 
 export const loop = ErrorMapper.wrapLoop(() => {
-  ManagerManager.runManagerManager();
+    ManagerManager.runManagerManager();
 });

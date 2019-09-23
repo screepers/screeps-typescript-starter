@@ -13,14 +13,13 @@ import {
     TIER_7,
     TIER_8,
     ROLE_REMOTE_RESERVER,
-    ERROR_ERROR
-} from "utils/Constants";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api"
-import UserException from "utils/UserException";
+    ERROR_ERROR,
+    SpawnHelper,
+    SpawnApi,
+    UserException
+} from "utils/internals";
 
 export class RemoteReserverBodyOptsHelper implements ICreepBodyOptsHelper {
-
     public name: RoleConstant = ROLE_REMOTE_RESERVER;
 
     constructor() {
@@ -93,7 +92,12 @@ export class RemoteReserverBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+    public getTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
         const roomMemory: RemoteRoomMemory | undefined = SpawnHelper.getRemoteRoomNeedingRemoteReserver(room);
         if (roomMemory) {
             return roomMemory.roomName;

@@ -1,8 +1,6 @@
-import { ROLE_SCOUT } from "utils/constants";
-import { setFlagsFromString } from "v8";
-import CreepApi from "Api/Creep.Api";
+import { ROLE_SCOUT, CreepApi } from "utils/internals";
 
-export default class ScoutCreepManager implements ICreepRoleManager {
+export class ScoutCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_SCOUT;
 
     constructor() {

@@ -1,6 +1,6 @@
 // tslint:disable:no-conditional-assignment
 import { SourceMapConsumer } from "source-map";
-import UserException from "./UserException";
+import { UserException } from "utils/internals";
 
 export class ErrorMapper {
     // Cache consumer

@@ -1,10 +1,7 @@
-import {
-    ROLE_COLONIZER,
-} from "utils/constants";
+import { ROLE_COLONIZER } from "utils/internals";
 
 // Manager for the miner creep role
-export default class RemoteColonizerCreepManager implements ICreepRoleManager {
-
+export class RemoteColonizerCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_COLONIZER;
 
     constructor() {

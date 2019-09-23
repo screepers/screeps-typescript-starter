@@ -1,10 +1,5 @@
 // Config file for memory related actions
-import {
-    ROLE_MEDIC,
-    ROLE_STALKER,
-    ROLE_ZEALOT,
-    ROLE_DOMESTIC_DEFENDER,
-} from "./constants";
+import { ROLE_MEDIC, ROLE_STALKER, ROLE_ZEALOT, ROLE_DOMESTIC_DEFENDER } from "utils/internals";
 
 // -----
 /* Arrays for military flags */

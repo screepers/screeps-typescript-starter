@@ -1,11 +1,7 @@
-import {
-    ROLE_REMOTE_DEFENDER,
-} from "utils/constants";
-import MiliApi from "Api/CreepMili.Api";
+import { ROLE_REMOTE_DEFENDER, MiliApi } from "utils/internals";
 
 // Manager for the miner creep role
-export default class RemoteDefenderCreepManager implements ICreepRoleManager {
-
+export class RemoteDefenderCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_REMOTE_DEFENDER;
 
     constructor() {
@@ -18,7 +14,6 @@ export default class RemoteDefenderCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 3;
 

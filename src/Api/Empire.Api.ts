@@ -1,15 +1,11 @@
-import EmpireHelper from "../Helpers/EmpireHelper";
-import MemoryApi from "./Memory.Api";
-import { PROCESS_FLAG_HELPERS } from "utils/Interface_Constants";
+import { EmpireHelper, MemoryApi, PROCESS_FLAG_HELPERS } from "utils/internals";
 
-export default class Empire {
-
+export class EmpireApi {
     /**
      * get new flags that need to be processed
      * @returns Flag[] an array of flags that need to be processed (empty if none)
      */
     public static getUnprocessedFlags(): Flag[] {
-
         // Create an array of all flags
         const allFlags: Flag[] = MemoryApi.getAllFlags();
         const newFlags: Flag[] = [];
@@ -32,7 +28,6 @@ export default class Empire {
      * @param newFlags StringMap of new flags we need to process
      */
     public static processNewFlags(newFlags: Flag[]): void {
-
         // Don't run the function if theres no new flags
         if (newFlags.length === 0) {
             return;
@@ -69,7 +64,6 @@ export default class Empire {
      * deletes all flags marked as complete
      */
     public static deleteCompleteFlags(): void {
-
         const completeFlags = MemoryApi.getAllFlags((flag: Flag) => flag.memory.complete);
 
         // Loop over all flags, removing them and their direct memory from the game
@@ -83,16 +77,17 @@ export default class Empire {
      * look for dead flags (memory with no associated flag existing) and remove them
      */
     public static cleanDeadFlags(): void {
-
         // Get all flag based action memory structures (Remote, Claim, and Attack Room Memory)
         const allRooms = MemoryApi.getOwnedRooms();
-        const claimRooms: Array<ClaimRoomMemory | undefined> = _.flatten(_.map(allRooms,
-            room => MemoryApi.getClaimRooms(room)));
-        const remoteRooms: Array<RemoteRoomMemory | undefined> = _.flatten(_.map(allRooms,
-            room => MemoryApi.getRemoteRooms(room)));
-        const attackRooms: Array<AttackRoomMemory | undefined> = _.flatten(_.map(allRooms,
-            room => MemoryApi.getAttackRooms(room)));
-
+        const claimRooms: Array<ClaimRoomMemory | undefined> = _.flatten(
+            _.map(allRooms, room => MemoryApi.getClaimRooms(room))
+        );
+        const remoteRooms: Array<RemoteRoomMemory | undefined> = _.flatten(
+            _.map(allRooms, room => MemoryApi.getRemoteRooms(room))
+        );
+        const attackRooms: Array<AttackRoomMemory | undefined> = _.flatten(
+            _.map(allRooms, room => MemoryApi.getAttackRooms(room))
+        );
 
         // Clean dead flags from memory structures
         EmpireHelper.cleanDeadClaimRoomFlags(claimRooms);
@@ -104,4 +99,4 @@ export default class Empire {
         EmpireHelper.cleanDeadRemoteRooms(remoteRooms);
         EmpireHelper.cleanDeadAttackRooms(attackRooms);
     }
-};
+}

@@ -1,10 +1,7 @@
-import { CREEP_MANAGERS } from "../utils/Interface_Constants";
-import { ERROR_ERROR } from "../utils/constants";
-import UtilHelper from "Helpers/UtilHelper";
-import UserException from "utils/UserException";
+import { CREEP_MANAGERS, ERROR_ERROR, UtilHelper, UserException } from "utils/internals";
 
 // Call the creep manager for each role
-export default class CreepManager {
+export class CreepManager {
     /**
      * loop over all creeps and call single creep manager for it
      */

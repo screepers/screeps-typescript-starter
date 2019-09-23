@@ -1,6 +1,6 @@
-import MemoryHelper from "Helpers/MemoryHelper";
-import RoomHelper from "Helpers/RoomHelper";
 import {
+    MemoryHelper,
+    RoomHelper,
     ERROR_ERROR,
     ROLE_MINER,
     ROOM_STATE_INTRO,
@@ -11,14 +11,17 @@ import {
     ROOM_STATE_STIMULATE,
     ROOM_STATE_UPGRADER,
     WALL_LIMIT,
-    ERROR_WARN
-} from "utils/constants";
-import UserException from "utils/UserException";
-import MemoryApi from "./Memory.Api";
-import { REPAIR_THRESHOLD, PRIORITY_REPAIR_THRESHOLD, RUN_RESERVE_TTL_TIMER, TOWER_THRESHOLD } from "utils/config";
+    ERROR_WARN,
+    UserException,
+    MemoryApi,
+    REPAIR_THRESHOLD,
+    PRIORITY_REPAIR_THRESHOLD,
+    RUN_RESERVE_TTL_TIMER,
+    TOWER_THRESHOLD
+} from "utils/internals";
 
 // an api used for functions related to the room
-export default class RoomApi {
+export class RoomApi {
     /**
      * check if there are hostile creeps in the room
      * @param room the room we are checking
@@ -267,13 +270,13 @@ export default class RoomApi {
             }
         ) as StructureExtension[];
 
-        const spawnsNeedFilled: StructureSpawn[] = MemoryApi.getStructureOfType(
+        const spawnsNeedFilled: StructureSpawn[] = (MemoryApi.getStructureOfType(
             room.name,
             STRUCTURE_SPAWN,
             (e: StructureSpawn) => {
                 return e.energy < e.energyCapacity;
             }
-        ) as any as StructureSpawn[];
+        ) as any) as StructureSpawn[];
 
         const extensionsAndSpawns: Array<StructureExtension | StructureSpawn> = [];
         _.forEach(extensionsNeedFilled, (ext: StructureExtension) => extensionsAndSpawns.push(ext));
@@ -286,10 +289,13 @@ export default class RoomApi {
      * @param room the room we are getting towers that need to be filled from
      */
     public static getTowersNeedFilled(room: Room): StructureTower[] {
-
-        const unsortedTowerList: StructureTower[] = <StructureTower[]>MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER, (t: StructureTower) => {
-            return t.energy < t.energyCapacity * TOWER_THRESHOLD;
-        });
+        const unsortedTowerList: StructureTower[] = <StructureTower[]>MemoryApi.getStructureOfType(
+            room.name,
+            STRUCTURE_TOWER,
+            (t: StructureTower) => {
+                return t.energy < t.energyCapacity * TOWER_THRESHOLD;
+            }
+        );
         // Sort by lowest to highest towers, so the most needed gets filled first
         return _.sortBy(unsortedTowerList, (tower: StructureTower) => tower.energy);
     }
@@ -513,11 +519,14 @@ export default class RoomApi {
         if (!target) {
             return null;
         }
-        const rampartsInRoom: StructureRampart[] = MemoryApi.getStructureOfType(room.name, STRUCTURE_RAMPART) as StructureRampart[];
+        const rampartsInRoom: StructureRampart[] = MemoryApi.getStructureOfType(
+            room.name,
+            STRUCTURE_RAMPART
+        ) as StructureRampart[];
         const openRamparts: StructureRampart[] = _.filter(rampartsInRoom, (rampart: StructureRampart) => {
             const foundCreeps: Creep[] = rampart.pos.lookFor(LOOK_CREEPS);
             const foundStructures: Array<Structure<StructureConstant>> = rampart.pos.lookFor(LOOK_STRUCTURES);
-            return (!foundCreeps && !foundStructures);
+            return !foundCreeps && !foundStructures;
         });
         return target!.pos.findClosestByRange(openRamparts);
     }
@@ -536,7 +545,7 @@ export default class RoomApi {
         }
 
         // If we are under attack and our towers have no energy, trigger a safe mode
-        const towerEnergy = _.sum(MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER), 'energy');
+        const towerEnergy = _.sum(MemoryApi.getStructureOfType(room.name, STRUCTURE_TOWER), "energy");
         if (defcon >= 3 && towerEnergy === 0) {
             if (room.controller!.safeModeAvailable) {
                 room.controller!.activateSafeMode();

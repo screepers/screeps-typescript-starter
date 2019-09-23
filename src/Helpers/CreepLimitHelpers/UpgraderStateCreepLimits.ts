@@ -10,14 +10,13 @@ import {
     ROLE_CLAIMER,
     ROLE_COLONIZER,
     ROLE_REMOTE_DEFENDER,
-    ROOM_STATE_UPGRADER
-} from "utils/constants";
-import RoomHelper from "Helpers/RoomHelper";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import MemoryApi from "Api/Memory.Api";
+    ROOM_STATE_UPGRADER,
+    RoomHelper,
+    SpawnHelper,
+    MemoryApi
+} from "utils/internals";
 
 export class UpgraderStateCreepLimits implements ICreepSpawnLimits {
-
     public roomState: RoomStateConstant = ROOM_STATE_UPGRADER;
 
     constructor() {
@@ -40,7 +39,7 @@ export class UpgraderStateCreepLimits implements ICreepSpawnLimits {
         };
 
         const numLorries: number = SpawnHelper.getLorryLimitForRoom(room, room.memory.roomState!);
-        const minerLimits: number = MemoryApi.getSources(room.name).length
+        const minerLimits: number = MemoryApi.getSources(room.name).length;
 
         // Generate Limits --------
         domesticLimits[ROLE_MINER] = minerLimits;

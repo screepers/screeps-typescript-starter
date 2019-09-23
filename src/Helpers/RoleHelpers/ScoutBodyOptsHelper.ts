@@ -16,10 +16,10 @@ import {
     TIER_7,
     TIER_8,
     ROLE_HARVESTER,
-    ROLE_SCOUT
-} from "utils/Constants";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api";
+    ROLE_SCOUT,
+    SpawnHelper,
+    SpawnApi
+} from "utils/internals";
 
 export class ScoutBodyOptsHelper implements ICreepBodyOptsHelper {
     public name: RoleConstant = ROLE_SCOUT;
@@ -67,7 +67,12 @@ export class ScoutBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+    public getTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
         // temporary value until we get an alg for this
         // TODO write this function for scout
         return room.name;

@@ -1,11 +1,6 @@
-import { C_EVENT_CREEP_SPAWNED } from "utils/Constants";
-import EventHelper from "Helpers/EventHelper";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import UserException from "utils/UserException";
-import MemoryApi from "./Memory.Api";
+import { C_EVENT_CREEP_SPAWNED, EventHelper, SpawnHelper, UserException, MemoryApi } from "utils/internals";
 
-export default class EventApi {
-
+export class EventApi {
     /**
      * log an event in the room
      * this will not create an event if the subject is undefined
@@ -26,36 +21,31 @@ export default class EventApi {
             targetId: id,
             roomName: roomNameString,
             processed: false
-        }
+        };
         Memory.rooms[roomNameString].events.push(event);
     }
-
 
     /**
      * check for events occuring in a room
      * @param room the room we are checking events for
      */
     public static scanForNewEvents(room: Room): void {
-
         // Call the helper functions to scan for and create new events for the room
         // ! [Disclaimer] This is scanning structures and forcing update every tick, watch cpu and we
         // Should individually profile this, it is useful but could turn out to be expensive, we'll see how it goes
         EventHelper.scanForCreepSpawnedEvents(room);
     }
 
-
     /**
      * process all of the events for the room
      * @param room the room we are running events for
      */
     public static processRoomEvents(room: Room): void {
-
         const events: CustomEvent[] = room.memory.events;
         for (const event in events) {
             this.processSingleEvent(room, events[event]);
         }
     }
-
 
     /**
      * process the specific event provided by the parameter
@@ -63,7 +53,6 @@ export default class EventApi {
      * @param event the event that occured
      */
     public static processSingleEvent(room: Room, event: CustomEvent): void {
-
         // Mark the event as processed
         event.processed = true;
         // Handle saftey and early returns
@@ -74,7 +63,6 @@ export default class EventApi {
 
         // Call the appropriate helper for each event
         switch (event.type) {
-
             // Handle all creep spawned events
             case C_EVENT_CREEP_SPAWNED:
                 this.processCreepSpawnEvent(room, event, subject);

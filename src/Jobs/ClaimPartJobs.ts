@@ -1,9 +1,4 @@
-import MemoryApi from "Api/Memory.Api";
-import { RESERVER_MIN_TTL } from "utils/config";
-import CreepHelper from "Helpers/CreepHelper";
-import CreepApi from "Api/Creep.Api";
-import PathfindingApi from "Api/Pathfinding.Api";
-import UserException from "utils/UserException";
+import { CreepHelper, CreepApi, PathfindingApi, MemoryApi, RESERVER_MIN_TTL, UserException } from "utils/internals";
 
 export class ClaimPartJobs implements IJobTypeHelper {
     public jobType: Valid_JobTypes = "claimPartJob";

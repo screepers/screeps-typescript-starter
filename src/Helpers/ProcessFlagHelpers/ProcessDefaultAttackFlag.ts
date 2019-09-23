@@ -1,8 +1,6 @@
-import MemoryApi from "Api/Memory.Api";
-import EmpireHelper from "Helpers/EmpireHelper";
+import { MemoryApi, EmpireHelper } from "utils/internals";
 
 export class ProcessDefaultAttackFlag implements IFlagProcesser {
-
     public primaryColor: ColorConstant = COLOR_RED;
     public secondaryColor: undefined = undefined;
 
@@ -28,20 +26,32 @@ export class ProcessDefaultAttackFlag implements IFlagProcesser {
         Memory.flags[flag.name].spawnProcessed = false;
 
         // Create the RemoteFlagMemory object for this flag
-        const attackFlagMemory: AttackFlagMemory = EmpireHelper.generateAttackFlagOptions(flag, flagTypeConst, dependentRoom.name);
-
+        const attackFlagMemory: AttackFlagMemory = EmpireHelper.generateAttackFlagOptions(
+            flag,
+            flagTypeConst,
+            dependentRoom.name
+        );
 
         // If the dependent room already has this room covered, just push this flag onto the existing structure
-        const existingDepedentAttackRoomMem: AttackRoomMemory | undefined = _.find(MemoryApi.getAttackRooms(dependentRoom),
+        const existingDepedentAttackRoomMem: AttackRoomMemory | undefined = _.find(
+            MemoryApi.getAttackRooms(dependentRoom),
             (rr: AttackRoomMemory) => {
                 if (rr) {
                     return rr.roomName === roomName;
                 }
                 return false;
-            });
+            }
+        );
 
         if (existingDepedentAttackRoomMem) {
-            MemoryApi.createEmpireAlertNode("Attack Flag [" + flag.name + "] processed. Added to existing Host Room: [" + existingDepedentAttackRoomMem.roomName + "]", 10);
+            MemoryApi.createEmpireAlertNode(
+                "Attack Flag [" +
+                    flag.name +
+                    "] processed. Added to existing Host Room: [" +
+                    existingDepedentAttackRoomMem.roomName +
+                    "]",
+                10
+            );
             existingDepedentAttackRoomMem.flags.push(attackFlagMemory);
             return;
         }
@@ -51,10 +61,13 @@ export class ProcessDefaultAttackFlag implements IFlagProcesser {
             hostiles: { cache: Game.time, data: null },
             structures: { cache: Game.time, data: null },
             roomName: flag.pos.roomName,
-            flags: [attackFlagMemory],
+            flags: [attackFlagMemory]
         };
 
-        MemoryApi.createEmpireAlertNode("Attack Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]", 10);
+        MemoryApi.createEmpireAlertNode(
+            "Attack Flag [" + flag.name + "] processed. Host Room: [" + dependentRoom.name + "]",
+            10
+        );
         dependentRoom.memory.attackRooms!.push(attackRoomMemory);
     }
 }

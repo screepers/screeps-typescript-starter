@@ -1,9 +1,6 @@
-import {
-    ROOM_STATE_NUKE_INBOUND
-} from "utils/constants";
+import { ROOM_STATE_NUKE_INBOUND } from "utils/internals";
 
 export class NukeStateCreepLimits implements ICreepSpawnLimits {
-
     public roomState: RoomStateConstant = ROOM_STATE_NUKE_INBOUND;
 
     constructor() {

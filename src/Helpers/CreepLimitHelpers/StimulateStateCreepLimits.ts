@@ -10,14 +10,13 @@ import {
     ROLE_COLONIZER,
     ROLE_CLAIMER,
     ROLE_REMOTE_DEFENDER,
-    ROOM_STATE_STIMULATE
-} from "utils/constants";
-import RoomHelper from "Helpers/RoomHelper";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import MemoryApi from "Api/Memory.Api";
+    ROOM_STATE_STIMULATE,
+    RoomHelper,
+    SpawnHelper,
+    MemoryApi
+} from "utils/internals";
 
 export class StimulateStateCreepLimits implements ICreepSpawnLimits {
-
     public roomState: RoomStateConstant = ROOM_STATE_STIMULATE;
 
     constructor() {
@@ -47,7 +46,7 @@ export class StimulateStateCreepLimits implements ICreepSpawnLimits {
         domesticLimits[ROLE_HARVESTER] = 2;
         domesticLimits[ROLE_WORKER] = 2;
         domesticLimits[ROLE_POWER_UPGRADER] = 1;
-        domesticLimits[ROLE_LORRY] = numLorries
+        domesticLimits[ROLE_LORRY] = numLorries;
 
         return domesticLimits;
     }

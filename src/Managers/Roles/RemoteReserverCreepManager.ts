@@ -1,12 +1,7 @@
-import MemoryApi from "../../Api/Memory.Api";
-import CreepApi from "Api/Creep.Api";
-import {
-    ROLE_REMOTE_RESERVER,
-} from "utils/constants";
+import { ROLE_REMOTE_RESERVER, MemoryApi, CreepApi } from "utils/internals";
 
 // Manager for the miner creep role
-export default class RemoteReserverCreepManager implements ICreepRoleManager {
-
+export class RemoteReserverCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_REMOTE_RESERVER;
 
     constructor() {
@@ -19,7 +14,6 @@ export default class RemoteReserverCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         const homeRoom = Game.rooms[creep.memory.homeRoom];
         const targetRoom = Game.rooms[creep.memory.targetRoom];
 

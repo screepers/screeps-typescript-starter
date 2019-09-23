@@ -1,5 +1,5 @@
-import { SpawnHelper } from "Helpers/SpawnHelper";
 import {
+    SpawnHelper,
     domesticRolePriority,
     remoteRolePriority,
     ROLE_COLONIZER,
@@ -29,19 +29,20 @@ import {
     TIER_7,
     TIER_8,
     ERROR_ERROR,
-    ROLE_SCOUT
-} from "utils/Constants";
-import { CREEP_BODY_OPT_HELPERS, ROOM_STATE_CREEP_LIMITS } from "../utils/Interface_Constants";
-import MemoryHelperRoom from "../Helpers/MemoryHelper_Room";
-import RoomHelper from "../Helpers/RoomHelper";
-import MemoryApi from "./Memory.Api";
-import UserException from "utils/UserException";
-import EventHelper from "Helpers/EventHelper";
+    ROLE_SCOUT,
+    CREEP_BODY_OPT_HELPERS,
+    ROOM_STATE_CREEP_LIMITS,
+    MemoryHelper_Room,
+    RoomHelper,
+    MemoryApi,
+    UserException,
+    EventHelper
+} from "utils/internals";
 
 /**
  * The API used by the spawn manager
  */
-export default class SpawnApi {
+export class SpawnApi {
     /**
      * set domestic creep limits
      * @param room the room we want limits for
@@ -133,7 +134,6 @@ export default class SpawnApi {
         for (const role of rolesToAdd) {
             room.memory.creepLimit!.militaryLimits.push(role);
         }
-
     }
 
     /**
@@ -141,17 +141,16 @@ export default class SpawnApi {
      * @param room the room we are setting limits for
      */
     public static setCreepLimits(room: Room): void {
-
         // Ensure creep limits are set
         if (!room.memory.creepLimit) {
             MemoryApi.initCreepLimits(room);
         }
 
         // Set Domestic Limits to Memory
-        MemoryHelperRoom.updateDomesticLimits(room, this.generateDomesticCreepLimits(room));
+        MemoryHelper_Room.updateDomesticLimits(room, this.generateDomesticCreepLimits(room));
 
         // Set Remote Limits to Memory
-        MemoryHelperRoom.updateRemoteLimits(room, this.generateRemoteCreepLimits(room));
+        MemoryHelper_Room.updateRemoteLimits(room, this.generateRemoteCreepLimits(room));
 
         // Create the Military Queue
         this.generateMilitaryCreepQueue(room);
@@ -250,7 +249,6 @@ export default class SpawnApi {
             );
         }
 
-
         const creepMemory = SpawnHelper.generateDefaultCreepMemory(role, homeRoom, targetRoom, creepOptions);
         return spawn.spawnCreep(body, name, { memory: creepMemory });
     }
@@ -342,9 +340,9 @@ export default class SpawnApi {
         // Set default values if military options aren't provided
         // If one of these aren't provided, then the entire purpose of them is nix,
         // So we just check if any of them aren't provided and set defaults for all in that case
-        let squadSize: number = squadMemory['squadSize'];
-        let squadUUID: number | null = squadMemory['squadUUID'];
-        let rallyLocation: RoomPosition | null = squadMemory['rallyLocation'];
+        let squadSize: number = squadMemory["squadSize"];
+        let squadUUID: number | null = squadMemory["squadUUID"];
+        let rallyLocation: RoomPosition | null = squadMemory["rallyLocation"];
         if (!squadSize || !squadUUID || !rallyLocation) {
             squadSize = 0;
             squadUUID = null;
@@ -353,17 +351,18 @@ export default class SpawnApi {
 
         // If no role provided, throw warning
         if (!role) {
-            throw new UserException(
-                "Null role provided to generate creep options",
-                "Api/SpawnApi",
-                ERROR_ERROR
-            );
+            throw new UserException("Null role provided to generate creep options", "Api/SpawnApi", ERROR_ERROR);
         }
 
         // Call the appropriate class to generate the creep options for the specified role
         for (const index in CREEP_BODY_OPT_HELPERS) {
             if (CREEP_BODY_OPT_HELPERS[index].name === role) {
-                return CREEP_BODY_OPT_HELPERS[index].generateCreepOptions(roomState, squadSize, squadUUID, rallyLocation);
+                return CREEP_BODY_OPT_HELPERS[index].generateCreepOptions(
+                    roomState,
+                    squadSize,
+                    squadUUID,
+                    rallyLocation
+                );
             }
         }
         throw new UserException(
@@ -379,13 +378,8 @@ export default class SpawnApi {
      * @param role the role of the creep we want
      */
     public static generateCreepBody(tier: TierConstant, role: RoleConstant | null): BodyPartConstant[] {
-
         if (!role) {
-            throw new UserException(
-                "Null role provided to generate creep options",
-                "Api/SpawnApi",
-                ERROR_ERROR
-            );
+            throw new UserException("Null role provided to generate creep options", "Api/SpawnApi", ERROR_ERROR);
         }
         for (const index in CREEP_BODY_OPT_HELPERS) {
             if (CREEP_BODY_OPT_HELPERS[index].name === role) {
@@ -493,7 +487,6 @@ export default class SpawnApi {
      * @param creepName the name of the creep we are checking for
      */
     public static generateSquadOptions(room: Room, roleConst: RoleConstant, creepName: string): StringMap {
-
         // Set to this for clarity that we aren't expecting any squad options in some cases
         const squadOptions: StringMap = {
             squadSize: 0,
@@ -506,12 +499,15 @@ export default class SpawnApi {
             return squadOptions;
         }
 
-        const selectedFlagMemory: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(room, roleConst, creepName);
+        const selectedFlagMemory: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(
+            room,
+            roleConst,
+            creepName
+        );
         // If we didn't find a squad based flag return the default squad options
         if (!selectedFlagMemory) {
             return squadOptions;
         } else {
-
             // Set squad options to the flags memory and return it
             squadOptions.squadSize = selectedFlagMemory.squadSize;
             squadOptions.squadUUID = selectedFlagMemory.squadUUID;
@@ -527,7 +523,12 @@ export default class SpawnApi {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public static getCreepTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
+    public static getCreepTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
         for (const index in CREEP_BODY_OPT_HELPERS) {
             if (CREEP_BODY_OPT_HELPERS[index].name === roleConst) {
                 return CREEP_BODY_OPT_HELPERS[index].getTargetRoom(room, roleConst, creepBody, creepName);

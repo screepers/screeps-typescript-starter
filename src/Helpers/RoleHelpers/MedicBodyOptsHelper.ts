@@ -16,15 +16,14 @@ import {
     TIER_7,
     TIER_8,
     ROLE_MEDIC,
-    ERROR_ERROR
-} from "utils/Constants";
-import { SpawnHelper } from "Helpers/SpawnHelper";
-import SpawnApi from "Api/Spawn.Api"
-import EventHelper from "Helpers/EventHelper";
-import UserException from "utils/UserException";
+    ERROR_ERROR,
+    SpawnHelper,
+    SpawnApi,
+    EventHelper,
+    UserException
+} from "utils/internals";
 
 export class MedicBodyOptsHelper implements ICreepBodyOptsHelper {
-
     public name: RoleConstant = ROLE_MEDIC;
 
     constructor() {
@@ -87,7 +86,6 @@ export class MedicBodyOptsHelper implements ICreepBodyOptsHelper {
         squadUUIDParam: number | null,
         rallyLocationParam: RoomPosition | null
     ): CreepOptionsMili | undefined {
-
         let creepOptions: CreepOptionsMili = SpawnHelper.getDefaultCreepOptionsMili();
         switch (roomState) {
             case ROOM_STATE_INTRO:
@@ -127,8 +125,17 @@ export class MedicBodyOptsHelper implements ICreepBodyOptsHelper {
      * @param creepBody the body of the creep we are checking, so we know who to exclude from creep counts
      * @param creepName the name of the creep we are checking for
      */
-    public getTargetRoom(room: Room, roleConst: RoleConstant, creepBody: BodyPartConstant[], creepName: string): string {
-        const requestingFlag: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(room, roleConst, creepName);
+    public getTargetRoom(
+        room: Room,
+        roleConst: RoleConstant,
+        creepBody: BodyPartConstant[],
+        creepName: string
+    ): string {
+        const requestingFlag: AttackFlagMemory | undefined = EventHelper.getMiliRequestingFlag(
+            room,
+            roleConst,
+            creepName
+        );
         if (requestingFlag) {
             return Game.flags[requestingFlag!.flagName].pos.roomName;
         }

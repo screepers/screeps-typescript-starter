@@ -1,4 +1,4 @@
-export default class Normalize {
+export class Normalize {
 
     /**
      * Returns a mockup of a room object for a given roomname

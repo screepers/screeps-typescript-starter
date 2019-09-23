@@ -1,14 +1,7 @@
-import MemoryApi from "../../Api/Memory.Api";
-import {
-    ROLE_MEDIC,
-} from "utils/constants";
-import MiliApi from "Api/CreepMili.Api";
-import PathfindingApi from "Api/Pathfinding.Api";
-
+import { ROLE_MEDIC, MemoryApi, MiliApi, PathfindingApi } from "utils/internals";
 
 // Manager for the miner creep role
-export default class MedicCreepManager implements ICreepRoleManager {
-
+export class MedicCreepManager implements ICreepRoleManager {
     public name: RoleConstant = ROLE_MEDIC;
 
     constructor() {
@@ -21,7 +14,6 @@ export default class MedicCreepManager implements ICreepRoleManager {
      * @param creep the creep we are running
      */
     public runCreepRole(creep: Creep): void {
-
         const creepOptions: CreepOptionsMili = creep.memory.options as CreepOptionsMili;
         const CREEP_RANGE: number = 3;
 
@@ -64,13 +56,11 @@ export default class MedicCreepManager implements ICreepRoleManager {
                 creep.heal(healingTarget);
             }
             if (creep.hits < creep.hitsMax) {
-                creep.heal(creep);  // heal self first if we need to
-            }
-            else {
+                creep.heal(creep); // heal self first if we need to
+            } else {
                 creep.heal(healingTarget);
             }
-        }
-        else {
+        } else {
             creep.moveTo(healingTarget);
         }
     }
