@@ -1,4 +1,4 @@
-import { CreepApi, MemoryApi, UserException } from "utils/internals";
+import { CreepApi, MemoryApi, UserException, ROLE_CLAIMER } from "utils/internals";
 
 // Manager for the miner creep role
 export class ClaimerCreepManager implements ICreepRoleManager {
