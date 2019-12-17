@@ -32,7 +32,7 @@
     "@types/lodash": "^3.10.1",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.5.5",
-    "@types/screeps": "^2.4.0",
+    "@types/screeps": "^3.0.0",
     "@types/sinon": "^5.0.5",
     "@types/sinon-chai": "^3.2.0",
     "chai": "^4.2.0",
