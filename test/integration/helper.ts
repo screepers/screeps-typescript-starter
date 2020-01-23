@@ -58,6 +58,6 @@ before(() => {
 
 after(() => {
   process.exit();
-})
+});
 
 export const helper = new IntegrationTestHelper();
