@@ -56,8 +56,4 @@ before(() => {
   stdHooks.hookWrite();
 });
 
-after(() => {
-  process.exit();
-});
-
 export const helper = new IntegrationTestHelper();
