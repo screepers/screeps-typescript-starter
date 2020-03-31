@@ -9,8 +9,8 @@ const DIST_MAIN_JS = 'dist/main.js';
  * manipulating the terrain and game state.
  */
 class IntegrationTestHelper {
-  private _server;
-  private _player;
+  private _server: any;
+  private _player: any;
 
   get server() {
     return this._server;
