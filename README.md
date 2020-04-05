@@ -50,7 +50,7 @@ We've also spent some time reworking the documentation from the ground-up, which
 
 Maintaining the docs will also become a more community-focused effort, which means you too, can take part in improving the docs for this starter kit.
 
-To visit the docs, [click here](https://screepers.gitbooks.io/screeps-typescript-starter/).
+To visit the docs, [click here](https://screepers.gitbook.io/screeps-typescript-starter/).
 
 ## Contributing
 
