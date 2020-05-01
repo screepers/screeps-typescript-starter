@@ -6,7 +6,7 @@ Screeps Typescript Starter is a starting point for a Screeps AI written in Types
 
 You will need:
 
-- [Node.JS](https://nodejs.org/en/download) (>= 10.0.0)
+- [Node.JS](https://nodejs.org/en/download) (10.x)
 - A Package Manager ([Yarn](https://yarnpkg.com/en/docs/getting-started) or [npm](https://docs.npmjs.com/getting-started/installing-node))
 - Rollup CLI (Optional, install via `npm install -g rollup`)
 - Build tools (`apt install build-essential` for Ubuntu, [Visual Studio](https://www.visualstudio.com/vs/) for Windows, etc)
