@@ -10,6 +10,7 @@
 /tsc-out
 /node_modules
 /_book
+/build/*
 
 # TypeScript definitions installed by Typings
 /typings
