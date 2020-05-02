@@ -42,13 +42,40 @@ magnitude, it is recommended to prefer unit tests wherever possible.
 
 ## Integration Testing
 
+### Installing Screeps Server Mockup
+
+Before starting to use integration testing, you must install [screeps-server-mockup](https://github.com/screepers/screeps-server-mockup) to your project.
+Please view that repository for more instruction on installation.
+
+```bash
+# Using yarn:
+yarn add -D screeps-server-mockup
+# Using npm
+npm install --save-dev screeps-server-mockup
+```
+
+You will also need to add scripts to run integration tests.
+
+In `package.json`, add a new `test-integration` script and add the new integration testing to the main `test` script.
+
+```json
+  "scripts": {
+    "test": "npm run test-unit && npm run test-integration",
+    "test-integration": "npm run build && rollup -c rollup.test-integration-config.js && mocha dist/test-integration.bundle.js",
+  }
+```
+
+Now you can run integration tests by using the `test-integration` script or run both unit and integration tests using the `test` script.
+
+### Integration Testing with Screeps Server Mockup
+
 Integration testing is for code that depends heavily on having a full game
 environment. Integration tests are completely representative of the real game
 (in fact they run with an actual Screeps server). This comes at the cost of
 performance and very involved setup when creating specific scenarios.
 
-Server testing support is implmented via
-[screeps-server-mockup](https://github.com/Hiryus/screeps-server-mockup). View
+Server testing support is implemented via
+[screeps-server-mockup](https://github.com/screepers/screeps-server-mockup). View
 this repository for more information on the API.
 
 By default the test helper will create a "stub" world with a 3x3 grid of rooms
