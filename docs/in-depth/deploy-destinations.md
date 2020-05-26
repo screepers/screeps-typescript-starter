@@ -1,8 +1,8 @@
-# Deploy destination
+# Deploy destinations
 
 The `screeps.json` file is a JSON configuration file separated into multiple deploy destinations. We've given you three primary destinations by default.
 
-```json
+```javascript
 {
   // Used for deploying to the main world
   "main": {
@@ -44,3 +44,4 @@ rollup -c --environment DEST:main
 ```
 
 Omitting the destination will perform a dry run, which will compile and bundle the code without uploading it.
+

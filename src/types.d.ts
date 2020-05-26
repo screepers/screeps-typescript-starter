@@ -1,16 +1,28 @@
-// type shim for nodejs' `require()` syntax
-// for stricter node.js typings, remove this and install `@types/node`
-declare const require: (module: string) => any;
+// example declaration file - remove these and add your own custom typings
 
-// add your custom typings here
+// memory extension samples
 declare enum CreepRole {
     Worker,
     Harvester
 }
 
-declare interface CreepMemory {
-    role: string
-    job: string
-    silo: string
-    energySource: string
+interface CreepMemory {
+  role: string;
+  room: string;
+  working: boolean;
+  job: string
+  silo: string
+  energySource: string
+}
+
+interface Memory {
+  uuid: number;
+  log: any;
+}
+
+// `global` extension samples
+declare namespace NodeJS {
+  interface Global {
+    log: any;
+  }
 }

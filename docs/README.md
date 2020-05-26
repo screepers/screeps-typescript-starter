@@ -1,10 +1,10 @@
-# Screeps Typescript Starter
+# Introduction
 
 Screeps Typescript Starter is a starting point for a Screeps AI written in [Typescript](http://www.typescriptlang.org/). It provides everything you need to start writing your AI whilst leaving `main.ts` as empty as possible.
 
 [View on GitHub](https://github.com/screepers/screeps-typescript-starter)
 
-## What's new (v3.0)
+## What's new \(v3.0\)
 
 ### Simpler setup!
 
@@ -14,7 +14,7 @@ The new version does away with all this and only provides only the code and tool
 
 ### Rollup!
 
-We have swapped the bundler from Webpack to [Rollup](https://rollupjs.org/). Rollup is easier to configure and can be set up to do everything needed for Screeps. It also comes with various improvements over Webpack, which you can learn more about [here](./in-depth/module-bundling.md).
+We have swapped the bundler from Webpack to [Rollup](https://rollupjs.org/). Rollup is easier to configure and can be set up to do everything needed for Screeps. It also comes with various improvements over Webpack, which you can learn more about [here](in-depth/module-bundling.md).
 
 ### Better docs!
 
@@ -30,4 +30,5 @@ Download the latest source [here](https://github.com/screepers/screeps-typescrip
 git clone https://github.com/screepers/screeps-typescript-starter.git
 ```
 
-Extract it to a folder, and [let's get started](./getting-started/installation.md)!
+Extract it to a folder, and [let's get started](getting-started/installation.md)!
+
