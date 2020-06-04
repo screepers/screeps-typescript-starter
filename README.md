@@ -12,7 +12,7 @@ You will need:
 
 Download the latest source [here](https://github.com/screepers/screeps-typescript-starter/archive/master.zip) and extract it to a folder.
 
-Open the folder in your terminal and run your package manager to install install the required packages and TypeScript declaration files:
+Open the folder in your terminal and run your package manager to install the required packages and TypeScript declaration files:
 
 ```bash
 # npm
