@@ -18,43 +18,37 @@ If you would rather not use Prettier instead, you can easily disable it too. In 
 }
 ```
 
-## Configuring TSLint for Prettier
+## Configuring ESLint for Prettier
 
 The `.prettierrc` file configures how Prettier formats your code. By default we use the following options.
 
-```javascript
+```json
 {
   "semi": true,
   "tabWidth": 2,
   "printWidth": 120,
   "singleQuote": false,
-  "trailingComma": "none"
+  "trailingComma": "none",
+  "arrowParens": "avoid",
+  "endOfLine": "auto"
 }
 ```
 
-We can use `tslint-config-prettier` to override some TSLint rules with its Prettier counterparts. In your `tslint.json` file, extend `tslint-config-prettier`.
-
-```javascript
-{
-  "extends" : [
-    "tslint:recommended",
-    "tslint-config-prettier"
-  ]
-}
-```
-
-To make Prettier error out on formatting errors, we can also use `tslint-plugin-prettier` to add a custom rule for this.
+We can use ESLint config and plugin for Prettier to override some ESLint rules to not conflict with Prettier.
 
 ```bash
-yarn add --dev tslint-plugin-prettier
+$ yarn add --dev eslint-plugin-prettier eslint-config-prettier prettier
 ```
+
+Then in your `.eslintrc` file, add the following:
 
 ```javascript
-{
-  "rulesDirectory": ["tslint-plugin-prettier"],
-  "rules": {
-    "prettier": true
+module.exports = {
+  // other configuration omitted for brevity
+  extends: ["prettier", "prettier/@typescript-eslint", "plugin:prettier/recommended"],
+  plugins: ["prettier"],
+  rules: {
+    "prettier/prettier": "error"
   }
-}
+};
 ```
-
