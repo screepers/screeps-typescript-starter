@@ -1,4 +1,3 @@
-// tslint:disable:no-conditional-assignment
 import { SourceMapConsumer } from "source-map";
 
 export class ErrorMapper {
@@ -27,10 +26,11 @@ export class ErrorMapper {
    */
   public static sourceMappedStackTrace(error: Error | string): string {
     const stack: string = error instanceof Error ? (error.stack as string) : error;
-    if (this.cache.hasOwnProperty(stack)) {
+    if (Object.prototype.hasOwnProperty.call(this.cache, stack)) {
       return this.cache[stack];
     }
 
+    // eslint-disable-next-line no-useless-escape
     const re = /^\s+at\s+(.+?\s+)?\(?([0-z._\-\\\/]+):(\d+):(\d+)\)?$/gm;
     let match: RegExpExecArray | null;
     let outStack = error.toString();
