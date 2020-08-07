@@ -1,4 +1,4 @@
---require test/setup-node.js
+--require test/setup-mocha.js
 --require ts-node/register
 --require tsconfig-paths/register
 --ui bdd

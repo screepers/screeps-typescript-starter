@@ -60,7 +60,7 @@ In `package.json`, add a new `test-integration` script and add the new integrati
 
 ```json
   "scripts": {
-    "test": "export TS_NODE_PROJECT='./tsconfig.test.json' && npm run test-unit && npm run test-integration",
+    "test": "npm run test-unit && npm run test-integration",
     "test-integration": "npm run build && mocha test/integration/**/*.ts",
   }
 ```
