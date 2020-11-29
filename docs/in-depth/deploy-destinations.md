@@ -1,6 +1,6 @@
 # Deploy destinations
 
-The `screeps.json` file is a JSON configuration file separated into multiple deploy destinations. We've given you three primary destinations by default.
+The `screeps.json` file is a JSON configuration file separated into multiple deploy destinations. We've given you four primary destinations by default.
 
 ```javascript
 {
@@ -24,6 +24,16 @@ The `screeps.json` file is a JSON configuration file separated into multiple dep
     "path": "/",
     "branch": "sim"
   },
+  // Used for deploying to Seasonal Event server
+  "season": {
+    "email": "you@provider.tld",
+    "password": "Password",
+    "protocol": "https",
+    "hostname": "screeps.com",
+    "port": 443,
+    "path": "/season",
+    "branch": "main"
+  },
   // Used for deploying to a private server
   "pserver": {
     "email": "username",
@@ -44,4 +54,3 @@ rollup -c --environment DEST:main
 ```
 
 Omitting the destination will perform a dry run, which will compile and bundle the code without uploading it.
-

@@ -15,6 +15,14 @@
     "path": "/",
     "branch": "sim"
   },
+  "season": {
+    "token": "YOUR_TOKEN",
+    "protocol": "https",
+    "hostname": "screeps.com",
+    "port": 443,
+    "path": "/season",
+    "branch": "main"
+  },
   "pserver": {
     "email": "username",
     "password": "Password",
