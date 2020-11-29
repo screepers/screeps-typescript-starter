@@ -1,13 +1,14 @@
 # Deploy destinations
 
-The `screeps.json` file is a JSON configuration file separated into multiple deploy destinations. We've given you three primary destinations by default.
+The `screeps.json` file is a JSON configuration file separated into multiple deploy destinations. We've given you four primary destinations by default.
+
+See [here](/docs/getting-started/authenticating.md) for steps to generate your API token.
 
 ```javascript
 {
   // Used for deploying to the main world
   "main": {
-    "email": "you@provider.tld",
-    "password": "Password",
+    "token": "YOUR_TOKEN",
     "protocol": "https",
     "hostname": "screeps.com",
     "port": 443,
@@ -16,18 +17,25 @@ The `screeps.json` file is a JSON configuration file separated into multiple dep
   },
   // Used for deploying to Simulation mode
   "sim": {
-    "email": "you@provider.tld",
-    "password": "Password",
+    "token": "YOUR_TOKEN",
     "protocol": "https",
     "hostname": "screeps.com",
     "port": 443,
     "path": "/",
     "branch": "sim"
   },
+  // Used for deploying to Seasonal Event server
+  "season": {
+    "token": "YOUR_TOKEN",
+    "protocol": "https",
+    "hostname": "screeps.com",
+    "port": 443,
+    "path": "/season",
+    "branch": "main"
+  },
   // Used for deploying to a private server
   "pserver": {
-    "email": "username",
-    "password": "Password",
+    "token": "YOUR_TOKEN",
     "protocol": "http",
     "hostname": "1.2.3.4",
     "port": 21025,
@@ -44,4 +52,3 @@ rollup -c --environment DEST:main
 ```
 
 Omitting the destination will perform a dry run, which will compile and bundle the code without uploading it.
-
