@@ -10,7 +10,7 @@ If you have an existing copy of your starter kit, follow these steps:
 * Upgrade `rollup-plugin-screeps` to version 0.1.1.
 * Follow the authentication steps as defined below.
 
-## Seting up Screeps authentication
+## Setting up Screeps authentication
 
 The authentication token is pulled by the starter kit from a file named `screeps.json`. A sample config file \(`screeps.sample.json`\) is provided within the project, to use it, simply make a copy and rename it to `screeps.json`.
 
