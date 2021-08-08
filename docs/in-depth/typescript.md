@@ -25,24 +25,23 @@ Starting from version 2.0 of the starter kit, we've enabled the `--strict` flag 
 
 **For more info:** [https://blog.mariusschulz.com/2017/06/09/typescript-2-3-the-strict-compiler-option](https://blog.mariusschulz.com/2017/06/09/typescript-2-3-the-strict-compiler-option)
 
-## TSLint
+## ESLint
 
-TSLint checks your TypeScript code for readability, maintainability, and functionality errors, and can also enforce coding style standards.
+ESLint checks your TypeScript (and JavaScript) code for readability, maintainability, and functionality errors, and can also enforce coding style standards.
 
-This project provides TSLint rules through a `tslint.json` file, which extends the recommended rules from TSLint defined [here](https://github.com/palantir/tslint/blob/next/src/configs/recommended.ts).
+This project provides ESLint rules through a `.eslintrc.js` file, which extends the recommended rules from ESLint defined [here](https://eslint.org/docs/rules/).
 
 We've made some changes to these rules, which we considered necessary and/or relevant to a proper Screeps project:
 
-* set the [forin](http://palantir.github.io/tslint/rules/forin/) rule to `false`, it was forcing `for ( ... in ...)` loops to check if object members were not coming from the class prototype.
-* set the [interface-name](http://palantir.github.io/tslint/rules/interface-name/) rule to `false`, in order to allow interfaces that are not prefixed with `I`.
-* set the [no-console](http://palantir.github.io/tslint/rules/no-console/) rule to `false`, in order to allow using `console`.
-* in the [variable-name](http://palantir.github.io/tslint/rules/variable-name/) rule, added `allow-leading-underscore`.
+* set the [guard-for-in](https://eslint.org/docs/rules/guard-for-in) rule to `off`, it was forcing `for ( ... in ...)` loops to check if object members were not coming from the class prototype.
+* set the [no-console](https://eslint.org/docs/rules/no-console) rule to `off`, in order to allow using `console`.
+* set the [no-underscore-dangle](https://eslint.org/docs/rules/no-underscore-dangle) to `warn`.
 
-### Customising TSLint
+### Customising ESLint
 
-You can also customise your `tslint.json` file to match the preferences of your codebase. Click [here](https://palantir.github.io/tslint/usage/configuration/), to find out how, and click [here](https://palantir.github.io/tslint/rules/) for a complete list of rules available.
+You can also customise your `.eslintrc.js` file to match the preferences of your codebase. Click [here](https://eslint.org/docs/user-guide/configuring/), to find out how, and click [here](https://eslint.org/docs/rules/) for a complete list of rules available.
 
-If you believe that some rules should not apply to a part of your code \(e.g. for one-off cases like having to use `require()` to include a module\), you can use flags to let TSLint know about it: [https://palantir.github.io/tslint/usage/rule-flags/](https://palantir.github.io/tslint/usage/rule-flags/)
+If you believe that some rules should not apply to a part of your code \(e.g. for one-off cases like having to use `require()` to include a module\), you can use flags to let ESLint know about it: [https://eslint.org/docs/user-guide/configuring/rules#disabling-rules](https://eslint.org/docs/user-guide/configuring/rules#disabling-rules)
 
-**More info about TSLint:** [https://palantir.github.io/tslint/](https://palantir.github.io/tslint/)
+**More info about ESLint:** [https://eslint.org/](https://eslint.org/)
 
