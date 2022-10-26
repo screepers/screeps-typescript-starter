@@ -29,9 +29,6 @@
     "url": "https://github.com/screepers/screeps-typescript-starter/issues"
   },
   "homepage": "https://github.com/screepers/screeps-typescript-starter#readme",
-  "engines": {
-    "node": ">=16.x"
-  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
