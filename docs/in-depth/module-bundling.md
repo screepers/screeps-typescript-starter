@@ -2,7 +2,7 @@
 
 Bundling your Screeps codebase using module bundlers like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/) allows you to improve your Screeps AI development workflow.
 
-For instance, it allows you to easily include third-party libraries, like [screeps-profiler](https://github.com/screepers/screeps-profiler) and [Traveler](https://github.com/bonzaiferroni/Traveler). Instead of manually copy-pasting these libraries into your code, you can simply install it as an `npm` module:
+For instance, it allows you to easily include third-party libraries, like [screeps-profiler](https://github.com/screepers/screeps-profiler). Instead of manually copy-pasting these libraries into your code, you can simply install it as an `npm` module:
 
 ```bash
 npm install screeps-profiler
