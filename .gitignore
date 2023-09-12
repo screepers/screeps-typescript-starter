@@ -17,6 +17,7 @@
 
 # Screeps Config
 screeps.json
+Gruntfile.js
 
 # ScreepsServer data from integration tests
 /server
