@@ -1,0 +1,29 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build code
+        run: npm run build
+
+      - name: Deploy to Screeps
+        env:
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+        run: npm run deploy

@@ -1,0 +1,13 @@
+{
+    "name": "Screeps Development",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:16",
+    "postCreateCommand": "npm install",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode"
+            ]
+        }
+    }
+}
