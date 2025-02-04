@@ -5,45 +5,54 @@ import { RoomRoutine } from "RoomProgram";
 
 export class EnergyCarrying extends RoomRoutine {
     name = "energy carrying";
+    energyRoutes: EnergyRoute[] = [];
 
-    constructor() {
-        super();
+    constructor(room : Room) {
+        if (!room.controller) throw new Error("Room has no controller");
+        super(room.controller.pos, { "carrier": [] });
     }
 
     routine(room: Room): void {
         console.log('energy carrying');
 
-        if (!room.memory.energyRoutes) { this.calculateRoutes(room); }
-        if (!room.memory.energyRoutes) { return; }
+        if (!this.energyRoutes.length) { this.calculateRoutes(room); }
 
-        let routes = room.memory.energyRoutes as EnergyRoute[];
-        forEach(routes, (route) => {
-            let r = route as EnergyRoute;
-            forEach(r.Carriers, (carrier) => {
+        forEach(this.energyRoutes, (route) => {
+            forEach(route.Carriers, (carrier) => {
                 let creep = Game.getObjectById(carrier.creepId) as Creep;
                 let currentWaypointIdx = carrier.waypointIdx;
                 if (creep == null) { return; }
 
-                if (this.LocalDelivery(creep, currentWaypointIdx, r)) return;
-                this.MoveToNextWaypoint(creep, currentWaypointIdx, r, carrier);
+                if (this.LocalDelivery(creep, currentWaypointIdx, route)) return;
+                this.MoveToNextWaypoint(creep, currentWaypointIdx, route, carrier);
             });
         });
-
-        room.memory.energyRoutes = routes;
     }
 
-    SpawnCarryCreep(
-        route: EnergyRoute,
-        spawn: StructureSpawn): boolean {
+    serialize() {
+        return {
+            name: this.name,
+            position: this.position,
+            creepIds: this.creepIds,
+            energyRoutes: this.energyRoutes
+        };
+    }
 
-        if (route.Carriers.length < 1) {
-            return spawn.spawnCreep(
-                [CARRY, CARRY, MOVE, MOVE],
-                spawn.name + Game.time,
-                { memory: { role: "carrier" } }) == OK;
+    deserialize(data: any): void {
+        this.name = data.name;
+        this._position = new RoomPosition(data.position.x, data.position.y, data.position.roomName);
+        this.creepIds = data.creepIds;
+        this.energyRoutes = data.energyRoutes;
+    }
+
+    calcSpawnQueue(room : Room): void {
+        if (this.creepIds.carrier.length < 1) {
+            this.spawnQueue.push({
+                body: [CARRY, CARRY, MOVE, MOVE],
+                pos: this.position,
+                role: "carrier"
+            });
         }
-
-        return false;
     }
 
     LocalDelivery(creep: Creep, currentWaypointIdx: number, route: EnergyRoute): boolean {
@@ -147,9 +156,9 @@ export class EnergyCarrying extends RoomRoutine {
     }
 
     calculateRoutes(room: Room) {
-        if (!room.memory.sourceMines) { return; }
+        if (!room.memory.routines.sourceMines) { return; }
 
-        let mines = room.memory.sourceMines as SourceMine[];
+        let mines = room.memory.routines.sourceMines as SourceMine[];
 
         let miners = room.find(FIND_MY_CREEPS, { filter: (creep) => { return creep.memory.role == "busyHarvester"; } });
         if (miners.length == 0) { return; }
@@ -160,9 +169,9 @@ export class EnergyCarrying extends RoomRoutine {
         let energyRoutes: EnergyRoute[] = [];
         forEach(mines, (mine) => {
             let harvestPos = new RoomPosition(
-                mine.HarvestPositions[0].pos.x,
-                mine.HarvestPositions[0].pos.y,
-                mine.HarvestPositions[0].pos.roomName);
+                mine.HarvestPositions[0].x,
+                mine.HarvestPositions[0].y,
+                mine.HarvestPositions[0].roomName);
             if (harvestPos == null) { return; }
 
             energyRoutes.push(
@@ -173,7 +182,5 @@ export class EnergyCarrying extends RoomRoutine {
                     Carriers: []
                 });
         });
-
-        room.memory.energyRoutes = energyRoutes;
     }
 }

@@ -1,11 +1,6 @@
 export interface SourceMine {
     sourceId : Id<Source>;
-    HarvestPositions: HarvestPosition[];
+    HarvestPositions: RoomPosition[];
     flow: number;
     distanceToSpawn: number;
-}
-
-export interface HarvestPosition {
-    pos: RoomPosition;
-    Harvesters: Id<Creep>[];
 }

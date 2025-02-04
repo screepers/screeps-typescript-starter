@@ -1,39 +1,89 @@
 import { RoomRoutine } from "RoomProgram";
-import { HarvestPosition, SourceMine } from "SourceMine";
-import { forEach, some, sortBy } from "lodash";
+import { SourceMine } from "SourceMine";
 
-export class EnergyMining { //extends RoomRoutine {
+export class EnergyMining extends RoomRoutine {
     name = 'energy mining';
+    private sourceMine!: SourceMine
 
-    //constructor() { super(); }
+    constructor(pos: RoomPosition) {
+        super(pos, { harvester: [] });
+    }
 
     routine(room: Room): void {
         console.log('energy mining');
+        if (this.sourceMine == undefined) { return; }
 
-        if (!room.memory.sourceMines) { findMines(room); }
+        let source = Game.getObjectById(this.sourceMine.sourceId);
+        if (source == null) { return; }
+        this.HarvestAssignedEnergySource();
 
-        let mines = room.memory.sourceMines as SourceMine[];
-        forEach(mines, (mine) => {
-            let m = mine as SourceMine;
-            let source = Game.getObjectById(m.sourceId);
-            if (source == null) { return; }
-            HarvestAssignedEnergySource(m);
-        });
-
-        room.memory.sourceMines = mines;
+        this.createConstructionSiteOnEnergyPiles();
     }
-}
 
-function HarvestAssignedEnergySource(mine: SourceMine) {
-    let source = Game.getObjectById(mine.sourceId);
-    if (source == null) { return; }
+    calcSpawnQueue(room: Room): void {
+        let spawns = room.find(FIND_MY_SPAWNS);
+        let spawn = spawns[0];
+        if (spawn == undefined) return;
 
-    for (let p = 0; p < mine.HarvestPositions.length; p++) {
-        let pos = mine.HarvestPositions[p];
-        forEach(pos.Harvesters, (creepId) => {
-            HarvestPosAssignedEnergySource(Game.getObjectById(pos.Harvesters[p]), source, pos.pos);
+        this.spawnQueue = [];
+
+        if (this.creepIds['harvester'].length < this.sourceMine.HarvestPositions.length) {
+            this.spawnQueue.push({
+                body: [WORK, WORK, MOVE],
+                pos: spawn.pos,
+                role: "harvester"
+            });
+        }
+    }
+
+    serialize(): any {
+        return {
+            name: this.name,
+            position: this.position,
+            creepIds: this.creepIds,
+            sourceMine: this.sourceMine
+        };
+    }
+
+    deserialize(data: any): void {
+        console.log('deserialize energy mining ' + JSON.stringify(data));
+        super.deserialize(data);
+        this.sourceMine = data.sourceMine;
+    }
+
+    setSourceMine(sourceMine: SourceMine) {
+        this.sourceMine = sourceMine;
+    }
+
+    private createConstructionSiteOnEnergyPiles() {
+        _.forEach(this.sourceMine.HarvestPositions.slice(0, 2), (harvestPos) => {
+            let pos = new RoomPosition(harvestPos.x, harvestPos.y, harvestPos.roomName);
+            let structures = pos.lookFor(LOOK_STRUCTURES);
+            let containers = structures.filter(s => s.structureType == STRUCTURE_CONTAINER);
+            if (containers.length == 0) {
+
+                let energyPile = pos.lookFor(LOOK_ENERGY).filter(e => e.amount > 500);
+
+                if (energyPile.length > 0) {
+
+                    let constructionSites = pos.lookFor(LOOK_CONSTRUCTION_SITES).filter(s => s.structureType == STRUCTURE_CONTAINER);
+                    if (constructionSites.length == 0) {
+                        pos.createConstructionSite(STRUCTURE_CONTAINER);
+                    }
+                }
+            }
         });
-    };
+    }
+
+    private HarvestAssignedEnergySource() {
+        let source = Game.getObjectById(this.sourceMine.sourceId);
+        if (source == null) { return; }
+
+        for (let p = 0; p < this.sourceMine.HarvestPositions.length; p++) {
+            let pos = this.sourceMine.HarvestPositions[p];
+            HarvestPosAssignedEnergySource(Game.getObjectById(this.creepIds['harvester']?.[p]), source, pos);
+        };
+    }
 }
 
 function HarvestPosAssignedEnergySource(creep: Creep | null, source: Source | null, destination: RoomPosition | null) {
@@ -47,48 +97,4 @@ function HarvestPosAssignedEnergySource(creep: Creep | null, source: Source | nu
     creep.moveTo(new RoomPosition(destination.x, destination.y, destination.roomName), { maxOps: 50 });
 
     creep.harvest(source);
-}
-
-function findMines(room: Room) {
-    let energySources = room.find(FIND_SOURCES);
-    let mines: SourceMine[] = [];
-
-    forEach(energySources, (source) => {
-        let s = initFromSource(source);
-        mines.push(s);
-    });
-
-    room.memory.sourceMines = mines;
-}
-
-function initFromSource(source: Source): SourceMine {
-    let adjacentPositions = source.room.lookForAtArea(
-        LOOK_TERRAIN,
-        source.pos.y - 1,
-        source.pos.x - 1,
-        source.pos.y + 1,
-        source.pos.x + 1, true);
-
-    let harvestPositions: HarvestPosition[] = [];
-
-    forEach(adjacentPositions, (pos) => {
-        if (pos.terrain == "plain" || pos.terrain == "swamp") {
-            harvestPositions.push({
-                pos: new RoomPosition(pos.x, pos.y, source.room.name),
-                Harvesters: []
-            } as HarvestPosition);
-        }
-    });
-
-    let spawns = source.room.find(FIND_MY_SPAWNS);
-    spawns = _.sortBy(spawns, s => s.pos.findPathTo(source.pos).length);
-
-    return {
-        sourceId: source.id,
-        HarvestPositions: sortBy(harvestPositions, (h) => {
-            return h.pos.getRangeTo(spawns[0]);
-        }),
-        distanceToSpawn: spawns[0].pos.findPathTo(source.pos).length,
-        flow: 10
-    }
 }
