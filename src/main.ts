@@ -16,7 +16,7 @@ declare global {
 }
 
 export const loop = ErrorMapper.wrapLoop(() => {
-  console.log(`Current game tick is blue forty two ${Game.time}`);
+  console.log(`Current game tick is blue forty three ${Game.time}`);
 
   _.forEach(Game.rooms, (room) => {
     // Ensure room.memory.routines is initialized
@@ -76,6 +76,11 @@ function getRoomRoutines(room: Room): { [routineType: string]: RoomRoutine[] } {
     room.memory.routines.construction = _.map(currentSites, (site) => new Construction(site.id).serialize());
   }
 
+  // Sync room map routine
+  if (!room.memory.routines.roomMap) {
+    room.memory.routines.roomMap = [new RoomMap(room).serialize()];
+  }
+
   // Deserialize routines
   return {
     bootstrap: _.map(room.memory.routines.bootstrap, (memRoutine) => {
@@ -92,6 +97,11 @@ function getRoomRoutines(room: Room): { [routineType: string]: RoomRoutine[] } {
       const c = new Construction(memRoutine.constructionSiteId);
       c.deserialize(memRoutine);
       return c;
+    }),
+    roomMap: _.map(room.memory.routines.roomMap, (memRoutine) => {
+      const r = new RoomMap(room);
+      r.deserialize(memRoutine);
+      return r;
     })
   };
 }
