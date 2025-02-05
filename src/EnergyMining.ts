@@ -1,5 +1,5 @@
-import { RoomRoutine } from "RoomProgram";
-import { SourceMine } from "SourceMine";
+import { RoomRoutine } from "./RoomProgram";
+import { SourceMine } from "./SourceMine";
 
 export class EnergyMining extends RoomRoutine {
     name = 'energy mining';

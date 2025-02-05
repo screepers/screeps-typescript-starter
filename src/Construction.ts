@@ -1,4 +1,4 @@
-import { RoomRoutine } from "RoomProgram";
+import { RoomRoutine } from "./RoomProgram";
 
 export class Construction extends RoomRoutine {
     name = "construction";

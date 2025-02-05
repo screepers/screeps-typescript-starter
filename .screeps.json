@@ -1,0 +1,8 @@
+{
+    "host": "localhost",
+    "port": 21025,
+    //"username": "YOUR_USERNAME",
+    //"password": "YOUR_PASSWORD",
+    "branch": "default",
+    "ptr": false
+}

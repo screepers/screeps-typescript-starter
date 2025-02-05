@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "module": "esnext",
-    "lib": ["es2018"],
-    "target": "es2018",
+    "module": "CommonJS",
+    "lib": [
+      "es2018"
+    ],
+    "target": "ES6",
     "moduleResolution": "Node",
     "outDir": "dist",
     "baseUrl": "src/",

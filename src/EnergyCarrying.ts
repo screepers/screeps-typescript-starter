@@ -1,7 +1,7 @@
-import { SourceMine } from "SourceMine";
+import { SourceMine } from "./SourceMine";
 import { forEach, sortBy } from "lodash";
-import { EnergyRoute } from "EnergyRoute";
-import { RoomRoutine } from "RoomProgram";
+import { EnergyRoute } from "./EnergyRoute";
+import { RoomRoutine } from "./RoomProgram";
 
 export class EnergyCarrying extends RoomRoutine {
     name = "energy carrying";

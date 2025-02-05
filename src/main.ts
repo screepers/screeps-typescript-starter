@@ -1,10 +1,10 @@
-import { Construction } from "Construction";
-import { EnergyMining } from "EnergyMining";
-import { RoomRoutine } from "RoomProgram";
-import { Bootstrap } from "bootstrap";
+import { Construction } from "./Construction"
+import { EnergyMining } from "./EnergyMining";
+import { RoomRoutine } from "./RoomProgram";
+import { Bootstrap } from "./bootstrap";
 import { forEach, sortBy } from "lodash";
-import { ErrorMapper } from "utils/ErrorMapper";
-import { RoomMap } from "RoomMap";
+import { ErrorMapper } from "./ErrorMapper";
+import { RoomMap } from "./RoomMap";
 
 declare global {
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -16,126 +16,104 @@ declare global {
 }
 
 export const loop = ErrorMapper.wrapLoop(() => {
-  console.log(`Current game tick is ${Game.time}`);
+  console.log(`Current game tick is blue forty two ${Game.time}`);
 
-  forEach(Game.rooms, (room) => {
-    let routines = getRoomRoutines(room);
+  _.forEach(Game.rooms, (room) => {
+    // Ensure room.memory.routines is initialized
+    if (!room.memory.routines) {
+      room.memory.routines = {};
+    }
 
-    room.memory.routines = {};
+    const routines = getRoomRoutines(room);
 
-    _.keys(routines).forEach((routineType) => {
-      _.forEach(routines[routineType], (routine) => {
-        console.log(`running routine ${routineType} in room ${room.name} ${JSON.stringify(routine)}`);
-        routine.runRoutine(room);
-      });
-    });
-
-    _.keys(routines).forEach((routineType) => {
-      room.memory.routines[routineType] = _.map(routines[routineType], (routine) => routine.serialize())
+    _.forEach(routines, (routineList, routineType) => {
+      _.forEach(routineList, (routine) => routine.runRoutine(room));
+      if (routineType) {
+        room.memory.routines[routineType] = _.map(routineList, (routine) => routine.serialize());
+      }
     });
 
     new RoomMap(room);
   });
 
-  // Automatically delete memory of missing creeps
-  for (const name in Memory.creeps) {
-    if (!(name in Game.creeps)) {
-      delete Memory.creeps[name];
+  // Clean up memory
+  _.forIn(Memory.creeps, (_, name) => {
+    if (name) {
+      if (!Game.creeps[name]) delete Memory.creeps[name];
     }
-  }
-
+  });
 });
 
 
 function getRoomRoutines(room: Room): { [routineType: string]: RoomRoutine[] } {
-  if (!room.controller) { return {}; }
+  if (!room.controller) return {};
 
-  if (room.memory?.routines?.bootstrap == null || room.memory?.routines?.bootstrap.length == 0) {
-    room.memory.routines = {
-      bootstrap: [new Bootstrap(room.controller?.pos).serialize()]
-    };
+  // Initialize room.memory.routines if not present
+  if (!room.memory.routines) {
+    room.memory.routines = {};
   }
 
-  if (room.memory?.routines?.energyMines == null || room.memory?.routines?.energyMines.length == 0) {
-    let energySources = room.find(FIND_SOURCES);
-    let mines = _.map(energySources, (source) => initEnergyMiningFromSource(source));
+  // Sync routines with the current state of the room
+  if (!room.memory.routines.bootstrap) {
+    room.memory.routines.bootstrap = [new Bootstrap(room.controller.pos).serialize()];
+  }
 
-    room.memory.routines.energyMines = _.map(mines, (m) => m.serialize());
-  };
+  // Sync energy mines with current sources
+  const currentSources = room.find(FIND_SOURCES);
+  const existingSourceIds = _.map(room.memory.routines.energyMines || [], (m) => m.sourceId);
+  const newSources = _.filter(currentSources, (source) => !existingSourceIds.includes(source.id));
 
-  if (room.memory?.routines?.construction == null || room.memory?.routines?.construction.length == 0) {
-    console.log(`room.memory.routines.construction is empty adding c`);
-    room.memory.routines.construction = [];
-    let s = room.find(FIND_MY_CONSTRUCTION_SITES);
-    _.forEach(s.slice(0, 1), (site) => {
-      room.memory.routines.construction.push(new Construction(site.id).serialize());
-    });
-  };
+  if (newSources.length > 0 || !room.memory.routines.energyMines) {
+    room.memory.routines.energyMines = _.map(currentSources, (source) => initEnergyMiningFromSource(source).serialize());
+  }
 
-  console.log(`construction rs: ${JSON.stringify(room.memory.routines.construction)}`);
-  room.memory.routines.construction = _.filter(room.memory.routines.construction, (memRoutine) => {
-    return Game.getObjectById(memRoutine.constructionSiteId) != null;
-  });
+  // Sync construction sites
+  const currentSites = room.find(FIND_MY_CONSTRUCTION_SITES);
+  const existingSiteIds = _.map(room.memory.routines.construction || [], (c) => c.constructionSiteId);
+  const newSites = _.filter(currentSites, (site) => !existingSiteIds.includes(site.id));
 
-  console.log(`construction rs: ${JSON.stringify(room.memory.routines.construction)}`);
+  if (newSites.length > 0 || !room.memory.routines.construction) {
+    room.memory.routines.construction = _.map(currentSites, (site) => new Construction(site.id).serialize());
+  }
 
-  let routines = {
+  // Deserialize routines
+  return {
     bootstrap: _.map(room.memory.routines.bootstrap, (memRoutine) => {
-      let b = new Bootstrap(room.controller!.pos);
+      const b = new Bootstrap(room.controller!.pos);
       b.deserialize(memRoutine);
       return b;
     }),
     energyMines: _.map(room.memory.routines.energyMines, (memRoutine) => {
-      let m = new EnergyMining(room.controller!.pos);
+      const m = new EnergyMining(room.controller!.pos);
       m.deserialize(memRoutine);
       return m;
     }),
     construction: _.map(room.memory.routines.construction, (memRoutine) => {
-
-      let c = new Construction(memRoutine.constructionSiteId)
+      const c = new Construction(memRoutine.constructionSiteId);
       c.deserialize(memRoutine);
       return c;
     })
   };
-
-  console.log(`routines2: ${JSON.stringify(routines)}`);
-  return routines;
 }
 
 function initEnergyMiningFromSource(source: Source): EnergyMining {
-  let adjacentPositions = source.room.lookForAtArea(
-    LOOK_TERRAIN,
-    source.pos.y - 1,
-    source.pos.x - 1,
-    source.pos.y + 1,
-    source.pos.x + 1, true);
+  const harvestPositions = _.filter(
+    source.room.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true),
+    (pos) => pos.terrain === "plain" || pos.terrain === "swamp"
+  ).map((pos) => new RoomPosition(pos.x, pos.y, source.room.name));
 
-  let harvestPositions: RoomPosition[] = [];
+  const spawns = _.sortBy(source.room.find(FIND_MY_SPAWNS), (s) => s.pos.findPathTo(source.pos).length);
 
-  forEach(adjacentPositions, (pos) => {
-    if (pos.terrain == "plain" || pos.terrain == "swamp") {
-      harvestPositions.push(new RoomPosition(pos.x, pos.y, source.room.name))
-    }
-  });
-
-  let spawns = source.room.find(FIND_MY_SPAWNS);
-  spawns = _.sortBy(spawns, s => s.pos.findPathTo(source.pos).length);
-
-  let m = new EnergyMining(source.pos);
+  const m = new EnergyMining(source.pos);
   m.setSourceMine({
     sourceId: source.id,
-    HarvestPositions: sortBy(harvestPositions, (h) => {
-      return h.getRangeTo(spawns[0]);
-    }),
+    HarvestPositions: _.sortBy(harvestPositions, (h) => h.getRangeTo(spawns[0])),
     distanceToSpawn: spawns[0].pos.findPathTo(source.pos).length,
     flow: 10
   });
 
   return m;
 }
-
-
-
 
 
 //////

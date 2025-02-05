@@ -1,4 +1,4 @@
-import { RoomRoutine } from "RoomProgram";
+import { RoomRoutine } from "./RoomProgram";
 import { forEach } from "lodash";
 import { start } from "repl";
 
