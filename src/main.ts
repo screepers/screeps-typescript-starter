@@ -1,6 +1,8 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { MainController } from "./modules/controller";
 
+require("utils/prototype.Creep.move.js")
+
 declare global {
   /*
     Example types, expand on these or remove them and add your own.
