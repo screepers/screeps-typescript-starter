@@ -1,9 +1,9 @@
 import { isNull } from "lodash";
 
-export class Creep_harvester {
+export const Creep_harvester = {
   err(message: string): never {
     throw new Error(`<HARVESTER> ${message}`);
-  }
+  },
   run(creep: Creep): void {
     let state: STATE = creep.memory.state;
 
@@ -16,6 +16,7 @@ export class Creep_harvester {
       data = creep.memory.data as Harvester_data;
     } catch (e) {
       this.err(`Harvester ${creep.name} data has an error type, error message: ${(e as Error).message}`);
+      throw e;  // cheat typescript type checker(otherwise data will be marked as used before assign)
     }
 
     // initialize source
