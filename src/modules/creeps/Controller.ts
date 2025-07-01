@@ -1,4 +1,4 @@
-import {Creep_harvester} from "./harvester"
+import {Creep_harvester} from "./Harvester"
 
 export const CreepController = {
   run(): void {

@@ -1,4 +1,4 @@
-import {CreepController} from "./creeps/controller";
+import {CreepController} from "./creeps/Controller";
 
 export const MainController = {
   run(): void {
