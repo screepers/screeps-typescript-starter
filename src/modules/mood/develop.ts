@@ -3,6 +3,7 @@ import { HARVESTER } from "../creeps/CreepAPI";
 const CreepDict = {
   "HARVESTER": {
     getConfigIndex: function (): number {
+      // TODO: implement
       return 0;
     },
     "CONFIG": [
@@ -15,21 +16,6 @@ const CreepDict = {
 }
 
 export const DevelopConfig = {
-  // creep: {
-  //   "HARVESTER": {
-  //     getConfigIndex: function (): number {
-  //       return 0;
-  //     },
-  //     "CONFIG": [
-  //       {
-  //         "body": [WORK, CARRY, MOVE],
-  //       }
-  //     ]
-  //   },
-  //   "UPGRADER": {
-  //
-  //   }
-  // }
   creep: {
     getCreepConfig: (creepTypeString: string): {body: BodyPartConstant[]} => {
       switch (creepTypeString) {
