@@ -1,7 +1,8 @@
 import { ErrorMapper } from "utils/ErrorMapper";
-import { MainController } from "./modules/controller";
+import { MainController } from "./modules/Controller";
 
 require("utils/prototype.Creep.move.js")
+require("utils/structure.cache.js")
 
 declare global {
   /*
