@@ -40,9 +40,8 @@ export const Creep_upgrader = {
       }
       const result = creep.withdraw(container, RESOURCE_ENERGY);
       switch (result) {
+        case ERR_FULL:
         case OK:
-          creep.memory.state = STATE.WORK;
-          state = STATE.WORK;
           break;
         case ERR_NOT_IN_RANGE:
           creep.moveTo(container.pos);
@@ -53,6 +52,10 @@ export const Creep_upgrader = {
           break;
         default:
           error(`Unhandled withdraw error code: ${result}`);
+      }
+      if (creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+        creep.memory.state = STATE.WORK;
+        state = STATE.WORK;
       }
     } else if (state == STATE.WORK) {
       // assume upgrader will not go outside the room

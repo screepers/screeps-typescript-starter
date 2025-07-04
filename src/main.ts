@@ -31,7 +31,7 @@ declare global {
 export const loop = ErrorMapper.wrapLoop(() => {
   const superMove = require("prototype.Creep.move");
   const structureCache = require("structure.cache");
-  info(`Current game tick is ${Game.time}`);
+  if (Game.time % 100 == 0) info(`Current game tick is ${Game.time}`);
 
   MainController.checkAndInit();
   MainController.run();
