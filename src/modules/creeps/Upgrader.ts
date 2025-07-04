@@ -1,4 +1,9 @@
 import { CreepAPI } from "./CreepAPI";
+import { err, info } from "../Message";
+
+function error(message: string, throwError: boolean = false) {
+  err(`<UPGRADER> ${message}`, throwError);
+}
 
 export const Creep_upgrader = {
   run(creep: Creep): void {
@@ -16,10 +21,56 @@ export const Creep_upgrader = {
         state = STATE.FETCH;
       } else {
         creep.say("No data");
+        error(`Upgrader ${creep.name} data not found`);
       }
     }
-    if (state == STATE.IDLE) {
+    let data = creep.memory.data as Upgrader_data;
 
+    if (state == STATE.IDLE) {
+      creep.memory.state = STATE.FETCH;
+      state = STATE.FETCH;
+    }
+    if (state == STATE.FETCH) {
+      // get container instance
+      const container = Game.getObjectById(data.cid as Id<Structure>);
+      if (!container) {
+        creep.say("Null container");
+        error(`Cannot find container ${data.cid}`);
+        return;
+      }
+      const result = creep.withdraw(container, RESOURCE_ENERGY);
+      switch (result) {
+        case OK:
+          creep.memory.state = STATE.WORK;
+          state = STATE.WORK;
+          break;
+        case ERR_NOT_IN_RANGE:
+          creep.moveTo(container.pos);
+          break;
+        case ERR_NOT_ENOUGH_RESOURCES:
+          // wait until source is filled
+          creep.say("Waiting");
+          break;
+        default:
+          error(`Unhandled withdraw error code: ${result}`);
+      }
+    } else if (state == STATE.WORK) {
+      // assume upgrader will not go outside the room
+      const controller = creep.room.controller!;
+      const result = creep.upgradeController(controller);
+      switch (result) {
+        case OK:
+          break;
+        case ERR_NOT_IN_RANGE:
+          creep.moveTo(controller.pos);
+          break;
+        case ERR_NOT_ENOUGH_RESOURCES:
+          creep.memory.state = STATE.FETCH;
+          state = STATE.FETCH;
+          break;
+        default:
+          error(`Unhandled upgrade controller error code: ${result}`);
+      }
     }
   }
 }

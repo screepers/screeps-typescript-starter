@@ -1,4 +1,4 @@
-export function err(message: string, throwError: boolean = false): void {
+export function err(message: string, throwError: boolean): void {
   if (throwError) {
     throw new Error(message);
   } else {
@@ -7,9 +7,9 @@ export function err(message: string, throwError: boolean = false): void {
 }
 
 export function warn(message: string): void {
-  console.log(`<span style="color: #ffff00">${message}</span>");`);
+  console.log(`<span style="color: #ffff00">${message}</span>`);
 }
 
 export function info(message: string): void {
-  console.log(`<span style="color: #00ff00">${message}</span>");`)
+  console.log(`<span style="color: #00ff00">${message}</span>`);
 }

@@ -52,13 +52,13 @@ export class CreepConfig {
 
 // creep role definition
 export const HARVESTER = "HARVESTER";
+export const UPGRADER = "UPGRADER";
 export enum CreepType {
   HARVESTER,
+  UPGRADER
 }
 export function getCreepTypeList() {
-  return [
-    CreepType.HARVESTER,
-  ]
+  return [CreepType.HARVESTER, CreepType.UPGRADER];
 }
 
 // tool function
@@ -107,6 +107,8 @@ function getCreepType(typeName: string): CreepType {
   switch (typeName) {
     case HARVESTER:
       return CreepType.HARVESTER;
+    case UPGRADER:
+      return CreepType.UPGRADER;
     default:
       throw new Error(`<CREEP API> Unknown creep type ${typeName}`);
   }
@@ -115,7 +117,7 @@ function getCreepType(typeName: string): CreepType {
 // creep data getter
 function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
   switch (type) {
-    case CreepType.HARVESTER:
+    case CreepType.HARVESTER: {
       // nameInfoList[2] indicates the room of source
       const room = Game.rooms[nameInfoList[2]];
       if (!room) {
@@ -137,6 +139,18 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
           sid: source.id,
           cid: spawn.id
         };
+    }
+    case CreepType.UPGRADER: {
+      const room = Game.rooms[nameInfoList[2]];
+      if (!room.storage)
+        return {
+          cid: room.spawn[0].id
+        };
+      else
+        return {
+          cid: room.storage.id
+        };
+    }
     default:
       throw new Error(`<CREEP API> Unknown creep type ${type}`);
   }

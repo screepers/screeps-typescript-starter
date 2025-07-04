@@ -1,5 +1,7 @@
-import {Creep_harvester} from "./Harvester"
+import { Creep_harvester } from "./Harvester";
 import { checkCreepMemory, checkCreepNum } from "./CreepChecker";
+import { Creep_upgrader } from "./Upgrader";
+import { CreepAPI, CreepType } from "./CreepAPI";
 
 export const CreepController = function (context: CreepControllerContext) {
   const prerun = function (): void {
@@ -21,18 +23,22 @@ export const CreepController = function (context: CreepControllerContext) {
   const run = function (): void {
     for (let [name, creep] of Object.entries(Game.creeps)) {
       // use name to identify the creep's type
-      switch(name.split('_')[0]) {
-        case 'HARVESTER':
+      const config = CreepAPI.getCreepConfig(name, { getCreepType: true });
+      switch (config.creepType) {
+        case CreepType.HARVESTER:
           Creep_harvester.run(creep);
+          break;
+        case CreepType.UPGRADER:
+          Creep_upgrader.run(creep);
           break;
         default:
           throw new Error(`Unhandled creep type: ${name}`);
       }
     }
-  }
+  };
 
   return { prerun, run };
-}
+};
 
 interface CreepControllerContext {
   spawnFunc(name: string): void;

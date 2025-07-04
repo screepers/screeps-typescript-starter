@@ -15,16 +15,32 @@ const CreepDict = {
       { body: [WORK, WORK, WORK, WORK, WORK, MOVE] } // perfect form
     ]
   },
-  UPGRADER: {}
+  UPGRADER: {
+    getConfigIndex: function (): number {
+      // TODO: implement
+      return 0;
+    },
+    getNum: function (room: Room): number {
+      return room.controller ? 1 : 0;
+    },
+    CONFIG: [
+      { body: [WORK, CARRY, MOVE] },
+    ]
+  }
 };
 
 export const DevelopConfig = {
   creep: {
     getCreepConfig: (creepType: CreepType): {body: BodyPartConstant[]} => {
       switch (creepType) {
-        case CreepType.HARVESTER:
+        case CreepType.HARVESTER: {
           let roleConfig = CreepDict.HARVESTER;
           return roleConfig.CONFIG[roleConfig.getConfigIndex()];
+        }
+        case CreepType.UPGRADER: {
+          let roleConfig = CreepDict.UPGRADER;
+          return roleConfig.CONFIG[roleConfig.getConfigIndex()];
+        }
         default:
           throw new Error(`<DEVELOP CONFIG> Unknown creep type ${creepType} in function getCreepConfig`);
       }
@@ -33,6 +49,8 @@ export const DevelopConfig = {
       switch (creepType) {
         case CreepType.HARVESTER:
           return CreepDict.HARVESTER.getNum(room);
+        case CreepType.UPGRADER:
+          return CreepDict.UPGRADER.getNum(room);
         default:
           throw new Error(`<DEVELOP CONFIG> Unknown creep type ${creepType} in function getCreepNum`);
       }

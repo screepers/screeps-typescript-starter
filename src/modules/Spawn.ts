@@ -1,5 +1,6 @@
 import { CreepAPI, CreepType } from "./creeps/CreepAPI";
 import PriorityQueue from "../utils/PriorityQueue";
+import { info } from "./Message";
 
 export const SpawnController = function (context: SpawnControllerContext) {
   const run = function (): void {
@@ -54,7 +55,7 @@ class SpawnTask {
   cost: number;
 
   constructor(creepName: string) {
-    let config = CreepAPI.getCreepConfig(creepName, { getSpawnInfo: true });
+    let config = CreepAPI.getCreepConfig(creepName, { getSpawnInfo: true, getCreepType: true });
     this.name = creepName;
     this.body = config.body!;
     this.cost = config.spawnCost!;
