@@ -1,5 +1,5 @@
 import { CreepAPI } from "./CreepAPI";
-import { err, info } from "../Message";
+import { err } from "../Message";
 
 function error(message: string, throwError: boolean = false) {
   err(`<UPGRADER> ${message}`, throwError);

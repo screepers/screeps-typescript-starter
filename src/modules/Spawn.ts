@@ -1,6 +1,5 @@
 import { CreepAPI, CreepType } from "./creeps/CreepAPI";
 import PriorityQueue from "../utils/PriorityQueue";
-import { info } from "./Message";
 
 export const SpawnController = function (context: SpawnControllerContext) {
   const run = function (): void {
