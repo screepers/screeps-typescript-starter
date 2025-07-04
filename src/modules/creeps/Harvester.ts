@@ -1,26 +1,26 @@
 import { isNull } from "lodash";
 import { CreepAPI } from "./CreepAPI";
+import { err } from "../Message";
 
 // TODO: 1. calculate px and py; 2. fill state IDLE by get memory data from creepapi
 
 export const Creep_harvester = {
-  err(message: string): never {
-    throw new Error(`<HARVESTER> ${message}`);
-  },
   run(creep: Creep): void {
+    if (creep.spawning) return;
+
     let state: STATE = creep.memory.state;
 
     // check data
     if (!creep.memory.data) {
-      if (state == STATE.IDLE && !creep.spawning) {
+      if (state == STATE.IDLE) {
         // init memory data
         const config = CreepAPI.getCreepConfig(creep.name, { getCreepMemoryData: true });
         creep.memory.data = config.creepMemoryData;
         creep.memory.state = STATE.MOVE;
         state = STATE.MOVE;
       } else {
-        creep.say("Data not found");
-        this.err(`Harvester ${creep.name} data not found`);
+        creep.say("No data");
+        err(`Harvester ${creep.name} data not found`);
       }
     }
     let data: Harvester_data;
@@ -28,7 +28,7 @@ export const Creep_harvester = {
       data = creep.memory.data as Harvester_data;
     } catch (e) {
       creep.say("Data error");
-      this.err(`Harvester ${creep.name} data has an error type, error message: ${(e as Error).message}`);
+      err(`Harvester ${creep.name} data has an error type, error message: ${(e as Error).message}`);
       throw e; // cheat typescript type checker(otherwise data will be marked as used before assign)
     }
 
@@ -36,7 +36,7 @@ export const Creep_harvester = {
     let source_temp = Game.getObjectById(data.sid as Id<Source>);
     if (isNull(source_temp)) {
       creep.say("Cannot find source");
-      this.err(`Cannot find source ${data.sid}`);
+      err(`Cannot find source ${data.sid}`);
     }
     let source = source_temp as Source;
 
@@ -57,13 +57,13 @@ export const Creep_harvester = {
     // Execute workflow by state
     if (state == STATE.CARRY) {
       if (isNull(data.cid)) {
-        creep.say("Container not found");
-        this.err(`Container id is null`);
+        creep.say("No container");
+        err(`Container id is null`);
       }
       let container_temp = Game.getObjectById(data.cid as Id<StructureSpawn>); // Carry state exists only when RCL = 1
       if (isNull(container_temp)) {
-        creep.say("Container not found");
-        this.err(`Cannot find container ${data.cid}`);
+        creep.say("No container");
+        err(`Cannot find container ${data.cid}`);
       }
       let container = container_temp as StructureSpawn;
       let result = creep.transfer(container, RESOURCE_ENERGY); // try to move energy to spawn
@@ -80,7 +80,7 @@ export const Creep_harvester = {
           break;
         default:
           creep.say("Transfer failed");
-          this.err(`Unhandled transfer error code: ${result}`); // Unhandled error code
+          err(`Unhandled transfer error code: ${result}`); // Unhandled error code
       }
     }
     if (state == STATE.MOVE) {
@@ -114,13 +114,13 @@ export const Creep_harvester = {
         }
         if (!has_carry) {
           creep.say("Wierd error");
-          this.err(`Harvester ${creep.name} does not have carry part and no container exists. Unhandled error.`);
+          err(`Harvester ${creep.name} does not have carry part and no container exists. Unhandled error.`);
         }
         // harvest
         let harvest_result = creep.harvest(source);
         if (harvest_result != OK) {
           creep.say("Cannot harvest");
-          this.err(`Harvester cannot harvest source ${data.sid}, error code = ${harvest_result}`);
+          err(`Harvester cannot harvest source ${data.sid}, error code = ${harvest_result}`);
         }
         // if energy is full, move to spawn
         if (creep.store.getFreeCapacity() == 0) {
@@ -132,7 +132,7 @@ export const Creep_harvester = {
         let harvest_result = creep.harvest(source);
         if (harvest_result != OK) {
           creep.say("Cannot harvest");
-          this.err(`Harvester cannot harvest source ${data.sid}, error code = ${harvest_result}`);
+          err(`Harvester cannot harvest source ${data.sid}, error code = ${harvest_result}`);
         }
       }
     }

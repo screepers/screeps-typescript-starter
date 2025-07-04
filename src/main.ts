@@ -1,5 +1,6 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { MainController } from "./modules/Controller";
+import { info } from "./modules/Message";
 
 declare global {
   /*
@@ -30,7 +31,7 @@ declare global {
 export const loop = ErrorMapper.wrapLoop(() => {
   const superMove = require("prototype.Creep.move");
   const structureCache = require("structure.cache");
-  console.log(`Current game tick is ${Game.time}`);
+  info(`Current game tick is ${Game.time}`);
 
   MainController.checkAndInit();
   MainController.run();
