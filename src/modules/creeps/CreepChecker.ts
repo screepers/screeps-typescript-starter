@@ -1,5 +1,4 @@
 import { CreepAPI, CreepType, getCreepTypeList } from "./CreepAPI";
-import { info } from "../Message";
 
 export function checkCreepMemory(spawn: (creepName: string) => void) {
   for (const name in Memory.creeps) {
@@ -12,7 +11,6 @@ export function checkCreepMemory(spawn: (creepName: string) => void) {
 }
 
 export function checkCreepNum() {
-  info("Call checkCreepNum");
   for (const [roomName, singleRoom] of Object.entries(Memory.rooms)) {
     const room = Game.rooms[roomName];
 
@@ -21,7 +19,7 @@ export function checkCreepNum() {
       acc[key] = 0;
       return acc;
     }, {} as Record<CreepType, number>);
-    // calculate creep info
+    // calculate creep info in memory
     for (const creepName of singleRoom.creeps) {
       const config = CreepAPI.getCreepConfig(creepName, { getCreepType: true });
       creepTypeMap[config.creepType!] += 1;
@@ -40,6 +38,7 @@ export function checkCreepNum() {
           const creepName = `${CreepType[creepType]}_${i}_${roomName}`;
           // create creep memory
           Memory.creeps[creepName] = {state: 0};
+          room.memory.creeps.push(creepName);
         }
       }
     }

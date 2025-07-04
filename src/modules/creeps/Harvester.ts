@@ -76,12 +76,15 @@ export const Creep_harvester = {
           creep.say("Full!");
           break;
         case OK:
-          creep.memory.state = STATE.MOVE; // Energy transferred. Move to source
-          state = STATE.MOVE;
           break;
         default:
           creep.say("Transfer failed");
           error(`Unhandled transfer error code: ${result}`); // Unhandled error code
+
+        if (creep.store.energy == 0) {
+          creep.memory.state = STATE.MOVE; // Energy transferred. Move to source
+          state = STATE.MOVE;
+        }
       }
     }
     if (state == STATE.MOVE) {
