@@ -35,12 +35,17 @@ interface Room {
 }
 
 interface Memory {
-  sq: [string]; // spawn queue
+  sq: string[]; // spawn queue
+  lastCreepCheck: number; // ticks since last creep check
+  creepConfigUpdate: boolean; // creep config update flag
 }
 
 interface CreepMemory {
   state: number;
   data?: object;
+}
+interface RoomMemory {
+  creeps: string[];
 }
 
 interface SpawnConfig {

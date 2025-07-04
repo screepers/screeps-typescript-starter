@@ -1,9 +1,6 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { MainController } from "./modules/Controller";
 
-require("utils/prototype.Creep.move.js")
-require("utils/structure.cache.js")
-
 declare global {
   /*
     Example types, expand on these or remove them and add your own.
@@ -19,12 +16,6 @@ declare global {
     log: any;
   }
 
-  interface CreepMemory {
-    role: string;
-    room: string;
-    working: boolean;
-  }
-
   // Syntax for adding proprties to `global` (ex "global.log")
   namespace NodeJS {
     interface Global {
@@ -35,15 +26,12 @@ declare global {
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
+
 export const loop = ErrorMapper.wrapLoop(() => {
+  const superMove = require("prototype.Creep.move");
+  const structureCache = require("structure.cache");
   console.log(`Current game tick is ${Game.time}`);
 
+  MainController.checkAndInit();
   MainController.run();
-
-  // Automatically delete memory of missing creeps
-  for (const name in Memory.creeps) {
-    if (!(name in Game.creeps)) {
-      delete Memory.creeps[name];
-    }
-  }
 });

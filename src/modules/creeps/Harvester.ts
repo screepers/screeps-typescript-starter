@@ -1,4 +1,7 @@
 import { isNull } from "lodash";
+import { CreepAPI } from "./CreepAPI";
+
+// TODO: 1. calculate px and py; 2. fill state IDLE by get memory data from creepapi
 
 export const Creep_harvester = {
   err(message: string): never {
@@ -9,58 +12,89 @@ export const Creep_harvester = {
 
     // check data
     if (!creep.memory.data) {
-      this.err(`Harvester ${creep.name} data not found`);
+      if (state == STATE.IDLE && !creep.spawning) {
+        // init memory data
+        const config = CreepAPI.getCreepConfig(creep.name, { getCreepMemoryData: true });
+        creep.memory.data = config.creepMemoryData;
+        creep.memory.state = STATE.MOVE;
+        state = STATE.MOVE;
+      } else {
+        creep.say("Data not found");
+        this.err(`Harvester ${creep.name} data not found`);
+      }
     }
     let data: Harvester_data;
     try {
       data = creep.memory.data as Harvester_data;
     } catch (e) {
+      creep.say("Data error");
       this.err(`Harvester ${creep.name} data has an error type, error message: ${(e as Error).message}`);
-      throw e;  // cheat typescript type checker(otherwise data will be marked as used before assign)
+      throw e; // cheat typescript type checker(otherwise data will be marked as used before assign)
     }
 
     // initialize source
     let source_temp = Game.getObjectById(data.sid as Id<Source>);
     if (isNull(source_temp)) {
+      creep.say("Cannot find source");
       this.err(`Cannot find source ${data.sid}`);
     }
     let source = source_temp as Source;
 
+    // TODO: get px and py from structure controller
+    let px = source.pos.x;
+    let py = source.pos.y;
+    const dir_x = [1, 1, 0, -1, -1, -1, 0, 1];
+    const dir_y = [0, -1, -1, -1, 0, 1, 1, 1];
+    const terrain = source.room.getTerrain();
+    for (let i = 0; i < 8; i++) {
+      if (terrain.get(px + dir_x[i], py + dir_y[i]) != TERRAIN_MASK_WALL) {
+        px += dir_x[i];
+        py += dir_y[i];
+        break;
+      }
+    }
+
     // Execute workflow by state
     if (state == STATE.CARRY) {
       if (isNull(data.cid)) {
+        creep.say("Container not found");
         this.err(`Container id is null`);
       }
-      let container_temp = Game.getObjectById(data.cid as Id<StructureSpawn>);  // Carry state exists only when RCL = 1
+      let container_temp = Game.getObjectById(data.cid as Id<StructureSpawn>); // Carry state exists only when RCL = 1
       if (isNull(container_temp)) {
+        creep.say("Container not found");
         this.err(`Cannot find container ${data.cid}`);
       }
       let container = container_temp as StructureSpawn;
-      let result = creep.transfer(container, RESOURCE_ENERGY);  // try to move energy to spawn
+      let result = creep.transfer(container, RESOURCE_ENERGY); // try to move energy to spawn
       switch (result) {
         case ERR_NOT_IN_RANGE:
-          creep.moveTo(container);  // move to spawn
+          creep.moveTo(container); // move to spawn
+          break;
+        case ERR_FULL:
+          creep.say("Full!");
           break;
         case OK:
-          creep.memory.state = STATE.MOVE;  // Energy transferred. Move to source
+          creep.memory.state = STATE.MOVE; // Energy transferred. Move to source
           state = STATE.MOVE;
           break;
         default:
+          creep.say("Transfer failed");
           this.err(`Unhandled transfer error code: ${result}`); // Unhandled error code
       }
     }
     if (state == STATE.MOVE) {
-      if (creep.pos.x != data.px || creep.pos.y != data.py) {
-        creep.moveTo(data.px, data.py); // move to source
+      if (creep.pos.x != px || creep.pos.y != py) {
+        creep.moveTo(px, py); // move to source
       } else {
-        creep.memory.state = STATE.WORK;  // start harvest
+        creep.memory.state = STATE.WORK; // start harvest
         state = STATE.WORK;
       }
     }
     if (state == STATE.WORK) {
       // check if container exists
       let container: StructureContainer | null = null;
-      let structures = creep.room.lookForAt(LOOK_STRUCTURES, data.px, data.py);
+      let structures = creep.room.lookForAt(LOOK_STRUCTURES, px, py);
       for (let structure of structures) {
         if (structure.structureType == STRUCTURE_CONTAINER) {
           container = structure as StructureContainer;
@@ -79,11 +113,13 @@ export const Creep_harvester = {
           }
         }
         if (!has_carry) {
+          creep.say("Wierd error");
           this.err(`Harvester ${creep.name} does not have carry part and no container exists. Unhandled error.`);
         }
         // harvest
         let harvest_result = creep.harvest(source);
         if (harvest_result != OK) {
+          creep.say("Cannot harvest");
           this.err(`Harvester cannot harvest source ${data.sid}, error code = ${harvest_result}`);
         }
         // if energy is full, move to spawn
@@ -95,16 +131,15 @@ export const Creep_harvester = {
         // container exists, harvest
         let harvest_result = creep.harvest(source);
         if (harvest_result != OK) {
+          creep.say("Cannot harvest");
           this.err(`Harvester cannot harvest source ${data.sid}, error code = ${harvest_result}`);
         }
       }
     }
   }
-}
+};
 
 interface Harvester_data {
-  px: number; // harvest position x
-  py: number; // harvest position y
   sid: string; // source id
   cid?: string; // container id (if needed)
 }

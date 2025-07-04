@@ -1,4 +1,4 @@
-import { CreepAPI, CreepConfig, CreepType } from "./creeps/CreepAPI";
+import { CreepAPI, CreepType } from "./creeps/CreepAPI";
 import PriorityQueue from "../utils/PriorityQueue";
 
 export const SpawnController = function (context: SpawnControllerContext) {
@@ -17,15 +17,22 @@ export const SpawnController = function (context: SpawnControllerContext) {
     }
     if (sq.empty()) return;
     // try to spawn
-    let task = sq.poll();
+    let task = sq.peek();
     for (let spawn of spawns_avail) {
-      if (spawn.spawnCreep(task.body, task.name, {dryRun: true})) {
+      if (spawn.spawnCreep(task.body, task.name, { dryRun: true }) == OK) {
         // can spawn
-        spawn.spawnCreep(task.body, task.name);
+        spawn.spawnCreep(task.body, task.name, { memory: { state: 0 } });
+        sq.poll();
         // update task
         if (sq.empty()) break;
-        task = sq.poll();
+        task = sq.peek();
       }
+    }
+
+    // reset Memory.sq
+    Memory.sq = [];
+    while (!sq.empty()) {
+      Memory.sq.push(sq.poll().name);
     }
   };
 
@@ -37,7 +44,7 @@ export const SpawnController = function (context: SpawnControllerContext) {
 };
 
 interface SpawnControllerContext {
-  room: Room
+  room: Room;
 }
 
 class SpawnTask {

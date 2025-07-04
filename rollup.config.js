@@ -5,6 +5,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
 import screeps from 'rollup-plugin-screeps';
+import copy from "rollup-plugin-copy";
 
 let cfg;
 const dest = process.env.DEST;
@@ -24,6 +25,13 @@ export default {
 
   plugins: [
     clear({ targets: ["dist"] }),
+    copy({
+      targets: [
+        // { src: 'src/ccode/*.wasm', dest: 'dist' },
+        // { src: 'src/ccode/*.js', dest: 'dist' },
+        { src: 'src/utils/*.js', dest: 'dist'}
+      ]
+    }),
     resolve({ rootDir: "src" }),
     commonjs(),
     typescript({tsconfig: "./tsconfig.json"}),
