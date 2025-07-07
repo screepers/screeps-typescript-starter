@@ -1,5 +1,5 @@
 import { CreepAPI } from "./CreepAPI";
-import { err, info } from "../Message";
+import { err } from "../Message";
 
 // TODO: 1. calculate px and py; 2. fill state IDLE by get memory data from creepapi
 

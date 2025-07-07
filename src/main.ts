@@ -1,7 +1,6 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { MainController } from "./modules/Controller";
 import { info } from "./modules/Message";
-import { showBunkerLayout } from "./modules/layout/bunkerLayout";
 
 declare global {
   /*

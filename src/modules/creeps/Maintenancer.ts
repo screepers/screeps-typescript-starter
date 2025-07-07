@@ -6,9 +6,6 @@ import PriorityQueue from "../../utils/PriorityQueue";
 function error(message: string, throwError: boolean = false) {
   err(`<MAINTENANCER> ${message}`, throwError);
 }
-function _info(message: string) {
-  info(`<MAINTENANCER> ${message}`);
-}
 
 export const Creep_maintenancer = {
   getMaintenancerQueue(room: Room): PriorityQueue<Task> {

@@ -1,6 +1,5 @@
 import { VisualBuilding } from "./visual";
 import { err } from "../Message";
-import PriorityQueue from "../../utils/PriorityQueue";
 
 const SpawnsLoc = [
   { x: 1, y: 0 },
