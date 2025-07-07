@@ -1,5 +1,5 @@
 // Maintenancer = Builder + Repairer + Carrier
-import { err, info } from "../Message";
+import { err } from "../Message";
 import { CreepAPI } from "./CreepAPI";
 import PriorityQueue from "../../utils/PriorityQueue";
 
