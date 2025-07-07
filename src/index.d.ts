@@ -34,21 +34,43 @@ interface Room {
   update(): void;
 }
 
-interface Memory {
-  sq: string[]; // spawn queue
-  lastCreepCheck: number; // ticks since last creep check
-  creepConfigUpdate: boolean; // creep config update flag
+interface Task {
+  type: string;
+  time: number;
+  data: object;
+}
+interface CarryTaskData {
+  targetId: string;
+  resourceType: ResourceConstant;
+  resourceNum: number;
+  carriedNum: number;
+}
+interface RepairTaskData {
+  targetId: string;
+  hits: number;
+}
+interface BuildTaskData {
+  targetId: string;
 }
 
 interface CreepMemory {
   state: number;
+  no_pull: boolean;
   data?: object;
 }
 interface RoomMemory {
+  mq: Task[]; // maintenancer queue
+  cq: Task[]; // construction queue
+  sq: string[]; // spawn queue
   creeps: string[];
+  center: { x: number; y: number };
+  lv: number; // controller level(used to check controller upgrade)
+  source: { id: string; type: string };
+  lastCreepCheck: number; // ticks since last creep check
+  creepConfigUpdate: boolean; // creep config update flag
 }
 
 interface SpawnConfig {
-  type: string;   // Creep type name
-  conf: number;   // Spawn config index (use index number to save memory)
+  type: string; // Creep type name
+  conf: number; // Spawn config index (use index number to save memory)
 }

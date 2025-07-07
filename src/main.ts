@@ -1,6 +1,7 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { MainController } from "./modules/Controller";
 import { info } from "./modules/Message";
+import { showBunkerLayout } from "./modules/layout/bunkerLayout";
 
 declare global {
   /*
@@ -33,6 +34,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
   const structureCache = require("structure.cache");
   if (Game.time % 100 == 0) info(`Current game tick is ${Game.time}`);
 
+  if (Game.cpu.bucket == 10000) Game.cpu.generatePixel();
+
   MainController.checkAndInit();
+  // showBunkerLayout('sim');
   MainController.run();
+
 });

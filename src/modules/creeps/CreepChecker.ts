@@ -10,37 +10,39 @@ export function checkCreepMemory(spawn: (creepName: string) => void) {
   }
 }
 
-export function checkCreepNum() {
-  for (const [roomName, singleRoom] of Object.entries(Memory.rooms)) {
-    const room = Game.rooms[roomName];
-
-    const creepTypeList = getCreepTypeList();
-    let creepTypeMap: Record<CreepType, number> = creepTypeList.reduce((acc, key) => {
-      acc[key] = 0;
-      return acc;
-    }, {} as Record<CreepType, number>);
-    // calculate creep info in memory
-    for (const creepName of singleRoom.creeps) {
-      const config = CreepAPI.getCreepConfig(creepName, { getCreepType: true });
-      creepTypeMap[config.creepType!] += 1;
-    }
-    // check each type of creep
-    for (const creepType of creepTypeList) {
-      const exceptNum = CreepAPI.getCreepNum(creepType, room);
-      const realNum = creepTypeMap[creepType];
-      if (realNum > exceptNum) {
-        throw new Error(
-          "<CREEP NUM CHECKER> Unhandled error: creep number ${realNum} greater than exception ${exceptNum}"
-        );
-      }
-      if (realNum < exceptNum) {
-        for (let i = realNum; i < exceptNum; i ++) {
-          const creepName = `${CreepType[creepType]}_${i}_${roomName}`;
-          // create creep memory
-          Memory.creeps[creepName] = {state: 0};
-          room.memory.creeps.push(creepName);
+export function checkCreepNum(room: Room, destroyCreeps: (names: string[]) => void) {
+  const creepTypeList = getCreepTypeList();
+  let creepTypeMap: Record<CreepType, string[]> = creepTypeList.reduce((acc, key) => {
+    acc[key] = [];
+    return acc;
+  }, {} as Record<CreepType, string[]>);
+  // calculate creep info in memory
+  for (const creepName of room.memory.creeps) {
+    const config = CreepAPI.getCreepConfig(creepName, { getCreepType: true });
+    creepTypeMap[config.creepType!].push(creepName);
+  }
+  // check each type of creep
+  let destroyedCreepNames: string[] = [];
+  for (const creepType of creepTypeList) {
+    const exceptNum = CreepAPI.getCreepNum(creepType, room);
+    const realNum = creepTypeMap[creepType].length;
+    if (realNum > exceptNum) {
+      let creepNames = creepTypeMap[creepType];
+      creepNames.sort((s1, s2) => {
+        function getNum(s: string) {
+          return parseInt(s.split("_")[1]);
         }
+        return getNum(s1) < getNum(s2) ? -1 : 1;
+      });
+      destroyedCreepNames.push(...creepNames.slice(exceptNum, realNum));
+    } else if (realNum < exceptNum) {
+      for (let i = realNum; i < exceptNum; i++) {
+        const creepName = `${CreepType[creepType]}_${i}_${room.name}`;
+        // create creep memory
+        Memory.creeps[creepName] = { state: 0 };
+        room.memory.creeps.push(creepName);
       }
     }
   }
+  destroyCreeps(destroyedCreepNames);
 }

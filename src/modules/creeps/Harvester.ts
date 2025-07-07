@@ -1,5 +1,5 @@
 import { CreepAPI } from "./CreepAPI";
-import { err } from "../Message";
+import { err, info } from "../Message";
 
 // TODO: 1. calculate px and py; 2. fill state IDLE by get memory data from creepapi
 
@@ -61,7 +61,7 @@ export const Creep_harvester = {
         error(`Container id is null`);
         return;
       }
-      let container = Game.getObjectById(data.cid as Id<StructureSpawn>); // Carry state exists only when RCL = 1
+      let container = Game.getObjectById(data.cid as Id<StructureSpawn>); // Carry state exists only when container is not built
       if (!container) {
         creep.say("No container");
         error(`Cannot find container ${data.cid}`);
@@ -87,7 +87,28 @@ export const Creep_harvester = {
         state = STATE.MOVE;
       }
     }
+    // get target
     if (state == STATE.MOVE) {
+      // check if container exists
+      let container: StructureContainer | null = null;
+      let structures = creep.room.lookForAtArea(
+        LOOK_STRUCTURES,
+        source.pos.y - 1,
+        source.pos.x - 1,
+        source.pos.y + 1,
+        source.pos.x + 1,
+        true
+      );
+      for (let structure of structures) {
+        if (structure.structure.structureType == STRUCTURE_CONTAINER) {
+          container = structure.structure as StructureContainer;
+          break;
+        }
+      }
+      if (container) {
+        px = container.pos.x;
+        py = container.pos.y;
+      }
       if (creep.pos.x != px || creep.pos.y != py) {
         creep.moveTo(px, py); // move to source
       } else {
@@ -98,10 +119,17 @@ export const Creep_harvester = {
     if (state == STATE.WORK) {
       // check if container exists
       let container: StructureContainer | null = null;
-      let structures = creep.room.lookForAt(LOOK_STRUCTURES, px, py);
+      let structures = creep.room.lookForAtArea(
+        LOOK_STRUCTURES,
+        source.pos.y - 1,
+        source.pos.x - 1,
+        source.pos.y + 1,
+        source.pos.x + 1,
+        true
+      );
       for (let structure of structures) {
-        if (structure.structureType == STRUCTURE_CONTAINER) {
-          container = structure as StructureContainer;
+        if (structure.structure.structureType == STRUCTURE_CONTAINER) {
+          container = structure.structure as StructureContainer;
           break;
         }
       }
@@ -140,6 +168,12 @@ export const Creep_harvester = {
         }
       }
     }
+  },
+  destroy(creep: Creep): void {
+    delete Memory.creeps[creep.name];
+    let creeps = creep.room.memory.creeps;
+    creeps.splice(creeps.indexOf(creep.name), 1);
+    creep.suicide();
   }
 };
 

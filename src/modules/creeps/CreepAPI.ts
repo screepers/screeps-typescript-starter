@@ -5,7 +5,8 @@ export const CreepAPI = {
     let ctx = {
       getSpawnInfo: context.getSpawnInfo ?? false,
       getCreepType: context.getCreepType ?? false,
-      getCreepMemoryData: context.getCreepMemoryData ?? false
+      getCreepMemoryData: context.getCreepMemoryData ?? false,
+      getCreepRoom: context.getCreepRoom ?? false,
     };
     let returnConfig = new CreepConfig();
 
@@ -16,7 +17,7 @@ export const CreepAPI = {
 
     if (ctx.getSpawnInfo) {
       // TODO: use different mood
-      let creepConfig = DevelopConfig.creep.getCreepConfig(creepType);
+      let creepConfig = DevelopConfig.creep.getCreepConfig(creepType, Game.rooms[nameInfoList[2]]);
       returnConfig.body = creepConfig.body;
       returnConfig.spawnCost = getCreepCost(returnConfig.body);
     }
@@ -27,6 +28,10 @@ export const CreepAPI = {
 
     if (ctx.getCreepMemoryData) {
       returnConfig.creepMemoryData = getCreepMemoryData(creepType, nameInfoList);
+    }
+
+    if (ctx.getCreepRoom) {
+      returnConfig.room = Game.rooms[nameInfoList[2]];
     }
 
     return returnConfig;
@@ -41,6 +46,7 @@ interface CreepAPIContext {
   getSpawnInfo?: boolean;
   getCreepType?: boolean;
   getCreepMemoryData?: boolean;
+  getCreepRoom?: boolean;
 }
 
 export class CreepConfig {
@@ -48,17 +54,22 @@ export class CreepConfig {
   spawnCost?: number;
   creepType?: CreepType;
   creepMemoryData?: Object;
+  room?: Room;
 }
 
 // creep role definition
 export const HARVESTER = "HARVESTER";
 export const UPGRADER = "UPGRADER";
+export const CONSTRUCTOR = "CONSTRUCTOR";
+export const MAINTENANCER = "MAINTENANCER";
 export enum CreepType {
   HARVESTER,
-  UPGRADER
+  CONSTRUCTOR,
+  UPGRADER,
+  MAINTENANCER,
 }
 export function getCreepTypeList() {
-  return [CreepType.HARVESTER, CreepType.UPGRADER];
+  return [CreepType.HARVESTER, CreepType.UPGRADER, CreepType.CONSTRUCTOR, CreepType.MAINTENANCER];
 }
 
 // tool function
@@ -109,6 +120,10 @@ function getCreepType(typeName: string): CreepType {
       return CreepType.HARVESTER;
     case UPGRADER:
       return CreepType.UPGRADER;
+    case CONSTRUCTOR:
+      return CreepType.CONSTRUCTOR;
+    case MAINTENANCER:
+      return CreepType.MAINTENANCER;
     default:
       throw new Error(`<CREEP API> Unknown creep type ${typeName}`);
   }
@@ -140,16 +155,17 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
           cid: spawn.id
         };
     }
-    case CreepType.UPGRADER: {
-      const room = Game.rooms[nameInfoList[2]];
-      if (!room.storage)
-        return {
-          cid: room.spawn[0].id
-        };
-      else
-        return {
-          cid: room.storage.id
-        };
+    case CreepType.CONSTRUCTOR: {
+      return {
+        task: null
+      }
+    }
+    case CreepType.MAINTENANCER: {
+      return {
+        task: null,
+        sourceId: "",
+        sourceTy: "",
+      }
     }
     default:
       throw new Error(`<CREEP API> Unknown creep type ${type}`);

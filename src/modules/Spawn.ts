@@ -12,7 +12,7 @@ export const SpawnController = function (context: SpawnControllerContext) {
     }
     // init spawn queue
     let sq = new PriorityQueue(SpawnTaskJudge);
-    for (const creepName of Memory.sq) {
+    for (const creepName of context.room.memory.sq) {
       sq.push(new SpawnTask(creepName));
     }
     if (sq.empty()) return;
@@ -30,14 +30,14 @@ export const SpawnController = function (context: SpawnControllerContext) {
     }
 
     // reset Memory.sq
-    Memory.sq = [];
+    context.room.memory.sq = [];
     while (!sq.empty()) {
-      Memory.sq.push(sq.poll().name);
+      context.room.memory.sq.push(sq.poll().name);
     }
   };
 
   const createSpawnTask = function (creepName: string): void {
-    Memory.sq.push(creepName);
+    context.room.memory.sq.push(creepName);
   };
 
   return { run, createSpawnTask };
