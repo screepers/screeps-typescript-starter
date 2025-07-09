@@ -18,14 +18,13 @@ export const CreepController = function (context: CreepControllerContext) {
     // check creep num
     let destroyedNames: string[] = [];
     if (room.memory.creepConfigUpdate || room.memory.lastCreepCheck > CREEP_CHECK_DURATION) {
-      checkCreepNum(room, (names) => {
+      checkCreepNum(room, names => {
         destroyedNames = names;
       });
       room.memory.creepConfigUpdate = false;
       room.memory.lastCreepCheck = 0;
     }
     // get maintenancer queue
-    let maintenancerQueue = Creep_maintenancer.getMaintenancerQueue(room);
     for (let [name, creep] of Object.entries(Game.creeps)) {
       let destroy = destroyedNames.includes(name);
       // use name to identify the creep's type
@@ -44,7 +43,14 @@ export const CreepController = function (context: CreepControllerContext) {
           if (destroy) Creep_constructor.destroy(creep);
           break;
         case CreepType.MAINTENANCER:
-          Creep_maintenancer.run(creep, room, maintenancerQueue);
+          Creep_maintenancer.run(
+            creep,
+            room,
+            context.fetchMaintenanceTask,
+            context.returnMaintenanceTask,
+            context.finishCarryTask,
+            context.finishRepairTask
+          );
           if (destroy) Creep_maintenancer.destroy(creep);
           break;
         default:
@@ -52,8 +58,6 @@ export const CreepController = function (context: CreepControllerContext) {
       }
     }
     room.memory.lastCreepCheck += 1;
-    // destroy maintenancer queue
-    Creep_maintenancer.destroyMaintenancerQueue(room, maintenancerQueue);
   };
 
   return { prerun, run };
@@ -62,4 +66,8 @@ export const CreepController = function (context: CreepControllerContext) {
 interface CreepControllerContext {
   spawnFunc(name: string): void;
   room: Room;
+  fetchMaintenanceTask(): Task | null;
+  returnMaintenanceTask(task: Task): void;
+  finishCarryTask(task: Task): void;
+  finishRepairTask(task: Task): void;
 }

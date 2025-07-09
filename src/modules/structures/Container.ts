@@ -1,17 +1,17 @@
 export const SContainer = {
-  run(container: StructureContainer) {
+  run(container: StructureContainer, addRepairTask: (task: Task) => void) {
     const room = container.room;
     const memory = room.memory;
     // repair task
-    if (container.hits < container.hitsMax >> 2) {
-      memory.mq.push({
+    if (container.hits < (container.hitsMax >> 1)) {
+      addRepairTask({
         type: "Repair",
         time: 0,
         data: {
           targetId: container.id,
           hits: container.hitsMax - 10
         } as RepairTaskData
-      })
+      });
     }
     // add to energy source
     if (!room.storage) {

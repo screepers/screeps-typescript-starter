@@ -60,6 +60,8 @@ interface CreepMemory {
 }
 interface RoomMemory {
   mq: Task[]; // maintenancer queue
+  cis: string[]; // carry task id set
+  ris: string[]; // repair task id set
   cq: Task[]; // construction queue
   sq: string[]; // spawn queue
   creeps: string[];

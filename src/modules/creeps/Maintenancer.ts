@@ -8,26 +8,19 @@ function error(message: string, throwError: boolean = false) {
 }
 
 export const Creep_maintenancer = {
-  getMaintenancerQueue(room: Room): PriorityQueue<Task> {
-    let queue = new PriorityQueue<Task>(judge);
-    for (const task of room.memory.mq) {
-      queue.push(task);
-    }
-    return queue;
-  },
-  destroyMaintenancerQueue(room: Room, queue: PriorityQueue<Task>): void {
-    room.memory.mq = []
-    while (!queue.empty()) {
-      const task = queue.poll();
-      task.time += 1;
-      room.memory.mq.push(task);
-    }
-  },
-  run(creep: Creep, room: Room, maintenancerQueue: PriorityQueue<Task>): void {
+  run(
+    creep: Creep,
+    room: Room,
+    fetchMaintenanceTask: () => Task | null,
+    returnMaintenanceTask: (task: Task) => void,
+    finishCarryTask: (task: Task) => void,
+    finishRepairTask: (task: Task) => void
+  ): void {
     if (creep.spawning) return;
     // check if creep will die. If so, return the task.
     if (creep.ticksToLive! < 2) {
-      maintenancerQueue.push((creep.memory.data as Maintenancer_data).task!);
+      let task = (creep.memory.data as Maintenancer_data).task;
+      if (task) returnMaintenanceTask(task);
       creep.suicide();
     }
 
@@ -47,35 +40,36 @@ export const Creep_maintenancer = {
     let data = creep.memory.data as Maintenancer_data;
 
     if (state == STATE.IDLE) {
-      if (!maintenancerQueue.empty()) {
-        data.task = maintenancerQueue.poll();
-        const resourceTy = data.task.type == "Carry" ? (data.task.data as CarryTaskData).resourceType : RESOURCE_ENERGY;
-        if (data.task.type == "Build") {
-          // convert position info to target id
-          const position = (data.task.data as BuildTaskData).targetId.split("|");
-          if (position.length > 1) {
-            const x = parseInt(position[0]), y = parseInt(position[1]);
-            (data.task.data as BuildTaskData).targetId = room.lookForAt(LOOK_CONSTRUCTION_SITES, x, y)[0].id;
-          }
+      let task = fetchMaintenanceTask();
+      if (!task) return;
+      data.task = task;
+      const resourceTy = data.task.type == "Carry" ? (data.task.data as CarryTaskData).resourceType : RESOURCE_ENERGY;
+      if (data.task.type == "Build") {
+        // convert position info to target id
+        const position = (data.task.data as BuildTaskData).targetId.split("|");
+        if (position.length > 1) {
+          const x = parseInt(position[0]),
+            y = parseInt(position[1]);
+          (data.task.data as BuildTaskData).targetId = room.lookForAt(LOOK_CONSTRUCTION_SITES, x, y)[0].id;
         }
-        if (creep.store.getUsedCapacity(resourceTy) <= 10) {
-          creep.memory.state = STATE.FETCH;
-          state = STATE.FETCH;
-        } else {
-          switch (data.task.type) {
-            case "Carry":
-              creep.memory.state = STATE.CARRY;
-              state = STATE.CARRY;
-              break;
-            case "Build":
-              creep.memory.state = STATE.BUILD;
-              state = STATE.BUILD;
-              break;
-            case "Repair":
-              creep.memory.state = STATE.REPAIR;
-              state = STATE.REPAIR;
-              break;
-          }
+      }
+      if (creep.store.getUsedCapacity(resourceTy) <= 10) {
+        creep.memory.state = STATE.FETCH;
+        state = STATE.FETCH;
+      } else {
+        switch (data.task.type) {
+          case "Carry":
+            creep.memory.state = STATE.CARRY;
+            state = STATE.CARRY;
+            break;
+          case "Build":
+            creep.memory.state = STATE.BUILD;
+            state = STATE.BUILD;
+            break;
+          case "Repair":
+            creep.memory.state = STATE.REPAIR;
+            state = STATE.REPAIR;
+            break;
         }
       }
     }
@@ -153,7 +147,7 @@ export const Creep_maintenancer = {
             let energy = 0;
             if (room.memory.sq.length > 0) energy = spawn.store.energy - 200;
             else energy = spawn.store.energy;
-            if (energy> 0) {
+            if (energy > 0) {
               data.sourceTy = "Spawn";
               data.sourceId = spawn.id;
               source = spawn;
@@ -237,8 +231,12 @@ export const Creep_maintenancer = {
       const result = creep.transfer(target, task.resourceType);
       switch (result) {
         case ERR_NOT_ENOUGH_RESOURCES:
-        case ERR_FULL:
         case OK:
+          break;
+        case ERR_FULL:
+          finishCarryTask((creep.memory.data as Maintenancer_data).task!);
+          (creep.memory.data as Maintenancer_data).task = null;
+          creep.memory.state = STATE.IDLE;
           break;
         case ERR_NOT_IN_RANGE:
           creep.moveTo(target);
@@ -249,6 +247,7 @@ export const Creep_maintenancer = {
       const resourceAfter = creep.store.getUsedCapacity(task.resourceType);
       const carriedNum = task.carriedNum + resourceBefore - resourceAfter;
       if (carriedNum > task.resourceNum) {
+        finishCarryTask((creep.memory.data as Maintenancer_data).task!);
         creep.memory.state = STATE.IDLE;
         (creep.memory.data as Maintenancer_data).task = null;
       } else if (resourceAfter == 0) {
@@ -275,6 +274,7 @@ export const Creep_maintenancer = {
           error(`Unhandled repair error code ${result}`);
       }
       if (target.hits >= task.hits) {
+        finishRepairTask((creep.memory.data as Maintenancer_data).task!);
         creep.memory.state = STATE.IDLE;
         (creep.memory.data as Maintenancer_data).task = null;
       } else if (creep.store.energy == 0) {
@@ -304,23 +304,4 @@ enum STATE {
   BUILD,
   CARRY,
   REPAIR
-}
-
-function judge(task1: Task, task2: Task): boolean {
-  function score(task: Task): number {
-    let score = 0;
-    switch (task.type) {
-      case "Carry":
-        score += 10;
-        break;
-      case "Build":
-        score += 5;
-        break;
-      case "Repair":
-        score += 8;
-        break;
-    }
-    return score * task.time;
-  }
-  return score(task1) < score(task2);
 }

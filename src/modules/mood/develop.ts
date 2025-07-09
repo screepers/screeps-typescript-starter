@@ -36,8 +36,7 @@ const CreepDict = {
         case 1:
           return 1;
         case 2:
-          if (room.memory.cq.length == 0) return 4;
-          else return 2;
+          return 4;
         default:
           return 3;
       }
@@ -49,40 +48,32 @@ const CreepDict = {
   CONSTRUCTOR: {
     getConfigIndex: function (room: Room): number {
       // TODO: implement
+      if (room.extension.length >= 5) return 1;
       return 0;
     },
     getNum: function (room: Room): number {
-      if (room.memory.cq.length == 0) {
-        let stay = false;
-        // get existing creeps
-        for (const name of room.memory.creeps) {
-          // @ts-ignore
-          if (Game.creeps[name].memory.data.task != null) {
-            stay = true;
-            break;
-          }
-        }
-        return stay ? 2 : 0;
-      }
+      if (room.memory.cq.length == 0) return 0;
       // TODO: implement
       else return 2;
     },
     CONFIG: [
       { body: [WORK, CARRY, MOVE] },
+      { body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]}, // cost 550
     ]
   },
   MAINTENANCER: {
     getConfigIndex: function (room: Room): number {
       // TODO: implement
+      if (room.extension.length >= 11) return 1;
       return 0;
     },
     getNum: function (room: Room): number {
-      // TODO: implement
-      if (room.memory.mq.length == 0) return 0;
-      else return 1;
+      if (room.controller!.level > 1) return 2;
+      return 0;
     },
     CONFIG: [
       { body: [WORK, CARRY, MOVE] },
+      { body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]}, // cost 550
     ]
   },
 };

@@ -19,9 +19,16 @@ export const SpawnController = function (context: SpawnControllerContext) {
     // try to spawn
     let task = sq.peek();
     for (let spawn of spawns_avail) {
-      if (spawn.spawnCreep(task.body, task.name, { dryRun: true }) == OK) {
+      let result = spawn.spawnCreep(task.body, task.name, { dryRun: true });
+      while (result == ERR_NAME_EXISTS) {
+        sq.poll();
+        if (sq.empty()) break;
+        task = sq.peek();
+        result = spawn.spawnCreep(task.body, task.name, { dryRun: true });
+      }
+      if (result == OK) {
         // can spawn
-        spawn.spawnCreep(task.body, task.name, { memory: { state: 0 } });
+        spawn.spawnCreep(task.body, task.name, { memory: { state: 0, no_pull: false } });
         sq.poll();
         // update task
         if (sq.empty()) break;

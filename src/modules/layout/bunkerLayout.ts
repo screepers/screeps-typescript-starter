@@ -342,7 +342,7 @@ export function createBunkerLayout(
       for (const extension of extensions) createFn(extension.x, extension.y, STRUCTURE_EXTENSION);
 
       // build roads around spawn
-      let roads = RoadLoc.slice(0, 11).map(loc => {
+      let roads = RoadLoc.map(loc => {
         return { x: loc.x + center.x, y: loc.y + center.y };
       });
       for (const road of roads) createFn(road.x, road.y, STRUCTURE_ROAD);
@@ -352,6 +352,15 @@ export function createBunkerLayout(
         for (const road of roads.slice(0, path.length - 2))
           createFn(room.controller!.pos.x, room.controller!.pos.y, STRUCTURE_ROAD);
       }
+      break;
+    }
+    case 3: {
+      // build tower and extension
+      let extensions = ExtensionLoc.slice(5, 10).map(loc => {
+        return { x: loc.x + center.x, y: loc.y + center.y };
+      });
+      for (const extension of extensions) createFn(extension.x, extension.y, STRUCTURE_EXTENSION);
+      createFn(TowerLoc[0].x + center.x, TowerLoc[1].y + center.y, STRUCTURE_TOWER);
       break;
     }
     default:

@@ -1,5 +1,5 @@
 import { CreepAPI } from "./CreepAPI";
-import { err } from "../Message";
+import { err, warn } from "../Message";
 
 function error(message: string, throwError: boolean = false) {
   err(`<CONSTRUCTOR> ${message}`, throwError);
@@ -35,11 +35,17 @@ export const Creep_constructor = {
         let d = (data.task as Task).data as BuildTaskData;
         if (d.targetId[0] == "|") {
           let positionList = d.targetId.split("|");
-          d.targetId = creep.room.lookForAt(
+          const sites = creep.room.lookForAt(
             LOOK_CONSTRUCTION_SITES,
             parseInt(positionList[1]),
             parseInt(positionList[2])
-          )[0].id;
+          );
+          if (sites.length == 0) {
+            warn(`Cannot find construction site (${positionList[1]}, ${positionList[2]})`);
+            cq.pop();
+            return;
+          }
+          d.targetId = sites[0].id;
         }
         if (creep.store.energy < 5) {
           creep.memory.state = STATE.FETCH;

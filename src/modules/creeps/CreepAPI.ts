@@ -64,9 +64,9 @@ export const CONSTRUCTOR = "CONSTRUCTOR";
 export const MAINTENANCER = "MAINTENANCER";
 export enum CreepType {
   HARVESTER,
+  MAINTENANCER,
   CONSTRUCTOR,
   UPGRADER,
-  MAINTENANCER,
 }
 export function getCreepTypeList() {
   return [CreepType.HARVESTER, CreepType.UPGRADER, CreepType.CONSTRUCTOR, CreepType.MAINTENANCER];

@@ -39,7 +39,7 @@ export function checkCreepNum(room: Room, destroyCreeps: (names: string[]) => vo
       for (let i = realNum; i < exceptNum; i++) {
         const creepName = `${CreepType[creepType]}_${i}_${room.name}`;
         // create creep memory
-        Memory.creeps[creepName] = { state: 0 };
+        Memory.creeps[creepName] = { state: 0, no_pull: false };
         room.memory.creeps.push(creepName);
       }
     }
