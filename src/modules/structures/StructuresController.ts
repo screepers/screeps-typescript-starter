@@ -28,6 +28,6 @@ export const StructuresController = function (context: StructureControllerContex
 
 interface StructureControllerContext {
   room: Room;
-  addRepairTask: (task: Task) => void;
-  addCarryTask: (task: Task) => void;
+  addRepairTask: (task: RepairTask) => void;
+  addCarryTask: (task: CarryTask) => void;
 }

@@ -26,15 +26,16 @@ export const Creep_constructor = {
       }
     }
     let data = creep.memory.data as Constructor_data;
+    let room = creep.room;
 
     if (state == STATE.IDLE) {
       // try to fetch task
       let cq = creep.room.memory.cq;
       if (cq.length > 0) {
-        data.task = <Task>cq[cq.length - 1];
-        let d = (data.task as Task).data as BuildTaskData;
-        if (d.targetId[0] == "|") {
-          let positionList = d.targetId.split("|");
+        data.task = <ConstructTask>cq[cq.length - 1];
+        let task = data.task as ConstructTask;
+        if (task.tgt[0] == "|") {
+          let positionList = task.tgt.split("|");
           const sites = creep.room.lookForAt(
             LOOK_CONSTRUCTION_SITES,
             parseInt(positionList[1]),
@@ -45,7 +46,7 @@ export const Creep_constructor = {
             cq.pop();
             return;
           }
-          d.targetId = sites[0].id;
+          task.tgt = sites[0].id;
         }
         if (creep.store.energy < 5) {
           creep.memory.state = STATE.FETCH;
@@ -55,48 +56,114 @@ export const Creep_constructor = {
           state = STATE.WORK;
         }
       }
+      else room.memory.creepConfigUpdate = true;
     }
     if (state == STATE.FETCH) {
-      // get source
-      const sourceConfig = creep.room.memory.source;
-      if (sourceConfig.id == "") {
-        creep.say("No source");
-        if (creep.store.energy > 0) {
-          creep.memory.state = STATE.WORK;
+      if (room.controller!.level == 1) {
+        function harvest(source: Source): void {
+          const result = creep.harvest(source);
+          switch (result) {
+            case OK:
+              creep.memory.no_pull = true;
+              break;
+            case ERR_NOT_IN_RANGE:
+              creep.moveTo(source.pos);
+              break;
+            case ERR_NOT_ENOUGH_RESOURCES:
+              if (creep.store.energy > 0) {
+                creep.memory.state = STATE.WORK;
+                state = STATE.WORK;
+              }
+              break;
+            default:
+              error(`Unhandled harvest error: ${result}`);
+          }
+          if (creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+            creep.memory.no_pull = false;
+            creep.memory.state = STATE.WORK;
+            state = STATE.WORK;
+          }
         }
-        return;
-      }
-      const source = Game.getObjectById(sourceConfig.id as Id<Structure>);
-      if (!source) {
-        error("Cannot find room source");
-        return;
-      }
-      const result = creep.withdraw(source, RESOURCE_ENERGY);
-      switch (result) {
-        case ERR_NOT_IN_RANGE:
-          creep.moveTo(source.pos);
-          break;
-        case ERR_FULL:
-        case OK:
-          creep.memory.state = STATE.WORK;
-          break;
-        case ERR_NOT_ENOUGH_RESOURCES:
-          creep.say("No energy");
-          break;
-        default:
-          error(`Unhandled withdraw error code ${result}`);
+        // harvest energy from source
+        if (data.source) harvest(Game.getObjectById(data.source as Id<Source>) as Source);
+        else {
+          // find nearest source
+          // get construction site position
+          const site = Game.getObjectById(data.task!.tgt as Id<ConstructionSite>);
+          if (!site) {
+            error(`Cannot find construction site ${data.task!.tgt}`);
+            return;
+          }
+          let source: Source | null = null;
+          let cost = 100000;
+          for (const s of room.source) {
+            const path = PathFinder.search(site.pos, { pos: s.pos, range: 1 });
+            if (path.cost < cost) {
+              source = s;
+              cost = path.path.length;
+            }
+          }
+          if (!source) {
+            error(`No source in room ${room.name}`);
+            return;
+          }
+          data.source = source.id;
+          harvest(source);
+        }
+      } else {
+        function withdraw(structure: Structure): void {
+          // structure must have .store. use ignore to simplify code.
+          // @ts-ignore
+          if (structure.store.energy < 400) return;
+          const result = creep.withdraw(structure, RESOURCE_ENERGY);
+          switch (result) {
+            case ERR_FULL:
+            case OK:
+              creep.memory.state = STATE.WORK;
+              break;
+            case ERR_NOT_IN_RANGE:
+              creep.moveTo(structure.pos);
+              break;
+            case ERR_NOT_ENOUGH_RESOURCES:
+              creep.say("No resource");
+              break;
+            default:
+              error(`Unhandled withdraw error code: ${result}`);
+          }
+        }
+
+        // storage exists or not has huge difference
+        if (room.storage) {
+          // storage exists, rcl >= 4
+          withdraw(room.storage);
+        } else {
+          // storage not exists, rcl <= 4, fetch energy from center container
+          if (
+            Math.max(Math.abs(creep.pos.x - room.memory.center.x), Math.abs(creep.pos.y - room.memory.center.y)) > 1
+          ) {
+            creep.moveTo(room.memory.center.x, room.memory.center.y);
+          } else {
+            // find container
+            let structures = room.lookForAt(LOOK_STRUCTURES, room.memory.center.x, room.memory.center.y);
+            if (structures.length == 0) {
+              error(`Cannot find container at (${room.memory.center.x}, ${room.memory.center.y})`);
+              return;
+            }
+            withdraw(structures[0]);
+          }
+        }
       }
     } else if (state == STATE.WORK) {
-      const task = data.task!.data as BuildTaskData;
-      const site = Game.getObjectById(task.targetId as Id<ConstructionSite>);
+      const task = data.task!;
+      const site = Game.getObjectById(task.tgt as Id<ConstructionSite>);
       if (!site) {
         // construction finished
         creep.memory.state = STATE.IDLE;
         creep.memory.no_pull = false;
-        let task = (creep.memory.data as Constructor_data).task!;
         let cq = creep.room.memory.cq;
-        if ((task.data as BuildTaskData).targetId == (cq[cq.length - 1].data as BuildTaskData).targetId) cq.pop();
-        (creep.memory.data as Constructor_data).task = null;
+        if (task.tgt == cq[cq.length - 1].tgt) cq.pop();
+        data.task = null;
+        data.source = null;
         creep.room.update();
         return;
       }
@@ -128,7 +195,8 @@ export const Creep_constructor = {
 };
 
 interface Constructor_data {
-  task: Task | null;
+  task: ConstructTask | null;
+  source: string | null;
 }
 
 enum STATE {

@@ -2,8 +2,10 @@ import { Creep_harvester } from "./Harvester";
 import { checkCreepMemory, checkCreepNum } from "./CreepChecker";
 import { Creep_upgrader } from "./Upgrader";
 import { CreepAPI, CreepType } from "./CreepAPI";
-import { Creep_maintenancer } from "./Maintenancer";
 import { Creep_constructor } from "./Constructor";
+import { Creep_carrier } from "./Carrier";
+import { Creep_repairer } from "./Repairer";
+import { Creep_center_carrier } from "./CenterCarrier";
 
 const CREEP_CHECK_DURATION = 1000;
 
@@ -32,7 +34,16 @@ export const CreepController = function (context: CreepControllerContext) {
       switch (config.creepType) {
         case CreepType.HARVESTER:
           Creep_harvester.run(creep);
-          if (destroy) Creep_harvester.destroy(creep);
+          break;
+        case CreepType.CCARRIER:
+          Creep_center_carrier.run(creep, room);
+          if (destroy) Creep_center_carrier.destroy(creep);
+          break;
+        case CreepType.CARRIER:
+          Creep_carrier.run(creep, room, context.fetchCarryTask, context.returnCarryTask, context.finishCarryTask);
+          break;
+        case CreepType.REPAIRER:
+          Creep_repairer.run(creep, room, context.fetchRepairTask, context.returnRepairTask, context.finishRepairTask);
           break;
         case CreepType.UPGRADER:
           Creep_upgrader.run(creep);
@@ -41,17 +52,6 @@ export const CreepController = function (context: CreepControllerContext) {
         case CreepType.CONSTRUCTOR:
           Creep_constructor.run(creep);
           if (destroy) Creep_constructor.destroy(creep);
-          break;
-        case CreepType.MAINTENANCER:
-          Creep_maintenancer.run(
-            creep,
-            room,
-            context.fetchMaintenanceTask,
-            context.returnMaintenanceTask,
-            context.finishCarryTask,
-            context.finishRepairTask
-          );
-          if (destroy) Creep_maintenancer.destroy(creep);
           break;
         default:
           throw new Error(`Unhandled creep type: ${name}`);
@@ -66,8 +66,10 @@ export const CreepController = function (context: CreepControllerContext) {
 interface CreepControllerContext {
   spawnFunc(name: string): void;
   room: Room;
-  fetchMaintenanceTask(): Task | null;
-  returnMaintenanceTask(task: Task): void;
-  finishCarryTask(task: Task): void;
-  finishRepairTask(task: Task): void;
+  fetchCarryTask(): CarryTask | null;
+  fetchRepairTask(): RepairTask | null;
+  returnCarryTask(task: CarryTask): void;
+  returnRepairTask(task: RepairTask): void;
+  finishCarryTask(task: CarryTask): void;
+  finishRepairTask(task: RepairTask): void;
 }

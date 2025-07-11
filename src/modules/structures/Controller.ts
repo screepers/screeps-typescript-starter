@@ -16,10 +16,8 @@ export const SController = {
         switch (result) {
           case OK:
             room.memory.cq.unshift({
-              type: "Build",
-              time: 0,
-              data: { targetId: `|${x}|${y}` }
-            });
+              tgt: `|${x}|${y}`,
+            } as ConstructTask);
             break;
           default:
             error(`Unhandled construction error code ${result}`);

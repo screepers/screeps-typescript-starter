@@ -1,4 +1,5 @@
 import { DevelopConfig } from "../mood/develop";
+import { err } from "../Message";
 
 export const CreepAPI = {
   getCreepConfig(creepName: string, context: CreepAPIContext = {}): CreepConfig {
@@ -6,7 +7,7 @@ export const CreepAPI = {
       getSpawnInfo: context.getSpawnInfo ?? false,
       getCreepType: context.getCreepType ?? false,
       getCreepMemoryData: context.getCreepMemoryData ?? false,
-      getCreepRoom: context.getCreepRoom ?? false,
+      getCreepRoom: context.getCreepRoom ?? false
     };
     let returnConfig = new CreepConfig();
 
@@ -59,17 +60,21 @@ export class CreepConfig {
 
 // creep role definition
 export const HARVESTER = "HARVESTER";
+export const CCARRIER = "CCARRIER";
+export const CARRIER = "CARRIER";
+export const REPAIRER = "REPAIRER";
 export const UPGRADER = "UPGRADER";
 export const CONSTRUCTOR = "CONSTRUCTOR";
-export const MAINTENANCER = "MAINTENANCER";
 export enum CreepType {
   HARVESTER,
-  MAINTENANCER,
+  CARRIER,
+  CCARRIER,
+  REPAIRER,
   CONSTRUCTOR,
-  UPGRADER,
+  UPGRADER
 }
 export function getCreepTypeList() {
-  return [CreepType.HARVESTER, CreepType.UPGRADER, CreepType.CONSTRUCTOR, CreepType.MAINTENANCER];
+  return [CreepType.HARVESTER, CreepType.CCARRIER, CreepType.CARRIER, CreepType.REPAIRER, CreepType.UPGRADER, CreepType.CONSTRUCTOR];
 }
 
 // tool function
@@ -118,12 +123,16 @@ function getCreepType(typeName: string): CreepType {
   switch (typeName) {
     case HARVESTER:
       return CreepType.HARVESTER;
+    case CCARRIER:
+      return CreepType.CCARRIER;
+    case CARRIER:
+      return CreepType.CARRIER;
+    case REPAIRER:
+      return CreepType.REPAIRER;
     case UPGRADER:
       return CreepType.UPGRADER;
     case CONSTRUCTOR:
       return CreepType.CONSTRUCTOR;
-    case MAINTENANCER:
-      return CreepType.MAINTENANCER;
     default:
       throw new Error(`<CREEP API> Unknown creep type ${typeName}`);
   }
@@ -144,29 +153,29 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
       }
       const idx = Number(nameInfoList[1]);
       const source = room.source[idx];
-      const spawn = room.spawn[0];
-      if (!spawn)
-        return {
-          sid: source.id
-        };
-      else
-        return {
-          sid: source.id,
-          cid: spawn.id
-        };
+      // find container
+      let structures = room.lookForAtArea(LOOK_STRUCTURES, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
+      let container: StructureContainer | null = null;
+      for (let structure of structures) {
+        if (structure.structure.structureType == STRUCTURE_CONTAINER) {
+          container = structure.structure as StructureContainer;
+          break;
+        }
+      }
+      if (!container) {
+        err(`<CREEP API> Cannot find source container, idx = ${idx}`, true);
+      }
+      return {
+        sid: source.id,
+        cid: container!.id
+      }
     }
-    case CreepType.CONSTRUCTOR: {
+    case CreepType.CARRIER:
+    case CreepType.REPAIRER:
+    case CreepType.CONSTRUCTOR:
       return {
         task: null
-      }
-    }
-    case CreepType.MAINTENANCER: {
-      return {
-        task: null,
-        sourceId: "",
-        sourceTy: "",
-      }
-    }
+      };
     default:
       throw new Error(`<CREEP API> Unknown creep type ${type}`);
   }

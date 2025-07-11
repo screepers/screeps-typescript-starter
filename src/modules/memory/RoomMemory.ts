@@ -18,60 +18,20 @@ function initRepairIdSet(memory: RoomMemory) {
   }
 }
 
-let maintenanceQueue: PriorityQueue<Task> | undefined = undefined;
+let carryQueue: PriorityQueue<CarryTask> | undefined = undefined;
+let repairQueue: PriorityQueue<RepairTask> | undefined = undefined;
 
-function initMaintenanceQueue(memory: RoomMemory) {
-  maintenanceQueue = new PriorityQueue<Task>((task1: Task, task2: Task): boolean => {
-    function score(task: Task): number {
-      let score = 0;
-      switch (task.type) {
-        case "Carry":
-          score += 10;
-          break;
-        case "Build":
-          score += 5;
-          break;
-        case "Repair":
-          score += 8;
-          break;
-      }
-      return score * task.time;
-    }
-    return score(task1) < score(task2);
-  });
-  for (const task of memory.mq) maintenanceQueue.push(task);
+function initCarryQueue(memory: RoomMemory) {
+  carryQueue = new PriorityQueue<CarryTask>();
+  for (const task of memory.caq) carryQueue.push(task);
+}
+
+function initRepairQueue(memory: RoomMemory) {
+  repairQueue = new PriorityQueue<RepairTask>();
+  for (const task of memory.rq) repairQueue.push(task);
 }
 
 export const RoomMemoryController = function (context: RoomMemoryControllerContext) {
-  const preRun = function () {
-    carryIdSet = undefined;
-    repairIdSet = undefined;
-    maintenanceQueue = undefined;
-  };
-
-  const run = function () {
-    const memory = context.room.memory;
-    // check source
-    if (memory.source.id != "") {
-      switch (memory.source.type) {
-        case "Spawn":
-          // if sq is not empty, reset to none
-          if (memory.sq.length > 0) memory.source.id = "";
-          break;
-        case "Container": {
-          // if container has no energy, reset to none
-          const container = Game.getObjectById(memory.source.id as Id<StructureContainer>);
-          if (!container) memory.source.id = "";
-          else if (container.store.energy < 50) memory.source.id = "";
-          break;
-        }
-        default:
-          warn(`<ROOM MEMORY> memory source type invalid, reset to none. current type is ${memory.source.type}`);
-          memory.source.id = "";
-      }
-    }
-  };
-
   const postRun = function () {
     let memory = context.room.memory;
     // move data back to memory
@@ -80,80 +40,99 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
       for (const id of carryIdSet) {
         memory.cis.push(id);
       }
+      carryIdSet = undefined;
     }
     if (repairIdSet) {
       memory.ris = [];
       for (const id of repairIdSet) {
         memory.ris.push(id);
       }
+      repairIdSet = undefined;
     }
-    if (maintenanceQueue) {
-      memory.mq = [];
-      while (!maintenanceQueue.empty()) {
-        memory.mq.push(maintenanceQueue.poll());
+    if (carryQueue) {
+      memory.caq = [];
+      while (!carryQueue.empty()) {
+        memory.caq.push(carryQueue.poll());
       }
+      carryQueue = undefined;
+    }
+    if (repairQueue) {
+      memory.rq = [];
+      while (!repairQueue.empty()) {
+        memory.rq.push(repairQueue.poll());
+      }
+      repairQueue = undefined;
     }
   };
 
-  const addCarryTask = function (task: Task) {
+  const addCarryTask = function (task: CarryTask) {
     if (!carryIdSet) initCarryIdSet(context.room.memory);
     carryIdSet = carryIdSet!;
-    const id = (task.data as CarryTaskData).targetId;
-    if (!carryIdSet.has(id)) {
-      carryIdSet.add(id);
-      if (!maintenanceQueue) initMaintenanceQueue(context.room.memory);
-      maintenanceQueue = maintenanceQueue!;
-      maintenanceQueue.push(task);
+    if (!carryIdSet.has(task.tgt)) {
+      carryIdSet.add(task.tgt);
+      if (!carryQueue) initCarryQueue(context.room.memory);
+      carryQueue!.push(task);
     }
   };
 
-  const finishCarryTask = function (task: Task) {
+  const finishCarryTask = function (task: CarryTask) {
     if (!carryIdSet) initCarryIdSet(context.room.memory);
     carryIdSet = carryIdSet!;
-    carryIdSet.delete((task.data as CarryTaskData).targetId);
+    carryIdSet.delete(task.tgt);
   };
 
-  const addRepairTask = function (task: Task) {
+  const addRepairTask = function (task: RepairTask) {
     if (!repairIdSet) initRepairIdSet(context.room.memory);
     repairIdSet = repairIdSet!;
-    const id = (task.data as RepairTaskData).targetId;
-    if (!repairIdSet.has(id)) {
-      repairIdSet.add(id);
-      if (!maintenanceQueue) initMaintenanceQueue(context.room.memory);
-      maintenanceQueue = maintenanceQueue!;
-      maintenanceQueue.push(task);
+    if (!repairIdSet.has(task.tgt)) {
+      repairIdSet.add(task.tgt);
+      if (!repairQueue) initRepairQueue(context.room.memory);
+      repairQueue!.push(task);
     }
   };
 
-  const finishRepairTask = function (task: Task) {
+  const finishRepairTask = function (task: RepairTask) {
     if (!repairIdSet) initRepairIdSet(context.room.memory);
     repairIdSet = repairIdSet!;
-    repairIdSet.delete((task.data as RepairTaskData).targetId);
+    repairIdSet.delete(task.tgt);
   };
 
-  const fetchMaintenanceTask = function (): Task | null {
-    if (!maintenanceQueue) initMaintenanceQueue(context.room.memory);
-    maintenanceQueue = maintenanceQueue!;
-    if (maintenanceQueue.empty()) return null;
-    return maintenanceQueue.poll();
-  };
+  const fetchCarryTask = function (): CarryTask | null {
+    if (!carryQueue) initCarryQueue(context.room.memory);
+    carryQueue = carryQueue!;
+    if (carryQueue.empty()) return null;
+    return carryQueue.poll();
+  }
 
-  const returnMaintenanceTask = function (task: Task) {
-    if (!maintenanceQueue) initMaintenanceQueue(context.room.memory);
-    maintenanceQueue = maintenanceQueue!;
-    maintenanceQueue.push(task);
-  };
+  const fetchRepairTask = function (): RepairTask | null {
+    if (!repairQueue) initRepairQueue(context.room.memory);
+    repairQueue = repairQueue!;
+    if (repairQueue.empty()) return null;
+    return repairQueue.poll();
+  }
+
+  const returnCarryTask = function (task: CarryTask) {
+    if (!carryQueue) initCarryQueue(context.room.memory);
+    carryQueue =  carryQueue!;
+    carryQueue.push(task);
+  }
+
+  const returnRepairTask = function (task: RepairTask) {
+    if (!repairQueue) initRepairQueue(context.room.memory);
+    repairQueue = repairQueue!;
+    repairQueue.push(task);
+  }
 
   return {
-    preRun,
-    run,
     postRun,
     addCarryTask,
     finishCarryTask,
     addRepairTask,
     finishRepairTask,
-    fetchMaintenanceTask,
-    returnMaintenanceTask
+    fetchCarryTask,
+    fetchRepairTask,
+    returnCarryTask,
+    returnRepairTask,
   };
 };
 

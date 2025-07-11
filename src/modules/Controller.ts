@@ -13,9 +13,11 @@ export const MainController = {
       const creepController = CreepController({
         spawnFunc: spawnController.createSpawnTask,
         room: room,
-        fetchMaintenanceTask: roomMemoryController.fetchMaintenanceTask,
-        returnMaintenanceTask: roomMemoryController.returnMaintenanceTask,
+        fetchCarryTask: roomMemoryController.fetchCarryTask,
+        returnCarryTask: roomMemoryController.returnCarryTask,
         finishCarryTask: roomMemoryController.finishCarryTask,
+        fetchRepairTask: roomMemoryController.fetchRepairTask,
+        returnRepairTask: roomMemoryController.returnRepairTask,
         finishRepairTask: roomMemoryController.finishRepairTask,
       });
       const structureController = StructuresController({
@@ -25,11 +27,9 @@ export const MainController = {
       });
 
       // prerun
-      roomMemoryController.preRun();
       creepController.prerun();
 
       // run
-      roomMemoryController.run();
       spawnController.run();
       structureController.run();
       creepController.run();
@@ -51,14 +51,14 @@ export const MainController = {
         const spawnPos = room.spawn[0].pos;
         Memory.rooms[room.name] = {
           creeps: [],
-          mq: [],
+          caq: [],
           cis: [],
+          rq: [],
           ris: [],
           cq: [],
           sq: [],
           center: { x: spawnPos.x - 1, y: spawnPos.y },
           lv: 0,
-          source: { id: "", type: "" },
           lastCreepCheck: 0,
           creepConfigUpdate: true
         };

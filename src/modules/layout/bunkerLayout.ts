@@ -317,7 +317,7 @@ export function createBunkerLayout(
             error(`Path is null`, true);
           }
           containers.push(path.pop()!);
-          roads.push(...path);
+          roads.push(...(path.reverse()));
         }
       } else
         for (const source of room.source) {
@@ -326,10 +326,11 @@ export function createBunkerLayout(
             error(`Path is null`, true);
           }
           containers.push(path.pop()!);
-          roads.push(...path);
+          roads.push(...(path.reverse()));
         }
-      for (const road of roads) createFn(road.x, road.y, STRUCTURE_ROAD);
       for (const container of containers) createFn(container.x, container.y, STRUCTURE_CONTAINER);
+      for (const road of roads) createFn(road.x, road.y, STRUCTURE_ROAD);
+      createFn(center.x, center.y, STRUCTURE_CONTAINER);  // center container
       break;
     }
     case 2: {
@@ -360,7 +361,7 @@ export function createBunkerLayout(
         return { x: loc.x + center.x, y: loc.y + center.y };
       });
       for (const extension of extensions) createFn(extension.x, extension.y, STRUCTURE_EXTENSION);
-      createFn(TowerLoc[0].x + center.x, TowerLoc[1].y + center.y, STRUCTURE_TOWER);
+      createFn(TowerLoc[0].x + center.x, TowerLoc[0].y + center.y, STRUCTURE_TOWER);
       break;
     }
     default:
