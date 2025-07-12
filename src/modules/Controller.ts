@@ -2,6 +2,7 @@ import { CreepController } from "./creeps/Controller";
 import { SpawnController } from "./Spawn";
 import { StructuresController } from "./structures/StructuresController";
 import { RoomMemoryController } from "./memory/RoomMemory";
+import { DefenseController } from "./defense/Controller";
 
 export const MainController = {
   run(): void {
@@ -20,10 +21,16 @@ export const MainController = {
         returnRepairTask: roomMemoryController.returnRepairTask,
         finishRepairTask: roomMemoryController.finishRepairTask,
       });
+      const defenseController = DefenseController({
+        room: room,
+        getHostileCreeps: creepController.getHostileCreeps,
+        getHostilePowerCreeps: creepController.getHostilePowerCreeps,
+      });
       const structureController = StructuresController({
         room: room,
         addRepairTask: roomMemoryController.addRepairTask,
         addCarryTask: roomMemoryController.addCarryTask,
+        getAttackTarget: defenseController.getAttackTarget
       });
 
       // prerun

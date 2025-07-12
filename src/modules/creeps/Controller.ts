@@ -6,8 +6,13 @@ import { Creep_constructor } from "./Constructor";
 import { Creep_carrier } from "./Carrier";
 import { Creep_repairer } from "./Repairer";
 import { Creep_center_carrier } from "./CenterCarrier";
+import { err } from "../Message";
 
 const CREEP_CHECK_DURATION = 1000;
+
+function error(message: string, throwError: boolean = false) {
+  err(`\<CONSTRUCTOR\> ${message}`, throwError);
+}
 
 export const CreepController = function (context: CreepControllerContext) {
   const prerun = function (): void {
@@ -37,30 +42,40 @@ export const CreepController = function (context: CreepControllerContext) {
           break;
         case CreepType.CCARRIER:
           Creep_center_carrier.run(creep, room);
-          if (destroy) Creep_center_carrier.destroy(creep);
+          if (destroy) Creep_center_carrier.destroy(creep, room);
           break;
         case CreepType.CARRIER:
           Creep_carrier.run(creep, room, context.fetchCarryTask, context.returnCarryTask, context.finishCarryTask);
+          if (destroy) Creep_carrier.destroy(creep, room, context.returnCarryTask);
           break;
         case CreepType.REPAIRER:
           Creep_repairer.run(creep, room, context.fetchRepairTask, context.returnRepairTask, context.finishRepairTask);
+          if (destroy) Creep_repairer.destroy(creep, room, context.returnRepairTask);
           break;
         case CreepType.UPGRADER:
           Creep_upgrader.run(creep);
-          if (destroy) Creep_upgrader.destroy(creep);
+          if (destroy) Creep_upgrader.destroy(creep, room);
           break;
         case CreepType.CONSTRUCTOR:
           Creep_constructor.run(creep);
-          if (destroy) Creep_constructor.destroy(creep);
+          if (destroy) Creep_constructor.destroy(creep, room);
           break;
         default:
-          throw new Error(`Unhandled creep type: ${name}`);
+          error(`Unhandled creep type: ${name}`);
       }
     }
     room.memory.lastCreepCheck += 1;
   };
 
-  return { prerun, run };
+  const getHostileCreeps = function(): Creep[] {
+    return context.room.find(FIND_HOSTILE_CREEPS);
+  }
+
+  const getHostilePowerCreeps = function(): PowerCreep[] {
+    return context.room.find(FIND_HOSTILE_POWER_CREEPS);
+  }
+
+  return { prerun, run, getHostileCreeps, getHostilePowerCreeps };
 };
 
 interface CreepControllerContext {

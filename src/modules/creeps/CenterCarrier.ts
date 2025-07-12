@@ -13,7 +13,7 @@ export const Creep_center_carrier = {
 
     if (state == STATE.FETCH) {
       // parse index
-      const idx = parseInt(creep.name.split("_")[1]) % 2;
+      const idx = parseInt(creep.name.split("_")[1]) % room.source.length;
       const source = room.source[idx];
       // find container
       let structures = room.lookForAtArea(
@@ -55,6 +55,7 @@ export const Creep_center_carrier = {
       function transfer(structure: Structure): void {
         const result = creep.transfer(structure, RESOURCE_ENERGY);
         switch (result) {
+          case ERR_NOT_ENOUGH_RESOURCES:
           case OK:
             creep.memory.state = STATE.FETCH;
             break;
@@ -89,7 +90,11 @@ export const Creep_center_carrier = {
       }
     }
   },
-  destroy(creep: Creep) {
+  destroy(creep: Creep, room: Room) {
+    delete Memory.creeps[creep.name];
+    let creeps = room.memory.creeps;
+    const index = creeps.indexOf(creep.name);
+    if (index > -1) creeps.splice(index, 1);
     creep.suicide();
   }
 };

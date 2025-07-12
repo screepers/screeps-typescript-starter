@@ -364,6 +364,15 @@ export function createBunkerLayout(
       createFn(TowerLoc[0].x + center.x, TowerLoc[0].y + center.y, STRUCTURE_TOWER);
       break;
     }
+    case 4: {
+      // build storage and extension
+      createFn(StorageLoc.x + center.x, StorageLoc.y + center.y, STRUCTURE_STORAGE);
+      let extensions = ExtensionLoc.slice(10, 20).map(loc => {
+        return { x: loc.x + center.x, y: loc.y + center.y };
+      });
+      for (const extension of extensions) createFn(extension.x, extension.y, STRUCTURE_EXTENSION);
+      break;
+    }
     default:
       error(`Unimplemented controller level ${controller!.level}`);
   }

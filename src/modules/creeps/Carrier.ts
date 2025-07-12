@@ -112,6 +112,15 @@ export const Creep_carrier = {
       if (structure) transfer(structure);
       else error(`Cannot find structure ${task.tgt}`);
     }
+  },
+  destroy(creep: Creep, room: Room, returnCarryTask: (task: CarryTask) => void) {
+    let data = creep.memory.data as Carrier_data;
+    if (data.task) returnCarryTask(data.task);
+    delete Memory.creeps[creep.name];
+    let creeps = room.memory.creeps;
+    const index = creeps.indexOf(creep.name);
+    if (index > -1) creeps.splice(index, 1);
+    creep.suicide();
   }
 };
 

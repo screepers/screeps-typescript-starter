@@ -21,7 +21,7 @@ const CreepDict = {
       { body: [WORK, MOVE] }, // before source bounded container is built
       { body: [WORK, WORK, MOVE, MOVE] }, // cost 300 energy, used before extension is built
       { body: [WORK, WORK, WORK, WORK, MOVE, MOVE] }, // cost 500 energy
-      { body: [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE]}, // cost 650 energy, perfect form
+      { body: [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE] } // cost 650 energy, perfect form
     ]
   },
   CENTER_CARRIER: {
@@ -38,7 +38,7 @@ const CreepDict = {
         let num = 0;
         if (room.name == "sim") num = 2;
         else num = room.source.length;
-        if (room.controller!.level <= 3) return num * 2;
+        if (room.controller!.level <= 4) return num * 2;
         else return num;
       }
     },
@@ -72,8 +72,8 @@ const CreepDict = {
     getConfigIndex: function (room: Room): number {
       // TODO: implement
       if (room.controller!.level == 1) return 0;
-
-      return 1;
+      if (room.extension.length < 20) return 1;
+      return 2;
     },
     getNum: function (room: Room): number {
       const controller = room.controller;
@@ -85,15 +85,17 @@ const CreepDict = {
       switch (controller.level) {
         case 0:
         case 1:
+        case 8:
           return 1;
-        case 2:
-        case 3:
-          return 4;
         default:
-          return 3;
+          return 4;
       }
     },
-    CONFIG: [{ body: [WORK, CARRY, MOVE] }, { body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] }]
+    CONFIG: [
+      { body: [WORK, CARRY, MOVE] },
+      { body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] },
+      { body: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE] }
+    ]
   },
   CONSTRUCTOR: {
     getConfigIndex: function (room: Room): number {

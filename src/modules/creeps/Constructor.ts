@@ -186,10 +186,11 @@ export const Creep_constructor = {
       }
     }
   },
-  destroy(creep: Creep): void {
+  destroy(creep: Creep, room: Room): void {
     delete Memory.creeps[creep.name];
-    let creeps = creep.room.memory.creeps;
-    creeps.splice(creeps.indexOf(creep.name), 1);
+    let creeps = room.memory.creeps;
+    const index = creeps.indexOf(creep.name);
+    if (index > -1) creeps.splice(index, 1);
     creep.suicide();
   }
 };

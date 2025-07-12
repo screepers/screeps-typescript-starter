@@ -14,7 +14,7 @@ export const Creep_repairer = {
     finishRepairTask: (task: RepairTask) => void
   ): void {
     if (creep.spawning) return;
-    let memory = creep.memory
+    let memory = creep.memory;
     if (creep.ticksToLive! < 2) {
       let task = (memory.data as Repairer_data).task;
       if (task) returnRepairTask(task);
@@ -111,6 +111,15 @@ export const Creep_repairer = {
       if (structure) repair(structure);
       else error(`Cannot find structure ${task.tgt}`);
     }
+  },
+  destroy(creep: Creep, room: Room, returnRepairTask: (task: RepairTask) => void): void {
+    let data = creep.memory.data as Repairer_data;
+    if (data.task) returnRepairTask(data.task);
+    delete Memory.creeps[creep.name];
+    let creeps = room.memory.creeps;
+    const index = creeps.indexOf(creep.name);
+    if (index > -1) creeps.splice(index, 1);
+    creep.suicide();
   }
 };
 
