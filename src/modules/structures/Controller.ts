@@ -2,7 +2,7 @@ import { createBunkerLayout } from "../layout/bunkerLayout";
 import { err } from "../Message";
 
 function error(message: string, throwError: boolean = false) {
-  err(`<STRUCTURE CONTROLLER> ${message}`, throwError);
+  err(`[STRUCTURE CONTROLLER] ${message}`, throwError);
 }
 
 export const SController = {

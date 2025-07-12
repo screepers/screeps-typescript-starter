@@ -207,7 +207,7 @@ const RoadLoc = [
 ];
 
 function error(message: string, throwError = false) {
-  err(`<Bunker Layout> ${message}`, throwError);
+  err(`[Bunker Layout] ${message}`, throwError);
 }
 
 function checkReachSurroundingRoad(x: number, y: number): number {

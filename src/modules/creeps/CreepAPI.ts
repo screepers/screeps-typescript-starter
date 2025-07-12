@@ -134,7 +134,7 @@ function getCreepType(typeName: string): CreepType {
     case CONSTRUCTOR:
       return CreepType.CONSTRUCTOR;
     default:
-      throw new Error(`<CREEP API> Unknown creep type ${typeName}`);
+      throw new Error(`[CREEP API] Unknown creep type ${typeName}`);
   }
 }
 
@@ -163,7 +163,7 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
         }
       }
       if (!container) {
-        err(`<CREEP API> Cannot find source container, idx = ${idx}`, true);
+        err(`[CREEP API] Cannot find source container, idx = ${idx}`, true);
       }
       return {
         sid: source.id,
@@ -177,6 +177,6 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
         task: null
       };
     default:
-      throw new Error(`<CREEP API> Unknown creep type ${type}`);
+      throw new Error(`[CREEP API] Unknown creep type ${type}`);
   }
 }

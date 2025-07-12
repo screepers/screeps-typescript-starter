@@ -147,7 +147,7 @@ export const DevelopConfig = {
           return roleConfig.CONFIG[roleConfig.getConfigIndex(room)];
         }
         default:
-          throw new Error(`<DEVELOP CONFIG> Unknown creep type ${creepType} in function getCreepConfig`);
+          throw new Error(`[DEVELOP CONFIG] Unknown creep type ${creepType} in function getCreepConfig`);
       }
     },
     getCreepNum: (creepType: CreepType, room: Room): number => {
@@ -165,7 +165,7 @@ export const DevelopConfig = {
         case CreepType.CONSTRUCTOR:
           return CreepDict.CONSTRUCTOR.getNum(room);
         default:
-          throw new Error(`<DEVELOP CONFIG> Unknown creep type ${creepType} in function getCreepNum`);
+          throw new Error(`[DEVELOP CONFIG] Unknown creep type ${creepType} in function getCreepNum`);
       }
     }
   }

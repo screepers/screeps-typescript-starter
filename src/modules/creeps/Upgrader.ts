@@ -1,7 +1,7 @@
 import { err } from "../Message";
 
 function error(message: string, throwError: boolean = false) {
-  err(`<UPGRADER> ${message}`, throwError);
+  err(`[UPGRADER] ${message}`, throwError);
 }
 
 export const Creep_upgrader = {

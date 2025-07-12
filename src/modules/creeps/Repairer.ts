@@ -2,7 +2,7 @@ import { err } from "../Message";
 import { CreepAPI } from "./CreepAPI";
 
 function error(message: string, throwError: boolean = false) {
-  err(`<REPAIRER> ${message}`, throwError);
+  err(`[REPAIRER] ${message}`, throwError);
 }
 
 export const Creep_repairer = {

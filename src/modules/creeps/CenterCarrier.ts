@@ -2,7 +2,7 @@
 import { err } from "../Message";
 
 function error(message: string, throwError: boolean = false) {
-  err(`<CENTER CARRIER> ${message}`, throwError);
+  err(`[CENTER CARRIER] ${message}`, throwError);
 }
 
 export const Creep_center_carrier = {

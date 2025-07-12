@@ -4,7 +4,7 @@ import { err } from "../Message";
 // TODO: 1. calculate px and py; 2. fill state IDLE by get memory data from creepapi
 
 function error(message: string, throwError: boolean = false) {
-  err(`<HARVESTER> ${message}`, throwError);
+  err(`[HARVESTER] ${message}`, throwError);
 }
 
 export const Creep_harvester = {
