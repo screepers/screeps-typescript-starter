@@ -5,6 +5,7 @@ export const SRoad = {
       addRepairTask({
         tgt: road.id,
         hits: road.hitsMax,
+        sn: STRUCTURE_ROAD
       });
   }
 }

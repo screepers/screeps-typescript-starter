@@ -3,6 +3,7 @@ import PriorityQueue from "../../utils/PriorityQueue";
 
 let carryIdSet: Set<string> | undefined = undefined;
 let repairIdSet: Set<string> | undefined = undefined;
+let emergencyRepairIdSet: Set<string> | undefined = undefined;
 
 function initCarryIdSet(memory: RoomMemory) {
   carryIdSet = new Set();
@@ -18,8 +19,26 @@ function initRepairIdSet(memory: RoomMemory) {
   }
 }
 
+function initEmergencyRepairIdSet(memory: RoomMemory) {
+  emergencyRepairIdSet = new Set();
+  for (const id of memory.eris) {
+    emergencyRepairIdSet.add(id);
+  }
+}
+
 let carryQueue: PriorityQueue<CarryTask> | undefined = undefined;
 let repairQueue: PriorityQueue<RepairTask> | undefined = undefined;
+let emergencyRepairQueue: PriorityQueue<RepairTask> | undefined = undefined;
+
+function repairTaskPriority(task1: RepairTask, task2: RepairTask): boolean {
+  function score(task: RepairTask) {
+    if (task.sn == STRUCTURE_RAMPART) return 1;
+    else if (task.sn == STRUCTURE_CONTAINER) return 10;
+    else if (task.sn == STRUCTURE_ROAD) return 5;
+    else return 7;
+  }
+  return score(task1) > score(task2);
+}
 
 function initCarryQueue(memory: RoomMemory) {
   carryQueue = new PriorityQueue<CarryTask>();
@@ -27,8 +46,13 @@ function initCarryQueue(memory: RoomMemory) {
 }
 
 function initRepairQueue(memory: RoomMemory) {
-  repairQueue = new PriorityQueue<RepairTask>();
+  repairQueue = new PriorityQueue<RepairTask>(repairTaskPriority);
   for (const task of memory.rq) repairQueue.push(task);
+}
+
+function initEmergencyRepairQueue(memory: RoomMemory) {
+  emergencyRepairQueue = new PriorityQueue<RepairTask>(repairTaskPriority);
+  for (const task of memory.erq) emergencyRepairQueue.push(task);
 }
 
 export const RoomMemoryController = function (context: RoomMemoryControllerContext) {
@@ -49,6 +73,13 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
       }
       repairIdSet = undefined;
     }
+    if (emergencyRepairIdSet) {
+      memory.eris = [];
+      for (const id of emergencyRepairIdSet) {
+        memory.eris.push(id);
+      }
+      emergencyRepairIdSet = undefined;
+    }
     if (carryQueue) {
       memory.caq = [];
       while (!carryQueue.empty()) {
@@ -62,6 +93,13 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
         memory.rq.push(repairQueue.poll());
       }
       repairQueue = undefined;
+    }
+    if (emergencyRepairQueue) {
+      memory.erq = [];
+      while (!emergencyRepairQueue.empty()) {
+        memory.erq.push(emergencyRepairQueue.poll());
+      }
+      emergencyRepairQueue = undefined;
     }
   };
 
@@ -97,6 +135,22 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
     repairIdSet.delete(task.tgt);
   };
 
+  const addEmergencyRepairTask = function (task: RepairTask) {
+    if (!emergencyRepairIdSet) initEmergencyRepairIdSet(context.room.memory);
+    emergencyRepairIdSet = emergencyRepairIdSet!;
+    if (!emergencyRepairIdSet.has(task.tgt)) {
+      emergencyRepairIdSet.add(task.tgt);
+      if (!emergencyRepairQueue) initEmergencyRepairQueue(context.room.memory);
+      emergencyRepairQueue!.push(task);
+    }
+  }
+
+  const finishEmergencyRepairTask = function (task: RepairTask) {
+    if (!emergencyRepairIdSet) initEmergencyRepairIdSet(context.room.memory);
+    emergencyRepairIdSet = emergencyRepairIdSet!;
+    emergencyRepairIdSet.delete(task.tgt);
+  };
+
   const fetchCarryTask = function (): CarryTask | null {
     if (!carryQueue) initCarryQueue(context.room.memory);
     carryQueue = carryQueue!;
@@ -111,6 +165,13 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
     return repairQueue.poll();
   }
 
+  const fetchEmergencyRepairTask = function (): RepairTask | null {
+    if (!emergencyRepairQueue) initEmergencyRepairQueue(context.room.memory);
+    emergencyRepairQueue = emergencyRepairQueue!;
+    if (emergencyRepairQueue.empty()) return null;
+    return emergencyRepairQueue.poll();
+  }
+
   const returnCarryTask = function (task: CarryTask) {
     if (!carryQueue) initCarryQueue(context.room.memory);
     carryQueue =  carryQueue!;
@@ -123,16 +184,26 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
     repairQueue.push(task);
   }
 
+  const returnEmergencyRepairTask = function (task: RepairTask) {
+    if (!emergencyRepairQueue) initEmergencyRepairQueue(context.room.memory);
+    emergencyRepairQueue = emergencyRepairQueue!;
+    emergencyRepairQueue.push(task);
+  }
+
   return {
     postRun,
     addCarryTask,
     finishCarryTask,
     addRepairTask,
     finishRepairTask,
+    addEmergencyRepairTask,
+    finishEmergencyRepairTask,
     fetchCarryTask,
     fetchRepairTask,
+    fetchEmergencyRepairTask,
     returnCarryTask,
     returnRepairTask,
+    returnEmergencyRepairTask,
   };
 };
 

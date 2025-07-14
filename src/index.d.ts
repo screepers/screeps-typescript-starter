@@ -33,17 +33,25 @@ interface Room {
   // function
   update(): void;
 }
+interface Room {
+  resetQueue: () => void;
+}
 
 interface ConstructTask {
   tgt: string;
 }
 interface CarryTask {
-  tgt: string;            // target id
-  rt: ResourceConstant;   // resource type.
+  tgt: string; // target id
+  rt: ResourceConstant; // resource type.
 }
 interface RepairTask {
-  tgt: string;            // target id.
-  hits: number;           // hits to be repaired
+  tgt: string; // target id.
+  hits: number; // hits to be repaired
+  sn: string; // structure name
+}
+
+interface TowerMemory {
+  rt: RepairTask | null;
 }
 
 interface CreepMemory {
@@ -52,10 +60,15 @@ interface CreepMemory {
   data?: object;
 }
 interface RoomMemory {
-  caq: CarryTask[];   // carry task queue
+  // structure memory
+  tm: { [id: string]: TowerMemory };
+
+  caq: CarryTask[]; // carry task queue
   cis: string[]; // carry task id set
-  rq: RepairTask[];    // repair task queue
+  rq: RepairTask[]; // repair task queue
+  erq: RepairTask[]; // emergency repair task
   ris: string[]; // repair task id set
+  eris: string[]; // emergency repair task id set
   cq: ConstructTask[]; // construction queue
   sq: string[]; // spawn queue
   creeps: string[];

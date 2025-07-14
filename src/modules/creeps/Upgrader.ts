@@ -1,4 +1,5 @@
-import { err } from "../Message";
+import { err, info } from "../Message";
+import { CreepAPI } from "./CreepAPI";
 
 function error(message: string, throwError: boolean = false) {
   err(`[UPGRADER] ${message}`, throwError);
@@ -9,6 +10,22 @@ export const Creep_upgrader = {
     if (creep.spawning) return;
 
     let state: STATE = creep.memory.state;
+    if (!creep.memory.data) {
+      if (state == STATE.IDLE) {
+        // init memory data
+        const config = CreepAPI.getCreepConfig(creep.name, { getCreepMemoryData: true });
+        creep.memory.data = config.creepMemoryData;
+      } else {
+        creep.say("No data");
+        error(`Center Carrier ${creep.name} data not found`);
+      }
+    }
+    let data = creep.memory.data as Upgrader_data;
+    if (!data.stop) data.stop = 0;
+    if (data.stop > 0) {
+      data.stop --;
+      return;
+    }
     let room = creep.room;
 
     if (state == STATE.IDLE) {
@@ -19,7 +36,10 @@ export const Creep_upgrader = {
       function withdraw(structure: Structure): void {
         // structure must have .store. use ignore to simplify code.
         // @ts-ignore
-        if (structure.store.energy < 400) return;
+        if (structure.store.energy < 600) {
+          data.stop = 5;
+          return;
+        }
         const result = creep.withdraw(structure, RESOURCE_ENERGY);
         switch (result) {
           case ERR_FULL:
@@ -30,6 +50,7 @@ export const Creep_upgrader = {
             creep.moveTo(structure.pos);
             break;
           case ERR_NOT_ENOUGH_RESOURCES:
+            data.stop = 5;
             creep.say("No resource");
             break;
           default:
@@ -77,6 +98,7 @@ export const Creep_upgrader = {
     }
   },
   destroy(creep: Creep, room: Room): void {
+    info(`Destroying creep ${creep.name}`);
     delete Memory.creeps[creep.name];
     let creeps = room.memory.creeps;
     const index = creeps.indexOf(creep.name);
@@ -84,6 +106,10 @@ export const Creep_upgrader = {
     creep.suicide();
   }
 };
+
+interface Upgrader_data {
+  stop: number;
+}
 
 enum STATE {
   IDLE,

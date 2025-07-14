@@ -1,5 +1,5 @@
 import { CreepAPI } from "./CreepAPI";
-import { err, warn } from "../Message";
+import { err, info, warn } from "../Message";
 
 function error(message: string, throwError: boolean = false) {
   err(`[CONSTRUCTOR] ${message}`, throwError);
@@ -26,6 +26,11 @@ export const Creep_constructor = {
       }
     }
     let data = creep.memory.data as Constructor_data;
+    if (!data.stop) data.stop = 0;
+    if (data.stop && data.stop > 0) {
+      data.stop --;
+      return;
+    }
     let room = creep.room;
 
     if (state == STATE.IDLE) {
@@ -114,7 +119,10 @@ export const Creep_constructor = {
         function withdraw(structure: Structure): void {
           // structure must have .store. use ignore to simplify code.
           // @ts-ignore
-          if (structure.store.energy < 400) return;
+          if (structure.store.energy < 600) {
+            data.stop = 5;
+            return;
+          }
           const result = creep.withdraw(structure, RESOURCE_ENERGY);
           switch (result) {
             case ERR_FULL:
@@ -125,6 +133,7 @@ export const Creep_constructor = {
               creep.moveTo(structure.pos);
               break;
             case ERR_NOT_ENOUGH_RESOURCES:
+              data.stop = 5;
               creep.say("No resource");
               break;
             default:
@@ -161,7 +170,7 @@ export const Creep_constructor = {
         creep.memory.state = STATE.IDLE;
         creep.memory.no_pull = false;
         let cq = creep.room.memory.cq;
-        if (task.tgt == cq[cq.length - 1].tgt) cq.pop();
+        if (cq.length > 0 && task.tgt == cq[cq.length - 1].tgt) cq.pop();
         data.task = null;
         data.source = null;
         creep.room.update();
@@ -187,6 +196,7 @@ export const Creep_constructor = {
     }
   },
   destroy(creep: Creep, room: Room): void {
+    info(`Destroying creep ${creep.name}`);
     delete Memory.creeps[creep.name];
     let creeps = room.memory.creeps;
     const index = creeps.indexOf(creep.name);
@@ -196,6 +206,7 @@ export const Creep_constructor = {
 };
 
 interface Constructor_data {
+  stop: number | null;
   task: ConstructTask | null;
   source: string | null;
 }

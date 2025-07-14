@@ -1,5 +1,5 @@
 import { CreepAPI } from "./CreepAPI";
-import { err } from "../Message";
+import { err, info } from "../Message";
 
 function error(message: string, throwError: boolean = false) {
   err(`[CARRIER] ${message}`, throwError);
@@ -114,6 +114,7 @@ export const Creep_carrier = {
     }
   },
   destroy(creep: Creep, room: Room, returnCarryTask: (task: CarryTask) => void) {
+    info(`Destroying creep ${creep.name}`);
     let data = creep.memory.data as Carrier_data;
     if (data.task) returnCarryTask(data.task);
     delete Memory.creeps[creep.name];

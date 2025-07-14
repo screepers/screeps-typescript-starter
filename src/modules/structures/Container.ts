@@ -6,7 +6,8 @@ export const SContainer = {
     if (container.hits < (container.hitsMax >> 1))
       addRepairTask({
         tgt: container.id,
-        hits: container.hitsMax
+        hits: container.hitsMax,
+        sn: STRUCTURE_CONTAINER
       });
   }
 }

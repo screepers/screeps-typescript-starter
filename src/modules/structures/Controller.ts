@@ -20,7 +20,7 @@ export const SController = {
             } as ConstructTask);
             break;
           default:
-            error(`Unhandled construction error code ${result}`);
+            error(`Unhandled construction error code ${result}, type = ${type}, position = (${x}, ${y})`);
         }
       });
       room.memory.lastCreepCheck = 998;

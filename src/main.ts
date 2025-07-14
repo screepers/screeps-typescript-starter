@@ -31,7 +31,8 @@ declare global {
 export const loop = ErrorMapper.wrapLoop(() => {
   const superMove = require("prototype.Creep.move");
   const structureCache = require("structure.cache");
-  if (Game.time % 100 == 0) info(`Current game tick is ${Game.time}`);
+  const consoleFunction = require("console.function");
+  if (Game.time % 1000 == 0) info(`Current game tick is ${Game.time}`);
 
   if (Game.cpu.bucket == 10000) Game.cpu.generatePixel();
 

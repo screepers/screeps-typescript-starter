@@ -172,9 +172,19 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
     }
     case CreepType.CARRIER:
     case CreepType.REPAIRER:
-    case CreepType.CONSTRUCTOR:
       return {
         task: null
+      };
+    case CreepType.CONSTRUCTOR:
+      return {
+        task: null,
+        source: null,
+        stop: 0
+      }
+    case CreepType.UPGRADER:
+    case CreepType.CCARRIER:
+      return {
+        stop: 0
       };
     default:
       throw new Error(`[CREEP API] Unknown creep type ${type}`);

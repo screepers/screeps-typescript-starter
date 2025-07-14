@@ -28,7 +28,8 @@ const CreepDict = {
     getConfigIndex: function (room: Room): number {
       // TODO: implement
       if (room.controller!.level == 1) return 0;
-      return 1;
+      if (room.extension.length < 20) return 1;
+      return 2;
     },
     getNum: function (room: Room): number {
       // try to find center container
@@ -38,11 +39,15 @@ const CreepDict = {
         let num = 0;
         if (room.name == "sim") num = 2;
         else num = room.source.length;
-        if (room.controller!.level <= 4) return num * 2;
+        if (room.extension.length < 20) return num * 2;
         else return num;
       }
     },
-    CONFIG: [{ body: [CARRY, CARRY, MOVE, MOVE] }, { body: [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] }]
+    CONFIG: [
+      { body: [CARRY, CARRY, MOVE, MOVE] },
+      { body: [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] },
+      { body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE] }
+    ]
   },
   CARRIER: {
     getConfigIndex: function (room: Room): number {
@@ -61,12 +66,16 @@ const CreepDict = {
   REPAIRER: {
     getConfigIndex: function (room: Room): number {
       // TODO: implement
-      return 0;
+      if (room.extension.length < 10) return 0;
+      return 1;
     },
     getNum: function (room: Room): number {
       return room.memory.rq.length == 0 ? 0 : 1;
     },
-    CONFIG: [{ body: [CARRY, CARRY, MOVE, MOVE, WORK] }]
+    CONFIG: [
+      { body: [CARRY, CARRY, MOVE, MOVE, WORK] },
+      { body: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE] }
+    ]
   },
   UPGRADER: {
     getConfigIndex: function (room: Room): number {

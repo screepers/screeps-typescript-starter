@@ -1,4 +1,4 @@
-import { err } from "../Message";
+import { err, info } from "../Message";
 import { CreepAPI } from "./CreepAPI";
 
 function error(message: string, throwError: boolean = false) {
@@ -113,6 +113,7 @@ export const Creep_repairer = {
     }
   },
   destroy(creep: Creep, room: Room, returnRepairTask: (task: RepairTask) => void): void {
+    info(`Destroying creep ${creep.name}`);
     let data = creep.memory.data as Repairer_data;
     if (data.task) returnRepairTask(data.task);
     delete Memory.creeps[creep.name];

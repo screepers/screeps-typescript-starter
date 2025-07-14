@@ -1,5 +1,6 @@
 // Carry energy from source container to center container
-import { err } from "../Message";
+import { err, info } from "../Message";
+import { CreepAPI } from "./CreepAPI";
 
 function error(message: string, throwError: boolean = false) {
   err(`[CENTER CARRIER] ${message}`, throwError);
@@ -10,10 +11,26 @@ export const Creep_center_carrier = {
     if (creep.spawning) return;
     let memory = creep.memory;
     let state: STATE = memory.state;
+    if (!creep.memory.data) {
+      if (state == STATE.FETCH) {
+        // init memory data
+        const config = CreepAPI.getCreepConfig(creep.name, { getCreepMemoryData: true });
+        creep.memory.data = config.creepMemoryData;
+      } else {
+        creep.say("No data");
+        error(`Center Carrier ${creep.name} data not found`);
+      }
+    }
+    let data = memory.data as CCarrier_data;
+    if (!data.stop) data.stop = 0;
+    if (data.stop > 0) {
+      data.stop --;
+      return;
+    }
 
     if (state == STATE.FETCH) {
       // parse index
-      const idx = parseInt(creep.name.split("_")[1]) % room.source.length;
+      const idx = parseInt(creep.name.split("_")[1]) % (room.name == "sim" ? 2 : room.source.length);
       const source = room.source[idx];
       // find container
       let structures = room.lookForAtArea(
@@ -45,6 +62,7 @@ export const Creep_center_carrier = {
           creep.moveTo(container.pos);
           break;
         case ERR_NOT_ENOUGH_RESOURCES:
+          data.stop = 5;
           creep.say("No resource");
           break;
         default:
@@ -91,6 +109,7 @@ export const Creep_center_carrier = {
     }
   },
   destroy(creep: Creep, room: Room) {
+    info(`Destroying creep ${creep.name}`);
     delete Memory.creeps[creep.name];
     let creeps = room.memory.creeps;
     const index = creeps.indexOf(creep.name);
@@ -98,6 +117,10 @@ export const Creep_center_carrier = {
     creep.suicide();
   }
 };
+
+interface CCarrier_data {
+  stop: number;
+}
 
 enum STATE {
   FETCH,
