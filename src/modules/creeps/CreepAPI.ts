@@ -86,7 +86,7 @@ const RANGED_ATTACK_COST = 150;
 const HEAL_COST = 250;
 const CLAIM_COST = 600;
 const TOUGH_COST = 10;
-function getCreepCost(body: BodyPartConstant[]): number {
+export function getCreepCost(body: BodyPartConstant[]): number {
   let cost = 0;
   for (let part of body) {
     switch (part) {
@@ -163,7 +163,11 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
         }
       }
       if (!container) {
-        err(`[CREEP API] Cannot find source container, idx = ${idx}`, true);
+        err(`[CREEP API] Cannot find source container, idx = ${idx}`, false);
+        return {
+          sid: source.id,
+          cid: ""
+        }
       }
       return {
         sid: source.id,
@@ -171,9 +175,13 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
       }
     }
     case CreepType.CARRIER:
-    case CreepType.REPAIRER:
       return {
         task: null
+      }
+    case CreepType.REPAIRER:
+      return {
+        task: null,
+        stop: 0
       };
     case CreepType.CONSTRUCTOR:
       return {

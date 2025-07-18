@@ -39,5 +39,4 @@ export const loop = ErrorMapper.wrapLoop(() => {
   MainController.checkAndInit();
   // showBunkerLayout('sim');
   MainController.run();
-
 });

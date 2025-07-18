@@ -68,6 +68,8 @@ export const MainController = {
         eris: [],
         cq: [],
         sq: [],
+        fb: false,
+        fbc: -1,
         center: { x: spawnPos.x - 1, y: spawnPos.y },
         lv: 0,
         lastCreepCheck: 0,

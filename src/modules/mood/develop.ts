@@ -1,14 +1,52 @@
-import { CreepType } from "../creeps/CreepAPI";
+import { CARRIER, CreepType, getCreepCost, HARVESTER } from "../creeps/CreepAPI";
+
+export function updateFallback(room: Room) {
+  let fallback = false;
+  // use fallback creep config when
+  // 1. creep carrier is dead, or
+  // 2. creep harvester is dead
+  for (const name of room.memory.sq) {
+    if (name.startsWith(HARVESTER) || name.startsWith(CARRIER)) {
+      fallback = true;
+      break;
+    }
+  }
+
+  if (fallback) {
+    // use fallback
+    room.memory.fb = true;
+    // calculate remaining energy in extensions and spawns
+    let energy_amount = 0;
+    for (const extension of room.extension) {
+      energy_amount += extension.store.energy;
+    }
+    let min_energy = 10000;
+    for (const spawn of room.spawn) {
+      min_energy = Math.min(min_energy, spawn.store.energy);
+    }
+    room.memory.fbc = Math.max(min_energy + energy_amount, 300);
+  } else {
+    room.memory.fb = false;
+    room.memory.fbc = -1;
+  }
+}
 
 const CreepDict = {
   HARVESTER: {
     getConfigIndex: function (room: Room): number {
-      // TODO: implement
-      if (room.controller!.level == 1) return 0;
+      let index = 0;
       const num_ext = room.extension.length;
-      if (num_ext < 5) return 1;
-      if (num_ext < 10) return 2;
-      return 3;
+      if (room.controller!.level == 1) index = 0;
+      else if (num_ext < 5) index = 1;
+      else if (num_ext < 10) index = 2;
+      else index = 3;
+      // check fallback
+      if (room.memory.fb) {
+        for (; index >= 1; index--) {
+          if (getCreepCost(this.CONFIG[index].body) <= room.memory.fbc) break;
+        }
+      }
+      return index;
     },
     getNum: function (room: Room): number {
       if (room.controller!.level == 1 && room.memory.cq.length > 0) return 0;
@@ -26,10 +64,17 @@ const CreepDict = {
   },
   CENTER_CARRIER: {
     getConfigIndex: function (room: Room): number {
-      // TODO: implement
-      if (room.controller!.level == 1) return 0;
-      if (room.extension.length < 20) return 1;
-      return 2;
+      let index = 0;
+      if (room.controller!.level == 1) index = 0;
+      else if (room.extension.length < 20) index = 1;
+      else index = 2;
+      // check fallback
+      if (room.memory.fb) {
+        for (; index >= 0; index--) {
+          if (getCreepCost(this.CONFIG[index].body) <= room.memory.fbc) break;
+        }
+      }
+      return index;
     },
     getNum: function (room: Room): number {
       // try to find center container
@@ -61,7 +106,11 @@ const CreepDict = {
       if (structures.length == 0) return 0;
       else return 1;
     },
-    CONFIG: [{ body: [CARRY, MOVE] }, { body: [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] }]
+    CONFIG: [
+      { body: [CARRY, MOVE] },
+      { body: [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] },
+      { body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE] }
+    ]
   },
   REPAIRER: {
     getConfigIndex: function (room: Room): number {
@@ -80,7 +129,7 @@ const CreepDict = {
   UPGRADER: {
     getConfigIndex: function (room: Room): number {
       // TODO: implement
-      if (room.controller!.level == 1) return 0;
+      if (room.controller!.level == 1 || room.extension.length < 5) return 0;
       if (room.extension.length < 20) return 1;
       return 2;
     },

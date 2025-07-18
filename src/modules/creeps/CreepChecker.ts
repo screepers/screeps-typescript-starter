@@ -1,8 +1,9 @@
+import { updateFallback } from "../mood/develop";
 import { CreepAPI, CreepType, getCreepTypeList } from "./CreepAPI";
 
-export function checkCreepMemory(spawn: (creepName: string) => void) {
+export function checkCreepMemory(room: Room, spawn: (creepName: string) => void) {
   for (const name in Memory.creeps) {
-    if (!(name in Game.creeps)) {
+    if (!(name in Game.creeps) && name.split("_")[2] == room.name) {
       // creep dead, spawn new one
       spawn(name);
       delete Memory.creeps[name];

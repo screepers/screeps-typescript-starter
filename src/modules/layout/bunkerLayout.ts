@@ -371,7 +371,7 @@ export function createBunkerLayout(
       let path = floodFillSearchPath(room, room.controller!.pos);
       if (path.length > 2) {
         console.log("Found road to controller")
-        for (const road of roads.slice(0, path.length - 2))
+        for (const road of path.slice(0, path.length - 2))
           createFn(road.x, road.y, STRUCTURE_ROAD);
       }
       break;

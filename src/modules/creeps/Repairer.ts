@@ -35,6 +35,11 @@ export const Creep_repairer = {
       }
     }
     let data = memory.data as Repairer_data;
+    if (!data.stop) data.stop = 0;
+    if (data.stop && data.stop > 0) {
+      data.stop --;
+      return;
+    }
 
     if (state == STATE.IDLE) {
       let task = fetchRepairTask();
@@ -50,6 +55,11 @@ export const Creep_repairer = {
     }
     if (state == STATE.FETCH) {
       function withdraw(structure: Structure): void {
+        // @ts-ignore
+        if (structure.store.energy < 600) {
+          data.stop = 10;
+          return;
+        }
         const result = creep.withdraw(structure, RESOURCE_ENERGY);
         switch (result) {
           case ERR_FULL:
@@ -109,7 +119,12 @@ export const Creep_repairer = {
       }
       let structure = Game.getObjectById(task.tgt as Id<Structure>);
       if (structure) repair(structure);
-      else error(`Cannot find structure ${task.tgt}`);
+      else {
+        error(`Cannot find structure ${task.tgt}`);
+        finishRepairTask(task);
+        data.task = null;
+        creep.memory.state = STATE.IDLE;
+      }
     }
   },
   destroy(creep: Creep, room: Room, returnRepairTask: (task: RepairTask) => void): void {
@@ -126,6 +141,7 @@ export const Creep_repairer = {
 
 interface Repairer_data {
   task: RepairTask | null;
+  stop: number | null;
 }
 
 enum STATE {

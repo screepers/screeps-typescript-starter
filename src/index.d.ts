@@ -71,6 +71,8 @@ interface RoomMemory {
   eris: string[]; // emergency repair task id set
   cq: ConstructTask[]; // construction queue
   sq: string[]; // spawn queue
+  fb: boolean; // creep config fallback
+  fbc: number; // fallback cost
   creeps: string[];
   center: { x: number; y: number };
   lv: number; // controller level(used to check controller upgrade)

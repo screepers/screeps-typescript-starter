@@ -29,12 +29,12 @@ export const StructuresController = function (context: StructureControllerContex
     }
     for (const container of room.container) {
       handleError(() => {
-        SContainer.run(container, context.addRepairTask);
+        SContainer.run(container, context.addRepairTask, context.addEmergencyRepairTask);
       });
     }
     for (const road of room.road) {
       handleError(() => {
-        SRoad.run(road, context.addRepairTask);
+        SRoad.run(road, context.addRepairTask, context.addEmergencyRepairTask);
       });
     }
     for (const extension of room.extension) {

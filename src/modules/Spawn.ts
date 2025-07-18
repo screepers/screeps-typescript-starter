@@ -1,5 +1,6 @@
 import { CreepAPI, CreepType } from "./creeps/CreepAPI";
 import PriorityQueue from "../utils/PriorityQueue";
+import { updateFallback } from "./mood/develop";
 
 export const SpawnController = function (context: SpawnControllerContext) {
   const run = function (): void {
@@ -16,6 +17,7 @@ export const SpawnController = function (context: SpawnControllerContext) {
       sq.push(new SpawnTask(creepName));
     }
     if (sq.empty()) return;
+    updateFallback(context.room);
     // try to spawn
     let task = sq.peek();
     for (let spawn of spawns_avail) {

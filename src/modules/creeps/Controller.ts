@@ -16,7 +16,7 @@ function error(message: string, throwError: boolean = false) {
 
 export const CreepController = function (context: CreepControllerContext) {
   const prerun = function (): void {
-    checkCreepMemory(context.spawnFunc);
+    checkCreepMemory(context.room, context.spawnFunc);
   };
 
   const run = function (): void {
