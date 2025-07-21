@@ -35,3 +35,10 @@ Room.prototype.scanConstructionSite = function() {
     this.memory.cq = newTasks.concat(this.memory.cq);
   }
 }
+
+global.findPath = function(name1, x1, y1, name2, x2, y2) {
+  let result = PathFinder.search(new RoomPosition(x1, y1, name1), {pos: new RoomPosition(x2, y2, name2), range: 1});
+  for (let p of result.path) {
+    console.log(`${p.roomName}, ${p.x}, ${p.y}`);
+  }
+}
