@@ -23,6 +23,7 @@ export const Creep_constructor = {
       } else {
         creep.say("No data");
         error(`Constructor ${creep.name} data not found`);
+        return;
       }
     }
     let data = creep.memory.data as Constructor_data;

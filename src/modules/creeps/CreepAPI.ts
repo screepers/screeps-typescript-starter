@@ -65,16 +65,26 @@ export const CARRIER = "CARRIER";
 export const REPAIRER = "REPAIRER";
 export const UPGRADER = "UPGRADER";
 export const CONSTRUCTOR = "CONSTRUCTOR";
+export const RESERVER = "RESERVER";
 export enum CreepType {
   HARVESTER,
   CARRIER,
   CCARRIER,
   REPAIRER,
   CONSTRUCTOR,
-  UPGRADER
+  UPGRADER,
+  RESERVER,
 }
 export function getCreepTypeList() {
-  return [CreepType.HARVESTER, CreepType.CCARRIER, CreepType.CARRIER, CreepType.REPAIRER, CreepType.UPGRADER, CreepType.CONSTRUCTOR];
+  return [
+    CreepType.HARVESTER,
+    CreepType.CCARRIER,
+    CreepType.CARRIER,
+    CreepType.REPAIRER,
+    CreepType.UPGRADER,
+    CreepType.CONSTRUCTOR,
+    CreepType.RESERVER,
+  ];
 }
 
 // tool function
@@ -133,6 +143,8 @@ function getCreepType(typeName: string): CreepType {
       return CreepType.UPGRADER;
     case CONSTRUCTOR:
       return CreepType.CONSTRUCTOR;
+    case RESERVER:
+      return CreepType.RESERVER;
     default:
       throw new Error(`[CREEP API] Unknown creep type ${typeName}`);
   }
@@ -154,7 +166,14 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
       const idx = Number(nameInfoList[1]);
       const source = room.source[idx];
       // find container
-      let structures = room.lookForAtArea(LOOK_STRUCTURES, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
+      let structures = room.lookForAtArea(
+        LOOK_STRUCTURES,
+        source.pos.y - 1,
+        source.pos.x - 1,
+        source.pos.y + 1,
+        source.pos.x + 1,
+        true
+      );
       let container: StructureContainer | null = null;
       for (let structure of structures) {
         if (structure.structure.structureType == STRUCTURE_CONTAINER) {
@@ -167,17 +186,17 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
         return {
           sid: source.id,
           cid: ""
-        }
+        };
       }
       return {
         sid: source.id,
         cid: container!.id
-      }
+      };
     }
     case CreepType.CARRIER:
       return {
         task: null
-      }
+      };
     case CreepType.REPAIRER:
       return {
         task: null,
@@ -188,12 +207,16 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
         task: null,
         source: null,
         stop: 0
-      }
+      };
     case CreepType.UPGRADER:
     case CreepType.CCARRIER:
       return {
         stop: 0
       };
+    case CreepType.RESERVER:
+      return {
+        pos: null
+      }
     default:
       throw new Error(`[CREEP API] Unknown creep type ${type}`);
   }

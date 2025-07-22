@@ -6,9 +6,11 @@ export function updateFallback(room: Room) {
   // 1. creep carrier is dead, or
   // 2. creep harvester is dead
   for (const name of room.memory.sq) {
-    if (name.startsWith(HARVESTER) || name.startsWith(CARRIER)) {
+    if (name.startsWith(CARRIER)) {
       fallback = true;
       break;
+    } else if (name.startsWith(HARVESTER)) {
+      // TODO: add timer, when harvester is in spawnQueue more than 50 ticks, fallback
     }
   }
 
@@ -97,8 +99,16 @@ const CreepDict = {
   CARRIER: {
     getConfigIndex: function (room: Room): number {
       // TODO: implement
-      if (room.controller!.level == 1) return 0;
-      return 1;
+      let index = 0;
+      if (room.controller!.level == 1) index = 0;
+      else if (room.extension.length < 30) index = 1;
+      else index = 2;
+      if (room.memory.fb) {
+        for (; index >= 0; index --) {
+          if (getCreepCost(this.CONFIG[index].body) <= room.memory.fbc) break;
+        }
+      }
+      return index;
     },
     getNum: function (room: Room): number {
       // try to find center container
@@ -145,6 +155,8 @@ const CreepDict = {
         case 1:
         case 8:
           return 1;
+        case 5:
+          return 3;
         default:
           return 4;
       }
@@ -172,6 +184,18 @@ const CreepDict = {
       { body: [WORK, CARRY, MOVE] },
       { body: [WORK, WORK, CARRY, MOVE] },
       { body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE] } // cost 550
+    ]
+  },
+  RESERVER: {
+    getConfigIndex: function (room: Room): number {
+      return 0;
+    },
+    getNum: function (room: Room): number {
+      if (room.extension.length < 30) return 0;
+      return room.memory.sr.length;
+    },
+    CONFIG: [
+      { body: [CLAIM, CLAIM, MOVE, MOVE] } // cost 1300
     ]
   }
 };
@@ -204,6 +228,10 @@ export const DevelopConfig = {
           let roleConfig = CreepDict.CONSTRUCTOR;
           return roleConfig.CONFIG[roleConfig.getConfigIndex(room)];
         }
+        case CreepType.RESERVER: {
+          let roleConfig = CreepDict.RESERVER;
+          return roleConfig.CONFIG[roleConfig.getConfigIndex(room)];
+        }
         default:
           throw new Error(`[DEVELOP CONFIG] Unknown creep type ${creepType} in function getCreepConfig`);
       }
@@ -222,6 +250,8 @@ export const DevelopConfig = {
           return CreepDict.UPGRADER.getNum(room);
         case CreepType.CONSTRUCTOR:
           return CreepDict.CONSTRUCTOR.getNum(room);
+        case CreepType.RESERVER:
+          return CreepDict.RESERVER.getNum(room);
         default:
           throw new Error(`[DEVELOP CONFIG] Unknown creep type ${creepType} in function getCreepNum`);
       }

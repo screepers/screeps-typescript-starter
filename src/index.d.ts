@@ -50,6 +50,12 @@ interface RepairTask {
   sn: string; // structure name
 }
 
+interface FallBackData {
+  fb: boolean; // fallback flag
+  fbc: number; // fallback cost
+  t: number; // fallback timer(used for harvester)
+}
+
 interface TowerMemory {
   rt: RepairTask | null;
 }
@@ -73,6 +79,7 @@ interface RoomMemory {
   sq: string[]; // spawn queue
   fb: boolean; // creep config fallback
   fbc: number; // fallback cost
+  sr: string[]; // source rooms(外矿房)
   creeps: string[];
   center: { x: number; y: number };
   lv: number; // controller level(used to check controller upgrade)

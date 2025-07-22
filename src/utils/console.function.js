@@ -42,3 +42,22 @@ global.findPath = function(name1, x1, y1, name2, x2, y2) {
     console.log(`${p.roomName}, ${p.x}, ${p.y}`);
   }
 }
+
+global.updateRoomMemory = function() {
+  for (const roomName in Memory.rooms) {
+    let roomMemory = Memory.rooms[roomName];
+    if (!roomMemory.tm) roomMemory.tm = {};
+    if (!roomMemory.creeps) roomMemory.creeps = [];
+    if (!roomMemory.caq) roomMemory.caq = [];
+    if (!roomMemory.cis) roomMemory.cis = [];
+    if (!roomMemory.rq) roomMemory.rq = [];
+    if (!roomMemory.ris) roomMemory.ris = [];
+    if (!roomMemory.eris) roomMemory.eris = [];
+    if (!roomMemory.cq) roomMemory.cq = [];
+    if (!roomMemory.sq) roomMemory.sq = [];
+    if (!roomMemory.fbc) roomMemory.fbc = -1;
+    if (!roomMemory.sr) roomMemory.sr = [];
+    if (!roomMemory.lv) roomMemory.lv = 0;
+    if (!roomMemory.lastCreepCheck) roomMemory.lastCreepCheck = 0;
+  }
+}

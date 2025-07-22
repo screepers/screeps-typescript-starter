@@ -7,6 +7,7 @@ import { Creep_carrier } from "./Carrier";
 import { Creep_repairer } from "./Repairer";
 import { Creep_center_carrier } from "./CenterCarrier";
 import { err } from "../Message";
+import { Creep_reserver } from "./Reserver";
 
 const CREEP_CHECK_DURATION = 1000;
 
@@ -59,6 +60,9 @@ export const CreepController = function (context: CreepControllerContext) {
         case CreepType.CONSTRUCTOR:
           Creep_constructor.run(creep);
           if (destroy) Creep_constructor.destroy(creep, room);
+          break;
+        case CreepType.RESERVER:
+          Creep_reserver.run(creep, room);
           break;
         default:
           error(`Unhandled creep type: ${name}`);
