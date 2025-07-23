@@ -16,14 +16,14 @@ export const SController = {
         switch (result) {
           case OK:
             room.memory.cq.unshift({
-              tgt: `|${x}|${y}`,
+              tgt: `|${x}|${y}|${room.name}`,
             } as ConstructTask);
             break;
           default:
             error(`Unhandled construction error code ${result}, type = ${type}, position = (${x}, ${y})`);
         }
       });
-      room.memory.lastCreepCheck = 998;
+      room.memory.creepConfigUpdate = true;
     }
   }
 };

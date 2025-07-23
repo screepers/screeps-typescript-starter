@@ -42,17 +42,20 @@ export const Creep_constructor = {
         let task = data.task as ConstructTask;
         if (task.tgt[0] == "|") {
           let positionList = task.tgt.split("|");
-          const sites = creep.room.lookForAt(
-            LOOK_CONSTRUCTION_SITES,
-            parseInt(positionList[1]),
-            parseInt(positionList[2])
-          );
-          if (sites.length == 0) {
-            warn(`Cannot find construction site (${positionList[1]}, ${positionList[2]})`);
-            cq.pop();
-            return;
+          let siteRoom = Game.rooms[positionList[3]];
+          if (siteRoom) {
+            const sites = siteRoom.lookForAt(
+              LOOK_CONSTRUCTION_SITES,
+              parseInt(positionList[1]),
+              parseInt(positionList[2])
+            );
+            if (sites.length == 0) {
+              warn(`Cannot find construction site (${positionList[1]}, ${positionList[2]})`);
+              cq.pop();
+              return;
+            }
+            task.tgt = sites[0].id;
           }
-          task.tgt = sites[0].id;
         }
         if (creep.store.energy < 5) {
           creep.memory.state = STATE.FETCH;
