@@ -86,6 +86,14 @@ interface RoomMemory {
   lastCreepCheck: number; // ticks since last creep check
   creepConfigUpdate: boolean; // creep config update flag
 }
+interface SRMemory {
+  // source room memory
+  init: boolean;
+  numSource: number;
+  ready: boolean; // room is ready to harvest(when containers are built)
+  hasInvader: boolean;
+  hasDefender: boolean;
+}
 
 interface SpawnConfig {
   type: string; // Creep type name

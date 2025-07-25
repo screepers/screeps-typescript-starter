@@ -5,6 +5,7 @@ let carryIdSet: Set<string> | undefined = undefined;
 let repairIdSet: Set<string> | undefined = undefined;
 let emergencyRepairIdSet: Set<string> | undefined = undefined;
 
+
 function initCarryIdSet(memory: RoomMemory) {
   carryIdSet = new Set();
   for (const id of memory.cis) {
@@ -40,9 +41,30 @@ function repairTaskPriority(task1: RepairTask, task2: RepairTask): boolean {
   return score(task1) > score(task2);
 }
 
-function initCarryQueue(memory: RoomMemory) {
-  carryQueue = new PriorityQueue<CarryTask>();
-  for (const task of memory.caq) carryQueue.push(task);
+function initCarryQueue(room: Room) {
+  function carryTaskPriority(task1: CarryTask, task2: CarryTask): boolean {
+    let structure1 = Game.getObjectById(task1.tgt as Id<Structure>);
+    let structure2 = Game.getObjectById(task2.tgt as Id<Structure>);
+    if (!structure1 || !structure2) return true;
+    let st1 = structure1.structureType;
+    let st2 = structure2.structureType;
+
+    function ty(st: StructureConstant) {
+      if (st === STRUCTURE_SPAWN) return 10;
+      if (st === STRUCTURE_TOWER) return 9;
+      if (st === STRUCTURE_EXTENSION) return 8;
+      return 7;
+    }
+
+    if (st1 !== st2) return ty(st1) > ty(st2);
+    let cx = room.memory.center.x, cy = room.memory.center.y;
+    function dist(pos: RoomPosition): number {
+      return Math.abs(cx - pos.x) + Math.abs(cy - pos.y);
+    }
+    return dist(structure1.pos) < dist(structure2.pos);
+  }
+  carryQueue = new PriorityQueue<CarryTask>(carryTaskPriority);
+  for (const task of room.memory.caq) carryQueue.push(task);
 }
 
 function initRepairQueue(memory: RoomMemory) {
@@ -108,7 +130,7 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
     carryIdSet = carryIdSet!;
     if (!carryIdSet.has(task.tgt)) {
       carryIdSet.add(task.tgt);
-      if (!carryQueue) initCarryQueue(context.room.memory);
+      if (!carryQueue) initCarryQueue(context.room);
       carryQueue!.push(task);
     }
   };
@@ -152,7 +174,7 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
   };
 
   const fetchCarryTask = function (): CarryTask | null {
-    if (!carryQueue) initCarryQueue(context.room.memory);
+    if (!carryQueue) initCarryQueue(context.room);
     carryQueue = carryQueue!;
     if (carryQueue.empty()) return null;
     return carryQueue.poll();
@@ -173,7 +195,7 @@ export const RoomMemoryController = function (context: RoomMemoryControllerConte
   }
 
   const returnCarryTask = function (task: CarryTask) {
-    if (!carryQueue) initCarryQueue(context.room.memory);
+    if (!carryQueue) initCarryQueue(context.room);
     carryQueue =  carryQueue!;
     carryQueue.push(task);
   }

@@ -1,4 +1,4 @@
-import { CreepAPI, CreepType } from "./creeps/CreepAPI";
+import { CENTER, CreepAPI, CreepType } from "./creeps/CreepAPI";
 import PriorityQueue from "../utils/PriorityQueue";
 import { updateFallback } from "./mood/develop";
 
@@ -20,7 +20,9 @@ export const SpawnController = function (context: SpawnControllerContext) {
     updateFallback(context.room);
     // try to spawn
     let task = sq.peek();
-    for (let spawn of spawns_avail) {
+    if (task.name.startsWith(CENTER)) {
+      // use the first spawn
+      let spawn = room.spawn[0];
       let result = spawn.spawnCreep(task.body, task.name, { dryRun: true });
       while (result == ERR_NAME_EXISTS) {
         sq.poll();
@@ -30,11 +32,26 @@ export const SpawnController = function (context: SpawnControllerContext) {
       }
       if (result == OK) {
         // can spawn
-        spawn.spawnCreep(task.body, task.name, { memory: { state: 0, no_pull: false } });
+        spawn.spawnCreep(task.body, task.name, { memory: { state: 0, no_pull: false }, directions: [LEFT] });
         sq.poll();
-        // update task
-        if (sq.empty()) break;
-        task = sq.peek();
+      }
+    } else {
+      for (let spawn of spawns_avail) {
+        let result = spawn.spawnCreep(task.body, task.name, { dryRun: true });
+        while (result == ERR_NAME_EXISTS) {
+          sq.poll();
+          if (sq.empty()) break;
+          task = sq.peek();
+          result = spawn.spawnCreep(task.body, task.name, { dryRun: true });
+        }
+        if (result == OK) {
+          // can spawn
+          spawn.spawnCreep(task.body, task.name, { memory: { state: 0, no_pull: false } });
+          sq.poll();
+          // update task
+          if (sq.empty()) break;
+          task = sq.peek();
+        }
       }
     }
 

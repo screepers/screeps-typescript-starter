@@ -22,30 +22,57 @@ export const SourceRoomController = function (context: SourceRoomControllerConte
       // init room
       let center = context.getFatherCenter();
       for (let source of room.source) {
-        let result = PathFinder.search(center, { pos: source.pos, range: 1 });
+        let result = PathFinder.search(
+          center,
+          { pos: source.pos, range: 1 },
+          {
+            plainCost: 2,
+            swampCost: 2,
+            roomCallback(roomName: string): boolean | CostMatrix {
+              let room = Game.rooms[roomName];
+              if (!room) return false;
+              let costs = new PathFinder.CostMatrix();
+              room.find(FIND_STRUCTURES).forEach(function (struct) {
+                if (struct.structureType === STRUCTURE_ROAD) {
+                  // 相对于平原，寻路时将更倾向于道路
+                  costs.set(struct.pos.x, struct.pos.y, 1);
+                } else if (
+                  struct.structureType !== STRUCTURE_CONTAINER &&
+                  (struct.structureType !== STRUCTURE_RAMPART || !struct.my)
+                ) {
+                  // 不能穿过无法行走的建筑
+                  costs.set(struct.pos.x, struct.pos.y, 0xff);
+                }
+              });
+              return costs;
+            }
+          }
+        );
         context.createConstructionSiteByPath(result.path);
       }
+      memory.numSource = room.source.length;
       memory.init = true;
+      memory.ready = false;
+      memory.hasInvader = false;
+      memory.hasDefender = false;
     }
 
-    // structures self check
-    for (const road of room.road) {
-      SRoad.run(road, context.addRepairTask, (task: RepairTask) => {
-        return;
-      });
+    if (room.container.length == room.source.length) memory.ready = true;
+
+    // find enemy creeps
+    let creeps = room.find(FIND_HOSTILE_CREEPS);
+    if (creeps.length > 0) {
+      if (!memory.hasInvader) {
+        memory.hasInvader = true;
+        context.updateCreepCheckFlag();
+      }
     }
-    for (const container of room.container) {
-      SContainer.run(container, context.addRepairTask, (task: RepairTask) => {
-        return;
-      });
-    }
+    else memory.hasInvader = false;
     return SRError.OK;
   };
-};
 
-interface SRMemory {
-  init: boolean;
-}
+  return { run };
+};
 
 enum SRError {
   OK,
@@ -59,5 +86,5 @@ enum SRError {
 interface SourceRoomControllerContext {
   getFatherCenter: () => RoomPosition;
   createConstructionSiteByPath: (path: RoomPosition[]) => void;
-  addRepairTask: (task: RepairTask) => void;
+  updateCreepCheckFlag: () => void;
 }

@@ -1,4 +1,4 @@
-import { createBunkerLayout } from "./bunkerLayout";
+import { checkInsideLayout, createBunkerLayout } from "./bunkerLayout";
 
 export const LayoutController = function (context: LayoutControllerContext) {
   const createLayout = function (createFn: (x: number, y: number, type: BuildableStructureConstant) => void): void {
@@ -30,7 +30,12 @@ export const LayoutController = function (context: LayoutControllerContext) {
     }
   };
 
-  return { createLayout, getRampartTargetHits };
+  const checkPositionInsideLayout = function (x: number, y: number): boolean {
+    // TODO: implement other layout
+    return checkInsideLayout(context.room, x, y);
+  };
+
+  return { createLayout, getRampartTargetHits, checkPositionInsideLayout };
 };
 
 interface LayoutControllerContext {

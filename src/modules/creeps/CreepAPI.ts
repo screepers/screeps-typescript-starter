@@ -61,19 +61,28 @@ export class CreepConfig {
 // creep role definition
 export const HARVESTER = "HARVESTER";
 export const CCARRIER = "CCARRIER";
+export const CENTER = "CENTER";
 export const CARRIER = "CARRIER";
 export const REPAIRER = "REPAIRER";
 export const UPGRADER = "UPGRADER";
 export const CONSTRUCTOR = "CONSTRUCTOR";
 export const RESERVER = "RESERVER";
+
+export const SRHARVESTER = "SRHARVESTER";
+export const SRCARRIER = "SRCARRIER";
+export const SRDEFENDER = "SRDEFENDER";
 export enum CreepType {
   HARVESTER,
   CARRIER,
   CCARRIER,
+  SRDEFENDER,
   REPAIRER,
   CONSTRUCTOR,
   UPGRADER,
   RESERVER,
+
+  SRHARVESTER,
+  SRCARRIER
 }
 export function getCreepTypeList() {
   return [
@@ -84,6 +93,10 @@ export function getCreepTypeList() {
     CreepType.UPGRADER,
     CreepType.CONSTRUCTOR,
     CreepType.RESERVER,
+
+    CreepType.SRHARVESTER,
+    CreepType.SRCARRIER,
+    CreepType.SRDEFENDER,
   ];
 }
 
@@ -145,6 +158,12 @@ function getCreepType(typeName: string): CreepType {
       return CreepType.CONSTRUCTOR;
     case RESERVER:
       return CreepType.RESERVER;
+    case SRHARVESTER:
+      return CreepType.SRHARVESTER;
+    case SRCARRIER:
+      return CreepType.SRCARRIER;
+    case SRDEFENDER:
+      return CreepType.SRDEFENDER;
     default:
       throw new Error(`[CREEP API] Unknown creep type ${typeName}`);
   }
@@ -216,7 +235,12 @@ function getCreepMemoryData(type: CreepType, nameInfoList: string[]): Object {
     case CreepType.RESERVER:
       return {
         pos: null
-      }
+      };
+    case CreepType.SRCARRIER:
+      return {
+        container: null,
+        repairId: null
+      };
     default:
       throw new Error(`[CREEP API] Unknown creep type ${type}`);
   }

@@ -210,6 +210,12 @@ function error(message: string, throwError = false) {
   err(`[Bunker Layout] ${message}`, throwError);
 }
 
+export function checkInsideLayout(room: Room, x: number, y: number): boolean {
+  let xx = x - room.memory.center.x;
+  let yy = y - room.memory.center.y;
+  return xx >= -6 && xx <= 5 && yy >= -6 && yy <= 5;
+}
+
 function checkReachSurroundingRoad(x: number, y: number): number {
   // returns -1 if inside kernel or non-road boarder
   // returns 0 if outside kernel
@@ -229,8 +235,8 @@ function checkReachSurroundingRoad(x: number, y: number): number {
     if (x == 3 || x == 2 || x == -2) return 1;
     else return -1;
   }
-  error(`Unreachable! Please check bug`, true);
-  return -100; // unreachable. cheat typescript checker
+  error(`Unreachable! Please check bug`, false);
+  return -100;
 }
 
 function floodFillSearchPath(room: Room, target: RoomPosition) {
@@ -370,9 +376,8 @@ export function createBunkerLayout(
       // road to controller
       let path = floodFillSearchPath(room, room.controller!.pos);
       if (path.length > 2) {
-        console.log("Found road to controller")
-        for (const road of path.slice(0, path.length - 2))
-          createFn(road.x, road.y, STRUCTURE_ROAD);
+        console.log("Found road to controller");
+        for (const road of path.slice(0, path.length - 2)) createFn(road.x, road.y, STRUCTURE_ROAD);
       }
       break;
     }
@@ -416,8 +421,8 @@ export function createBunkerLayout(
         let containerPos: { x: number; y: number } | null = null;
         if (path.length > 0) {
           containerPos = path.pop()!;
-          for (const roadPos of path) createFn(roadPos.x + center.x, roadPos.y + center.y, STRUCTURE_ROAD);
-          createFn(containerPos!.x + center.x, containerPos!.y + center.y, STRUCTURE_CONTAINER);
+          for (const roadPos of path) createFn(roadPos.x, roadPos.y, STRUCTURE_ROAD);
+          createFn(containerPos!.x, containerPos!.y, STRUCTURE_CONTAINER);
         }
         // build extractor
         createFn(mineral.pos.x, mineral.pos.y, STRUCTURE_EXTRACTOR);

@@ -1,3 +1,5 @@
+import { err } from "../modules/Message";
+
 Room.prototype.resetQueue = function() {
   this.memory.rq = [];
   this.memory.erq = [];
@@ -9,12 +11,12 @@ Room.prototype.resetQueue = function() {
 
 Room.prototype.scanConstructionSite = function() {
   let room = arguments.length === 0 ? this : Game.rooms[arguments[0]];
-  let sites = this.lookForAtArea(LOOK_CONSTRUCTION_SITES, 0, 0, 49, 49, true);
+  let sites = room.lookForAtArea(LOOK_CONSTRUCTION_SITES, 0, 0, 49, 49, true);
   let newTasks = [];
   for (let result of sites) {
     let id = `|${result.x}|${result.y}|${room.name}`;
     let hasTask = false;
-    for (let task of room.memory.cq) {
+    for (let task of this.memory.cq) {
       if (task.tgt === id) {
         hasTask = true;
         break;
@@ -38,6 +40,14 @@ Room.prototype.scanConstructionSite = function() {
     }
     this.memory.cq = newTasks.concat(this.memory.cq);
   }
+}
+
+Room.prototype.addSourceRoom = function(roomName) {
+  if (typeof roomName !== "string") {
+    err("Source room name should be a string", false);
+    return;
+  }
+  this.memory.rq.push(roomName);
 }
 
 global.findPath = function(name1, x1, y1, name2, x2, y2) {

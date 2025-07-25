@@ -70,6 +70,10 @@ export const Creep_harvester = {
         error(`Harvester ${creep.name} cannot find source container`);
         return;
       }
+      if (!creep.pos.isEqualTo(container.pos)) {
+        creep.memory.state = STATE.MOVE;
+        return;
+      }
       if (container.store.getFreeCapacity(RESOURCE_ENERGY) == 0) return;
       let source = Game.getObjectById(data.sid as Id<Source>);
       if (source) {
