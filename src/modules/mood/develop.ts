@@ -295,7 +295,7 @@ const CreepDict = {
     },
     CONFIG: [
       {
-        body: [...Array(5).fill(TOUGH), ...Array(10).fill(MOVE), ...Array(3).fill(HEAL), ...Array(3).fill(ATTACK), MOVE]
+        body: [...Array(10).fill(TOUGH), ...Array(15).fill(MOVE), ...Array(6).fill(RANGED_ATTACK), MOVE]
       }
     ]
   }

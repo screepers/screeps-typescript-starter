@@ -1,5 +1,5 @@
 import { err } from "../Message";
-import { attackMsg } from "../../utils/ToolFunction";
+import { rangedAttackMsg } from "../../utils/ToolFunction";
 
 function error(message: string, throwError: boolean = false) {
   err(`[SR DEFENDER] ${message}`, throwError);
@@ -34,11 +34,6 @@ export const Creep_sr_defender = {
       creep.suicide();
     }
 
-    // check hits
-    if (creep.hits < creep.hitsMax) {
-      creep.heal(creep);
-    }
-
     // move to target room
     if (creep.room.name !== data.roomName) {
       creep.moveTo(sr.controller!);
@@ -67,17 +62,21 @@ export const Creep_sr_defender = {
         data.target = null;
         return;
       }
-      let attackResult = creep.attack(target);
-      switch (attackResult) {
+      let rangedAttackResult = creep.rangedAttack(target);
+      switch (rangedAttackResult) {
         case ERR_NOT_IN_RANGE:
           creep.moveTo(target);
           break;
         case OK:
           break;
         default:
-          error(attackMsg(attackResult));
+          error(rangedAttackMsg(rangedAttackResult));
       }
     }
+    // check hits
+    // else if (creep.hits < creep.hitsMax) {
+    //   creep.heal(creep);
+    // }
   }
 };
 

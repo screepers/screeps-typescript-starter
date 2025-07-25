@@ -132,7 +132,7 @@ export const Creep_sr_carrier = {
         if (result) {
           // creep is on a road
           let road = result as StructureRoad;
-          if (road.hits < ROAD_HITS * 0.8) {
+          if (road.hits < road.hitsMax * 0.8) {
             data.repairId = road.id;
             creep.memory.state = STATE.REPAIR;
             return;
