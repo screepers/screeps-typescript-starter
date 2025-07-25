@@ -27,7 +27,6 @@ export function checkCreepNum(room: Room, destroyCreeps: (names: string[]) => vo
   for (const creepType of creepTypeList) {
     const exceptNum = CreepAPI.getCreepNum(creepType, room);
     const realNum = creepTypeMap[creepType].length;
-    console.log(creepType, creepTypeMap[creepType], exceptNum, realNum);
     if (realNum > exceptNum) {
       let creepNames = creepTypeMap[creepType];
       creepNames.sort((s1, s2) => {

@@ -1,5 +1,3 @@
-import { err } from "../modules/Message";
-
 Room.prototype.resetQueue = function() {
   this.memory.rq = [];
   this.memory.erq = [];
@@ -44,7 +42,7 @@ Room.prototype.scanConstructionSite = function() {
 
 Room.prototype.addSourceRoom = function(roomName) {
   if (typeof roomName !== "string") {
-    err("Source room name should be a string", false);
+    console.log("Source room name should be a string");
     return;
   }
   this.memory.rq.push(roomName);
