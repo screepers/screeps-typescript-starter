@@ -21,12 +21,10 @@ declare global {
     working: boolean;
   }
 
-  // Syntax for adding proprties to `global` (ex "global.log")
-  namespace NodeJS {
-    interface Global {
-      log: any;
-    }
-  }
+}
+// Syntax for adding proprties to `global` (ex "global.log")
+declare const global: {
+  log: any;
 }
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
