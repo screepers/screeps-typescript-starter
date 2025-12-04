@@ -22,7 +22,7 @@ declare global {
   }
 
 }
-// Syntax for adding proprties to `global` (ex "global.log")
+// Syntax for adding properties to `global` (ex "global.log")
 declare const global: {
   log: any;
 }
