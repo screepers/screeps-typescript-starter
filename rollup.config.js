@@ -4,6 +4,7 @@ import clear from 'rollup-plugin-clear';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import screeps from 'rollup-plugin-screeps';
+import replace from '@rollup/plugin-replace';
 import typescript from 'rollup-plugin-typescript2';
 
 let cfg;
@@ -27,6 +28,10 @@ export default {
     resolve({ rootDir: "src" }),
     commonjs(),
     typescript({ tsconfig: "./tsconfig.json", include: ["**/*.ts"], exclude: [] }),
+    replace({
+      'process.env.BAREWIRE_PROXY_URL': JSON.stringify(process.env.BAREWIRE_PROXY_URL),
+      preventAssignment: true
+    }),
     screeps({config: cfg, dryRun: cfg == null})
   ]
 }
